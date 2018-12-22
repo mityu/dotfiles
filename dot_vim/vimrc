@@ -1,6 +1,7 @@
 " Author: mityu
-" Last Change: 17-Dec-2018.
+" Last Change: 22-Dec-2018.
 " vim: foldmethod=marker
+
 "{{{
 if has('vim_starting')
 	set encoding=utf-8
@@ -62,7 +63,7 @@ endfunc "}}}
 " Set environment variables on gVim.{{{
 let s:_envrc = expand('~/') . s:rc('envrc')
 if has('gui_running')&&filereadable(s:_envrc)
-	silent call execute(join(map(readfile(s:_envrc),'"let " . v:val'),"\n"))
+	silent call execute(join(map(readfile(s:_envrc),{-> {expr-> printf("let $%s='%s'",expr[0],expand(expr[1]))}(split(v:val,'='))}),"\n"))
 endif | unlet s:_envrc
 "}}}
 "}}}
@@ -82,7 +83,7 @@ endfor | unlet s:_augroups s:_pattern
 syntax on
 colorscheme domusaurea
 
-set number
+set relativenumber number
 set whichwrap=b,s,[,],<,>
 set wrap
 set smartindent autoindent
@@ -137,9 +138,7 @@ endif
 filetype plugin indent on
 
 augroup vimrc_filetype
-	au filetype * if !exists('b:did_ftplugin') |
-				\ let &l:commentstring=' ' . &l:commentstring |
-				\ endif
+	au filetype * let &l:commentstring=' ' . &l:commentstring
 augroup END
 "}}}
 " Mapping{{{
@@ -162,6 +161,19 @@ noremap <C-a> ^
 noremap <C-e> $
 noremap - <C-x>
 noremap + <C-a>
+nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
+
+inoremap <C-m> <C-g>u<C-m>
+inoremap <C-u> <C-g>u<C-u>
+
+vnoremap <C-e> $
+
+cnoremap <C-l> <C-f>
+cnoremap <C-f> <Right>
+cnoremap <C-p> <Up>
+cnoremap <C-n> <Down>
+cnoremap <C-b> <Left>
+cnoremap <C-a> <C-b>
 
 for [s:lhs,s:rhs] in [[';',':'],[':',';'],['<ESC>','N']]
 	execute printf('tnoremap <C-w>%s <C-w>%s',s:lhs,s:rhs)
@@ -169,7 +181,14 @@ endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
-func! s:_prefix(kind) abort "{{{
+augroup vimrc_mapping
+	au CmdWinEnter * nnoremap <buffer> <CR> <CR>
+augroup END
+augroup vimrc_mapping
+	au Filetype help nnoremap <silent> <buffer> q :<C-u>q<CR>
+augroup END
+
+func! s:map_prefix(kind) abort "{{{
 	return '<Plug>(vimrc-' . a:kind . '-prefix)'
 endfunc "}}}
 func! s:_toCommand(list) abort "{{{
@@ -178,28 +197,22 @@ endfunc "}}}
 " for Loop Mapping.{{{
 func! s:_loop_define(config) abort
 	let id = 'loop-' . a:config.id
-	let prefix = s:prefix(id)
+	let prefix = s:map_prefix(id)
 	let enter_with = a:config.enter_with
 	let mode = get(a:config,'mode','n')
-	exec printf('%snoremap <silent> %s :call <SID>map_when_leave_loop()<CR>',
-				\prefix,mode,id)
-	if has_key(a:config,'follow_key')
-		let keys = map(split(a:config.follow_key,'\zs'),'[v:val,v:val]')
-	else
-		let keys = a:config.map
-	endif
 	let plug_map = {}
-	call map(['prefix','main','do'],{->[
-				\execute('let plug_map[v:val]=printf("<Plug>(%s-%s)",prefix,v:val)'),
-				\v:val][-1]})
-
-	for [lhs,rhs] in keys
+	for key in ['prefix','main','do']
+		let plug_map[key]=printf("%s(%s)",prefix,key)
+	endfor
+	exec printf('%snoremap <silent> %s :call <SID>map_when_leave_loop()<CR>',
+				\mode,plug_map.prefix)
+	for [lhs,rhs] in a:config.map
 		let com = []
-		call add(com,[mode . 'noremap',
+		call add(com,[mode . 'noremap <silent>',
 					\plug_map.do . lhs,
-					\enter_with . rhs])
+					\rhs])
 		call add(com,[mode . 'map',
-					\enter_with . rhs,
+					\enter_with . lhs,
 					\plug_map.main . lhs])
 		call add(com,[mode . 'map',
 					\plug_map.main . lhs,
@@ -207,9 +220,14 @@ func! s:_loop_define(config) abort
 					\])
 		call add(com,[mode . 'map',
 					\plug_map.prefix . lhs,
-					\plug_map.main . lhs)
+					\plug_map.main . lhs])
 		execute join(map(com,'join(v:val," ")'),"\n")
 	endfor
+endfunc
+func! s:_simple_loop_define(config) abort
+	let config = deepcopy(a:config)
+	let config.map = map(split(config.follow_key,'\zs'),'[v:val,config.enter_with . v:val]')
+	call s:_loop_define(config)
 endfunc
 func! s:map_when_leave_loop() abort
 	if getchar(1)!=0
@@ -218,75 +236,94 @@ func! s:map_when_leave_loop() abort
 endfunc
 
 "Window management
-call s:_loop_define({
+call s:_simple_loop_define({
 			\'id': 'WinChange',
 			\'enter_with': '<C-w>',
 			\'follow_key': 'hjkl'
 			\})
-call s:_loop_define({
+call s:_simple_loop_define({
 			\'id': 'WinMove',
 			\'enter_with': '<C-w>',
 			\'follow_key': 'HJKL'
 			\})
-call s:_loop_define({
+call s:_simple_loop_define({
 			\'id': 'WinResize',
 			\'enter_with': '<C-w>',
 			\'follow_key': '<>-+'
 			\})
-"tab move
 call s:_loop_define({
 			\'id': 'TabChange',
 			\'enter_with': 'g',
-			\'map': [['h','T'],['l','t']]
+			\'map': [['h','gT'],['l','gt']]
 			\})
+call s:_loop_define({
+			\'id': 'TabMove',
+			\'enter_with': 'g',
+			\'map': [
+			\	['T',':<C-u>call <SID>map_tabmove(-1)<CR>'],
+			\	['t',':<C-u>call <SID>map_tabmove(1)<CR>']
+			\]
+			\}) " FIXME: This mapping does not repeat.
 delfunc s:_loop_define
+delfunc s:_simple_loop_define
+
+func! s:map_tabmove(delta) abort
+	let tab_count = tabpagenr('$')
+	if tab_count == 1 | return | endif
+	let current = tabpagenr() - 1
+	let move_to = current + a:delta
+	if move_to < 0
+		while move_to < 0
+			let move_to += tab_count
+		endwhile
+	endif
+	if move_to >= tab_count
+		let move_to = move_to % tab_count
+	endif
+	let movement = move_to - current
+	let command = 'tabmove '
+	if movement < 0
+		let command .= string(movement)
+	else
+		let command .= '+' . movement
+	endif
+	execute command
+endfunc
  "}}}
 " for Command.{{{
-let s:_prefix = s:_prefix('command')
-execute s:_toCommand(['nnoremap',s:_prefix,'<Nop>'])
-execute printf('nnoremap %sev :<C-u>edit $MYVIMRC<CR>',s:_prefix)
-execute printf('nnoremap %ssv :<C-u>source $MYVIMRC<CR>',s:_prefix)
+let s:_prefix = s:map_prefix('command')
+execute s:_toCommand(['noremap',s:_prefix,'<Nop>'])
+execute s:_toCommand(['map','<Space>',s:_prefix])
+let s:_map = []
+call add(s:_map,['nnoremap','','ev','edit $MYVIMRC'])
+call add(s:_map,['nnoremap','','sv','source $MYVIMRC'])
+call add(s:_map,['nnoremap','','k','Mru'])
+call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
+execute join(map(s:_map,{->join([
+			\  v:val[0],
+			\  v:val[1],
+			\  s:_prefix . v:val[2],
+			\  printf(':<C-u>%s<CR>',v:val[3])
+			\ ],' ')}),"\n")
+unlet s:_map
+
+func! s:map_toggle_QuickFix() abort "{{{
+	let win_count = winnr('$')
+	cclose
+	if win_count != winnr('$') | return | endif
+	try | copen | catch
+		echohl Eror | echom v:exception | echohl None
+	endtry
+endfunc "}}}
  "}}}
-" for Operator{{{
-let s:_prefix = s:prefix('operator')
-execute s:_toCommand(['nnoremap',s:_prefix,'<Nop>'])
-execute s:_toCommand(['nnoremap',',',s:_prefix])
-let s:_map = []
-call add(s:_map,['y','<Plug>(operator-stay-cursor-yank)'])
-call add(s:_map,['J','<Plug>(jplus)'])
-call add(s:_map,[s:_prefix . 'sa','<Plug>(operator-surround-append)'])
-call add(s:_map,[s:_prefix . 'sd','<Plug>(operator-surround-delete)'])
-call add(s:_map,[s:_prefix . 'sc','<Plug>(operator-surround-replace)'])
-call add(s:_map,[s:_prefix . 'r','<Plug>(operator-replace)'])
-call add(s:_map,[s:_prefix . 'sy','<Plug>(operator-swap-marking)'])
-call add(s:_map,[s:_prefix . 'sp','<Plug>(operator-swap)'])
-call add(s:_map,[s:_prefix . 'J','<Plug>(jplus-getchar-with-space)'])
-call add(s:_map,[s:_prefix . 'ct','<Plug>(operator-toggle-comment-wrap)'])
-for s:_ in s:_map
-	execute s:_toCommand(add(['map'],s:_))
-endfor | unlet s:_ s:_map
-"}}}
-" for Text Object.{{{
-let s:_map = []
-call add(s:_map,['ov','ab','<Plug>(textobj-multiblock-a)'])
-call add(s:_map,['ov','ib','<Plug>(textobj-multiblock-i)'])
-call add(s:_map,['ov','af','<Plug>(textobj-between-a)'])
-call add(s:_map,['ov','if','<Plug>(textobj-between-i)'])
-"call add(s:_map,['n','_t','<Plug>(sonictemplate)'])
-for [s:_modes,s:_lhs,s:_rhs] in s:_map
-	let s:_com = 'map ' . s:_lhs . ' ' . s:_rhs
-	for s:_mode in split(s:_modes,'\zs')
-		execute s:_mode . s:_com
-	endfor
-endfor | unlet s:_mode s:_com s:_modes s:_lhs s:_rhs s:_map
-"}}}
-unlet s:prefix
-delfunc s:_prefix
+unlet s:_prefix
 delfunc s:_toCommand
 
 func! s:plugin_mapping() abort "{{{
 	let maps = []
-	let prefix = s:prefix('operator')
+	let prefix = s:map_prefix('operator')
+	execute printf('noremap %s <Nop>', prefix)
+	execute printf('map , %s', prefix)
 
 	" Operator
 	call add(maps,['','sa','<Plug>(operator-surround-append)'])
@@ -297,7 +334,7 @@ func! s:plugin_mapping() abort "{{{
 	call add(maps,['','sp','<Plug>(operator-swap)'])
 	call add(maps,['','J' ,'<Plug>(jplus-getchar-with-space)'])
 	call add(maps,['','ct','<Plug>(operator-toggle-comment-wrap)'])
-	call map(maps,{list -> [list[0], prefix . list[1], list[2]]})
+	call map(maps,{list -> [list[0], prefix . list[1], list[2]]}) "Add prefix.
 
 	call add(maps,['','y','<Plug>(operator-stay-cursor-yank)'])
 	call add(maps,['','J','<Plug>(jplus)'])
@@ -318,7 +355,7 @@ func! s:plugin_mapping() abort "{{{
 	endfor
 endfunc "}}}
 augroup vimrc_plugin_settings
-	au User vimrc_initialize call s:plugin_mappings()
+	au User vimrc_initialize call s:plugin_mapping()
 augroup END
 
 func! s:shift_ten_key(enablize) abort "{{{
@@ -349,9 +386,13 @@ com! -bar EnableShiftTenKey call s:shift_ten_key(1)
 com! -bar DisableShiftTenKey call s:shift_ten_key(0)
 if has('vim_starting') | EnableShiftTenKey | endif
 
-augroup vimrc_cmdwin
-	au CmdWinEnter * nnoremap <buffer> <CR> <CR>
-augroup END
+if has('mac')
+	let mapleader='_'
+endif
+if has('win32')
+	inoremap \ _
+	inoremap _ \
+endif
 "}}}
 " Command {{{
 com! -bar CdCurrent cd %:p:h
@@ -410,13 +451,15 @@ func! s:pack_register() abort "{{{
 	call minpac#add('itchyny/vim-cursorword')
 	call minpac#add('mattn/sonictemplate-vim')
 	call minpac#add('w0rp/ale')
-	"call minpac#add('rhysd/tmpwin.vim')
 	call minpac#add('vim-jp/vital.vim')
 	call minpac#add('vim-jp/vimdoc-ja')
 	call minpac#add('tyru/open-browser.vim')
 	call minpac#add('sgur/vim-operator-openbrowser')
+	call minpac#add('tpope/vim-fugitive')
+	"call minpac#add('thinca/vim-ft-help_fold')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
+	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
 endfunc "}}}
 func! s:pack_init() abort "{{{
 	try
@@ -446,9 +489,6 @@ func! s:pack_clean() abort "{{{
 endfunc "}}}
 "}}}
 " Setting{{{
-" ale{{{
-"let g:ale
-"}}}
 " thinca/quickrun{{{
 let g:quickrun_config={}
 let g:quickrun_config._={
@@ -487,9 +527,17 @@ augroup vimrc_filetype
 	au FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
 augroup END
  "}}}
-" rhysd/vim-operator-surround{{{
-let g:operator#surround#ignore_space = 0
-let g:operator#surrounde#blocks = {}
+" w0rp/ale{{{
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_text_changed = 'always'
+let g:ale_lint_on_enter = 1
+let g:ale_set_loclist = 0
+let g:ale_set_quickfix = 1
+let g:ale_completion_enabled = 1
+let g:ale_open_list = 0
+let g:ale_keep_list_window_open = 0
+"let g:ale_linters = {}
+"let g:ale_linters.cpp = 'cquery'
 "}}}
 " mattn/sonictemplate{{{
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
@@ -498,18 +546,13 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
-" w0rp/ale{{{
-let g:ale_lint_on_save = 1
-let g:ale_lint_on_text_changed = 0
-let g:ale_lint_on_enter = 0
- "}}}
 "}}}
 "}}}
 " Utility{{{
 " tabpage_cd{{{
 augroup vimrc_tabpage_cd
-	au TabEnter * let t:vimrc_cwd = getcwd(-1)
-	au TabLeave * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
+	au TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
+	au TabLeave * let t:vimrc_cwd = getcwd(-1)
 augroup END
  "}}}
 " showmode{{{
@@ -615,7 +658,7 @@ func! s:showmode_statusline(active) abort "{{{
 		if &buftype!=#'terminal'&&!&l:ma
 			let info='%#StatusLine#' . info
 		else
-			let info='%#StatusLine#' . info . '%#VimrcShowMode# %{Vimrc_showmode_mode()} %#StatusLine#'
+			let info='%#StatusLine#' . info . '%#VimrcShowMode# %{Vimrc_showmode()} %#StatusLine#'
 		endif
 	else
 		let info='%#StatusLineNC#' . info
@@ -624,7 +667,7 @@ func! s:showmode_statusline(active) abort "{{{
 endfunc "}}}
  "}}}
 " tabline{{{
-let &tabline=printf('%!%stabline',s:SID())
+let &tabline=printf('%%!%stabline()',s:SID())
 func! s:tabline() abort "{{{
 	let tabline='%#TabLine#'
 	let t=tabpagenr()
@@ -677,7 +720,7 @@ augroup vimrc_terminal
 	au TerminalOpen * call s:terminal_open()
 augroup END
 func! s:terminal_open() abort
-	setlocal nonumber
+	setlocal nonumber norelativenumber
 endfunc
 "}}}
 "}}}
@@ -691,13 +734,15 @@ endif | unlet s:_lvimrc
 " }}}
 " gvimrc{{{
 if has('gui_running')
+	if has('vim_starting')
+		set lines=999
+		set columns=9999
+	endif
 	set guioptions& guioptions-=e guioptions-=T
 	set guioptions-=R guioptions-=r guioptions-=L guioptions-=l
 	set mouse=a
 	set nomousefocus
 	set mousehide
-	set lines=999
-	set columns=9999
 
 	if has('win32')
 		set guifont=MS_Gothic:h10:cSHIFTJIS
