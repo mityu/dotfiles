@@ -1,10 +1,10 @@
 " Vim filetype plugin.
-" Last Change: 17-Dec-2018.
+" Last Change: 23-Dec-2018.
 
-if exists('b:did_ftplugin')
+if exists('b:did_ftplugin_after')
 	finish
 endif
-let b:did_ftplugin = 1
+let b:did_ftplugin_after = 1
 
 
 com! -buffer -range=% AddAbort call s:add_abort(<line1>,<line2>)
