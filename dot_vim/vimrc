@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 22-Dec-2018.
+" Last Change: 23-Dec-2018.
 " vim: foldmethod=marker
 
 "{{{
@@ -138,7 +138,12 @@ endif
 filetype plugin indent on
 
 augroup vimrc_filetype
-	au filetype * let &l:commentstring=' ' . &l:commentstring
+	au FileType * let &l:commentstring=' ' . &l:commentstring
+	au BufRead .envrc set filetype=sh
+augroup END
+
+augroup vimrc_mru
+	au BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
 "}}}
 " Mapping{{{
@@ -297,7 +302,9 @@ execute s:_toCommand(['map','<Space>',s:_prefix])
 let s:_map = []
 call add(s:_map,['nnoremap','','ev','edit $MYVIMRC'])
 call add(s:_map,['nnoremap','','sv','source $MYVIMRC'])
-call add(s:_map,['nnoremap','','k','Mru'])
+call add(s:_map,['nnoremap','','k','call vimrc#mru#start()'])
+call add(s:_map,['nnoremap','','j','call vimrc#cwdfile#start()'])
+call add(s:_map,['nnoremap','','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
 execute join(map(s:_map,{->join([
 			\  v:val[0],
@@ -393,6 +400,22 @@ if has('win32')
 	inoremap \ _
 	inoremap _ \
 endif
+
+" gram.vim
+func! s:gram_mapping() abort
+	let map = [
+				\ ['k','loop-cursor-up'],
+				\ ['j','loop-cursor-down'],
+				\ ['<CR>','select-item'],
+				\ ['i','start-filtering'],
+				\ ['q','exit'],
+				\]
+	call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
+	execute join(map,"\n")
+endfunc
+augroup vimrc_gram
+	au User gramOpen call s:gram_mapping()
+augroup END
 "}}}
 " Command {{{
 com! -bar CdCurrent cd %:p:h
@@ -422,7 +445,6 @@ if has('mac')&&executable('open')
 	com! -bar -nargs=+ -complete=dir Open silent !open <args>
 endif
 "}}}
-" Plugin{{{
 " minpac{{{
 com! PackInit   source $MYVIMRC|call s:pack_init()
 com! PackUpdate source $MYVIMRC|call s:pack_update()
@@ -488,7 +510,7 @@ func! s:pack_clean() abort "{{{
 	if s:pack_init() | call minpac#clean() | endif
 endfunc "}}}
 "}}}
-" Setting{{{
+" Plugin Setting{{{
 " thinca/quickrun{{{
 let g:quickrun_config={}
 let g:quickrun_config._={
@@ -546,7 +568,6 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
-"}}}
 "}}}
 " Utility{{{
 " tabpage_cd{{{
