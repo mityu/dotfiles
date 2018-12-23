@@ -2,7 +2,6 @@
 " Last Change: 23-Dec-2018.
 " vim: foldmethod=marker
 
-"{{{
 if has('vim_starting')
 	set encoding=utf-8
 	scriptencoding utf-8
@@ -18,7 +17,6 @@ if has('vim_starting')
 	lockvar s:Windows
 	lockvar s:Unix
 endif
-"}}}
 func! s:SID() "{{{
 	return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSID$')
 endfunc "}}}
@@ -28,7 +26,7 @@ endfunc "}}}
 
 " Startup contig{{{
 if has('vim_starting')
-	" s:vimrc{{{
+	" s:vimrc
 	let s:vimrc = {}
 	let s:vimrc.filesystem = {}
 
@@ -43,7 +41,6 @@ if has('vim_starting')
 		let s:vimrc.filesystem.path_separator = ':'
 		let s:vimrc.filesystem.rcfile_prefix = '.'
 	endif
-	"}}}
 
 	"disable default plugins
 	let g:loaded_2html_plugin=1
@@ -54,6 +51,7 @@ if has('vim_starting')
 	let g:loaded_vimballPlugin=1
 	let g:loaded_netrwPlugin=1
 endif
+"}}}
 func! s:rc(fname) abort "{{{
 	return s:vimrc.filesystem.rcfile_prefix . a:fname
 endfunc "}}}
@@ -66,7 +64,7 @@ if has('gui_running')&&filereadable(s:_envrc)
 	silent call execute(join(map(readfile(s:_envrc),{-> {expr-> printf("let $%s='%s'",expr[0],expand(expr[1]))}(split(v:val,'='))}),"\n"))
 endif | unlet s:_envrc
 "}}}
-"}}}
+
 " Initialize autocmd{{{
 let s:_augroups = readfile(expand('<sfile>'))
 let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
@@ -79,10 +77,11 @@ for s:_augroup in s:_augroups
 	exec 'augroup END'
 endfor | unlet s:_augroups s:_pattern
  "}}}
-" Setting "{{{1
+" Setting
 syntax on
+filetype plugin indent on
 colorscheme domusaurea
-
+" built-in options{{{
 set relativenumber number
 set whichwrap=b,s,[,],<,>
 set wrap
@@ -134,19 +133,20 @@ if executable('ag')
 	let &grepprg='ag --vimgrep'
 	let &grepformat='%f:%l:%c:%m'
 endif
-
-filetype plugin indent on
-
+ "}}}
 augroup vimrc_filetype
 	au FileType * let &l:commentstring=' ' . &l:commentstring
 	au BufRead .envrc set filetype=sh
 augroup END
-
 augroup vimrc_mru
 	au BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
-"}}}
-" Mapping{{{
+
+" Mapping
+func! s:map_prefix(kind) abort
+	return '<Plug>(vimrc-' . a:kind . ')'
+endfunc
+" Mapping for builtins{{{
 nnoremap ; :
 nnoremap : ;
 vnoremap ; :
@@ -193,14 +193,14 @@ augroup vimrc_mapping
 	au Filetype help nnoremap <silent> <buffer> q :<C-u>q<CR>
 augroup END
 
-func! s:map_prefix(kind) abort "{{{
-	return '<Plug>(vimrc-' . a:kind . '-prefix)'
-endfunc "}}}
-func! s:_toCommand(list) abort "{{{
-	return join(a:list,' ')
-endfunc "}}}
-" for Loop Mapping.{{{
-func! s:_loop_define(config) abort
+if has('mac') | let mapleader='_' | endif
+if has('win32')
+	inoremap \ _
+	inoremap _ \
+endif
+ "}}}
+" Loop Mapping {{{
+func! s:_loop_define(config) abort "{{{
 	let id = 'loop-' . a:config.id
 	let prefix = s:map_prefix(id)
 	let enter_with = a:config.enter_with
@@ -228,18 +228,17 @@ func! s:_loop_define(config) abort
 					\plug_map.main . lhs])
 		execute join(map(com,'join(v:val," ")'),"\n")
 	endfor
-endfunc
-func! s:_simple_loop_define(config) abort
+endfunc "}}}
+func! s:_simple_loop_define(config) abort "{{{
 	let config = deepcopy(a:config)
 	let config.map = map(split(config.follow_key,'\zs'),'[v:val,config.enter_with . v:val]')
 	call s:_loop_define(config)
-endfunc
-func! s:map_when_leave_loop() abort
+endfunc "}}}
+func! s:map_when_leave_loop() abort "{{{
 	if getchar(1)!=0
 		call feedkeys(nr2char(getchar()))
 	endif
-endfunc
-
+endfunc "}}}
 "Window management
 call s:_simple_loop_define({
 			\'id': 'WinChange',
@@ -269,10 +268,7 @@ call s:_loop_define({
 			\	['t',':<C-u>call <SID>map_tabmove(1)<CR>']
 			\]
 			\}) " FIXME: This mapping does not repeat.
-delfunc s:_loop_define
-delfunc s:_simple_loop_define
-
-func! s:map_tabmove(delta) abort
+func! s:map_tabmove(delta) abort "{{{
 	let tab_count = tabpagenr('$')
 	if tab_count == 1 | return | endif
 	let current = tabpagenr() - 1
@@ -293,9 +289,15 @@ func! s:map_tabmove(delta) abort
 		let command .= '+' . movement
 	endif
 	execute command
+endfunc "}}}
+delfunc s:_loop_define
+delfunc s:_simple_loop_define
+"}}}
+" Command mapping{{{
+func! s:_toCommand(list) abort
+	return join(a:list,' ')
 endfunc
- "}}}
-" for Command.{{{
+
 let s:_prefix = s:map_prefix('command')
 execute s:_toCommand(['noremap',s:_prefix,'<Nop>'])
 execute s:_toCommand(['map','<Space>',s:_prefix])
@@ -314,19 +316,19 @@ execute join(map(s:_map,{->join([
 			\ ],' ')}),"\n")
 unlet s:_map
 
-func! s:map_toggle_QuickFix() abort "{{{
+func! s:map_toggle_QuickFix() abort
 	let win_count = winnr('$')
 	cclose
 	if win_count != winnr('$') | return | endif
 	try | copen | catch
 		echohl Eror | echom v:exception | echohl None
 	endtry
-endfunc "}}}
- "}}}
+endfunc
 unlet s:_prefix
 delfunc s:_toCommand
-
-func! s:plugin_mapping() abort "{{{
+"}}}
+" Plugin mapping{{{
+func! s:plugin_mapping() abort
 	let maps = []
 	let prefix = s:map_prefix('operator')
 	execute printf('noremap %s <Nop>', prefix)
@@ -360,11 +362,28 @@ func! s:plugin_mapping() abort "{{{
 			execute mode . 'map' lhs rhs
 		endfor
 	endfor
-endfunc "}}}
+endfunc
 augroup vimrc_plugin_settings
 	au User vimrc_initialize call s:plugin_mapping()
 augroup END
-
+"}}}
+" gram.vim{{{
+func! s:gram_mapping() abort
+	let map = [
+				\ ['k','loop-cursor-up'],
+				\ ['j','loop-cursor-down'],
+				\ ['<CR>','select-item'],
+				\ ['i','start-filtering'],
+				\ ['q','exit'],
+				\]
+	call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
+	execute join(map,"\n")
+endfunc
+augroup vimrc_gram
+	au User gramOpen call s:gram_mapping()
+augroup END
+"}}}
+" Shift ten key{{{
 func! s:shift_ten_key(enablize) abort "{{{
 	let ten_key_pair = [
 				\['1','!'],
@@ -392,32 +411,9 @@ endfunc "}}}
 com! -bar EnableShiftTenKey call s:shift_ten_key(1)
 com! -bar DisableShiftTenKey call s:shift_ten_key(0)
 if has('vim_starting') | EnableShiftTenKey | endif
-
-if has('mac')
-	let mapleader='_'
-endif
-if has('win32')
-	inoremap \ _
-	inoremap _ \
-endif
-
-" gram.vim
-func! s:gram_mapping() abort
-	let map = [
-				\ ['k','loop-cursor-up'],
-				\ ['j','loop-cursor-down'],
-				\ ['<CR>','select-item'],
-				\ ['i','start-filtering'],
-				\ ['q','exit'],
-				\]
-	call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
-	execute join(map,"\n")
-endfunc
-augroup vimrc_gram
-	au User gramOpen call s:gram_mapping()
-augroup END
 "}}}
-" Command {{{
+
+" Command
 com! -bar CdCurrent cd %:p:h
 com! -bar LcdCurrent lcd %:p:h
 com! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
@@ -425,7 +421,7 @@ com! -bar Scratch new|setl buftype=nofile nobuflisted noswapfile
 com! CopyToClipboard let @*=@"
 com! ClearMessage execute repeat("echom ''\n",201)
 com! Helptags helptags ALL
-
+" Filter{{{
 com! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 func! Filter(pat,com) abort "{{{
 	let output = split(execute(a:com),"\n")
@@ -440,12 +436,60 @@ func! s:filter(bang,pat,com) abort "{{{
 		echo output
 	endif
 endfunc "}}}
+ "}}}
 
-if has('mac')&&executable('open')
-	com! -bar -nargs=+ -complete=dir Open silent !open <args>
-endif
+"Highlight
+" EmphasisIndent{{{
+hi link VimrcEmphasisIndent CursorLine
+augroup vimrc_emphasize_indent
+	au WinEnter * call s:emphasize_indent()
+	au User vimrc_initialize call s:emphasize_indent()
+augroup END
+func! s:emphasize_indent() abort "{{{
+	if exists('w:disable_emphasis_indent')&&w:disable_emphasis_indent
+		return
+	endif
+	if exists('w:emphasis_indent_id')
+		call matchdelete(w:emphasis_indent_id)
+	endif
+	let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent',
+				\'\%(^\t\|\%(\_[^\t]\+\)\@<!\t\zs\t\)')
+endfunc "}}}
+func! s:emphasis_indent_enable() abort "{{{
+	let w:disable_emphasis_indent = 0
+endfunc "}}}
+func! s:emphasis_indent_disable() abort "{{{
+	let w:disable_emphasis_indent = 1
+	if exists('w:emphasis_indent_id')
+		call matchdelete(w:emphasis_indent_id)
+		unlet w:emphasis_indent_id
+	endif
+endfunc "}}}
+com! EmphasisIndentDisable call s:emphasis_indent_disable()
+com! EmphasisIndentEnable call s:emphasis_indent_enable()
 "}}}
-" minpac{{{
+" WarningSpace{{{
+hi link WarningSpace Error
+augroup vimrc_warningspace
+	au WinEnter * call s:warningspace()
+	au User vimrc_initialize call s:warningspace()
+augroup END
+func! s:warningspace() abort "{{{
+	if &buftype!=#'' || !(&ma) | return | endif
+
+	"Zenkaku space
+	if exists('w:twobytespace_id') | call matchdelete(w:twobytespace_id) | endif
+	let w:twobytespace_id=matchadd('WarningSpace','　')
+
+	"End of line's space
+	if exists('w:lineendspace_id') | call matchdelete(w:lineendspace_id) | endif
+	let w:lineendspace_id=matchadd('WarningSpace','\s\+$')
+endfunc "}}}
+com! ReplaceTwobyteSpace keeppatterns %s/　/ /g
+com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
+"}}}
+
+" minpac
 com! PackInit   source $MYVIMRC|call s:pack_init()
 com! PackUpdate source $MYVIMRC|call s:pack_update()
 com! PackClean  source $MYVIMRC|call s:pack_clean()
@@ -506,11 +550,8 @@ endfunc "}}}
 func! s:pack_update() abort "{{{
 	if s:pack_init() | call minpac#update() | endif
 endfunc "}}}
-func! s:pack_clean() abort "{{{
-	if s:pack_init() | call minpac#clean() | endif
-endfunc "}}}
-"}}}
-" Plugin Setting{{{
+
+" Plugin Setting
 " thinca/quickrun{{{
 let g:quickrun_config={}
 let g:quickrun_config._={
@@ -568,8 +609,8 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
-"}}}
-" Utility{{{
+
+" Utility
 " tabpage_cd{{{
 augroup vimrc_tabpage_cd
 	au TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
@@ -744,8 +785,7 @@ func! s:terminal_open() abort
 	setlocal nonumber norelativenumber
 endfunc
 "}}}
-"}}}
-"
+
 " lvimrc{{{
 let s:_lvimrc = s:rc('lvimrc')
 if filereadable(expand('~/' . s:_lvimrc))
