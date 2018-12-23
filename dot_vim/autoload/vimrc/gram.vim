@@ -72,7 +72,7 @@ func! s:win_foreground() abort "{{{
 		execute 'silent buffer' s:window.bufnr
 	else
 		silent e [gram]
-		setlocal bufhidden=hide buftype=nofile noswapfile noundofile nomodifiable nomodified
+		setlocal bufhidden=hide buftype=nofile nobuflisted noswapfile noundofile nomodifiable nomodified
 		augroup gram_buffer
 			au! * <buffer>
 			au BufWipeout <buffer> call s:win_bufwipeouted()
