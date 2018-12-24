@@ -39,12 +39,12 @@ if has('vim_starting')
 	let s:vimrc.filesystem = {}
 
 	if s:Windows
-		let $DOT_VIM = '~\vimfiles'
+		let $DOT_VIM = expand('~\vimfiles')
 		let s:vimrc.filesystem.slash = '\'
 		let s:vimrc.filesystem.path_separator = ';'
 		let s:vimrc.filesystem.rcfile_prefix = '_'
 	else
-		let $DOT_VIM = '~/.vim'
+		let $DOT_VIM = expand('~/.vim')
 		let s:vimrc.filesystem.slash = '/'
 		let s:vimrc.filesystem.path_separator = ':'
 		let s:vimrc.filesystem.rcfile_prefix = '.'
@@ -76,6 +76,7 @@ endif | unlet s:_envrc
 " Initialize autocmd{{{
 let s:_augroups = readfile(expand('<sfile>'))
 let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
+call filter(s:_augroups,'stridx(v:val,"aug")!=-1')
 call filter(s:_augroups,'v:val=~#s:_pattern')
 call map(s:_augroups,'matchstr(v:val,s:_pattern)')
 call uniq(sort(filter(s:_augroups,'v:val!~?"END"')))
@@ -128,6 +129,16 @@ set virtualedit=block
 set complete=.,i,d,w,b,u
 
 set noimdisable
+
+let s:_undodir = expand('$DOT_VIM') . '/_vim_cache/undodir'
+if !isdirectory(s:_undodir) && exists('*mkdir')
+	call mkdir(s:_undodir,'p')
+endif
+if isdirectory(s:_undodir)
+	set undofile
+	let &undodir = s:_undodir
+endif
+unlet s:_undodir
 
 if has('kaoriya')
 	set fileencodings=guess,utf-8
