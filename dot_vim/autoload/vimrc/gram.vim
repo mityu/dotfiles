@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 23-Dec-2018.
+"Last Change: 24-Dec-2018.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -162,7 +162,7 @@ func! s:gram_initialize_coloring() abort "{{{
 endfunc "}}}
 func! s:gram_set_user_input_syntax() abort "{{{
 	silent syntax clear gramMatch
-	exec 'syntax match gramMatch /\c' . call(s:gram.hilt.regpat,[s:gram.user_input]) . '/'
+	exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.hilt.regpat,[s:gram.user_input]) . '/'
 endfunc "}}}
 func! s:gram_is_active() abort "{{{
 	return s:active_hilt !=# ''
@@ -178,7 +178,7 @@ func! s:gram_exit() abort "{{{
 	let s:gram.user_input = ''
 endfunc "}}}
 func! s:gram_flush_display() abort "{{{
-	let prompt = s:gram.hilt.prompt . s:gram.user_input
+	let prompt = s:gram.hilt.name . s:gram.hilt.prompt . s:gram.user_input
 	let contents = call(s:gram.hilt.filter,[s:gram.user_input])
 	if empty(contents) | let contents = ['(No matches)'] | endif
 	call s:win_deleteline(1,'$')
@@ -209,7 +209,8 @@ func! s:gram_start_filtering() abort "{{{
 	augroup END
 	let user_input = s:gram.user_input
 	try
-		let user_input = input(s:gram.hilt.prompt,s:gram.user_input)
+		let user_input = input(s:gram.hilt.name . s:gram.hilt.prompt,
+					\s:gram.user_input)
 	finally
 		au! gram_filtering
 		if s:gram.user_input !=# user_input
