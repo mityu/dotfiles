@@ -1,6 +1,6 @@
 "Plugin Name: cwdfile.vim
 "Author: mityu
-"Last Change: 23-Dec-2018.
+"Last Change: 24-Dec-2018.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -38,7 +38,7 @@ endfunc "}}}
 if !exists('s:did_initialize_variables')
 	call s:initialize_variables()
 	let s:hilt = {
-				\ 'name' : 'buffers',
+				\ 'name' : 'cwdfile',
 				\ 'filter' : function('s:hilt_filter'),
 				\ 'regpat' : 'vimrc#gram#escape_regpat',
 				\ 'selected' : function('s:hilt_selected'),
