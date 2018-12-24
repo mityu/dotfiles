@@ -16,6 +16,7 @@ if !exists('s:did_initialize_variables') "{{{
 	let s:active_hilt = ''
 	let s:gram_default_config = {
 				\ 'prompt': '>> ',
+				\ 'name' : '',
 				\ }
 	let s:window = {
 				\ 'bufnr' : s:NULL,
@@ -132,7 +133,7 @@ func! vimrc#gram#launch(hilt) abort "{{{
 		call s:win_foreground()
 		return
 	endif
-	for require in ['name','filter','regpat','selected']
+	for require in ['filter','regpat','selected']
 		if !has_key(a:hilt,require)
 			call s:notify.error('This hilt does not have required element: ' . require)
 			return
@@ -170,6 +171,7 @@ endfunc "}}}
 func! s:gram_exit() abort "{{{
 	if !s:gram_is_active() | return | endif
 	call s:win_background()
+	au! gram_coloring
 	if has_key(s:gram.hilt,'exit')
 		call call(s:gram.hilt.exit,[])
 	endif
