@@ -1,6 +1,14 @@
 " Author: mityu
 " Last Change: 24-Dec-2018.
 " vim: foldmethod=marker
+"
+" Naming rules:
+"  - Augroup name :
+"     `augroup vimrc_{kind}`
+"  - Mapping prefix :
+"     `<Plug>(vimrc-{kind})`
+"  - Global function :
+"     Use `Vimrc` as its prefix.
 
 if has('vim_starting')
 	set encoding=utf-8
@@ -136,6 +144,7 @@ endif
  "}}}
 augroup vimrc_filetype
 	au FileType * let &l:commentstring=' ' . &l:commentstring
+	au FileType c,cpp setl foldmethod=indent
 	au BufRead .envrc set filetype=sh
 augroup END
 augroup vimrc_mru
@@ -345,8 +354,7 @@ func! s:plugin_mapping() abort
 	call add(maps,['','ct','<Plug>(operator-toggle-comment-wrap)'])
 	call map(maps,{list -> [list[0], prefix . list[1], list[2]]}) "Add prefix.
 
-	call add(maps,['','y','<Plug>(operator-stay-cursor-yank)'])
-	call add(maps,['','J','<Plug>(jplus)'])
+	call add(maps,['','J','<Plug>(jplus)']) "Special, replace built-in function.
 
 	" Text Object
 	call add(maps,['ov','ab','<Plug>(textobj-multiblock-a)'])
@@ -358,7 +366,7 @@ func! s:plugin_mapping() abort
 	for [modes,lhs,rhs] in maps
 		let modes = (modes !=# '') ? split(modes,'\zs') : ['']
 		for mode in modes
-			if maparg(rhs,mode) ==# '' | continue | endif
+			if maparg(rhs,mode) ==# '' | continue | endif " Check if rhs exists.
 			execute mode . 'map' lhs rhs
 		endfor
 	endfor
@@ -508,7 +516,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('kana/vim-operator-user')
 	call minpac#add('kana/vim-operator-replace')
 	call minpac#add('osyo-manga/vim-operator-swap')
-	call minpac#add('osyo-manga/vim-operator-stay-cursor')
+	"call minpac#add('osyo-manga/vim-operator-stay-cursor')
 	call minpac#add('rhysd/vim-operator-surround')
 	"call minpac#add('thinca/vim-operator-sequence')
 	call minpac#add('kana/vim-gf-user')
@@ -549,6 +557,9 @@ func! s:pack_init() abort "{{{
 endfunc "}}}
 func! s:pack_update() abort "{{{
 	if s:pack_init() | call minpac#update() | endif
+endfunc "}}}
+func! s:pack_clean() abort "{{{
+	if s:pack_init() | call minpac#clean() | endif
 endfunc "}}}
 
 " Plugin Setting
@@ -839,4 +850,4 @@ if has('vim_starting') "{{{
 else
 	doau User vimrc_initialize
 endif "}}}
- "}}}
+"}}}
