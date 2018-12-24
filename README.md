@@ -9,4 +9,4 @@ $ ./deploy.sh
 
 * in Windows:
 
-Deploy script hasn't prepared yet.
+Deploy script hasn't been prepared yet.
