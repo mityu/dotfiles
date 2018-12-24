@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 23-Dec-2018.
+" Last Change: 24-Dec-2018.
 " vim: foldmethod=marker
 
 if has('vim_starting')
@@ -70,7 +70,7 @@ let s:_augroups = readfile(expand('<sfile>'))
 let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
 call filter(s:_augroups,'v:val=~#s:_pattern')
 call map(s:_augroups,'matchstr(v:val,s:_pattern)')
-call uniq(sort(filter(s:_augroups,'v:val!~#"END"')))
+call uniq(sort(filter(s:_augroups,'v:val!~?"END"')))
 for s:_augroup in s:_augroups
 	exec 'augroup' s:_augroup
 		au!
