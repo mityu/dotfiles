@@ -436,7 +436,8 @@ if has('vim_starting') | EnableShiftTenKey | endif
 com! -bar CdCurrent cd %:p:h
 com! -bar LcdCurrent lcd %:p:h
 com! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
-com! -bar Scratch new|setl buftype=nofile nobuflisted noswapfile
+com! -bar Draft setl buftype=nofile nobuflisted noswapfile
+com! -bar Scratch new|Draft
 com! CopyToClipboard let @*=@"
 com! ClearMessage execute repeat("echom ''\n",201)
 com! Helptags helptags ALL
