@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 24-Dec-2018.
+" Last Change: 25-Dec-2018.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -509,9 +509,9 @@ com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 
 " minpac
-com! PackInit   source $MYVIMRC|call s:pack_init()
-com! PackUpdate source $MYVIMRC|call s:pack_update()
-com! PackClean  source $MYVIMRC|call s:pack_clean()
+com! -bar PackInit   source $MYVIMRC|call s:pack_init()
+com! -bar PackUpdate source $MYVIMRC|call s:pack_update()
+com! -bar PackClean  source $MYVIMRC|call s:pack_clean()
 func! s:pack_register() abort "{{{
 	call minpac#add('k-takata/minpac',{'type': 'opt'})
 
@@ -540,7 +540,9 @@ func! s:pack_register() abort "{{{
 	call minpac#add('vim-jp/vimdoc-ja')
 	call minpac#add('tyru/open-browser.vim')
 	call minpac#add('sgur/vim-operator-openbrowser')
-	call minpac#add('tpope/vim-fugitive')
+	call minpac#add('lambdalisue/gina.vim')
+	"call minpac#add('lambdalisue/fila.vim')
+	"call minpac#add('tpope/vim-fugitive')
 	"call minpac#add('thinca/vim-ft-help_fold')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
