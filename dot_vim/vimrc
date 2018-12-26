@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 25-Dec-2018.
+" Last Change: 26-Dec-2018.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -457,6 +457,13 @@ func! s:filter(bang,pat,com) abort "{{{
 	endif
 endfunc "}}}
  "}}}
+
+" Shell
+com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
+com! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,<f-args>)
+com! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
+com! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
+com! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
 
 "Highlight
 " EmphasisIndent{{{
