@@ -1,13 +1,13 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 23-Dec-2018.
+"Last Change: 26-Dec-2018.
 
 let s:cpo_save = &cpo
 set cpo&vim
 
 " Script local variables
 if !exists('s:did_initialize_variables')
-	let s:default_ignore_pattern = ['COMMIT_EDITMSG']
+	let s:default_ignore_pattern = ['\.git']
 	let s:default_history_max= 300
 	let s:default_auto_delete_unexist_file_history = 0
 
