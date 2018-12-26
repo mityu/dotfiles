@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 24-Dec-2018.
+"Last Change: 26-Dec-2018.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -242,7 +242,7 @@ endfunc "}}}
 
 " User utility
 func! vimrc#gram#escape_regpat(pat) abort "{{{
-	return escape(a:pat,'.~/\^$[]:')
+	return escape(a:pat,'.~/\^$[]:+*')
 endfunc "}}}
 func! vimrc#gram#glob2regpat(glob) abort "{{{
 	let separator = '\' . s:shellslash()
