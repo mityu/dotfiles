@@ -363,7 +363,7 @@ func! s:plugin_mapping() abort
 	call add(maps,['','sp','<Plug>(operator-swap)'])
 	call add(maps,['','J' ,'<Plug>(jplus-getchar-with-space)'])
 	call add(maps,['','ct','<Plug>(operator-toggle-comment-wrap)'])
-	call map(maps,{list -> [list[0], prefix . list[1], list[2]]}) "Add prefix.
+	call map(maps,{_,list -> [list[0], prefix . list[1], list[2]]}) "Add prefix.
 
 	call add(maps,['','J','<Plug>(jplus)']) "Special, replace built-in function.
 
