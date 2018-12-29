@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 26-Dec-2018.
+" Last Change: 29-Dec-2018.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -421,7 +421,7 @@ func! s:shift_ten_key(enablize) abort "{{{
 			execute 'inoremap' key2 key1
 		endfor
 	else
-		for [key1,key2] in s:ten_key_pair
+		for [key1,key2] in ten_key_pair
 			execute 'silent! iunmap' key1
 			execute 'silent! iunmap' key2
 		endfor
