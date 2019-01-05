@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Dec-2018.
+" Last Change: 05-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -187,6 +187,8 @@ noremap <C-e> $
 noremap - <C-x>
 noremap + <C-a>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
+nnoremap gh gT
+nnoremap gl gt
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -275,11 +277,12 @@ call s:_simple_loop_define({
 			\'enter_with': '<C-w>',
 			\'follow_key': '<>-+'
 			\})
-call s:_loop_define({
-			\'id': 'TabChange',
-			\'enter_with': 'g',
-			\'map': [['h','gT'],['l','gt']]
-			\})
+" Sometimes gh starts selection mode.
+" call s:_loop_define({
+" 			\'id': 'TabChange',
+" 			\'enter_with': 'g',
+" 			\'map': [['h','gT'],['l','gt']]
+" 			\})
 call s:_loop_define({
 			\'id': 'TabMove',
 			\'enter_with': 'g',
@@ -549,6 +552,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('tyru/open-browser.vim')
 	call minpac#add('sgur/vim-operator-openbrowser')
 	call minpac#add('lambdalisue/gina.vim')
+	call minpac#add('lambdalisue/vim-gista')
 	"call minpac#add('lambdalisue/fila.vim')
 	"call minpac#add('tpope/vim-fugitive')
 	"call minpac#add('thinca/vim-ft-help_fold')
@@ -641,6 +645,9 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
+" lambdalisue/vim-gista{{{
+let g:gista#github_user = 'mityu'
+"}}}
 
 " Utility
 " tabpage_cd{{{
