@@ -1,6 +1,6 @@
 "Plugin Name: buffers.vim
 "Author: mityu
-"Last Change: 23-Dec-2018.
+"Last Change: 07-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -20,15 +20,19 @@ func! s:generate_buflist() abort "{{{
 endfunc "}}}
 func! s:hilt_filter(user_input) abort "{{{
 	if a:user_input ==# ''
+		let s:regpat_save = ''
 		return keys(s:buflist_all)
 	endif
-	let regpat = vimrc#gram#glob2regpat(a:user_input)
+	let s:regpat_save = vimrc#gram#glob2regpat(a:user_input)
 	if s:user_input_save ==# '' || stridx(a:user_input,s:user_input_save) != 0
 		let s:buflist_filtered = keys(s:buflist_all)
 	endif
-	call filter(s:buflist_filtered,'v:val=~?regpat')
+	call filter(s:buflist_filtered,'v:val=~?s:regpat_save')
 	let s:user_input_save = a:user_input
 	return s:buflist_filtered
+endfunc "}}}
+func! s:hilt_regpat(user_input) abort "{{{
+	return s:regpat_save
 endfunc "}}}
 func! s:hilt_selected(selected_item) abort "{{{
 	execute 'buffer' s:buflist_all[a:selected_item]
@@ -36,7 +40,8 @@ endfunc "}}}
 func! s:initialize_variables() "{{{
 	let s:buflist_all = {}
 	let s:buflist_filtered = []
-	let s:user_input_save =''
+	let s:user_input_save = ''
+	let s:regpat_save = ''
 endfunc "}}}
 
 if !exists('s:did_initialize_variables')
@@ -44,7 +49,7 @@ if !exists('s:did_initialize_variables')
 	let s:hilt = {
 				\ 'name' : 'buffers',
 				\ 'filter' : function('s:hilt_filter'),
-				\ 'regpat' : 'vimrc#gram#glob2regpat',
+				\ 'regpat' : function('s:hilt_regpat'),
 				\ 'selected' : function('s:hilt_selected'),
 				\ 'exit' : function('s:initialize_variables'),
 				\}

@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 26-Dec-2018.
+"Last Change: 07-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -11,6 +11,7 @@ if !exists('s:did_initialize_variables') "{{{
 	let s:gram = {
 				\ 'line_prompt' : 1,
 				\ 'user_input' : '',
+				\ 'prompt' : '',
 				\ 'hilt': {}
 				\ }
 	let s:active_hilt = ''
@@ -129,7 +130,7 @@ endfunc "}}}
 " gram
 func! vimrc#gram#launch(hilt) abort "{{{
 	if s:gram_is_active()
-		call s:notify.warning('gram is already active with hilt: ' . s:active_hilt)
+		call s:notify.warning('gram is already active with a hilt: ' . s:active_hilt)
 		call s:win_foreground()
 		return
 	endif
@@ -143,6 +144,7 @@ func! vimrc#gram#launch(hilt) abort "{{{
 	let s:gram.hilt = a:hilt
 	call extend(s:gram.hilt,s:gram_default_config,'keep')
 	let s:active_hilt = s:gram.hilt.name
+	let s:gram.prompt = s:gram.hilt.name . ' ' . s:gram.hilt.prompt
 	call s:win_foreground()
 	call s:gram_define_mapping()
 	call s:gram_initialize_coloring()
@@ -180,12 +182,12 @@ func! s:gram_exit() abort "{{{
 	let s:gram.user_input = ''
 endfunc "}}}
 func! s:gram_flush_display() abort "{{{
-	let prompt = s:gram.hilt.name . s:gram.hilt.prompt . s:gram.user_input
+	let prompt = s:gram.prompt . s:gram.user_input
 	let contents = call(s:gram.hilt.filter,[s:gram.user_input])
 	if empty(contents) | let contents = ['(No matches)'] | endif
 	call s:win_deleteline(1,'$')
 	call s:win_setline(1,[prompt] + contents)
-	call s:gram_set_user_input_syntax()
+	call s:gram_set_user_input_syntax() " It must be called after calling hilt's filter function.
 	redraw
 endfunc "}}}
 func! s:gram_is_line_prompt(lnum) abort "{{{
@@ -211,8 +213,7 @@ func! s:gram_start_filtering() abort "{{{
 	augroup END
 	let user_input = s:gram.user_input
 	try
-		let user_input = input(s:gram.hilt.name . s:gram.hilt.prompt,
-					\s:gram.user_input)
+		let user_input = input(s:gram.prompt,s:gram.user_input)
 	finally
 		au! gram_filtering
 		if s:gram.user_input !=# user_input

@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 26-Dec-2018.
+"Last Change: 07-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -13,6 +13,7 @@ if !exists('s:did_initialize_variables')
 
 	let s:mru = {
 				\ 'user_input_save' : '',
+				\ 'regpat_save' : '',
 				\ 'history_all' : [],
 				\ 'history_filtered' : [],
 				\}
@@ -108,15 +109,19 @@ func! s:save_history() abort "{{{
 endfunc "}}}
 func! s:hilt_filter(user_input) abort "{{{
 	if a:user_input == ''
+		let s:mru.regpat_save = ''
 		return s:mru.history_all
 	endif
-	let regpat = vimrc#gram#glob2regpat(a:user_input)
+	let s:mru.regpat_save = vimrc#gram#glob2regpat(a:user_input)
 	if s:mru.user_input_save ==# '' || stridx(a:user_input,s:mru.user_input_save) != 0
 		let s:mru.history_filtered = copy(s:mru.history_all)
 	endif
-	call filter(s:mru.history_filtered,'v:val=~?regpat')
+	call filter(s:mru.history_filtered,'v:val=~?s:mru.regpat_save')
 	let s:mru.user_input_save = a:user_input
 	return s:mru.history_filtered
+endfunc "}}}
+func! s:hilt_regpat(user_input) abort "{{{
+	return s:mru.regpat_save
 endfunc "}}}
 func! s:hilt_selected(selected_item) abort "{{{
 	execute 'edit' fnameescape(a:selected_item)
@@ -129,7 +134,7 @@ if !exists('s:hilt')
 	let s:hilt = {
 				\ 'name' : 'mru',
 				\ 'filter' : function('s:hilt_filter'),
-				\ 'regpat' : 'vimrc#gram#glob2regpat',
+				\ 'regpat' : function('s:hilt_regpat'),
 				\ 'selected' : function('s:hilt_selected')
 				\}
 endif
