@@ -373,8 +373,8 @@ func! s:plugin_mapping() abort
 	call add(maps,['','J','<Plug>(jplus)']) "Special, replace built-in function.
 
 	" Text Object
-	call add(maps,['ov','ab','<Plug>(textobj-multiblock-a)'])
-	call add(maps,['ov','ib','<Plug>(textobj-multiblock-i)'])
+	call add(maps,['ov','ab','<Plug>(textobj-multitextobj-a)'])
+	call add(maps,['ov','ib','<Plug>(textobj-multitextobj-i)'])
 	call add(maps,['ov','af','<Plug>(textobj-between-a)'])
 	call add(maps,['ov','if','<Plug>(textobj-between-i)'])
 	" call add(maps,['n','t','<Plug>(sonictemplate)'])
@@ -535,12 +535,14 @@ func! s:pack_register() abort "{{{
 	call minpac#add('tyru/capture.vim')
 	call minpac#add('osyo-manga/vim-jplus')
 	call minpac#add('kana/vim-textobj-user')
+	call minpac#add('kana/vim-textobj-indent')
+	call minpac#add('kana/vim-textobj-function')
 	call minpac#add('osyo-manga/vim-textobj-multiblock')
+	call minpac#add('osyo-manga/vim-textobj-multitextobj')
 	call minpac#add('thinca/vim-textobj-between')
 	call minpac#add('kana/vim-operator-user')
 	call minpac#add('kana/vim-operator-replace')
 	call minpac#add('osyo-manga/vim-operator-swap')
-	"call minpac#add('osyo-manga/vim-operator-stay-cursor')
 	call minpac#add('rhysd/vim-operator-surround')
 	"call minpac#add('thinca/vim-operator-sequence')
 	call minpac#add('kana/vim-gf-user')
@@ -556,7 +558,6 @@ func! s:pack_register() abort "{{{
 	call minpac#add('lambdalisue/gina.vim')
 	call minpac#add('lambdalisue/vim-gista')
 	"call minpac#add('lambdalisue/fila.vim')
-	"call minpac#add('tpope/vim-fugitive')
 	"call minpac#add('thinca/vim-ft-help_fold')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
@@ -647,6 +648,20 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
+" osyo-manga/textobj-multitextobj{{{
+let g:textobj_multitextobj_textobjects_i = [
+		\ '<Plug>(textobj-multiblock-i)',
+		\ '<Plug>(textobj-indent-i)',
+		\ '<Plug>(textobj-function-i)',
+		\ 'it',
+		\]
+let g:textobj_multitextobj_textobjects_a = [
+		\ '<Plug>(textobj-multiblock-a)',
+		\ '<Plug>(textobj-indent-a)',
+		\ '<Plug>(textobj-function-a)',
+		\ 'at',
+		\]
+"}}}
 
 " Utility
 " tabpage_cd{{{
