@@ -436,13 +436,14 @@ com! -bar EnableShiftTenKey call s:shift_ten_key(1)
 com! -bar DisableShiftTenKey call s:shift_ten_key(0)
 if has('vim_starting') | EnableShiftTenKey | endif
 "}}}
+" Abbreviates
+cabbrev gina Gina
+cabbrev gista Gista
 
 " Command
 com! -bar CdCurrent cd %:p:h
 com! -bar LcdCurrent lcd %:p:h
 com! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
-com! -bar Draft setl buftype=nofile nobuflisted noswapfile
-com! -bar Scratch new|Draft
 com! CopyToClipboard let @*=@"
 com! ClearMessage execute repeat("echom ''\n",201)
 com! Helptags helptags ALL
@@ -461,8 +462,26 @@ func! s:filter(bang,pat,com) abort "{{{
 		echo output
 	endif
 endfunc "}}}
- "}}}
-
+"}}}
+" Draft buffer{{{
+func! s:draft() abort
+	let b:vimrc_draft_savedata = {
+				\ 'buftype': &l:buftype,
+				\ 'buflisted': &l:buflisted,
+				\ 'swapfile': &l:swapfile,
+				\ 'undofile': &l:undofile,
+				\}
+	setl buftype=nofile nobuflisted noswapfile
+endfunc
+func! s:undraft() abort
+	if !exists('b:vimrc_draft_savedata') | return | endif
+	execute join(values(map(copy(b:vimrc_draft_savedata),
+				\'printf("let &l:%s=%s",v:key,string(v:val))')),"|")
+endfunc
+com! -bar Draft call s:draft()
+com! -bar UnDraft call s:undraft()
+com! -bar Scratch new|Draft
+"}}}
 " Shell
 com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
 com! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,<f-args>)
