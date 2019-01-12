@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 11-Jan-2019.
+" Last Change: 12-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -648,15 +648,27 @@ let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 if has('mac')
 	let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
 endif "}}}
+" osyo-manga/textobj-multiblock{{{
+let g:textobj_multiblock_blocks = [
+		\['(',')'],
+		\['[',']'],
+		\['{','}'],
+		\['<','>'],
+		\]
+" }}}
 " osyo-manga/textobj-multitextobj{{{
 let g:textobj_multitextobj_textobjects_i = [
 		\ '<Plug>(textobj-multiblock-i)',
+		\ "i'",
+		\ 'i"',
 		\ '<Plug>(textobj-indent-i)',
 		\ '<Plug>(textobj-function-i)',
 		\ 'it',
 		\]
 let g:textobj_multitextobj_textobjects_a = [
 		\ '<Plug>(textobj-multiblock-a)',
+		\ "a'",
+		\ 'a"',
 		\ '<Plug>(textobj-indent-a)',
 		\ '<Plug>(textobj-function-a)',
 		\ 'at',
