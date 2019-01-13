@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 12-Jan-2019.
+" Last Change: 13-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -90,22 +90,21 @@ endfor | unlet s:_augroups s:_pattern
 syntax on
 filetype plugin indent on
 colorscheme domusaurea
-" built-in options{{{
 set relativenumber number
 set whichwrap=b,s,[,],<,>
 set wrap
 set smartindent autoindent
+set backspace=eol,start,indent
+set pumheight=10
+
 set noequalalways
 set scrolloff=1
 set colorcolumn=100
 set cursorline cursorcolumn
-
 set tabstop=4
 set shiftwidth=4
-
 set hls
 set display=lastline
-set pumheight=10
 
 set noundofile nobackup noswapfile
 set autoread
@@ -115,6 +114,7 @@ set laststatus=2
 
 set cmdheight=2 cmdwinheight=10
 set wildmenu
+set wildignore& wildignore+=*.DS_STORE,*.jpg,*.png,*.gif
 set history=100
 
 set keywordprg=:help
@@ -129,6 +129,7 @@ set virtualedit=block
 set complete=.,i,d,w,b,u
 
 set noimdisable
+set lazyredraw
 
 let s:_undodir = expand('$DOT_VIM') . '/_vim_cache/undodir'
 if !isdirectory(s:_undodir) && exists('*mkdir')
@@ -152,7 +153,7 @@ if executable('ag')
 	let &grepprg='ag --vimgrep'
 	let &grepformat='%f:%l:%c:%m'
 endif
- "}}}
+
 augroup vimrc_filetype
 	au FileType * let &l:commentstring=' ' . &l:commentstring
 	au FileType c,cpp setl foldmethod=indent
@@ -189,13 +190,16 @@ noremap + <C-a>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap gh gT
 nnoremap gl gt
-nnoremap <expr> qq (reg_recording()==#''?'qa':'q')
-nnoremap @@ @a
+nnoremap <expr> q (reg_recording()==#''?'qa':'q')
+nnoremap @ @a
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
+inoremap <C-@> <C-x>
 
 vnoremap <C-e> $
+vnoremap g+ g<C-a>
+vnoremap g- g<C-x>
 
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
@@ -377,7 +381,8 @@ func! s:plugin_mapping() abort
 	call add(maps,['ov','ib','<Plug>(textobj-multitextobj-i)'])
 	call add(maps,['ov','af','<Plug>(textobj-between-a)'])
 	call add(maps,['ov','if','<Plug>(textobj-between-i)'])
-	" call add(maps,['n','t','<Plug>(sonictemplate)'])
+	call add(maps,['ov','iF','<Plug>(textobj-function-i)'])
+	call add(maps,['ov','aF','<Plug>(textobj-function-a)'])
 
 	for [modes,lhs,rhs] in maps
 		let modes = (modes !=# '') ? split(modes,'\zs') : ['']
@@ -578,6 +583,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('lambdalisue/vim-gista')
 	"call minpac#add('lambdalisue/fila.vim')
 	"call minpac#add('thinca/vim-ft-help_fold')
+	call minpac#add('machakann/vim-Verdin')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -650,15 +656,16 @@ augroup END
  "}}}
 " w0rp/ale{{{
 let g:ale_lint_on_save = 1
-let g:ale_lint_on_text_changed = 'always'
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_insert_leave = 1
 let g:ale_lint_on_enter = 1
 let g:ale_set_loclist = 0
 let g:ale_set_quickfix = 1
 let g:ale_completion_enabled = 1
 let g:ale_open_list = 0
 let g:ale_keep_list_window_open = 0
-"let g:ale_linters = {}
-"let g:ale_linters.cpp = 'cquery'
+let g:ale_linters = {}
+let g:ale_linters.cpp = ['gcc']
 "}}}
 " mattn/sonictemplate{{{
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
