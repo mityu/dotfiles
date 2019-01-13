@@ -377,12 +377,16 @@ func! s:plugin_mapping() abort
 	call add(maps,['','J','<Plug>(jplus)']) "Special, replace built-in function.
 
 	" Text Object
-	call add(maps,['ov','ab','<Plug>(textobj-multitextobj-a)'])
-	call add(maps,['ov','ib','<Plug>(textobj-multitextobj-i)'])
-	call add(maps,['ov','af','<Plug>(textobj-between-a)'])
-	call add(maps,['ov','if','<Plug>(textobj-between-i)'])
-	call add(maps,['ov','iF','<Plug>(textobj-function-i)'])
-	call add(maps,['ov','aF','<Plug>(textobj-function-a)'])
+	call add(maps,['ov','ab','<Plug>(textobj-multiblock-a)'])
+	call add(maps,['ov','ib','<Plug>(textobj-multiblock-i)'])
+	call add(maps,['ov','ad','<Plug>(textobj-multitextobj-a)'])
+	call add(maps,['ov','id','<Plug>(textobj-multitextobj-i)'])
+	call add(maps,['v','<C-p>','<Plug>(textobj-multitextobj-apply-prev)'])
+	call add(maps,['v','<C-n>','<Plug>(textobj-multitextobj-apply-next)'])
+	call add(maps,['ov','aF','<Plug>(textobj-between-a)'])
+	call add(maps,['ov','iF','<Plug>(textobj-between-i)'])
+	call add(maps,['ov','if','<Plug>(textobj-function-i)'])
+	call add(maps,['ov','af','<Plug>(textobj-function-a)'])
 
 	for [modes,lhs,rhs] in maps
 		let modes = (modes !=# '') ? split(modes,'\zs') : ['']
@@ -684,17 +688,23 @@ let g:textobj_multiblock_blocks = [
 " }}}
 " osyo-manga/textobj-multitextobj{{{
 let g:textobj_multitextobj_textobjects_i = [
-		\ '<Plug>(textobj-multiblock-i)',
 		\ "i'",
 		\ 'i"',
+		\ 'i(',
+		\ 'i[',
+		\ 'i{',
+		\ 'i<',
 		\ '<Plug>(textobj-indent-i)',
 		\ '<Plug>(textobj-function-i)',
 		\ 'it',
 		\]
 let g:textobj_multitextobj_textobjects_a = [
-		\ '<Plug>(textobj-multiblock-a)',
 		\ "a'",
 		\ 'a"',
+		\ 'a(',
+		\ 'a[',
+		\ 'a{',
+		\ 'a<',
 		\ '<Plug>(textobj-indent-a)',
 		\ '<Plug>(textobj-function-a)',
 		\ 'at',
