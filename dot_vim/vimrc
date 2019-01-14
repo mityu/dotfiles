@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 13-Jan-2019.
+" Last Change: 14-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -190,8 +190,8 @@ noremap + <C-a>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap gh gT
 nnoremap gl gt
-nnoremap <expr> q (reg_recording()==#''?'qa':'q')
-nnoremap @ @a
+nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
+nnoremap @@ @a
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
