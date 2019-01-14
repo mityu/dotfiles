@@ -566,7 +566,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('kana/vim-textobj-indent')
 	call minpac#add('kana/vim-textobj-function')
 	call minpac#add('osyo-manga/vim-textobj-multiblock')
-	call minpac#add('osyo-manga/vim-textobj-multitextobj')
+	call minpac#add('mityu/vim-textobj-multitextobj')
 	call minpac#add('thinca/vim-textobj-between')
 	call minpac#add('kana/vim-operator-user')
 	call minpac#add('kana/vim-operator-replace')
@@ -686,7 +686,7 @@ let g:textobj_multiblock_blocks = [
 		\['<','>'],
 		\]
 " }}}
-" osyo-manga/textobj-multitextobj{{{
+" textobj-multitextobj{{{
 let g:textobj_multitextobj_textobjects_i = [
 		\ "i'",
 		\ 'i"',
