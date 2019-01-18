@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Jan-2019.
+" Last Change: 18-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -288,8 +288,7 @@ augroup END
 "}}}
 " Loop {{{
 func! s:_loop_define(config) abort "{{{
-	let id = 'loop-' . a:config.id
-	let prefix = s:map_prefix(id)
+	let prefix = printf('<Plug><SID>(loop-%s)',a:config.id)
 	let enter_with = a:config.enter_with
 	let mode = get(a:config,'mode','n')
 	let plug_map = {}
