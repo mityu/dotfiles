@@ -58,6 +58,8 @@ if has('vim_starting')
 	let g:loaded_tarPlugin=1
 	let g:loaded_vimballPlugin=1
 	let g:loaded_netrwPlugin=1
+
+	exec 'set runtimepath+=' . join([$DOT_VIM,'runtime'],s:vimrc.filesystem.slash)
 endif
 "}}}
 func! s:rc(fname) abort "{{{
