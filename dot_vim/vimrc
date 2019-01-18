@@ -239,7 +239,7 @@ endif
 func! s:plugin_mapping()
 	" These mapping commands are must be executed after loaded plugins in
 	" order to override plugin default mappings.
-	map J <Plug>(jplus-getchar-with-space)
+	map J <Plug>(jplus)
 	map ,sa <Plug>(operator-surround-append)
 	map ,sd <Plug>(operator-surround-delete)
 	map ,sc <Plug>(operator-surround-replace)
