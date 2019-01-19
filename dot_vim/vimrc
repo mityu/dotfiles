@@ -168,7 +168,7 @@ augroup END
  "}}}
 
 " Mapping
-" builtin
+" builtin{{{
 nnoremap ; :
 nnoremap : ;
 vnoremap ; :
@@ -198,8 +198,8 @@ nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
 nnoremap @@ @a
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap n nzzzo
-nnoremap N Nzzzo
+nnoremap n nzzzv
+nnoremap N Nzzzv
 nnoremap / /\v
 nnoremap ? ?\v
 nmap zf <Plug>(operator-vimrc-fold-zf)
@@ -292,7 +292,7 @@ if has('win32')
 	inoremap \ _
 	inoremap _ \
 endif
- 
+"}}}
 " Plugin{{{
 func! s:plugin_mapping()
 	" These mapping commands are must be executed after loaded plugins in
@@ -600,9 +600,9 @@ com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 
 " minpac
-com! -bar PackInit   source $MYVIMRC|call s:pack_init()
-com! -bar PackUpdate source $MYVIMRC|call s:pack_update()
-com! -bar PackClean  source $MYVIMRC|call s:pack_clean()
+com! -bar PackInit   call s:pack_init()
+com! -bar PackUpdate call s:pack_update()
+com! -bar PackClean  call s:pack_clean()
 func! s:pack_init() abort "{{{
 	try
 		packadd minpac
