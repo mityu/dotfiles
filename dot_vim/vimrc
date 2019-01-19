@@ -168,7 +168,7 @@ augroup END
  "}}}
 
 " Mapping
-" builtin{{{
+" builtin
 nnoremap ; :
 nnoremap : ;
 vnoremap ; :
@@ -202,6 +202,11 @@ nnoremap n nzzzo
 nnoremap N Nzzzo
 nnoremap / /\v
 nnoremap ? ?\v
+nmap zf <Plug>(operator-vimrc-fold-zf)
+nmap zF <Plug>(operator-vimrc-fold-zF)
+nmap zd <Plug>(operator-vimrc-fold-zd)
+nmap zD <Plug>(operator-vimrc-fold-zD)
+nmap zE <Plug>(operator-vimrc-fold-zE)
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -210,6 +215,11 @@ inoremap <C-@> <C-x>
 vnoremap <C-e> $
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
+vmap zf <Plug>(operator-vimrc-fold-zf)
+vmap zF <Plug>(operator-vimrc-fold-zF)
+vmap zd <Plug>(operator-vimrc-fold-zd)
+vmap zD <Plug>(operator-vimrc-fold-zD)
+vmap zE <Plug>(operator-vimrc-fold-zE)
 
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
@@ -224,8 +234,54 @@ endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
+func! s:map_fold_cmd(keys)
+	let commentstring_save = &l:commentstring
+	let &l:commentstring = ' ' . &l:commentstring
+	try
+		exec 'normal!' a:keys
+	catch " Usaully this :catch gets E490, 'Folding not found.'
+		echohl Error
+		echom v:exception
+		echohl None
+	endtry
+	let &l:commentstring = commentstring_save
+endfunc
+func! s:map_range_fold_cmd(motion_wizeness,keys)
+	let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
+	call s:map_fold_cmd(printf('`[%s`]%s',v_cmd,a:keys))
+endfunc
+
+func! s:map_define_operator()
+	let foldmotions_with_range = 'fF'
+	let foldmotions_standalone = 'dDE'
+	let sid = s:SID()
+	for keys in split(foldmotions_with_range . foldmotions_standalone,'\zs')
+		let keys = 'z' . keys
+		let func = [
+					\ printf('func! %smap_fold_%s(motion_wise)',sid,keys),
+					\ printf('	call s:map_range_fold_cmd(a:motion_wise,"%s")',keys),
+					\ 'endfunc'
+					\]
+		exec join(func,"\n")
+		call operator#user#define(
+					\ 'vimrc-fold-' . keys,
+					\ sid . 'map_fold_' . keys)
+	endfor
+
+	" Override for normal mode; A range isn't need for following commands.
+	let map_cmd = join(['nnoremap',
+				\ '<silent>',
+				\ '<Plug>(operator-vimrc-fold-%s)',
+				\ ':<C-u>call <SID>map_fold_cmd("%s")<CR>'],' ')
+	for keys in split(foldmotions_standalone,'\zs')
+		let keys = 'z' . keys
+		exec printf(map_cmd,keys,keys)
+	endfor
+endfunc
+
 augroup vimrc_mapping
 	au CmdWinEnter * nnoremap <buffer> <CR> <CR>
+	au User vimrc_initialize call s:map_define_operator()
 augroup END
 " augroup vimrc_mapping
 " 	au Filetype help nnoremap <silent> <buffer> q :<C-u>q<CR>
@@ -236,7 +292,7 @@ if has('win32')
 	inoremap \ _
 	inoremap _ \
 endif
- "}}}
+ 
 " Plugin{{{
 func! s:plugin_mapping()
 	" These mapping commands are must be executed after loaded plugins in
