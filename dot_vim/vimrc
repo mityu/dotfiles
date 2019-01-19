@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Jan-2019.
+" Last Change: 19-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -158,7 +158,7 @@ if executable('ag')
 endif
 
 augroup vimrc_filetype
-	au FileType * let &l:commentstring=' ' . &l:commentstring
+	" au FileType * let &l:commentstring=' ' . &l:commentstring
 	au FileType c,cpp setl foldmethod=indent
 	au BufRead .envrc set filetype=sh
 augroup END
@@ -198,8 +198,8 @@ nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
 nnoremap @@ @a
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap n nzz
-nnoremap N Nzz
+nnoremap n nzzzo
+nnoremap N Nzzzo
 nnoremap / /\v
 nnoremap ? ?\v
 
