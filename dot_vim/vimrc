@@ -249,6 +249,22 @@ endfunc
 func! s:map_range_fold_cmd(motion_wizeness,keys)
 	let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
 	call s:map_fold_cmd(printf('`[%s`]%s',v_cmd,a:keys))
+
+	" Remove spaces in beginning of the line which are inserted when the line was
+	" an empty line.
+	if &foldmethod ==# 'marker'
+		let marker_only_pat = '\m^\s\+%s'
+		let marker_pair = ["'[","']"]
+		let foldmarker_pair = split(&l:foldmarker,',')
+		for index in range(0,len(foldmarker_pair)-1)
+			let marker = marker_pair[index]
+			let foldmarker = printf(&l:commentstring,foldmarker_pair[index])
+			let lnum = getpos(marker)[1]
+			if getline(lnum) =~# printf(marker_only_pat,foldmarker)
+				call setline(lnum, foldmarker)
+			endif
+		endfor
+	endif
 endfunc
 
 func! s:map_define_operator()
