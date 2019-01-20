@@ -54,6 +54,9 @@ func! vimrc#mru#onReadFile() abort "{{{
 			return
 		endif
 	endfor
+	if file_name ==# g:mru_history_file
+		return
+	endif
 	call s:load_history()
 	let index = index(s:mru.history_all,file_name)
 	if index != -1 | call remove(s:mru.history_all,index) | endif
