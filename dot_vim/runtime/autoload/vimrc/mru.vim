@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 07-Jan-2019.
+"Last Change: 20-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -125,6 +125,20 @@ func! s:hilt_regpat(user_input) abort "{{{
 endfunc "}}}
 func! s:hilt_selected(selected_item) abort "{{{
 	execute 'edit' fnameescape(a:selected_item)
+endfunc "}}}
+
+" Editing history
+func! vimrc#mru#edit_history_start(...) abort "{{{
+	if !s:is_available() | return | endif
+
+	let open_cmd = get(a:000,0,'split')
+	try
+		exec open_cmd fnameescape(g:mru_history_file)
+	catch
+		call s:notify.error(v:exception)
+		return
+	endtry
+	setlocal nobuflisted noswapfile noundofile
 endfunc "}}}
 
 if !exists('s:is_available')
