@@ -24,7 +24,7 @@ let s:did_initialize_variables = v:true
 let s:notify = {}
 func! s:notify.notify(msg,hl_group,cmd) abort "{{{
 	execute 'echohl' a:hl_group
-	execute a:cmd '[mru]' a:msg
+	execute a:cmd '"[mru]"' a:msg
 	echohl None
 endfunc "}}}
 func! s:notify.error(msg) abort "{{{
