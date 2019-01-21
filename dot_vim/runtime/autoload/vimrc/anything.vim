@@ -1,13 +1,14 @@
 "Plugin Name: anything.vim
 "Author: mityu
-"Last Change: 07-Jan-2019.
+"Last Change: 21-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
 
 func! vimrc#anything#start(item_list,callback) abort "{{{
+	let s:item_all = copy(a:item_list)
 	let hilt = copy(s:hilt)
-	let hilt.exit = a:callback
+	let hilt.selected = a:callback
 	call vimrc#gram#launch(hilt)
 endfunc "}}}
 func! s:hilt_filter(user_input) abort "{{{
@@ -36,7 +37,7 @@ endfunc "}}}
 if !exists('s:did_initialize_variables')
 	call s:initialize_variables()
 	let s:hilt = {
-				\ 'name' : 'buffers',
+				\ 'name' : 'anything',
 				\ 'filter' : function('s:hilt_filter'),
 				\ 'regpat' : function('s:hilt_regpat'),
 				\ 'exit' : function('s:initialize_variables')
