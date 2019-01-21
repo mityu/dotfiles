@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 19-Jan-2019.
+" Last Change: 21-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -528,8 +528,11 @@ com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
 com! -bar Scratch new|Draft
 
+func! Execute_list(com) abort
+	return split(execute(a:com),"\n")
+endfunc
 func! Filter(pat,com) abort "{{{
-	let output = split(execute(a:com),"\n")
+	let output = Execute_list(a:com)
 	call filter(output,'v:val=~?a:pat')
 	return output
 endfunc "}}}
