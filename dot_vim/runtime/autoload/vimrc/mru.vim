@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 20-Jan-2019.
+"Last Change: 21-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -24,7 +24,7 @@ let s:did_initialize_variables = v:true
 let s:notify = {}
 func! s:notify.notify(msg,hl_group,cmd) abort "{{{
 	execute 'echohl' a:hl_group
-	execute a:cmd '"[mru]"' a:msg
+	execute a:cmd string('[mru] ' . a:msg)
 	echohl None
 endfunc "}}}
 func! s:notify.error(msg) abort "{{{
