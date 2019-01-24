@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 21-Jan-2019.
+"Last Change: 24-Jan-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -236,7 +236,7 @@ func! s:gram_define_mapping() abort "{{{
 				\ ['exit','gram_exit()'],
 				\]
 	call map(map,{key,val -> 
-				\'nnoremap <silent> <Plug>(gram-' . val[0] . ') ' .
+				\'nnoremap <silent><buffer> <Plug>(gram-' . val[0] . ') ' .
 				\':<C-u>call <SID>' . val[1] . '<CR>'})
 	execute join(map,"\n")
 endfunc "}}}
