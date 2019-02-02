@@ -536,7 +536,9 @@ func! s:history_register(path) abort "{{{
 	call insert(history,a:path)
 endfunc "}}}
 func! s:history_start_select() abort "{{{
-	let s:select_history.item_all = s:win_get_reference_of_current_items().history
+	let items = s:win_get_reference_of_current_items()
+	let s:select_history.item_all = items.history
+	let s:select_history.alter_bufnr_save = items.alter_bufnr
 	let s:select_history.user_input_save = ''
 	let s:select_history.regpat_save = ''
 	call vimrc#gram#launch(s:history_hilt)
@@ -563,12 +565,17 @@ func! s:history_hilt_selected(selected_item) abort "{{{
 	let items.current_directory = a:selected_item
 	call s:browse_fresh_display()
 endfunc "}}}
+func! s:history_hilt_exit() abort "{{{
+	let items = s:win_get_reference_of_current_items()
+	let items.alter_bufnr = s:select_history.alter_bufnr_save
+endfunc "}}}
 if !exists('s:history_hilt')
 	let s:history_hilt = {
 				\ 'name': 'filore-history',
 				\ 'filter': function('s:history_hilt_filter'),
 				\ 'regpat': function('s:history_hilt_regpat'),
-				\ 'selected': function('s:history_hilt_selected')
+				\ 'selected': function('s:history_hilt_selected'),
+				\ 'exit': function('s:history_hilt_exit')
 				\}
 endif
 if !exists('s:select_history')
@@ -577,6 +584,7 @@ if !exists('s:select_history')
 	let s:select_history.item_filtered = []
 	let s:select_history.user_input_save = ''
 	let s:select_history.regpat_save = ''
+	let s:select_history.alter_bufnr_save = s:NULL
 endif
 
 let &cpo = s:cpo_save
