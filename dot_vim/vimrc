@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 21-Jan-2019.
+" Last Change: 29-Jan-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -157,6 +157,9 @@ if executable('ag')
 	let &grepformat='%f:%l:%c:%m'
 endif
 
+augroup vimrc_syntax
+	au User vimrc_initialize syntax on
+augroup END
 augroup vimrc_filetype
 	" au FileType * let &l:commentstring=' ' . &l:commentstring
 	au FileType c,cpp setl foldmethod=indent
@@ -352,12 +355,30 @@ func! s:gram_mapping() abort
 	call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
 	execute join(map,"\n")
 endfunc
+func! s:filore_mapping() abort
+	let map = [
+				\ ['q','exit'],
+				\ ['o','toggle-directory-folding'],
+				\ ['l','enter-directory'],
+				\ ['h','leave-directory'],
+				\ ['.','toggle-show-hidden-files'],
+				\ ['k','loop-cursor-up'],
+				\ ['j','loop-cursor-down'],
+				\ ['<CR>','open-file'],
+				\ ['H', 'start-history'],
+				\]
+	call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
+	execute join(map,"\n")
+endfunc
 
 augroup vimrc_plugin_settings
 	au User vimrc_initialize call s:plugin_mapping()
 augroup END
 augroup vimrc_gram
 	au User gramOpen call s:gram_mapping()
+augroup END
+augroup vimrc_filore
+	au FileType filore call s:filore_mapping()
 augroup END
 "}}}
 " Loop {{{
@@ -461,6 +482,7 @@ call add(s:_map,['nnoremap','','sv','source $MYVIMRC'])
 call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
 call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
+call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
 call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
 execute join(map(s:_map,{->join([
 			\  v:val[0],
@@ -511,6 +533,9 @@ if has('vim_starting') | EnableShiftTenKey | endif
 
 " Abbreviates
 "{{{
+iabbrev todo: TODO:
+iabbrev fixme: FIXME:
+iabbrev note: NOTE:
 cabbrev gina Gina
 cabbrev gista Gista
 "}}}
@@ -683,6 +708,7 @@ func! s:pack_register() abort "{{{
 	"call minpac#add('lambdalisue/fila.vim')
 	"call minpac#add('thinca/vim-ft-help_fold')
 	call minpac#add('machakann/vim-Verdin')
+	call minpac#add('rbtnn/vim-readingvimrc')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -729,7 +755,7 @@ augroup END
  "}}}
 " w0rp/ale{{{
 let g:ale_lint_on_save = 1
-let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_text_changed = 'normal'
 let g:ale_lint_on_insert_leave = 1
 let g:ale_lint_on_enter = 1
 let g:ale_set_loclist = 0
