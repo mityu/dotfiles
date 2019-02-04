@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Jan-2019.
+" Last Change: 03-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -195,10 +195,8 @@ nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
-nnoremap gh gT
-nnoremap gl gt
 nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
-nnoremap @@ @a
+nnoremap <expr> @@ (reg_recording()==#''?'@a':'q')
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap n nzzzv
@@ -230,6 +228,18 @@ cnoremap <C-p> <Up>
 cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
+
+let s:Omap = {range, lhs, rhs ->
+			\[execute(printf('onoremap %s%s %s%s', range, lhs, range, rhs)),
+			\execute(printf('vnoremap %s%s %s%s', range, lhs, range, rhs))]}
+let s:EnhancedOmap = {lhs, rhs ->
+			\ [s:Omap('a',lhs,rhs),s:Omap('i',lhs,rhs)]
+			\}
+call s:EnhancedOmap('2','"')
+call s:EnhancedOmap('7',"'")
+call s:EnhancedOmap('8','(')
+call s:EnhancedOmap(',','<')
+unlet s:Omap s:EnhancedOmap
 
 for [s:lhs,s:rhs] in [[';',':'],[':',';'],['<ESC>','N']]
 	execute printf('tnoremap <C-w>%s <C-w>%s',s:lhs,s:rhs)
@@ -319,30 +329,28 @@ func! s:plugin_mapping()
 	map J <Plug>(jplus)
 	map ,sa <Plug>(operator-surround-append)
 	map ,sd <Plug>(operator-surround-delete)
-	map ,sc <Plug>(operator-surround-replace)
+	map ,sr <Plug>(operator-surround-replace)
 	map ,r  <Plug>(operator-replace)
 	map ,sy <Plug>(operator-swap-marking)
 	map ,sp <Plug>(operator-swap)
 	map ,ct <Plug>(operator-toggle-comment-wrap)
 
-	omap ab <Plug>(textobj-multiblock-a)
-	vmap ab <Plug>(textobj-multiblock-a)
-	omap ib <Plug>(textobj-multiblock-i)
-	vmap ib <Plug>(textobj-multiblock-i)
-	omap ad <Plug>(textobj-multitextobj-a)
-	vmap ad <Plug>(textobj-multitextobj-a)
-	omap id <Plug>(textobj-multitextobj-i)
-	vmap id <Plug>(textobj-multitextobj-i)
+	com! -nargs=+ OVmap omap <args>|vmap <args>
+	OVmap ab <Plug>(textobj-multiblock-a)
+	OVmap ib <Plug>(textobj-multiblock-i)
+	OVmap ad <Plug>(textobj-multitextobj-a)
+	OVmap id <Plug>(textobj-multitextobj-i)
+	OVmap aF <Plug>(textobj-between-a)
+	OVmap iF <Plug>(textobj-between-i)
+	OVmap if <Plug>(textobj-function-i)
+	OVmap af <Plug>(textobj-function-a)
+	OVmap ii <Plug>(textobj-indent-i)
+	OVmap iI <Plug>(textobj-indent-same-i)
+	OVmap ai <Plug>(textobj-indent-a)
+	OVmap aI <Plug>(textobj-indent-same-a)
 	vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
 	vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
-	omap aF <Plug>(textobj-between-a)
-	vmap aF <Plug>(textobj-between-a)
-	omap iF <Plug>(textobj-between-i)
-	vmap iF <Plug>(textobj-between-i)
-	omap if <Plug>(textobj-function-i)
-	vmap if <Plug>(textobj-function-i)
-	omap af <Plug>(textobj-function-a)
-	vmap af <Plug>(textobj-function-a)
+	delcom OVmap
 endfunc
 func! s:gram_mapping() abort
 	let map = [
@@ -390,7 +398,7 @@ func! s:_loop_define(config) abort "{{{
 	for key in ['prefix','main','do']
 		let plug_map[key]=printf("%s(%s)",prefix,key)
 	endfor
-	exec printf('%snoremap <silent> %s :call <SID>map_when_leave_loop()<CR>',
+	exec printf('%smap <silent><expr> %s nr2char(getchar(0))',
 				\mode,plug_map.prefix)
 	for [lhs,rhs] in a:config.map
 		let com = []
@@ -415,11 +423,6 @@ func! s:_simple_loop_define(config) abort "{{{
 	let config.map = map(split(config.follow_key,'\zs'),'[v:val,config.enter_with . v:val]')
 	call s:_loop_define(config)
 endfunc "}}}
-func! s:map_when_leave_loop() abort "{{{
-	if getchar(1)!=0
-		call feedkeys(nr2char(getchar()))
-	endif
-endfunc "}}}
 "Window management
 call s:_simple_loop_define({
 			\'id': 'WinChange',
@@ -437,11 +440,11 @@ call s:_simple_loop_define({
 			\'follow_key': '<>-+'
 			\})
 " Sometimes gh starts selection mode.
-" call s:_loop_define({
-" 			\'id': 'TabChange',
-" 			\'enter_with': 'g',
-" 			\'map': [['h','gT'],['l','gt']]
-" 			\})
+ call s:_loop_define({
+ 			\'id': 'TabChange',
+ 			\'enter_with': 'g',
+ 			\'map': [['h','gT'],['l','gt']]
+ 			\})
 call s:_loop_define({
 			\'id': 'TabMove',
 			\'enter_with': 'g',
@@ -764,7 +767,7 @@ let g:ale_completion_enabled = 1
 let g:ale_open_list = 0
 let g:ale_keep_list_window_open = 0
 let g:ale_linters = {}
-let g:ale_linters.cpp = ['gcc']
+let g:ale_linters.cpp = ['gcc','clangd']
 "}}}
 " mattn/sonictemplate{{{
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
@@ -783,26 +786,24 @@ let g:textobj_multiblock_blocks = [
 " }}}
 " textobj-multitextobj{{{
 let g:textobj_multitextobj_textobjects_i = [
-		\ "i'",
-		\ 'i"',
+		\ { 'textobj': "i'", 'is_cursor_in': 1},
+		\ { 'textobj': 'i"', 'is_cursor_in': 1},
 		\ 'i(',
 		\ 'i[',
 		\ 'i{',
 		\ 'i<',
 		\ '<Plug>(textobj-indent-i)',
 		\ '<Plug>(textobj-function-i)',
-		\ 'it',
 		\]
 let g:textobj_multitextobj_textobjects_a = [
-		\ "a'",
-		\ 'a"',
+		\ { 'textobj': "a'", 'is_cursor_in': 1},
+		\ { 'textobj': 'a"', 'is_cursor_in': 1},
 		\ 'a(',
 		\ 'a[',
 		\ 'a{',
 		\ 'a<',
 		\ '<Plug>(textobj-indent-a)',
 		\ '<Plug>(textobj-function-a)',
-		\ 'at',
 		\]
 "}}}
 
