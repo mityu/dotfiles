@@ -1,12 +1,12 @@
 " Author: mityu
-" Last Change: 03-Feb-2019.
+" Last Change: 05-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
 "  - Augroup name :
 "     `augroup vimrc_{kind}`
 "  - Mapping prefix :
-"     `<Plug>(vimrc-{kind})`
+"     `<Plug>(<SID>-{kind})`
 "  - Global function :
 "     Use `Vimrc` as its prefix.
 
@@ -190,7 +190,7 @@ nnoremap k gk
 nnoremap <CR> o<ESC>
 nnoremap <S-CR> O<ESC>
 nnoremap Y y$
-nnoremap <ESC><ESC> :<C-u>nohls<CR>
+nnoremap <C-h> :<C-u>nohls<CR>
 nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
@@ -351,6 +351,11 @@ func! s:plugin_mapping()
 	vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
 	vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
 	delcom OVmap
+
+	nnoremap <Plug>(<SID>-open-folding) zv
+	nmap gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
+	nmap <C-p> <Plug>(lsp-previous-error)
+	nmap <C-n> <Plug>(lsp-next-error)
 endfunc
 func! s:gram_mapping() abort
 	let map = [
@@ -538,6 +543,7 @@ if has('vim_starting') | EnableShiftTenKey | endif
 "{{{
 iabbrev todo: TODO:
 iabbrev fixme: FIXME:
+iabbrev xxx: XXX:
 iabbrev note: NOTE:
 cabbrev gina Gina
 cabbrev gista Gista
@@ -555,10 +561,12 @@ com! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
 com! -bar Scratch new|Draft
+com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
+com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
 
-func! Execute_list(com) abort
+func! Execute_list(com) abort "{{{
 	return split(execute(a:com),"\n")
-endfunc
+endfunc "}}}
 func! Filter(pat,com) abort "{{{
 	let output = Execute_list(a:com)
 	call filter(output,'v:val=~?a:pat')
@@ -585,6 +593,15 @@ func! s:undraft() abort "{{{
 	if !exists('b:vimrc_draft_savedata') | return | endif
 	execute join(values(map(copy(b:vimrc_draft_savedata),
 				\'printf("let &l:%s=%s",v:key,string(v:val))')),"|")
+endfunc "}}}
+func! s:list_up_tasks(args) abort "{{{
+	let target = '%'
+	if a:args ==# 'rf'
+		let target = '**/*.' . expand('%:e')
+	elseif a:args !=# ''
+		let target = a:args
+	endif
+	execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunc "}}}
 
 " Shell
@@ -709,9 +726,14 @@ func! s:pack_register() abort "{{{
 	call minpac#add('lambdalisue/gina.vim')
 	call minpac#add('lambdalisue/vim-gista')
 	"call minpac#add('lambdalisue/fila.vim')
-	"call minpac#add('thinca/vim-ft-help_fold')
+	call minpac#add('thinca/vim-ft-help_fold')
 	call minpac#add('machakann/vim-Verdin')
 	call minpac#add('rbtnn/vim-readingvimrc')
+	call minpac#add('prabirshrestha/async.vim')
+	call minpac#add('prabirshrestha/asyncomplete.vim')
+	call minpac#add('prabirshrestha/vim-lsp')
+	call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
+	call minpac#add('yami-beta/asyncomplete-omni.vim')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -763,11 +785,55 @@ let g:ale_lint_on_insert_leave = 1
 let g:ale_lint_on_enter = 1
 let g:ale_set_loclist = 0
 let g:ale_set_quickfix = 1
-let g:ale_completion_enabled = 1
 let g:ale_open_list = 0
 let g:ale_keep_list_window_open = 0
-let g:ale_linters = {}
-let g:ale_linters.cpp = ['gcc','clangd']
+" let g:ale_linters = {}
+" let g:ale_linters.cpp = ['clangd']
+" let g:ale_linters.c = ['gcc','clangd']
+let g:ale_completion_enabled = 0
+" let g:ale_completion_delay = 1
+
+func! s:ale_control() abort "{{{
+	if &l:filetype =~# '\<vim\>'
+		ALEEnable
+	else
+		ALEDisable
+	endif
+endfunc "}}}
+augroup vimrc_ale
+	au WinEnter * call s:ale_control()
+	au FileType * call s:ale_control()
+augroup END
+
+"}}}
+" ayncomplete.vim{{{
+let g:asyncomplete_auto_popup = 1
+let g:asyncomplete_smart_completion = 0
+"}}}
+" vim-lsp{{{
+if executable('clangd')
+	augroup vimrc_lsp_cpp
+		au User lsp_setup call lsp#register_server({
+					\ 'name': 'clangd',
+					\ 'cmd': {server_info->['clangd']},
+					\ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
+					\ })
+	augroup END
+endif
+let g:lsp_signs_enabled = 1
+let g:lsp_signs_error = 1
+let g:lsp_diagnostics_enabled = 1
+let g:lsp_diagnostics_echo_cursor = 1
+"}}}
+" ayncomplete-omni.vim{{{
+augroup vimrc_asyncomplete_omni
+	au User asyncomplete_setup call asyncomplete#register_source({
+		\ 'name': 'omni',
+		\ 'whitelist': ['*'],
+		\ 'blacklist': ['c', 'cpp', 'html'],
+		\ 'completor': function('asyncomplete#sources#omni#completor')
+		\  })
+augroup END
 "}}}
 " mattn/sonictemplate{{{
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
