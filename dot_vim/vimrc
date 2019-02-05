@@ -727,7 +727,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('lambdalisue/vim-gista')
 	"call minpac#add('lambdalisue/fila.vim')
 	call minpac#add('thinca/vim-ft-help_fold')
-	call minpac#add('machakann/vim-Verdin')
+	"call minpac#add('machakann/vim-Verdin')
 	call minpac#add('rbtnn/vim-readingvimrc')
 	call minpac#add('prabirshrestha/async.vim')
 	call minpac#add('prabirshrestha/asyncomplete.vim')
