@@ -733,7 +733,8 @@ func! s:pack_register() abort "{{{
 	call minpac#add('prabirshrestha/asyncomplete.vim')
 	call minpac#add('prabirshrestha/vim-lsp')
 	call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-	call minpac#add('yami-beta/asyncomplete-omni.vim')
+	call minpac#add('prabirshrestha/asyncomplete-necovim.vim')
+	call minpac#add('Shougo/neco-vim')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -826,16 +827,25 @@ let g:lsp_diagnostics_enabled = 1
 let g:lsp_diagnostics_echo_cursor = 1
 "}}}
 " ayncomplete-omni.vim{{{
-augroup vimrc_asyncomplete_omni
-	au User asyncomplete_setup call asyncomplete#register_source({
-		\ 'name': 'omni',
-		\ 'whitelist': ['*'],
-		\ 'blacklist': ['c', 'cpp', 'html'],
-		\ 'completor': function('asyncomplete#sources#omni#completor')
-		\  })
-augroup END
+" augroup vimrc_asyncomplete_omni
+" 	au User asyncomplete_setup call asyncomplete#register_source({
+" 		\ 'name': 'omni',
+" 		\ 'whitelist': ['*'],
+" 		\ 'blacklist': ['c', 'cpp', 'html'],
+" 		\ 'completor': function('asyncomplete#sources#omni#completor')
+" 		\  })
+" augroup END
 "}}}
+" asyncomplete-necovim{{{
+augroup vimrc_asyncomplete_necovim
+	au User asyncomplete_setup call asyncomplete#register_source({
+				\ 'name': 'neco-vim',
+				\ 'whitelist': ['vim'],
+				\ 'completor': function('asyncomplete#sources#necovim#completor'),
+				\})
+augroup END "}}}
 " mattn/sonictemplate{{{
+" I don't allow sonictemplate to define default mappings.
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
 let g:sonictemplate_intelligent_key='<Plug>(nop-sonictemplate-intelligent)'
 let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
