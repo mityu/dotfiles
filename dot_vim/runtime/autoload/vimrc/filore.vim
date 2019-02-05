@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 02-Feb-2019.
+"Last Change: 05-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -116,7 +116,7 @@ endfunc "}}}
 " Main
 func! vimrc#filore#start() abort "{{{
 	let current_directory = getcwd()
-	if expand('%') !=# '' && &buftype !=# '' && &buflisted
+	if expand('%') !=# '' && &buftype ==# '' && &buflisted
 		let current_directory = fnamemodify(expand('%'),':p:h')
 	endif
 	call s:win_new(current_directory)
