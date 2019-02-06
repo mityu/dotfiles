@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 05-Feb-2019.
+"Last Change: 06-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -114,10 +114,14 @@ func! s:escape_regpat(pat) abort "{{{
 endfunc "}}}
 
 " Main
-func! vimrc#filore#start() abort "{{{
-	let current_directory = getcwd()
-	if expand('%') !=# '' && &buftype ==# '' && &buflisted
+func! vimrc#filore#start(...) abort "{{{
+	let current_directory = get(a:000, 0, '')
+	if current_directory !=# '' && isdirectory(current_directory)
+		" Do nothing.
+	elseif expand('%') !=# '' && &buftype ==# '' && &buflisted
 		let current_directory = fnamemodify(expand('%'),':p:h')
+	else
+		let current_directory = getcwd();
 	endif
 	call s:win_new(current_directory)
 endfunc "}}}
@@ -462,6 +466,7 @@ func! s:browse_restore_cursor_position_with_cache() abort "{{{
 	call cursor(items.cursorpos[items.current_directory], 0)
 endfunc "}}}
 func! s:browse_enter_directory_under_cursor() abort "{{{
+	call s:browse_store_cursor_position_in_cache()
 	let items = s:win_get_reference_of_current_items()
 	let file_info = items.file_list[s:browse_get_index_from_lnum(line('.'))]
 
