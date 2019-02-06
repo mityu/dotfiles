@@ -121,7 +121,7 @@ func! vimrc#filore#start(...) abort "{{{
 	elseif expand('%') !=# '' && &buftype ==# '' && &buflisted
 		let current_directory = fnamemodify(expand('%'),':p:h')
 	else
-		let current_directory = getcwd();
+		let current_directory = getcwd()
 	endif
 	call s:win_new(current_directory)
 endfunc "}}}

@@ -1,6 +1,6 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 26-Dec-2018.
+"Last Change: 06-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -93,7 +93,7 @@ func! vimrc#shcmd#rm(has_bang,...) abort "{{{
 endfunc "}}}
 func! s:delete_files(files) abort "{{{
 	for file in a:files
-		echo printf('Delete %s ? [y/n]')
+		echo printf('Delete %s ? [y/n]', file)
 		if nr2char(getchar()) !~? 'y'
 			echo 'Cancel.'
 			continue
@@ -101,7 +101,7 @@ func! s:delete_files(files) abort "{{{
 		if delete(file) == 0 " Succesfully deleted.
 			let file = escape(file,'^[]\/*.+?$:')
 			if bufexists(bufname(file))
-				exec 'bwipeout' . bufname(file)
+				exec 'bwipeout' bufnr(file)
 			endif
 		else
 			call s:warning_msg(printf('Failed to delete %s', file))
