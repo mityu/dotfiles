@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 24-Jan-2019.
+"Last Change: 09-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -134,7 +134,7 @@ func! vimrc#gram#launch(hilt) abort "{{{
 		call s:win_foreground()
 		return
 	endif
-	for require in ['filter','regpat','selected']
+	for require in ['filter','regpat','selected','name']
 		if !has_key(a:hilt,require)
 			call s:notify.error('This hilt does not have required element: ' . require)
 			return
@@ -148,8 +148,20 @@ func! vimrc#gram#launch(hilt) abort "{{{
 	call s:win_foreground()
 	call s:gram_define_mapping()
 	call s:gram_initialize_coloring()
+
+	" Define dummy autocommands in order to avoid "No matching autocommands"
+	" error.
+	augroup gram-open-dummy
+		au!
+		au User gramOpen "Do nothing.
+		execute 'au User' s:active_hilt . 'Open "Do nothing'
+	augroup END
 	doautocmd User gramOpen
 	execute 'doautocmd User' s:active_hilt . 'Open'
+	augroup gram-open-dummy
+		au!
+	augroup END
+
 	call s:gram_flush_display()
 	call cursor(2,0)
 endfunc "}}}
