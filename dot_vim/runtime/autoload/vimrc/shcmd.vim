@@ -1,6 +1,6 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 06-Feb-2019.
+"Last Change: 09-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -54,7 +54,7 @@ func! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
 endfunc "}}}
 func! vimrc#shcmd#touch(...) abort "{{{
 	for fname in a:000
-		if getftype(fname) != ''
+		if getftype(fname) !=# ''
 			call s:warning_msg(printf('File %s exists. Overwrite? [y/n]',fname))
 			if nr2char(getchar()) !~? 'y'
 				continue
@@ -67,14 +67,19 @@ func! vimrc#shcmd#cpfile(...) abort "{{{
 	" I won't copy directories.
 	let args = s:expand_all(copy(a:000))
 	if a:0 == 1
+		let copy_from = ''
 	else
 		let copy_from = remove(args,0)
 	endif
-	let file_contents = readfile(copy_from)
+	if copy_from ==# ''
+		let file_contents = getline(0,'$')
+	else
+		let file_contents = readfile(copy_from)
+	endif
 	for copy_to in args
 		if getftype(copy_to) !=# ''
 			" File exists.
-			call s:warning_msg(printf('File %s exists. Overwrite? [y/n]',fname))
+			call s:warning_msg(printf('File %s exists. Overwrite? [y/n]',copy_to))
 			if nr2char(getchar()) !~? 'y'
 				continue
 			endif
