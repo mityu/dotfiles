@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 21-Jan-2019.
+"Last Change: 09-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -134,7 +134,7 @@ endfunc "}}}
 func! vimrc#mru#edit_history_start(...) abort "{{{
 	if !s:is_available() | return | endif
 
-	let open_cmd = get(a:000,0,'split')
+	let open_cmd = get(a:000,0,'tabedit')
 	try
 		exec open_cmd fnameescape(g:mru_history_file)
 	catch
