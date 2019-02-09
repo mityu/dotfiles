@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 06-Feb-2019.
+"Last Change: 09-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -80,7 +80,7 @@ func! s:extend_pos(list,item,...) "{{{
 	"   changes to the entitiy of reference.
 	" - 'index' is used same as 'insert()'
 	let index = exists('a:1') ? a:1 : 0
-	let index = s:mod(index,len(a:list))
+	if index < 0 | let index = s:mod(index,len(a:list)) | endif
 	let list = deepcopy(a:list)
 	call remove(a:list, 0, -1) " Remove everything to prepare for changes.
 	if index == 0
@@ -435,7 +435,7 @@ func! s:browse_fold_directory_under_cursor() abort "{{{
 		endif
 		let child_end += 1
 	endwhile
-	if child_start == child_end && file_list[child_start].depth < child_depth
+	if (child_start - 1) == child_end
 		" The parent directory is empty.
 		return
 	endif
