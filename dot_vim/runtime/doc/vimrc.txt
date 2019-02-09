@@ -1,4 +1,4 @@
-|vimrc.txt|	My vimrc reference.
+*vimrc.txt*	My vimrc reference.
 
 ==============================================================================
 CONTENTS					*vimrc-contents*
