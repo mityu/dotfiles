@@ -1,4 +1,4 @@
-"Last Change: 29-Apr-2018.
+"Last Change: 10-Feb-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -15,12 +15,15 @@ let s:palette={
 			\'black': [0,'black'],
 			\'white': [255,'white'],
 			\'yellow': [226,'yellow'],
+			\'darkred': [52,'#650000'],
 			\'red': [196,'red'],
 			\'tomato': [9,'tomato'],
 			\'orange': [214,'orange'],
 			\'vividorange': [208,'#ff7f00'],
 			\'dullorange': [214,'#ff9932'],
 			\'tenderorange': [214,'orange1'],
+			\'darkorange': [100,'#5c4709'],
+			\'depplydarkorange': [94,'#322705'],
 			\'tan': [214,'#ffa54f'],
 			\'cornsilk': [230,'cornsilk'],
 			\'gray': [238,'gray'],
@@ -30,7 +33,10 @@ let s:palette={
 			\'gold': [178,'gold'],
 			\'cyan': [14,'cyan'],
 			\'darkcyan': [67,'darkcyan'],
+			\'deeplydarkblue': [17,'#002a40'],
 			\'mediumspringgreen': [48,'mediumspringgreen'],
+			\'green': [28, '#006519'],
+			\'darkgreen': [28,'#00320c'],
 			\'purple': [129,'purple'],
 			\'violet': [207,'violet'],
 			\'lightsteelblue': [103,'lightsteelblue'],
@@ -59,11 +65,11 @@ func! s:hi(group,fg,bg,attr) "{{{
     if s:gui_running
         let fg=has_fg? 'guifg=' . s:palette[a:fg][1]: ''
         let bg=has_bg? 'guibg=' . s:palette[a:bg][1]: ''
-        let attr=has_attr? 'gui=' . a:attr: ''
+        let attr=has_attr? 'gui=' . a:attr : ''
     else
         let fg=has_fg? 'ctermfg=' . s:palette[a:fg][0]: ''
         let bg=has_bg? 'ctermbg=' . s:palette[a:bg][0]: ''
-        let attr=has_attr? 'cterm=' . a:attr: ''
+        let attr=has_attr? 'cterm=' . a:attr : ''
     endif
 	execute 'silent highlight' a:group fg bg attr
 endfunc "}}}
@@ -139,6 +145,11 @@ call s:hi('Pmenu','cornsilk','vividorange',0)
 call s:hi('PmenuSel','cornsilk','dullorange',0)
 call s:hi('PmenuSbar',0,'white',0)
 call s:hi('PmenuThumb',0,'gray',0)
+
+call s:hi('DiffAdd', 0, 'depplydarkorange', 0)
+call s:hi('DiffDelete', 'deeplydarkblue', 'deeplydarkblue', 0)
+call s:hi('DiffChange', 0, 'depplydarkorange', 0)
+call s:hi('DiffText', 0, 'darkorange', 0)
 
 call s:hi('cStatement','violet',0,0)
 
