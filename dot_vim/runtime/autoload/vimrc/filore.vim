@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 09-Feb-2019.
+"Last Change: 10-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -150,14 +150,6 @@ func! s:filore_loop_cursor(movement) abort "{{{
 	let law = line('$') - s:prompt_lines_count
 	let move_to = s:mod(move_to,law) + 1 + s:prompt_lines_count
 	call cursor(move_to,col('%'))
-endfunc "}}}
-func! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
-	if s:isdirectory(s:win_get_reference_of_current_items().file_list[
-				\ s:browse_get_index_from_lnum(line('.'))])
-		return a:on_directory
-	else
-		return a:on_file
-	endif
 endfunc "}}}
 
 " Window
@@ -591,6 +583,26 @@ if !exists('s:select_history')
 	let s:select_history.regpat_save = ''
 	let s:select_history.alter_bufnr_save = s:NULL
 endif
+
+" User utility
+func! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
+	if s:isdirectory(s:win_get_reference_of_current_items().file_list[
+				\ s:browse_get_index_from_lnum(line('.'))])
+		return a:on_directory
+	else
+		return a:on_file
+	endif
+endfunc "}}}
+func! vimrc#filore#get_file_path_under_cursor() abort "{{{
+	return vimrc#filore#get_file_path_of_line(line('.'))
+endfunc "}}}
+func! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
+	if a:lnum < (1 + s:prompt_lines_count) || a:lnum > line('$')
+		return ''
+	endif
+	return s:win_get_reference_of_current_items().file_list[
+				\ s:browse_get_index_from_lnum(a:lnum)].abs
+endfunc "}}}
 
 let &cpo = s:cpo_save
 unlet s:cpo_save
