@@ -23,11 +23,12 @@ let s:palette={
 			\'dullorange': [214,'#ff9932'],
 			\'tenderorange': [214,'orange1'],
 			\'darkorange': [100,'#5c4709'],
-			\'depplydarkorange': [94,'#322705'],
+			\'deeplydarkorange': [94,'#322705'],
 			\'tan': [214,'#ffa54f'],
 			\'cornsilk': [230,'cornsilk'],
 			\'gray': [238,'gray'],
 			\'lightgray': [240,'#555555'],
+			\'darkgray': [238, '#333333'],
 			\'blackgray': [234,'#1f1f1f'],
 			\'lightlightgray': [240,'#666666'],
 			\'gold': [178,'gold'],
@@ -142,13 +143,20 @@ call s:hi('MatchParen','NONE','purple',0)
 
 call s:hi('WileMenu',0,'yellow',0)
 call s:hi('Pmenu','cornsilk','vividorange',0)
-call s:hi('PmenuSel','cornsilk','dullorange',0)
+call s:hi('PmenuSel','cornsilk','tenderorange',0)
 call s:hi('PmenuSbar',0,'white',0)
 call s:hi('PmenuThumb',0,'gray',0)
 
-call s:hi('DiffAdd', 0, 'depplydarkorange', 0)
+" Experiment
+"call s:hi('Pmenu','cornsilk','darkorange',0)
+"call s:hi('PmenuSel','cornsilk','deeplydarkorange',0)
+"call s:hi('PmenuSbar',0,'darkgray',0)
+"call s:hi('PmenuThumb',0,'gray',0)
+
+
+call s:hi('DiffAdd', 0, 'deeplydarkorange', 0)
 call s:hi('DiffDelete', 'deeplydarkblue', 'deeplydarkblue', 0)
-call s:hi('DiffChange', 0, 'depplydarkorange', 0)
+call s:hi('DiffChange', 0, 'deeplydarkorange', 0)
 call s:hi('DiffText', 0, 'darkorange', 0)
 
 call s:hi('cStatement','violet',0,0)
