@@ -20,60 +20,61 @@ shcmd.vim			|shcmd.vim|
 ==============================================================================
 gram.vim							*gram.vim*
 	gram.vim provides a simple item-filtering interface.
-	The only feature is 'No customizable.'
+	The only feature is "No customizable."
 
 	Requirement:
 	 -|CmdlineChanged| autocommand
-	 - Builtin|setbufline()|,|appendbufline()|,and |deletebufline()| function
+	 - Builtin |setbufline()|, |appendbufline()|, and |deletebufline()| function
 	NOTE: These features are added in Vim 8.
 
 ------------------------------------------------------------------------------
 FUNCTIONS						*gram-functions*
 vimrc#gram#start({config})		*vimrc#gram#start()* *gram#start()*
 	Start using gram interface.
-	{config} is a |dict| and have following configurations and
+	{config} is a |dict| and has following configurations and
 	callback functions.  Callback functions can be |String| or |Funcref|.
 	NOTE: Callback functions are called via |call()|.
 
 	Required:
 	 - 'name' : (|String|)
-	 	 The name of source. |gram.vim| use this in prompt.
+	 	 The name of source. |gram.vim| use this in a prompt.
 	 - 'filter' : (callback)			*gram-callback-filter*
-	 	 Argument is User input (|String|).
-	 	 This function should return filtered candidates. If there isn't
-		any candidates, this function should return [] (empty list)
+	 	 The argument is user input (|String|).
+		 This function should return filtered candidates. If there
+		aren't any candidates, this function should return [] (an
+		empty list).
     		 |gram.vim| calls this function when user inputs text in
 		prompt.
     	 - 'regpat' : (callback)			*gram-callback-regpat*
-	 	 Argument is User input (|String|).
+	 	 The argument is user input (|String|).
 		 This function should return |regexp| of user input to
 		highlight matches in buffer.
-		 |gram.vim| DEFENETELY call this function after calling 'filter'
+		 |gram.vim| DEFINITELY call this function after calling 'filter'
 		callback. (See Also |gram-callback-order|.)
 	 - 'selected' : (callback)		*gram-callback-selected*
-	 	 Argument is selected item (|String|).
-		 |gram.vim| don't use returns of this function.
+	 	 The argument is selected item (|String|).
+		 |gram.vim| don't use return values of this function.
 		 |gram.vim| call this function when user select an item.
 
 	Optional:
 	 - 'exit' : (callback)				*gram-callback-exit*
 	 	 This function takes no arguments.
-		 This function is called when close |gram.vim|'s window.
+		 This function is called when closing |gram.vim|'s window.
 		 For example, you can use this callback to restore another
 		plugin's settings.
 
 	The calling order:				*gram-callback-order*
-	   # When user inputs in prompt:
+	   # When a user inputs in prompt:
 		1. 'filter'
 		2. 'regpat'
 
-	   # When user selects a item:
+	   # When a user selects an item:
 		1. 'selected'
 		2. 'exit'
 
 vimrc#gram#escape_regpat({pat})	*vimrc#gram#escape_regpat()* *gram#escape_regpat()*
-	This function escapes every charactor which has special meaning under
-	|'magic'| is set to on.
+	This function escapes every character which has special meaning under
+	|'magic'| is set on.
 
 vimrc#gram#glob2regpat({glob})	*vimrc#gram#glob2repat()* *gram#glob2regpat()*
 	This function converts a file pattern, as used by |glob()|, into a
@@ -84,12 +85,14 @@ vimrc#gram#glob2regpat({glob})	*vimrc#gram#glob2repat()* *gram#glob2regpat()*
 EVENTS								*gram-events*
 
 gramOpen							*gramOpen*
-	 After open gram window. 'gramOpen' is a pattern of |User| event.
-	 After You can use this event to set |gram.vim|-global settings.
+	 After opening the gram window. 'gramOpen' is a pattern of |User|
+	 event.
+	 You can use this event to set |gram.vim|-global settings.
 	 See Also: |gram-example|
+
 {source-name}Open
-	 After open gram window like |gramOpen|. '{source-name}Open' is also a
-	pattern of |User| event.
+	 After the open gram window like |gramOpen|. '{source-name}Open' is
+	 also a pattern of |User| event.
 	 Unlike |gramOpen|, you can use this event to set source-local
 	settings.
 
@@ -99,15 +102,15 @@ MAPPINGS						*gram-mappings*
 <Plug>(gram-exit)			*<Plug>(gram-exit)*
 	Stop using |gram.vim|.
 <Plug>(gram-loop-cursor-down)		*<Plug>(gram-loop-cursor-down)*
-	Move cursor down like |j|, but move to the top of items when cursor
-	reach to the end of items.
+	Move the cursor down like |j|, but move to the top of items on a buffer
+	when the cursor reachs the end of items.
 <Plug>(gram-loop-cursor-up)		*<Plug>(gram-loop-cursor-up)*
-	Move cursor up like |k|, but move to the end of items when cursor
-	reach to the top of items.
+	Move the cursor up like |k|, but move to the end of items on a buffer
+	when the cursor reachs the top of items.
 <Plug>(gram-select-item)		*<Plug>(gram-select-item)*
 	Select an item.
 <Plug>(gram-start-filtering)		*<Plug>(gram-strat-filtering)*
-	Start to filter items interactively by inputting text on prompt.
+	Start to filter items interactively by inputting text on a prompt.
 
 Default Mappings:					*gram-default-mapping*
 	|gram.vim| provide no default mappings.
@@ -137,7 +140,7 @@ mru.vim								*mru.vim*
 FUNCTIONS							*mru-functions*
 
 vimrc#mru#start()			*vimrc#mru#start()* *mru#start()*
-	Start to |gram.vim| interface to open a MRU file.
+	Start to use |gram.vim| interface to open a MRU file.
 
 				*vimrc#mru#delete_unexist_file_history()*
 					*mru#delete_unexist_file_history()*
@@ -145,12 +148,20 @@ vimrc#mru#delete_unexist_file_history()
 	Delete unexist files from MRU history.
 
 vimrc#mru#edit_history_start([{open-command}])
-	Start to edit MRU history in a buffer.
-	{open-command} is a command which is used to open MRU history file.
-	Type ':wq' to finish editing the file with saving changes.
+	Start to edit MRU history in a new buffer.
+	{open-command} is a command which is used to open the MRU history file.
+	Type ':wq<CR>' to finish editing the file with saving changes.
 
 ------------------------------------------------------------------------------
-VARIABLES						 *mru-variables*
+VARIABLES							*mru-variables*
+
+g:mru_history_file					*g:mru_history_file*
+	Type:    |String|
+	Default: (|mru.vim| DOES NOT provide default config)
+
+	You have to set available and writeable file path in this variable.
+	If this variable isn't set, this variable is empty or the file isn't
+	available, |mru.vim| becomes unavailable.
 
 g:mru_ignore_pattern					*g:mru_ignore_pattern*
 	Type:    |List|
@@ -191,31 +202,31 @@ shcmd.vim						*shcmd.vim*
 COMMANDS						*shcmd-commands*
 
 :Ls[!]	[{directory}]					*shcmd-Ls*
-	 Show a directory's contents like 'ls' command in shell.
+	 Show a directory's contents like 'ls' command in shells.
 	 If '!' is provided, this shows hidden files. In other words, '!' is
-	 to this what '-a' option is to 'ls' command in shell.
+	 to this what '-a' option is to 'ls' command in shells.
 	 If {directory} provided, this shows the directory's contents;
 	 Otherwise, this shows current directory's contents.
 
 :Mkdir[!] {directories}					*shcmd-Mkdir*
-	 Make directories like 'mkdir' command in shell.
+	 Make directories like 'mkdir' command in shells.
 	 If '!' is provided, this makes intermidiate directories. In other
-	 words, '!' is to this what '-p' option is to 'mkdir' command in shell.
+	 words, '!' is to this what '-p' option is to 'mkdir' command in shells.
 
 :Touch {files}						*shcmd-Touch*
-	Make files like 'touch' command in shell.
+	Make files like 'touch' command in shells.
 
 :CpFile [{copy-from}] {copy-to}				*shcmd-CpFile*
-	 Copy a file like 'cp' command in shell, but unlike 'cp', this command
+	 Copy a file like 'cp' command in shells, but unlike 'cp', this command
 	won't copy directories.
 	 If {copy-from} is omitted, this copies current buffer's contents to
 	{copy-to}.
 
 :Rm[!] {files}						*shcmd-Rm*
-	 Delete files or directories like 'rm' command in shell.
+	 Delete files or directories like 'rm' command in shells.
 	 If '!' is provided, this recognizes arguments as directorys' names;
 	 Otherwise this recognizes them as files' names. In other words, '!' is
-	 to this what '-r' option is to 'rm' command in shell.
+	 to this what '-r' option is to 'rm' command in shells.
 
 
 ==============================================================================
