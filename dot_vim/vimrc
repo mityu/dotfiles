@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Feb-2019.
+" Last Change: 12-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -902,6 +902,9 @@ let g:textobj_multitextobj_textobjects_a = [
 "}}}
 " caw.vim{{{
 let g:caw_no_default_keymappings = 1
+"}}}
+" previm{{{
+let g:previm_show_header = 0
 "}}}
 
 " Utility
