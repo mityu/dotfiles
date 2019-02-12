@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 05-Feb-2019.
+" Last Change: 10-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -25,10 +25,10 @@ if has('vim_starting') "{{{
 	lockvar s:Windows
 	lockvar s:Unix
 endif "}}}
-func! s:SID() "{{{
+func! s:SID() abort "{{{
 	return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSID$')
 endfunc "}}}
-func! VimrcSID() "{{{
+func! VimrcSID() abort "{{{
 	return s:SID()
 endfunc "}}}
 
@@ -201,8 +201,7 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nnoremap / /\v
-nnoremap ? ?\v
+nnoremap ? /\v
 nmap zf <Plug>(operator-vimrc-fold-zf)
 nmap zF <Plug>(operator-vimrc-fold-zF)
 nmap zd <Plug>(operator-vimrc-fold-zd)
@@ -247,7 +246,7 @@ endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
-func! s:map_fold_cmd(keys)
+func! s:map_fold_cmd(keys) abort "{{{
 	let commentstring_save = &l:commentstring
 	let &l:commentstring = ' ' . &l:commentstring
 	try
@@ -258,8 +257,8 @@ func! s:map_fold_cmd(keys)
 		echohl None
 	endtry
 	let &l:commentstring = commentstring_save
-endfunc
-func! s:map_range_fold_cmd(motion_wizeness,keys)
+endfunc "}}}
+func! s:map_range_fold_cmd(motion_wizeness,keys) abort "{{{
 	let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
 	call s:map_fold_cmd(printf('`[%s`]%s',v_cmd,a:keys))
 
@@ -278,9 +277,8 @@ func! s:map_range_fold_cmd(motion_wizeness,keys)
 			endif
 		endfor
 	endif
-endfunc
-
-func! s:map_define_operator()
+endfunc "}}}
+func! s:map_define_operator() abort "{{{
 	let foldmotions_with_range = 'fF'
 	let foldmotions_standalone = 'dDE'
 	let sid = s:SID()
@@ -306,7 +304,7 @@ func! s:map_define_operator()
 		let keys = 'z' . keys
 		exec printf(map_cmd,keys,keys)
 	endfor
-endfunc
+endfunc "}}}
 
 augroup vimrc_mapping
 	au CmdWinEnter * nnoremap <buffer> <CR> <CR>
@@ -323,7 +321,7 @@ if has('win32')
 endif
 "}}}
 " Plugin{{{
-func! s:plugin_mapping()
+func! s:plugin_mapping() abort
 	" These mapping commands are must be executed after loaded plugins in
 	" order to override plugin default mappings.
 	map J <Plug>(jplus)
@@ -333,7 +331,7 @@ func! s:plugin_mapping()
 	map ,r  <Plug>(operator-replace)
 	map ,sy <Plug>(operator-swap-marking)
 	map ,sp <Plug>(operator-swap)
-	map ,ct <Plug>(operator-toggle-comment-wrap)
+	map ,c <Plug>(caw:hatpos:toggle:operator)
 
 	com! -nargs=+ OVmap omap <args>|vmap <args>
 	OVmap ab <Plug>(textobj-multiblock-a)
@@ -396,7 +394,7 @@ augroup END
 "}}}
 " Loop {{{
 func! s:_loop_define(config) abort "{{{
-	let prefix = printf('<Plug><SID>(loop-%s)',a:config.id)
+	let prefix = printf('<Plug>(<SID>-loop-%s)',a:config.id)
 	let enter_with = a:config.enter_with
 	let mode = get(a:config,'mode','n')
 	let plug_map = {}
@@ -444,7 +442,7 @@ call s:_simple_loop_define({
 			\'enter_with': '<C-w>',
 			\'follow_key': '<>-+'
 			\})
-" Sometimes gh starts selection mode.
+" XXX: Sometimes gh starts selection mode.
  call s:_loop_define({
  			\'id': 'TabChange',
  			\'enter_with': 'g',
@@ -563,6 +561,8 @@ com! -bar UnDraft call s:undraft()
 com! -bar Scratch new|Draft
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
+com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
+com! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
 
 func! Execute_list(com) abort "{{{
 	return split(execute(a:com),"\n")
@@ -572,8 +572,8 @@ func! Filter(pat,com) abort "{{{
 	call filter(output,'v:val=~?a:pat')
 	return output
 endfunc "}}}
-func! s:filter(bang,pat,com) abort "{{{
-	let output = join(Filter(a:pat,a:com),"\n")
+func! s:filter(bang,pat,...) abort "{{{
+	let output = join(Filter(a:pat,join(a:000,' ')),"\n")
 	if a:bang
 		echom output
 	else
@@ -596,7 +596,7 @@ func! s:undraft() abort "{{{
 endfunc "}}}
 func! s:list_up_tasks(args) abort "{{{
 	let target = '%'
-	if a:args ==# 'rf'
+	if a:args =~# 'rf'
 		let target = '**/*.' . expand('%:e')
 	elseif a:args !=# ''
 		let target = a:args
@@ -611,6 +611,17 @@ com! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
 com! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 com! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
  "}}}
+
+" Function
+"{{{
+" These are useful when using expression register.
+func! FileName() "{{{
+	return expand('%')
+endfunc "}}}
+func! FileParent() "{{{
+	return expand('%:p:h:h')
+endfunc "}}}
+"}}}
 
 "Highlight
 " EmphasisIndent{{{
@@ -735,6 +746,9 @@ func! s:pack_register() abort "{{{
 	call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
 	call minpac#add('prabirshrestha/asyncomplete-necovim.vim')
 	call minpac#add('Shougo/neco-vim')
+	call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
+	call minpac#add('junegunn/vim-easy-align')
+	call minpac#add('tyru/caw.vim')
 
 	call minpac#add('kannokanno/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -813,7 +827,7 @@ let g:asyncomplete_smart_completion = 0
 "}}}
 " vim-lsp{{{
 if executable('clangd')
-	augroup vimrc_lsp_cpp
+	augroup vimrc_lsp_cpp_clangd
 		au User lsp_setup call lsp#register_server({
 					\ 'name': 'clangd',
 					\ 'cmd': {server_info->['clangd']},
@@ -824,6 +838,9 @@ endif
 let g:lsp_signs_enabled = 1
 let g:lsp_signs_error = {'text': '>>'}
 let g:lsp_signs_warning = {'text': '--'}
+let g:lsp_signs_information = {'text': '--'}
+let g:lsp_signs_hint = {'text': '? '}
+let g:lsp_diagnostics_echo_delay = 10
 let g:lsp_diagnostics_enabled = 1
 let g:lsp_diagnostics_echo_cursor = 1
 "}}}
@@ -882,6 +899,9 @@ let g:textobj_multitextobj_textobjects_a = [
 		\ '<Plug>(textobj-indent-a)',
 		\ '<Plug>(textobj-function-a)',
 		\]
+"}}}
+" caw.vim{{{
+let g:caw_no_default_keymappings = 1
 "}}}
 
 " Utility
