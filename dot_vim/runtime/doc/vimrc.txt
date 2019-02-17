@@ -23,7 +23,7 @@ gram.vim							*gram.vim*
 	The only feature is "No customizable."
 
 	Requirement:
-	 -|CmdlineChanged| autocommand
+	 - |CmdlineChanged| autocmd
 	 - Builtin |setbufline()|, |appendbufline()|, and |deletebufline()| function
 	NOTE: These features are added in Vim 8.
 
@@ -102,10 +102,10 @@ MAPPINGS						*gram-mappings*
 <Plug>(gram-exit)			*<Plug>(gram-exit)*
 	Stop using |gram.vim|.
 <Plug>(gram-loop-cursor-down)		*<Plug>(gram-loop-cursor-down)*
-	Move the cursor down like |j|, but move to the top of items on a buffer
+	Move on the next line like |j|, but move to the top of items on a buffer
 	when the cursor reachs the end of items.
 <Plug>(gram-loop-cursor-up)		*<Plug>(gram-loop-cursor-up)*
-	Move the cursor up like |k|, but move to the end of items on a buffer
+	Move on the previous like |k|, but move to the end of items on a buffer
 	when the cursor reachs the top of items.
 <Plug>(gram-select-item)		*<Plug>(gram-select-item)*
 	Select an item.
