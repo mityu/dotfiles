@@ -645,6 +645,7 @@ endfunc "}}}
 hi link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
     au WinEnter * call s:emphasize_indent()
+    au OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
     au User vimrc_initialize call s:emphasize_indent()
 augroup END
 func! s:emphasize_indent() abort "{{{
@@ -654,11 +655,18 @@ func! s:emphasize_indent() abort "{{{
     if exists('w:emphasis_indent_id')
         call matchdelete(w:emphasis_indent_id)
     endif
-    let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent',
-                \'\%(^\t\|\%(\_[^\t]\+\)\@<!\t\zs\t\)')
+
+    let pat = '\v%(^%(%s)*)@<=%s'
+    if &l:expandtab || &l:smarttab
+        let pat = printf(pat, repeat('\s', shiftwidth()), '\s')
+    else
+        let pat = printf(pat, '\t\t', '\t')
+    endif
+    let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent', pat)
 endfunc "}}}
 func! s:emphasis_indent_enable() abort "{{{
     let w:disable_emphasis_indent = 0
+    call s:emphasize_indent()
 endfunc "}}}
 func! s:emphasis_indent_disable() abort "{{{
     let w:disable_emphasis_indent = 1
