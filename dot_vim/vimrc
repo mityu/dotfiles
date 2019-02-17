@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 12-Feb-2019.
+" Last Change: 14-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -750,7 +750,7 @@ func! s:pack_register() abort "{{{
 	call minpac#add('junegunn/vim-easy-align')
 	call minpac#add('tyru/caw.vim')
 
-	call minpac#add('kannokanno/previm',{'type': 'opt'})
+	call minpac#add('previm/previm',{'type': 'opt'})
 	call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
 endfunc "}}}
 
@@ -905,6 +905,7 @@ let g:caw_no_default_keymappings = 1
 "}}}
 " previm{{{
 let g:previm_show_header = 0
+let g:previm_enable_realtime = 1
 "}}}
 
 " Utility
