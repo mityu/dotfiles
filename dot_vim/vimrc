@@ -567,7 +567,7 @@ com! Helptags helptags ALL
 com! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
-com! -bar Scratch new|Draft
+com! -bar -nargs=? Scratch call s:scratch(<q-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
 com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
@@ -593,16 +593,23 @@ endfunc "}}}
 func! s:draft() abort "{{{
     let b:vimrc_draft_savedata = {
                 \ 'buftype': &l:buftype,
-                \ 'buflisted': &l:buflisted,
                 \ 'swapfile': &l:swapfile,
                 \ 'undofile': &l:undofile,
                 \}
-    setl buftype=nofile nobuflisted noswapfile
+    setl buftype=nofile noswapfile
 endfunc "}}}
 func! s:undraft() abort "{{{
     if !exists('b:vimrc_draft_savedata') | return | endif
     execute join(values(map(copy(b:vimrc_draft_savedata),
                 \'printf("let &l:%s=%s",v:key,string(v:val))')),"|")
+endfunc "}}}
+func! s:scratch(...) abort "{{{
+    if a:1 ==# ''
+        new
+    else
+        execute 'split scratch://' . fnameescape(a:1)
+    endif
+    Draft
 endfunc "}}}
 func! s:list_up_tasks(args) abort "{{{
     let target = '%'
@@ -641,7 +648,7 @@ augroup vimrc_emphasize_indent
     au User vimrc_initialize call s:emphasize_indent()
 augroup END
 func! s:emphasize_indent() abort "{{{
-    if exists('w:disable_emphasis_indent')&&w:disable_emphasis_indent
+    if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
         return
     endif
     if exists('w:emphasis_indent_id')
