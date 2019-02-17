@@ -667,20 +667,30 @@ com! EmphasisIndentEnable call s:emphasis_indent_enable()
 hi link WarningSpace Error
 augroup vimrc_warningspace
     au WinEnter * call s:warningspace()
+    au OptionSet * call s:warningspace()
     au User vimrc_initialize call s:warningspace()
 augroup END
 func! s:warningspace() abort "{{{
+    " Clean up.
+    if exists('w:twobyte_space_id')
+        call matchdelete(w:twobyte_space_id)
+        unlet w:twobyte_space_id
+    endif
+    if exists('w:end_of_line_space_id')
+        call matchdelete(w:end_of_line_space_id)
+        unlet w:end_of_line_space_id
+    endif
+
     if &buftype!=#'' || !(&ma) | return | endif
 
     " Zenkaku space
-    if exists('w:twobytespace_id') | call matchdelete(w:twobytespace_id) | endif
-    let w:twobytespace_id=matchadd('WarningSpace','　')
+    " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
+    let w:twobyte_space_id=matchadd('WarningSpace','\%d12288')
 
     " End of line's space
-    if exists('w:lineendspace_id') | call matchdelete(w:lineendspace_id) | endif
-    let w:lineendspace_id=matchadd('WarningSpace','\s\+$')
+    let w:end_of_line_space_id=matchadd('WarningSpace','\s\+$')
 endfunc "}}}
-com! ReplaceTwobyteSpace keeppatterns %s/　/ /g
+com! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 
