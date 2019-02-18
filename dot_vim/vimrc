@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-Feb-2019.
+" Last Change: 18-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -751,6 +751,8 @@ func! s:pack_register() abort "{{{
     call minpac#add('kana/vim-textobj-user')
     call minpac#add('kana/vim-textobj-indent')
     call minpac#add('kana/vim-textobj-function')
+    call minpac#add('kana/vim-textobj-line')
+    call minpac#add('kana/vim-textobj-entire')
     call minpac#add('osyo-manga/vim-textobj-multiblock')
     call minpac#add('mityu/vim-textobj-multitextobj')
     call minpac#add('thinca/vim-textobj-between')
