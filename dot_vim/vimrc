@@ -573,6 +573,8 @@ com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
 com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
 com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 com! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
+com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
+            \ WorkingPlugin call s:working_plugin.load(<f-args>)
 
 func! Execute_list(com) abort "{{{
     return split(execute(a:com),"\n")
@@ -620,6 +622,49 @@ func! s:list_up_tasks(args) abort "{{{
     endif
     execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunc "}}}
+" :WorkingPlugin{{{
+let s:working_plugin = {}
+let s:working_plugin.workplace = s:filename([expand('$DOT_VIM'), 'workplace'])
+let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
+func! s:working_plugin.list_plugins() abort "{{{
+    if !self.available | return [] | endif
+    return map(filter(split(globpath(self.workplace, '*'), "\n"),
+                \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+endfunc "}}}
+func! s:working_plugin.load(...) abort "{{{
+    if !(self.available && a:0) | return | endif
+    let rtp = split(&rtp, ',')
+    let plugins = self.list_plugins()
+
+    for plugin in a:000
+        if index(plugins, plugin) == -1
+            echohl Error
+            echomsg 'Failed to load' string(plugin)
+            echohl None
+            continue
+        endif
+        let plugin_dir = s:filename([self.workplace, plugin])
+        call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
+        call add(rtp, plugin_dir)
+        for file_name in extend(
+                \ split(glob(s:filename([plugin_dir, 'plugin', '*.vim'])), "\n"),
+                \ split(glob(s:filename([plugin_dir, 'after', 'plugin', '*.vim'])), "\n")
+                \)
+            execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
+        endfor
+    endfor
+    let &rtp = join(rtp, ',')
+    runtime! plugin/*.vim
+endfunc "}}}
+func! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
+    if !self.available | return [] | endif
+    return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
+                \ 'fnameescape(v:val)')
+endfunc "}}}
+func! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
+    return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
+endfunc "}}}
+"}}}
 
 " Shell
 com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
@@ -632,10 +677,10 @@ com! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
 " Function
 "{{{
 " These are useful when using expression register.
-func! FileName() "{{{
+func! FileName() abort "{{{
     return expand('%')
 endfunc "}}}
-func! FileParent() "{{{
+func! FileParent() abort "{{{
     return expand('%:p:h:h')
 endfunc "}}}
 "}}}
