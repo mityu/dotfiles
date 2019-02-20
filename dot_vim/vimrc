@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Feb-2019.
+" Last Change: 20-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -573,6 +573,7 @@ com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
 com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
 com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 com! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
+com! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
 com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
             \ WorkingPlugin call s:working_plugin.load(<f-args>)
 
@@ -822,6 +823,7 @@ func! s:pack_register() abort "{{{
     call minpac#add('thinca/vim-ft-help_fold')
     call minpac#add('vim-jp/syntax-vim-ex')
     call minpac#add('mattn/vim-reading-vimrc')
+    call minpac#add('mityu/vim-readingvimrc-files')
     call minpac#add('prabirshrestha/async.vim')
     call minpac#add('prabirshrestha/asyncomplete.vim')
     call minpac#add('prabirshrestha/vim-lsp')
@@ -988,6 +990,19 @@ let g:caw_no_default_keymappings = 1
 " previm{{{
 let g:previm_show_header = 0
 let g:previm_enable_realtime = 1
+"}}}
+" ReadingVimrc{{{
+com! -bar StartReadingVimrc call s:start_readingvimrc()
+func! s:start_readingvimrc() abort
+    try
+        ReadingVimrc
+    endtry
+    try
+        let g:readingvimrc_files_listing_window_open_command = 'tabedit'
+        ReadingVimrcFiles
+        unlet g:readingvimrc_files_listing_window_open_command
+    endtry
+endfunc
 "}}}
 
 " Utility
