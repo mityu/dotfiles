@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 20-Feb-2019.
+" Last Change: 21-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -62,12 +62,6 @@ if has('vim_starting')
     exec 'set runtimepath+=' . join([$DOT_VIM,'runtime'],s:vimrc.filesystem.slash)
 endif
 "}}}
-func! s:rc(fname) abort "{{{
-    return s:vimrc.filesystem.rcfile_prefix . a:fname
-endfunc "}}}
-func! s:filename(path) abort "{{{
-    return join(a:path,s:vimrc.filesystem.slash)
-endfunc "}}}
 " Set environment variables on gVim.{{{
 let s:_envrc = expand('~/') . s:rc('envrc')
 if has('gui_running')&&filereadable(s:_envrc)
@@ -92,6 +86,41 @@ for s:_augroup in s:_augroups
     exec 'augroup END'
 endfor | unlet s:_augroups s:_pattern
  "}}}
+
+" Utility function
+func! s:rc(fname) abort "{{{
+    return s:vimrc.filesystem.rcfile_prefix . a:fname
+endfunc "}}}
+func! s:filename(path) abort "{{{
+    return join(a:path,s:vimrc.filesystem.slash)
+endfunc "}}}
+func! s:has(object, to_search) abort "{{{
+    let object_type = type(a:object)
+    if object_type == type('')
+        let func = 'stridx'
+    elseif object_type == type([])
+        let func = 'index'
+    elseif object_type == type({})
+        let func = 'has_key'
+    else
+        return 0
+    endif
+    return (call(func, [a:object, a:to_search]) != -1)
+endfunc "}}}
+func! s:echomsg_with_color(msg, hl_group) abort "{{{
+    execute 'echohl' a:hl_group
+    execute 'echomsg "[vimrc]"' string(a:msg)
+    echohl NONE
+endfunc "}}}
+func! s:echomsg(msg) abort "{{{
+    call s:echomsg_with_color(a:msg, 'NONE')
+endfunc "}}}
+func! s:echomsg_error(msg) abort "{{{
+    call s:echomsg_with_color(a:msg, 'Error')
+endfunc "}}}
+func! s:echomsg_warning(msg) abort "{{{
+    call s:echomsg_with_color(a:msg, 'WarningMsg')
+endfunc "}}}
 
 " Setting
 "{{{
@@ -574,8 +603,6 @@ com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
 com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 com! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
 com! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
-com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
-            \ WorkingPlugin call s:working_plugin.load(<f-args>)
 
 func! Execute_list(com) abort "{{{
     return split(execute(a:com),"\n")
@@ -623,49 +650,6 @@ func! s:list_up_tasks(args) abort "{{{
     endif
     execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunc "}}}
-" :WorkingPlugin{{{
-let s:working_plugin = {}
-let s:working_plugin.workplace = s:filename([expand('$DOT_VIM'), 'workplace'])
-let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
-func! s:working_plugin.list_plugins() abort "{{{
-    if !self.available | return [] | endif
-    return map(filter(split(globpath(self.workplace, '*'), "\n"),
-                \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-endfunc "}}}
-func! s:working_plugin.load(...) abort "{{{
-    if !(self.available && a:0) | return | endif
-    let rtp = split(&rtp, ',')
-    let plugins = self.list_plugins()
-
-    for plugin in a:000
-        if index(plugins, plugin) == -1
-            echohl Error
-            echomsg 'Failed to load' string(plugin)
-            echohl None
-            continue
-        endif
-        let plugin_dir = s:filename([self.workplace, plugin])
-        call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
-        call add(rtp, plugin_dir)
-        for file_name in extend(
-                \ split(glob(s:filename([plugin_dir, 'plugin', '*.vim'])), "\n"),
-                \ split(glob(s:filename([plugin_dir, 'after', 'plugin', '*.vim'])), "\n")
-                \)
-            execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
-        endfor
-    endfor
-    let &rtp = join(rtp, ',')
-    runtime! plugin/*.vim
-endfunc "}}}
-func! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
-    if !self.available | return [] | endif
-    return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
-                \ 'fnameescape(v:val)')
-endfunc "}}}
-func! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
-    return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
-endfunc "}}}
-"}}}
 
 " Shell
 com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
@@ -755,6 +739,7 @@ com! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 
+" ---Plugin---
 " minpac
 com! -bar PackInit   call s:pack_init()
 com! -bar PackUpdate call s:pack_update()
@@ -1004,6 +989,104 @@ func! s:start_readingvimrc() abort
     endtry
 endfunc
 "}}}
+
+" :WorkingPlugin*
+" {{{
+com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
+            \ WorkingPluginLoad call s:working_plugin.load(<f-args>)
+com! -bar -bang -nargs=1 -complete=customlist,VimrcWorkingPluginComplete
+            \ WorkingPluginCd call s:working_plugin.cd(<bang>0, <q-args>)
+com! -bar -nargs=+ WorkingPluginClone call s:working_plugin.clone(<f-args>)
+com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
+            \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
+
+let s:working_plugin = {}
+let s:working_plugin.workplace = s:filename([expand('$DOT_VIM'), 'workplace'])
+let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
+func! s:working_plugin.list_plugins() abort "{{{
+    if !self.available | return [] | endif
+    return map(filter(split(globpath(self.workplace, '*'), "\n"),
+                \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+endfunc "}}}
+func! s:working_plugin.load(...) abort "{{{
+    if !(self.available && a:0) | return | endif
+    let rtp = split(&rtp, ',')
+    let plugins = self.list_plugins()
+
+    for plugin in a:000
+        if index(plugins, plugin) == -1
+            call s:echomsg_error('Failed to load: ' . plugin)
+            continue
+        endif
+        let plugin_dir = s:filename([self.workplace, plugin])
+        call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
+        call add(rtp, plugin_dir)
+        for file_name in extend(
+                \ split(glob(s:filename([plugin_dir, 'plugin', '*.vim'])), "\n"),
+                \ split(glob(s:filename([plugin_dir, 'after', 'plugin', '*.vim'])), "\n")
+                \)
+            execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
+        endfor
+    endfor
+    let &rtp = join(rtp, ',')
+    runtime! plugin/*.vim
+endfunc "}}}
+func! s:working_plugin.cd(has_bang, plugin) abort "{{{
+    if !self.available | return | endif
+    execute (a:has_bang ? 'lcd' : 'cd') s:filename([self.workplace, a:plugin])
+endfunc "}}}
+func! s:working_plugin.clone(...) abort "{{{
+    if !(self.available && executable('git') && a:0)
+        return
+    endif
+    if !s:has(a:1, '/')
+        call s:echomsg_error(string(a:1) . ' is not a repository.')
+        return
+    endif
+    let repository = printf('https://github.com/%s.git', a:1)
+    let clone_to = ''
+    if a:0 == 1
+        let clone_to = split(a:1, '/')[1]
+    else
+        let clone_to = a:2
+    endif
+    if s:has(self.list_plugins(), clone_to)
+        call s:echomsg_error('Directory already exists: ' . clone_to)
+        return
+    endif
+    let clone_to = s:filename([self.workplace, clone_to])
+    execute '!git clone' repository clone_to
+endfunc "}}}
+func! s:working_plugin.rm(...) abort "{{{
+    if !self.available | return | endif
+
+    let plugin_list = self.list_plugins()
+    for plugin in a:000
+        if !s:has(plugin_list, plugin)
+            call s:echomsg_error('Plugin does not exist: ' . plugin)
+            continue
+        endif
+        call s:echomsg(printf('Delete %s ? [y/n]', plugin))
+        if nr2char(getchar()) !~? 'y'
+            call s:echomsg('Canceled.')
+            continue
+        endif
+        if delete(s:filename([self.workplace, plugin]), 'rf') != 0
+            call s:echomsg_error('Failed to delete: ' . plugin)
+        else
+            call s:echomsg('Succesfully deleted: ' . plugin)
+        endif
+    endfor
+endfunc "}}}
+func! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
+    if !self.available | return [] | endif
+    return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
+                \ 'fnameescape(v:val)')
+endfunc "}}}
+func! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
+    return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
+endfunc "}}}
+" }}}
 
 " Utility
 " tabpage_cd{{{
