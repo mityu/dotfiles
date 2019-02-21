@@ -171,7 +171,7 @@ set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
 
-let s:_undodir = expand('$DOT_VIM') . '/_vim_cache/undodir'
+let s:_undodir = s:filename([expand('$DOT_VIM'), '_vim_cache', 'undodir'])
 if !isdirectory(s:_undodir) && exists('*mkdir')
     call mkdir(s:_undodir,'p')
 endif
@@ -586,7 +586,7 @@ cabbrev gista Gista
 "}}}
 
 " Command
-" {{{
+" Declarations{{{
 com! -bar CdCurrent cd %:p:h
 com! -bar LcdCurrent lcd %:p:h
 com! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
@@ -600,10 +600,17 @@ com! -bar -nargs=? Scratch call s:scratch(<q-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
 com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
+
+" Plugin Shortcuts
 com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 com! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
 com! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
-
+com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
+com! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,<f-args>)
+com! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
+com! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
+com! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
+"}}}
 func! Execute_list(com) abort "{{{
     return split(execute(a:com),"\n")
 endfunc "}}}
@@ -651,16 +658,7 @@ func! s:list_up_tasks(args) abort "{{{
     execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunc "}}}
 
-" Shell
-com! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
-com! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,<f-args>)
-com! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
-com! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
-com! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
- "}}}
-
 " Function
-"{{{
 " These are useful when using expression register.
 func! FileName() abort "{{{
     return expand('%')
@@ -668,7 +666,7 @@ endfunc "}}}
 func! FileParent() abort "{{{
     return expand('%:p:h:h')
 endfunc "}}}
-"}}}
+
 
 " Highlight
 " EmphasisIndent{{{
@@ -1309,7 +1307,11 @@ if has('gui_running')
 endif
  "}}}
 
-"Initialize when load this file.{{{
+" Initialize when loading this file.{{{
+augroup vimrc_initialize_dummy
+    " Do not provide an error. For more information, see `:h E217`
+    au User vimrc_initialize " Do nothing.
+augroup END
 if has('vim_starting') "{{{
     augroup vimrc_initialize
         au VimEnter * doau User vimrc_initialize
