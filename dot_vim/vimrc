@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 21-Feb-2019.
+" Last Change: 23-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -10,89 +10,40 @@
 "  - Global function :
 "     Use `Vimrc` as its prefix.
 
-if has('vim_starting') "{{{
+" Encoding
+if has('vim_starting')
     set encoding=utf-8
     scriptencoding utf-8
-
-    if has('multi_lang')
-        if has('menu')
-            set langmenu=ja.utf-8
-        endif
-    endif
-
-    let s:Windows = has('win32')
-    let s:Unix = !s:Windows
-    lockvar s:Windows
-    lockvar s:Unix
-endif "}}}
-func! s:SID() abort "{{{
-    return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSID$')
-endfunc "}}}
-func! VimrcSID() abort "{{{
-    return s:SID()
-endfunc "}}}
-
-" Startup config{{{
-if has('vim_starting')
-    " s:vimrc
-    let s:vimrc = {}
-    let s:vimrc.filesystem = {}
-
-    if s:Windows
-        let $DOT_VIM = expand('~\vimfiles')
-        let s:vimrc.filesystem.slash = '\'
-        let s:vimrc.filesystem.path_separator = ';'
-        let s:vimrc.filesystem.rcfile_prefix = '_'
-    else
-        let $DOT_VIM = expand('~/.vim')
-        let s:vimrc.filesystem.slash = '/'
-        let s:vimrc.filesystem.path_separator = ':'
-        let s:vimrc.filesystem.rcfile_prefix = '.'
-    endif
-
-    "disable default plugins
-    let g:loaded_2html_plugin=1
-    let g:loaded_getscriptPlugin=1
-    let g:loaded_gzip=1
-    let g:loaded_zipPlugin=1
-    let g:loaded_tarPlugin=1
-    let g:loaded_vimballPlugin=1
-    let g:loaded_netrwPlugin=1
-
-    exec 'set runtimepath+=' . join([$DOT_VIM,'runtime'],s:vimrc.filesystem.slash)
 endif
-"}}}
-" Set environment variables on gVim.{{{
-let s:_envrc = expand('~/') . s:rc('envrc')
-if has('gui_running')&&filereadable(s:_envrc)
-    let s:contents = readfile(s:_envrc)
-    call filter(s:contents, "v:val[0] !=# '#'")
-    call filter(s:contents, '!empty(v:val)')
-    call map(s:contents, "split(v:val,'=')")
-    call map(s:contents,
-            \"execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
-endif | unlet s:contents s:_envrc
-"}}}
-" Initialize autocmd{{{
-let s:_augroups = readfile(expand('<sfile>'))
-let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
-call filter(s:_augroups,'stridx(v:val,"aug")!=-1')
-call filter(s:_augroups,'v:val=~#s:_pattern')
-call map(s:_augroups,'matchstr(v:val,s:_pattern)')
-call uniq(sort(filter(s:_augroups,'v:val!~?"END"')))
-for s:_augroup in s:_augroups
-    exec 'augroup' s:_augroup
-        au!
-    exec 'augroup END'
-endfor | unlet s:_augroups s:_pattern
- "}}}
 
 " Utility function
+func! s:SIDPrefix() abort "{{{
+    " Returns "<SNR>{number}_"
+    return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSIDPrefix$')
+endfunc "}}}
+func! s:SNR() abort "{{{
+    return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
+endfunc "}}}
+func! VimrcSIDPrefix() abort "{{{
+    return s:SIDPrefix()
+endfunc "}}}
+func! VimrcCall(func, ...) abort "{{{
+    return call('s:' . a:func, a:000)
+endfunc "}}}
+func! VimrcGetVar(...) abort "{{{
+    if a:0 == 0
+        return s:
+    elseif a:1 == 1
+        return get(s:, a:1)
+    else
+        return get(s:, a:1, a:2)
+    endif
+endfunc "}}}
 func! s:rc(fname) abort "{{{
-    return s:vimrc.filesystem.rcfile_prefix . a:fname
+    return s:filesystem.rcfile_prefix . a:fname
 endfunc "}}}
 func! s:filename(path) abort "{{{
-    return join(a:path,s:vimrc.filesystem.slash)
+    return join(a:path,s:filesystem.slash)
 endfunc "}}}
 func! s:has(object, to_search) abort "{{{
     let object_type = type(a:object)
@@ -122,7 +73,75 @@ func! s:echomsg_warning(msg) abort "{{{
     call s:echomsg_with_color(a:msg, 'WarningMsg')
 endfunc "}}}
 
-" Setting
+" Startup config
+" {{{
+if has('vim_starting')
+
+    if has('multi_lang')
+        if has('menu')
+            set langmenu=ja.utf-8
+        endif
+    endif
+
+    let s:Windows = has('win32')
+    let s:Unix = !s:Windows
+    lockvar s:Windows
+    lockvar s:Unix
+
+
+    let s:filesystem = {}
+    if s:Windows
+        let $DOT_VIM = expand('~\vimfiles')
+        let s:filesystem.slash = '\'
+        let s:filesystem.path_separator = ';'
+        let s:filesystem.rcfile_prefix = '_'
+    else
+        let $DOT_VIM = expand('~/.vim')
+        let s:filesystem.slash = '/'
+        let s:filesystem.path_separator = ':'
+        let s:filesystem.rcfile_prefix = '.'
+    endif
+
+    " disable default plugins
+    let g:loaded_2html_plugin=1
+    let g:loaded_getscriptPlugin=1
+    let g:loaded_gzip=1
+    let g:loaded_zipPlugin=1
+    let g:loaded_tarPlugin=1
+    let g:loaded_vimballPlugin=1
+    let g:loaded_netrwPlugin=1
+
+    exec 'set runtimepath+=' . s:filename([$DOT_VIM,'runtime'])
+endif
+"}}}
+
+" Before laading this file
+" Set environment variables on gVim.{{{
+let s:_envrc = s:filename([expand('~'), s:rc('envrc')])
+if has('gui_running')&&filereadable(s:_envrc)
+    let s:contents = readfile(s:_envrc)
+    call filter(s:contents, "v:val[0] !=# '#'")
+    call filter(s:contents, '!empty(v:val)')
+    call map(s:contents, "split(v:val,'=')")
+    call map(s:contents,
+            \"execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
+endif | unlet s:contents s:_envrc
+"}}}
+" Initialize autocmd{{{
+let s:_augroups = readfile(expand('<sfile>'))
+let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
+call filter(s:_augroups,'stridx(v:val,"aug")!=-1')
+call filter(s:_augroups,'v:val=~#s:_pattern')
+call map(s:_augroups,'matchstr(v:val,s:_pattern)')
+call uniq(sort(filter(s:_augroups,'v:val!~?"END"')))
+for s:_augroup in s:_augroups
+    exec 'augroup' s:_augroup
+        au!
+    exec 'augroup END'
+endfor | unlet s:_augroup s:_augroups s:_pattern
+ "}}}
+
+" Options
 "{{{
 syntax on
 filetype plugin indent on
@@ -319,7 +338,7 @@ endfunc "}}}
 func! s:map_define_operator() abort "{{{
     let foldmotions_with_range = 'fF'
     let foldmotions_standalone = 'dDE'
-    let sid = s:SID()
+    let sid = s:SIDPrefix()
     for keys in split(foldmotions_with_range . foldmotions_standalone,'\zs')
         let keys = 'z' . keys
         let func = [
@@ -995,6 +1014,7 @@ com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
 com! -bar -bang -nargs=1 -complete=customlist,VimrcWorkingPluginComplete
             \ WorkingPluginCd call s:working_plugin.cd(<bang>0, <q-args>)
 com! -bar -nargs=+ WorkingPluginClone call s:working_plugin.clone(<f-args>)
+com! -bar -nargs=+ WorkingPluginNew call s:working_plugin.new(<f-args>)
 com! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
             \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
 
@@ -1054,6 +1074,24 @@ func! s:working_plugin.clone(...) abort "{{{
     endif
     let clone_to = s:filename([self.workplace, clone_to])
     execute '!git clone' repository clone_to
+endfunc "}}}
+func! s:working_plugin.new(...) abort "{{{
+    if !self.available | return | endif
+    if !exists('*mkdir')
+        call s:echomsg_error('Built-in mkdir() function is not available.')
+        return
+    endif
+    for plugin in a:000
+        let base_dir = s:filename([self.workplace, plugin])
+        if isdirectory(base_dir)
+            call s:echomsg_error('Plugin already exists: ' . base_dir)
+            continue
+        endif
+        call mkdir(base_dir)
+        call mkdir(s:filename([base_dir, 'plugin']))
+        call mkdir(s:filename([base_dir, 'autoload']))
+        call s:echomsg('Created: ' . plugin)
+    endfor
 endfunc "}}}
 func! s:working_plugin.rm(...) abort "{{{
     if !self.available | return | endif
@@ -1205,7 +1243,7 @@ func! s:showmode_statusline(active) abort "{{{
 endfunc "}}}
  "}}}
 " tabline{{{
-let &tabline=printf('%%!%stabline()',s:SID())
+let &tabline=printf('%%!%stabline()',s:SIDPrefix())
 func! s:tabline() abort "{{{
     let tabline='%#TabLine#'
     let t=tabpagenr()
