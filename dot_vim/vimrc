@@ -174,7 +174,7 @@ set laststatus=2
 set cmdheight=2 cmdwinheight=10
 set wildmenu
 set wildignore& wildignore+=*.DS_STORE,*.jpg,*.png,*.gif
-set history=100
+set history=500
 
 set keywordprg=:help
 set shortmess& shortmess+=Ic
@@ -363,13 +363,23 @@ func! s:map_define_operator() abort "{{{
     endfor
 endfunc "}}}
 
+" Experimental
+nnoremap ; q:
+
+func! s:map_for_cmdwin() abort "{{{
+    " Type <CR> to execute current line in command-line window.
+    silent! nunmap <buffer> <CR>
+
+    " Return back to the current window from command-line window with
+    " inputting <C-c> once.
+    nnoremap <buffer> <C-c> <C-c><C-c>
+    nmap <buffer> q <C-c>
+endfunc "}}}
+
 augroup vimrc_mapping
-    au CmdWinEnter * nnoremap <buffer> <CR> <CR>
+    au CmdWinEnter * call s:map_for_cmdwin()|startinsert
     au User vimrc_initialize call s:map_define_operator()
 augroup END
-" augroup vimrc_mapping
-"     au Filetype help nnoremap <silent> <buffer> q :<C-u>q<CR>
-" augroup END
 
 if has('mac') | let mapleader='_' | endif
 if has('win32')
