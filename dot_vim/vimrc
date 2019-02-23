@@ -229,9 +229,11 @@ augroup END
 
 " Mapping
 " builtin{{{
-nnoremap ; :
+nnoremap ; q:
+nnoremap q: :
 nnoremap : ;
-vnoremap ; :
+vnoremap ; q:
+vnoremap q: :
 vnoremap : ;
 map <C-j> <ESC>
 map! <C-j> <ESC>
@@ -258,7 +260,8 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nnoremap ? /\v
+nnoremap <silent> / :<C-u>call <SID>curjump()<CR>
+nnoremap ? /
 nmap zf <Plug>(operator-vimrc-fold-zf)
 nmap zF <Plug>(operator-vimrc-fold-zF)
 nmap zd <Plug>(operator-vimrc-fold-zd)
@@ -363,9 +366,10 @@ func! s:map_define_operator() abort "{{{
     endfor
 endfunc "}}}
 
-" Experimental
-nnoremap ; q:
-
+func! s:curjump() abort "{{{
+    let @/ = input('/')
+    call search(@/)
+endfunc "}}}
 func! s:map_for_cmdwin() abort "{{{
     " Type <CR> to execute current line in command-line window.
     silent! nunmap <buffer> <CR>
@@ -374,6 +378,7 @@ func! s:map_for_cmdwin() abort "{{{
     " inputting <C-c> once.
     nnoremap <buffer> <C-c> <C-c><C-c>
     nmap <buffer> q <C-c>
+    imap <buffer> <C-c> <ESC><C-c>
 endfunc "}}}
 
 augroup vimrc_mapping
