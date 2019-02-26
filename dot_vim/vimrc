@@ -190,6 +190,86 @@ for s:_augroup in s:_augroups
 endfor | unlet s:_augroup s:_augroups s:_pattern
  "}}}
 
+" minpac
+func! s:pack_register() abort "{{{
+    call minpac#add('k-takata/minpac',{'type': 'opt'})
+
+    call minpac#add('vim-scripts/autodate.vim')
+    call minpac#add('thinca/vim-quickrun')
+    call minpac#add('thinca/vim-prettyprint')
+    call minpac#add('thinca/vim-partedit')
+    call minpac#add('tyru/capture.vim')
+    call minpac#add('osyo-manga/vim-jplus')
+    call minpac#add('kana/vim-textobj-user')
+    call minpac#add('kana/vim-textobj-indent')
+    call minpac#add('kana/vim-textobj-function')
+    call minpac#add('kana/vim-textobj-line')
+    call minpac#add('kana/vim-textobj-entire')
+    call minpac#add('osyo-manga/vim-textobj-multiblock')
+    call minpac#add('mityu/vim-textobj-multitextobj')
+    call minpac#add('thinca/vim-textobj-between')
+    call minpac#add('kana/vim-operator-user')
+    call minpac#add('kana/vim-operator-replace')
+    call minpac#add('osyo-manga/vim-operator-swap')
+    call minpac#add('rhysd/vim-operator-surround')
+    "call minpac#add('thinca/vim-operator-sequence')
+    call minpac#add('kana/vim-gf-user')
+    call minpac#add('sgur/vim-gf-autoload')
+    call minpac#add('kana/vim-altr')
+    call minpac#add('itchyny/vim-cursorword')
+    call minpac#add('mattn/sonictemplate-vim')
+    call minpac#add('w0rp/ale')
+    call minpac#add('vim-jp/vital.vim')
+    call minpac#add('vim-jp/vimdoc-ja')
+    call minpac#add('tyru/open-browser.vim')
+    call minpac#add('sgur/vim-operator-openbrowser')
+    call minpac#add('lambdalisue/gina.vim')
+    call minpac#add('lambdalisue/vim-gista')
+    "call minpac#add('lambdalisue/fila.vim')
+    call minpac#add('thinca/vim-ft-help_fold')
+    call minpac#add('vim-jp/syntax-vim-ex')
+    call minpac#add('mattn/vim-reading-vimrc')
+    call minpac#add('mityu/vim-readingvimrc-files')
+    call minpac#add('prabirshrestha/async.vim')
+    call minpac#add('prabirshrestha/asyncomplete.vim')
+    call minpac#add('prabirshrestha/vim-lsp')
+    call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
+    call minpac#add('machakann/vim-Verdin')
+    call minpac#add('mityu/vim-asyncomplete-Verdin')
+    call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
+    call minpac#add('junegunn/vim-easy-align')
+    call minpac#add('tyru/caw.vim')
+
+    call minpac#add('previm/previm',{'type': 'opt'})
+    call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
+endfunc "}}}
+func! s:pack_init() abort "{{{
+    try
+        packadd minpac
+    catch /^Vim\%((\a\+)\)\=:E919/
+        "Download minpac...
+        let minpac_path = s:filename([$DOT_VIM, 'pack', 'minpac', 'opt', 'minpac'])
+        call s:echomsg('Downloading minpac...')
+        call system('git clone https://github.com/k-takata/minpac.git ' .
+                    \ minpac_path)
+        packadd minpac
+    catch
+        echoerr v:exception
+        return 0
+    endtry
+
+    call minpac#init()
+    call s:pack_register()
+
+    return 1
+endfunc "}}}
+func! s:pack_update() abort "{{{
+    if s:pack_init() | call minpac#update() | endif
+endfunc "}}}
+func! s:pack_clean() abort "{{{
+    if s:pack_init() | call minpac#clean() | endif
+endfunc "}}}
+
 " Options
 "{{{
 syntax on
@@ -498,7 +578,7 @@ func! s:cmdwin_enter() abort "{{{
         nnoremap <buffer> ; <C-c>
 
         call s:cmdwin_save_options.store('completeopt')
-        setl completeopt=menu,preview
+        setl completeopt=menu,preview,longest
     endif
 endfunc "}}}
 func! s:cmdwin_leave() abort "{{{
@@ -761,8 +841,12 @@ com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
 com! -bar -nargs=? Scratch call s:scratch(<q-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
-com! -bar -nargs=* -complete=file ListUpTasks call s:list_up_tasks(<q-args>)
+com! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
+
+com! -bar PackInit   call s:pack_init()
+com! -bar PackUpdate call s:pack_update()
+com! -bar PackClean  call s:pack_clean()
 
 " Plugin Shortcuts
 com! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
@@ -807,7 +891,7 @@ func! s:scratch(...) abort "{{{
     endif
     Draft
 endfunc "}}}
-func! s:list_up_tasks(args) abort "{{{
+func! s:list_tasks(args) abort "{{{
     let target = '%'
     if a:args =~# 'rf'
         let target = '**/*.' . expand('%:e')
@@ -897,89 +981,7 @@ com! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 
 " ---Plugin---
-" minpac
-com! -bar PackInit   call s:pack_init()
-com! -bar PackUpdate call s:pack_update()
-com! -bar PackClean  call s:pack_clean()
-func! s:pack_init() abort "{{{
-    try
-        packadd minpac
-    catch /^Vim\%((\a\+)\)\=:E919/
-        "Download minpac...
-        let minpac_path = s:filename([$DOT_VIM, 'pack', 'minpac', 'opt', 'minpac'])
-        call s:echomsg('Downloading minpac...')
-        call system('git clone https://github.com/k-takata/minpac.git ' .
-                    \ minpac_path)
-        packadd minpac
-    catch
-        echoerr v:exception
-        return 0
-    endtry
-
-    call minpac#init()
-    call s:pack_register()
-
-    return 1
-endfunc "}}}
-func! s:pack_update() abort "{{{
-    if s:pack_init() | call minpac#update() | endif
-endfunc "}}}
-func! s:pack_clean() abort "{{{
-    if s:pack_init() | call minpac#clean() | endif
-endfunc "}}}
-func! s:pack_register() abort "{{{
-    call minpac#add('k-takata/minpac',{'type': 'opt'})
-
-    call minpac#add('vim-scripts/autodate.vim')
-    call minpac#add('thinca/vim-quickrun')
-    call minpac#add('thinca/vim-prettyprint')
-    call minpac#add('thinca/vim-partedit')
-    call minpac#add('tyru/capture.vim')
-    call minpac#add('osyo-manga/vim-jplus')
-    call minpac#add('kana/vim-textobj-user')
-    call minpac#add('kana/vim-textobj-indent')
-    call minpac#add('kana/vim-textobj-function')
-    call minpac#add('kana/vim-textobj-line')
-    call minpac#add('kana/vim-textobj-entire')
-    call minpac#add('osyo-manga/vim-textobj-multiblock')
-    call minpac#add('mityu/vim-textobj-multitextobj')
-    call minpac#add('thinca/vim-textobj-between')
-    call minpac#add('kana/vim-operator-user')
-    call minpac#add('kana/vim-operator-replace')
-    call minpac#add('osyo-manga/vim-operator-swap')
-    call minpac#add('rhysd/vim-operator-surround')
-    "call minpac#add('thinca/vim-operator-sequence')
-    call minpac#add('kana/vim-gf-user')
-    call minpac#add('sgur/vim-gf-autoload')
-    call minpac#add('kana/vim-altr')
-    call minpac#add('itchyny/vim-cursorword')
-    call minpac#add('mattn/sonictemplate-vim')
-    call minpac#add('w0rp/ale')
-    call minpac#add('vim-jp/vital.vim')
-    call minpac#add('vim-jp/vimdoc-ja')
-    call minpac#add('tyru/open-browser.vim')
-    call minpac#add('sgur/vim-operator-openbrowser')
-    call minpac#add('lambdalisue/gina.vim')
-    call minpac#add('lambdalisue/vim-gista')
-    "call minpac#add('lambdalisue/fila.vim')
-    call minpac#add('thinca/vim-ft-help_fold')
-    call minpac#add('vim-jp/syntax-vim-ex')
-    call minpac#add('mattn/vim-reading-vimrc')
-    call minpac#add('mityu/vim-readingvimrc-files')
-    call minpac#add('prabirshrestha/async.vim')
-    call minpac#add('prabirshrestha/asyncomplete.vim')
-    call minpac#add('prabirshrestha/vim-lsp')
-    call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-    call minpac#add('machakann/vim-Verdin')
-    call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
-    call minpac#add('junegunn/vim-easy-align')
-    call minpac#add('tyru/caw.vim')
-
-    call minpac#add('previm/previm',{'type': 'opt'})
-    call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
-endfunc "}}}
-
-" Plugin Setting
+" Setting
 " thinca/quickrun{{{
 let g:quickrun_config={}
 let g:quickrun_config._={
@@ -1050,12 +1052,34 @@ augroup END
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_smart_completion = 0
 "}}}
+" asyncomplete.vim's sources{{{
+func! s:register_asyncomplete_sources() abort
+    let Register = {options ->
+                \ asyncomplete#register_source(
+                \ asyncomplete#sources#{options.name}#get_source_options(
+                \ options))
+                \ }
+    call Register({
+                \ 'name': 'Verdin',
+                \ 'whitelist': ['vim'],
+                \ 'completor': function('asyncomplete#sources#Verdin#completor'),
+                \ })
+    call Register({
+                \ 'name': 'buffer',
+                \ 'whitelist': ['*'],
+                \ 'completor': function('asyncomplete#sources#buffer#completor'),
+                \ })
+endfunc
+augroup vimrc_asyncomplete_sources
+    au User asyncomplete_setup call s:register_asyncomplete_sources()
+augroup END
+"}}}
 " vim-lsp{{{
 if executable('clangd')
     augroup vimrc_lsp_cpp_clangd
         au User lsp_setup call lsp#register_server({
                     \ 'name': 'clangd',
-                    \ 'cmd': {server_info->['clangd']},
+                    \ 'cmd': {server_info -> ['clangd']},
                     \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
                     \ })
     augroup END
@@ -1068,39 +1092,6 @@ let g:lsp_signs_hint = {'text': '? '}
 let g:lsp_diagnostics_echo_delay = 10
 let g:lsp_diagnostics_enabled = 1
 let g:lsp_diagnostics_echo_cursor = 1
-"}}}
-" ayncomplete-omni.vim{{{
-" augroup vimrc_asyncomplete_omni
-"     au User asyncomplete_setup call asyncomplete#register_source({
-"         \ 'name': 'omni',
-"         \ 'whitelist': ['*'],
-"         \ 'blacklist': ['c', 'cpp', 'html'],
-"         \ 'completor': function('asyncomplete#sources#omni#completor')
-"         \  })
-" augroup END
-"}}}
-" asyncomplete-Verdin{{{
-let g:Verdin#cooperativemode = 1
-func! s:asyncomplete_Verdin(opt, ctx) abort "{{{
-    let startcol = Verdin#omnifunc(1, '')
-    let matches = Verdin#omnifunc(0, strpart(getline('.'), startcol))
-    call asyncomplete#complete(a:opt.name, a:ctx, startcol + 1, matches)
-endfunc "}}}
-augroup vimrc_asyncomplete_verdin
-    au User asyncomplete_setup call asyncomplete#register_source({
-                \ 'name': 'Verdin',
-                \ 'whitelist': ['vim'],
-                \ 'completor': function('s:asyncomplete_Verdin'),
-                \ })
-augroup END
-"}}}
-" asyncomplete-buffer{{{
-augroup vimrc_asyncomplete_buffer
-    au User asyncomplete_setup call asyncomplete#register_source({
-                \ 'name': 'buffer',
-                \ 'whitelist': ['*'],
-                \ 'completor': function('asyncomplete#sources#buffer#completor'),
-                \ })
 "}}}
 " mattn/sonictemplate{{{
 " I don't allow sonictemplate to define default mappings.
