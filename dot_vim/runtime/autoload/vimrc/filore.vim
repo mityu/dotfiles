@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 10-Feb-2019.
+"Last Change: 26-Feb-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -45,7 +45,7 @@ func! s:filesystem.abs(path) abort "{{{
 	return fnamemodify(a:path,':p')
 endfunc "}}}
 
-func! s:list_up_files(dir_path) abort "{{{
+func! s:list_files(dir_path) abort "{{{
 	let show_hidden = s:win_get_reference_of_current_items().show_hidden_files
 	let dir_path = escape(a:dir_path,',')
 	let raw_file_list = []
@@ -111,6 +111,9 @@ func! s:isdirectory(item) abort "{{{
 endfunc "}}}
 func! s:escape_regpat(pat) abort "{{{
 	return escape(a:pat,'.~/\^$[]:+*')
+endfunc "}}}
+func! s:is_cmdwin() abort "{{{
+    return getcmdwintype() !=# ''
 endfunc "}}}
 
 " Main
@@ -210,7 +213,7 @@ func! s:win_open_new() abort "{{{
 	call s:browse_color()
 endfunc "}}}
 func! s:win_get_available_name() abort "{{{
-	let name_base = 'filore:'
+	let name_base = 'filore://file-browser:'
 	let subscript = 1
 	while s:TRUE
 		let new_name = name_base . string(subscript)
@@ -237,12 +240,12 @@ func! s:win_close() abort "{{{
 	endif
 endfunc "}}}
 func! s:win_get_reference_of_current_items() abort "{{{
-	return s:win_get_reference_of_items(bufnr('%'))
+	return s:win_get_reference_of_items(bufnr(s:is_cmdwin() ? '#' : '%'))
 endfunc "}}}
 func! s:win_get_reference_of_items(bufnr) abort "{{{
 	let buffer_name = bufname(a:bufnr)
 	if !has_key(s:filore_list,buffer_name)
-		call s:notify.echoerr('items is not in s:filore_list: ' . buffer_name)
+		call s:notify.error('items is not in s:filore_list: ' . buffer_name)
 		return {}
 	endif
 	return s:filore_list[buffer_name].items
@@ -294,15 +297,15 @@ endfunc "}}}
 " Browse
 func! s:browse_fresh_current_directory_info() abort "{{{
 	let items = s:win_get_reference_of_current_items()
-	let items.file_list = s:browse_list_up_files(
+	let items.file_list = s:browse_list_files(
 				\ items.current_directory, s:NULL) " 'depth' starts with 0.
 endfunc "}}}
-func! s:browse_list_up_files(parent_dirctory, depth) abort "{{{
-	return s:browse_fill_nested_file_info(s:browse_list_up_file_info(
+func! s:browse_list_files(parent_dirctory, depth) abort "{{{
+	return s:browse_fill_nested_file_info(s:browse_list_file_info(
 				\ a:parent_dirctory, a:depth))
 endfunc "}}}
-func! s:browse_list_up_file_info(parent_dirctory,depth) abort "{{{
-	let [dirs,files] = s:list_up_files(a:parent_dirctory)
+func! s:browse_list_file_info(parent_dirctory,depth) abort "{{{
+	let [dirs,files] = s:list_files(a:parent_dirctory)
 	let Convert_to_info = {file_name, isdirectory ->
 				\ {
 				\	'abs': s:filesystem.abs(file_name),
@@ -335,7 +338,7 @@ func! s:browse_fill_nested_file_info(file_list) abort "{{{
 		endif
 		if s:has_item(unfolded_directories, file_list[index].abs)
 			call s:extend_pos(file_list,
-						\ s:browse_list_up_file_info(file_list[index].abs,
+						\ s:browse_list_file_info(file_list[index].abs,
 						\ 	file_list[index].depth + 1),
 						\ index+1)
 			let size = len(file_list)
@@ -394,7 +397,7 @@ func! s:browse_unfold_directory_under_cursor() abort "{{{
 	call add(items.unfolded_directories, file_info.abs)
 	call s:win_setline(lnum, s:browse_get_display_text(file_info))
 
-	let child_file_list = s:browse_list_up_files(file_info.abs, file_info.depth + 1)
+	let child_file_list = s:browse_list_files(file_info.abs, file_info.depth + 1)
 	if empty(child_file_list) | return | endif
 
 	call s:extend_pos(items.file_list, child_file_list, index + 1)
@@ -593,7 +596,7 @@ func! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
 		return a:on_file
 	endif
 endfunc "}}}
-func! vimrc#filore#get_file_path_under_cursor() abort "{{{
+func! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
 	return vimrc#filore#get_file_path_of_line(line('.'))
 endfunc "}}}
 func! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
