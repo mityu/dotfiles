@@ -218,7 +218,6 @@ func! s:pack_register() abort "{{{
     call minpac#add('kana/vim-altr')
     call minpac#add('itchyny/vim-cursorword')
     call minpac#add('mattn/sonictemplate-vim')
-    call minpac#add('w0rp/ale')
     call minpac#add('vim-jp/vital.vim')
     call minpac#add('vim-jp/vimdoc-ja')
     call minpac#add('tyru/open-browser.vim')
@@ -1020,34 +1019,6 @@ augroup vimrc_filetype
     au FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
 augroup END
  "}}}
-" w0rp/ale{{{
-let g:ale_lint_on_save = 1
-let g:ale_lint_on_text_changed = 'normal'
-let g:ale_lint_on_insert_leave = 1
-let g:ale_lint_on_enter = 1
-let g:ale_set_loclist = 0
-" let g:ale_set_quickfix = 1
-" let g:ale_open_list = 0
-" let g:ale_keep_list_window_open = 0
-" let g:ale_linters = {}
-" let g:ale_linters.cpp = ['clangd']
-" let g:ale_linters.c = ['gcc','clangd']
-let g:ale_completion_enabled = 0
-" let g:ale_completion_delay = 1
-
-func! s:ale_control() abort "{{{
-    if &l:filetype =~# '\<vim\>'
-        ALEEnable
-    else
-        ALEDisable
-    endif
-endfunc "}}}
-augroup vimrc_ale
-    au WinEnter * call s:ale_control()
-    au FileType * call s:ale_control()
-augroup END
-
-"}}}
 " ayncomplete.vim{{{
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_smart_completion = 0
@@ -1075,15 +1046,25 @@ augroup vimrc_asyncomplete_sources
 augroup END
 "}}}
 " vim-lsp{{{
-if executable('clangd')
-    augroup vimrc_lsp_cpp_clangd
-        au User lsp_setup call lsp#register_server({
+augroup vimrc_lsp_servers
+    au User lsp_setup call s:lsp_register_servers()
+augroup END
+func! s:lsp_register_servers() abort
+    if executable('clangd')
+        call lsp#register_server({
                     \ 'name': 'clangd',
                     \ 'cmd': {server_info -> ['clangd']},
                     \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
                     \ })
-    augroup END
-endif
+    endif
+    if executable('vint') && executable('efm-langserver')
+        call lsp#register_server({
+                    \ 'name' : 'efm-langserver-vim',
+                    \ 'cmd': {server_info -> ['efm-langserver', '-stdin', &shell, &shellcmdflag, 'vint -']},
+                    \ 'whitelist': ['vim']
+                    \ })
+    endif
+endfunc
 let g:lsp_signs_enabled = 1
 let g:lsp_signs_error = {'text': '>>'}
 let g:lsp_signs_warning = {'text': '--'}
