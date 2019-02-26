@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 23-Feb-2019.
+" Last Change: 26-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -33,10 +33,8 @@ endfunc "}}}
 func! VimrcGetVar(...) abort "{{{
     if a:0 == 0
         return s:
-    elseif a:1 == 1
-        return get(s:, a:1)
     else
-        return get(s:, a:1, a:2)
+        return call('get', [s:] + a:000)
     endif
 endfunc "}}}
 func! s:rc(fname) abort "{{{
@@ -71,6 +69,57 @@ func! s:echomsg_error(msg) abort "{{{
 endfunc "}}}
 func! s:echomsg_warning(msg) abort "{{{
     call s:echomsg_with_color(a:msg, 'WarningMsg')
+endfunc "}}}
+func! s:is_visualmode() abort "{{{
+    return s:has(['v', 'V', "\<C-v>"], mode())
+endfunc "}}}
+func! s:New(class_name) abort "{{{
+    let class = 's:' . a:class_name
+    if !exists(class)
+        call s:echomsg_error('s:New(): Class does not exist: ' . a:class_name)
+        return {}
+    endif
+    let new_obj = deepcopy(eval(class))
+    if exists('*new_obj.' . a:class_name)
+        cal call(new_obj[a:class_name], a:000)  " Call constructor.
+    endif
+    return new_obj
+endfunc "}}}
+
+" Classes
+let s:save_options = {}
+func! s:save_options.save_options() abort "{{{
+    call self.clear()
+endfunc "}}}
+func! s:save_options.store(options) abort "{{{
+    let type = type(a:options)
+    if type == v:t_list
+        let options = a:options
+    elseif type == v:t_string
+        let options = [a:options]
+    else
+        call s:echomsg_error('save_options.store(): String or List is required')
+    endif
+    for option in options
+        let self._shelter[option] = eval('&l:' . option)
+    endfor
+endfunc "}}}
+func! s:save_options.restore(option_name) abort "{{{
+    if !has_key(self._shelter, a:option_name)
+        call s:echomsg_error('option have not been stored: ' . a:option_name)
+        return
+    endif
+    execute printf('let &l:%s=%s',
+                \ a:option_name,
+                \ string(self._shelter[a:option_name]))
+endfunc "}}}
+func! s:save_options.restore_all() abort "{{{
+    for option_name in keys(self._shelter)
+        call self.restore(option_name)
+    endfor
+endfunc "}}}
+func! s:save_options.clear() abort "{{{
+    let self._shelter = {}
 endfunc "}}}
 
 " Startup config
@@ -228,15 +277,14 @@ augroup END
  "}}}
 
 " Mapping
-" builtin{{{
+" builtin, extension{{{
 nnoremap ; q:
-nnoremap q: :
 nnoremap : ;
 vnoremap ; q:
-vnoremap q: :
 vnoremap : ;
 map <C-j> <ESC>
-map! <C-j> <ESC>
+imap <C-j> <ESC>
+cmap <C-j> <C-c>
 onoremap <C-j> <ESC>
 
 noremap <C-a> ^
@@ -258,9 +306,10 @@ nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
 nnoremap <expr> @@ (reg_recording()==#''?'@a':'q')
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
+nnoremap <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nnoremap <silent> / :<C-u>call <SID>curjump()<CR>
+nmap / <Plug>(<SID>curjump)
 nnoremap ? /
 nmap zf <Plug>(operator-vimrc-fold-zf)
 nmap zF <Plug>(operator-vimrc-fold-zF)
@@ -305,6 +354,11 @@ for [s:lhs,s:rhs] in [[';',':'],[':',';'],['<ESC>','N']]
 endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
+
+nnoremap <expr> <Plug>(<SID>curjump-enter) <SID>phantom_cmd('/')
+nnoremap <silent> <Plug>(<SID>curjump-hlsearch) :<C-u>let &hlsearch = &hlsearch<CR>
+nmap <Plug>(<SID>curjump) <Plug>(<SID>curjump-hlsearch)<Plug>(<SID>curjump-enter)
+
 
 func! s:map_fold_cmd(keys) abort "{{{
     let commentstring_save = &l:commentstring
@@ -365,24 +419,99 @@ func! s:map_define_operator() abort "{{{
         exec printf(map_cmd,keys,keys)
     endfor
 endfunc "}}}
-
-func! s:curjump() abort "{{{
-    let @/ = input('/')
-    call search(@/)
+" Do something without recoding to history.
+let s:phantom_cmd = {
+            \ 'type': '',
+            \ 'history': [],
+            \ }
+func! s:phantom_cmd(config) abort "{{{
+    let config_type = type(a:config)
+    if config_type == type({})
+        let s:phantom_cmd.type = a:config.type
+        let entering_key = a:config.entering_key
+    else
+        let s:phantom_cmd.type = a:config
+        let entering_key = a:config
+    endif
+    let s:phantom_cmd.history = map(range(1, histnr(s:phantom_cmd.type)),
+                \ 'histget(s:phantom_cmd.type, v:val)')
+    augroup phantom_cmd
+        au!
+        " CmdlineLeave fires even if users leave from command-line window
+        " directly.
+        au CmdlineLeave * call s:phantom_cmd_on_leave()
+    augroup END
+    return entering_key
 endfunc "}}}
-func! s:map_for_cmdwin() abort "{{{
+func! s:phantom_cmd_on_leave() abort "{{{
+    " NOTE: expand('<afile>') returns one |cmdwin-char| . For more
+    " information, see :h CmdlineLeave .
+    if expand('<afile>') !=# s:phantom_cmd.type
+        return
+    endif
+    if histget(s:phantom_cmd.type, -1) ==# s:phantom_cmd.type[-1]
+        " History isn't changed.
+        return
+    endif
+
+    " Replace history.
+    call histdel(s:phantom_cmd.type, '.*')
+    for item in s:phantom_cmd.history
+        call histadd(s:phantom_cmd.type, item)
+    endfor
+endfunc "}}}
+func! s:toggle_zooming_window() abort "{{{
+    if winnr('$') == 1 | return | endif
+    if !exists('t:vimrc_zooming_window')
+        let t:vimrc_zooming_window = {
+                    \ 'zoomed_winnr': 0,
+                    \ 'winrestcmd': '',
+                    \ }
+    endif
+    if t:vimrc_zooming_window.zoomed_winnr
+        execute t:vimrc_zooming_window.winrestcmd
+    endif
+    if t:vimrc_zooming_window.zoomed_winnr == winnr()
+        let t:vimrc_zooming_window.zoomed_winnr = 0
+        let t:vimrc_zooming_window.winrestcmd = ''
+    else
+        let t:vimrc_zooming_window.zoomed_winnr = winnr()
+        let t:vimrc_zooming_window.winrestcmd = winrestcmd()
+        wincmd _
+        wincmd |
+    endif
+endfunc "}}}
+func! s:cmdwin_enter() abort "{{{
+    call s:cmdwin_save_options.clear()
+
     " Type <CR> to execute current line in command-line window.
-    silent! nunmap <buffer> <CR>
+    nnoremap <buffer> <CR> <CR>
 
     " Return back to the current window from command-line window with
     " inputting <C-c> once.
     nnoremap <buffer> <C-c> <C-c><C-c>
     nmap <buffer> q <C-c>
     imap <buffer> <C-c> <ESC><C-c>
+
+    let cmdwin_type = expand('<afile>')
+    if cmdwin_type ==# ':'
+        nnoremap <buffer> ; <C-c>
+
+        call s:cmdwin_save_options.store('completeopt')
+        setl completeopt=menu,preview
+    endif
 endfunc "}}}
+func! s:cmdwin_leave() abort "{{{
+    " let cmdwin_type = expand('<afile>')
+    if exists('s:cmdwin_save_options')
+        call s:cmdwin_save_options.restore_all()
+    endif
+endfunc "}}}
+let s:cmdwin_save_options = s:New('save_options')
 
 augroup vimrc_mapping
-    au CmdWinEnter * call s:map_for_cmdwin()|startinsert
+    au CmdWinEnter * call s:cmdwin_enter()|startinsert
+    au CmdWinLeave * call s:cmdwin_leave()
     au User vimrc_initialize call s:map_define_operator()
 augroup END
 
@@ -662,17 +791,13 @@ func! s:filter(bang,pat,...) abort "{{{
     endif
 endfunc "}}}
 func! s:draft() abort "{{{
-    let b:vimrc_draft_savedata = {
-                \ 'buftype': &l:buftype,
-                \ 'swapfile': &l:swapfile,
-                \ 'undofile': &l:undofile,
-                \}
+    let b:vimrc_draft_save_options = s:New('save_options')
+    call b:vimrc_draft_save_options.store(['buftype', 'swapfile'])
     setl buftype=nofile noswapfile
 endfunc "}}}
 func! s:undraft() abort "{{{
     if !exists('b:vimrc_draft_savedata') | return | endif
-    execute join(values(map(copy(b:vimrc_draft_savedata),
-                \'printf("let &l:%s=%s",v:key,string(v:val))')),"|")
+    call b:vimrc_draft_savedata.restore_all()
 endfunc "}}}
 func! s:scratch(...) abort "{{{
     if a:1 ==# ''
@@ -781,10 +906,10 @@ func! s:pack_init() abort "{{{
         packadd minpac
     catch /^Vim\%((\a\+)\)\=:E919/
         "Download minpac...
-        let minpac_path=s:vim_home() . '/pack/minpac/opt/minpac'
-        echo 'Downloading minpac...'
+        let minpac_path = s:filename([$DOT_VIM, 'pack', 'minpac', 'opt', 'minpac'])
+        call s:echomsg('Downloading minpac...')
         call system('git clone https://github.com/k-takata/minpac.git ' .
-                    \minpac_path)
+                    \ minpac_path)
         packadd minpac
     catch
         echoerr v:exception
@@ -845,8 +970,7 @@ func! s:pack_register() abort "{{{
     call minpac#add('prabirshrestha/asyncomplete.vim')
     call minpac#add('prabirshrestha/vim-lsp')
     call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-    call minpac#add('prabirshrestha/asyncomplete-necovim.vim')
-    call minpac#add('Shougo/neco-vim')
+    call minpac#add('machakann/vim-Verdin')
     call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
     call minpac#add('junegunn/vim-easy-align')
     call minpac#add('tyru/caw.vim')
@@ -955,14 +1079,29 @@ let g:lsp_diagnostics_echo_cursor = 1
 "         \  })
 " augroup END
 "}}}
-" asyncomplete-necovim{{{
-augroup vimrc_asyncomplete_necovim
+" asyncomplete-Verdin{{{
+let g:Verdin#cooperativemode = 1
+func! s:asyncomplete_Verdin(opt, ctx) abort "{{{
+    let startcol = Verdin#omnifunc(1, '')
+    let matches = Verdin#omnifunc(0, strpart(getline('.'), startcol))
+    call asyncomplete#complete(a:opt.name, a:ctx, startcol + 1, matches)
+endfunc "}}}
+augroup vimrc_asyncomplete_verdin
     au User asyncomplete_setup call asyncomplete#register_source({
-                \ 'name': 'neco-vim',
+                \ 'name': 'Verdin',
                 \ 'whitelist': ['vim'],
-                \ 'completor': function('asyncomplete#sources#necovim#completor'),
-                \})
-augroup END "}}}
+                \ 'completor': function('s:asyncomplete_Verdin'),
+                \ })
+augroup END
+"}}}
+" asyncomplete-buffer{{{
+augroup vimrc_asyncomplete_buffer
+    au User asyncomplete_setup call asyncomplete#register_source({
+                \ 'name': 'buffer',
+                \ 'whitelist': ['*'],
+                \ 'completor': function('asyncomplete#sources#buffer#completor'),
+                \ })
+"}}}
 " mattn/sonictemplate{{{
 " I don't allow sonictemplate to define default mappings.
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
