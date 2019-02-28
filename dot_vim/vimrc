@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 26-Feb-2019.
+" Last Change: 28-Feb-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -197,7 +197,6 @@ func! s:pack_register() abort "{{{
     call minpac#add('vim-scripts/autodate.vim')
     call minpac#add('thinca/vim-quickrun')
     call minpac#add('thinca/vim-prettyprint')
-    call minpac#add('thinca/vim-partedit')
     call minpac#add('tyru/capture.vim')
     call minpac#add('osyo-manga/vim-jplus')
     call minpac#add('kana/vim-textobj-user')
@@ -238,9 +237,11 @@ func! s:pack_register() abort "{{{
     call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
     call minpac#add('junegunn/vim-easy-align')
     call minpac#add('tyru/caw.vim')
+    call minpac#add('thinca/vim-ambicmd')
 
     call minpac#add('previm/previm',{'type': 'opt'})
     call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
+    call minpac#add('thinca/vim-partedit',{'type': 'opt'})
 endfunc "}}}
 func! s:pack_init() abort "{{{
     try
