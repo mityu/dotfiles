@@ -842,7 +842,6 @@ com! -bar UnDraft call s:undraft()
 com! -bar -nargs=? Scratch call s:scratch(<q-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
-com! -bar ReplaceHardTab keeppatterns %s/\t/\=repeat(' ', shiftwidth())/g
 
 com! -bar PackInit   call s:pack_init()
 com! -bar PackUpdate call s:pack_update()
