@@ -578,7 +578,7 @@ func! s:cmdwin_enter() abort "{{{
         nnoremap <buffer> ; <C-c>
 
         call s:cmdwin_save_options.store('completeopt')
-        setl completeopt=menu,preview,longest
+        setl completeopt=menu,preview
     endif
 endfunc "}}}
 func! s:cmdwin_leave() abort "{{{
@@ -903,10 +903,13 @@ endfunc "}}}
 " Function
 " These are useful when using expression register.
 func! FileName() abort "{{{
-    return expand('%')
+    return expand('%:p:h')
 endfunc "}}}
 func! FileParent() abort "{{{
     return expand('%:p:h:h')
+endfunc "}}}
+func! FilePath() abort "{{{
+    return expand('%')
 endfunc "}}}
 
 
