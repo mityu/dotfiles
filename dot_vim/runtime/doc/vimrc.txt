@@ -201,32 +201,63 @@ shcmd.vim						*shcmd.vim*
 ------------------------------------------------------------------------------
 COMMANDS						*shcmd-commands*
 
-:Ls[!]	[{directory}]					*shcmd-Ls*
+:Ls[!][{directory}]					*shcmd-Ls* *:Ls*
 	 Show a directory's contents like 'ls' command in shells.
 	 If '!' is provided, this shows hidden files. In other words, '!' is
 	 to this what '-a' option is to 'ls' command in shells.
 	 If {directory} provided, this shows the directory's contents;
 	 Otherwise, this shows current directory's contents.
 
-:Mkdir[!] {directories}					*shcmd-Mkdir*
+:Mkdir[!] {directories}				*shcmd-Mkdir* *:Mkdir*
 	 Make directories like 'mkdir' command in shells.
 	 If '!' is provided, this makes intermidiate directories. In other
 	 words, '!' is to this what '-p' option is to 'mkdir' command in shells.
 
-:Touch {files}						*shcmd-Touch*
+:Touch {files}					*shcmd-Touch* *:Touch*
 	Make files like 'touch' command in shells.
 
-:CpFile [{copy-from}] {copy-to}				*shcmd-CpFile*
+:CpFile [{copy-from}] {copy-to}			*shcmd-CpFile* *:CpFile*
 	 Copy a file like 'cp' command in shells, but unlike 'cp', this command
 	won't copy directories.
 	 If {copy-from} is omitted, this copies current buffer's contents to
 	{copy-to}.
 
-:Rm[!] {files}						*shcmd-Rm*
+:Rm[!] {files}						*shcmd-Rm* *:Rm*
 	 Delete files or directories like 'rm' command in shells.
 	 If '!' is provided, this recognizes arguments as directorys' names;
 	 Otherwise this recognizes them as files' names. In other words, '!' is
 	 to this what '-r' option is to 'rm' command in shells.
+
+
+==============================================================================
+vimrc							*vimrc-mityu*
+
+
+------------------------------------------------------------------------------
+COMMANDS						*vimrc-commands*
+
+NOTE: Following :WorkingPlugin* commands are applied for a directory,
+/path/to/.vim/workplace/{plugin-name} .
+NOTE: In the following, $WORKPLACE means the directory,
+/path/to/.vim/workplace .
+
+:WorkingPluginLoad {plugin-name} ...			*:WorkingPluginLoad*
+	Load plugins, like |:packadd|, but before loading plugins,
+	this command deletes load-guard variables.
+
+:WorkingPluginCd[!] {plugin-name}			*:WorkingPluginCd*
+	Execute `:cd $WORKPLACE/{plugin-name}` .
+	However, if ! is provided, it uses |:lcd| instead of |:cd|.
+
+:WorkingPluginClone {repository} [{plugin-name}]	*:WorkingPluginClone*
+	Clone {repository} into $WORKPLACE/{plugin-name} .
+	{repository} is a github.com's repository URL, but not a full URL. You
+	should use URL begin with user name, like plugin managers.
+	If {plugin-name} doesn't provided, {plugin-name} is created from
+	{repository} like raw `git clone` command.
+
+:WorkiingpluginRm {plugin-name} ...			*:WorkingPluginRm*
+	Delete $WORKPLACE/{plugin-name} .
 
 
 ==============================================================================

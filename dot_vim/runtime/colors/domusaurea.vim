@@ -1,4 +1,4 @@
-"Last Change: 10-Feb-2019.
+"Last Change: 28-Feb-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -12,38 +12,38 @@ let g:colors_name=s:colors_name
 if !exists('s:TYPE_NUM')|let s:TYPE_NUM=type(0)|execute 'lockvar s:TYPE_NUM'|endif
 
 let s:palette={
-			\'black': [0,'black'],
-			\'white': [255,'white'],
-			\'yellow': [226,'yellow'],
-			\'darkred': [52,'#650000'],
-			\'red': [196,'red'],
-			\'tomato': [9,'tomato'],
-			\'orange': [214,'orange'],
-			\'vividorange': [208,'#ff7f00'],
-			\'dullorange': [214,'#ff9932'],
-			\'tenderorange': [214,'orange1'],
-			\'darkorange': [100,'#5c4709'],
-			\'deeplydarkorange': [94,'#322705'],
-			\'tan': [214,'#ffa54f'],
-			\'cornsilk': [230,'cornsilk'],
-			\'gray': [238,'gray'],
-			\'lightgray': [240,'#555555'],
-			\'darkgray': [238, '#333333'],
-			\'blackgray': [234,'#1f1f1f'],
-			\'lightlightgray': [240,'#666666'],
-			\'gold': [178,'gold'],
-			\'cyan': [14,'cyan'],
-			\'darkcyan': [67,'darkcyan'],
-			\'deeplydarkblue': [17,'#002a40'],
-			\'mediumspringgreen': [48,'mediumspringgreen'],
-			\'green': [28, '#006519'],
-			\'darkgreen': [28,'#00320c'],
-			\'purple': [129,'purple'],
-			\'violet': [207,'violet'],
-			\'lightsteelblue': [103,'lightsteelblue'],
-			\'russet': [142,'yellow4'],
-			\'NONE': ['NONE','NONE']
-			\}
+            \'black': [0,'black'],
+            \'white': [255,'white'],
+            \'yellow': [226,'yellow'],
+            \'darkred': [52,'#650000'],
+            \'red': [196,'red'],
+            \'tomato': [9,'tomato'],
+            \'orange': [214,'orange'],
+            \'vividorange': [208,'#ff7f00'],
+            \'dullorange': [214,'#ff9932'],
+            \'tenderorange': [214,'orange1'],
+            \'darkorange': [100,'#5c4709'],
+            \'deeplydarkorange': [94,'#322705'],
+            \'tan': [214,'#ffa54f'],
+            \'cornsilk': [230,'cornsilk'],
+            \'gray': [238,'gray'],
+            \'lightgray': [240,'#555555'],
+            \'darkgray': [238, '#333333'],
+            \'blackgray': [234,'#1f1f1f'],
+            \'lightlightgray': [240,'#666666'],
+            \'gold': [178,'gold'],
+            \'cyan': [14,'cyan'],
+            \'darkcyan': [67,'darkcyan'],
+            \'deeplydarkblue': [17,'#002a40'],
+            \'mediumspringgreen': [48,'mediumspringgreen'],
+            \'green': [28, '#006519'],
+            \'darkgreen': [28,'#00320c'],
+            \'purple': [129,'purple'],
+            \'violet': [207,'violet'],
+            \'lightsteelblue': [103,'lightsteelblue'],
+            \'russet': [142,'yellow4'],
+            \'NONE': ['NONE','NONE']
+            \}
 
 let s:gui_running=has('gui_running')
 
@@ -72,7 +72,7 @@ func! s:hi(group,fg,bg,attr) "{{{
         let bg=has_bg? 'ctermbg=' . s:palette[a:bg][0]: ''
         let attr=has_attr? 'cterm=' . a:attr : ''
     endif
-	execute 'silent highlight' a:group fg bg attr
+    execute 'silent highlight' a:group fg bg attr
 endfunc "}}}
 func! s:echoerr(msg) "{{{
     echohl Error
