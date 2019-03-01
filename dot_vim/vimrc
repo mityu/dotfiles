@@ -513,8 +513,8 @@ func! s:phantom_cmd(config) abort "{{{
         let s:phantom_cmd.type = a:config
         let entering_key = a:config
     endif
-    let s:phantom_cmd.history = map(range(1, histnr(s:phantom_cmd.type)),
-                \ 'histget(s:phantom_cmd.type, v:val)')
+    let s:phantom_cmd.history = filter(map(range(1, histnr(s:phantom_cmd.type)),
+                \ 'histget(s:phantom_cmd.type, v:val)'), 'v:val !=# ''')
     augroup phantom_cmd
         au!
         " CmdlineLeave fires even if users leave from command-line window
@@ -782,6 +782,7 @@ call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
 call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
+call add(s:_map,['nnoremap','<silent>',';','call vimrc#cmdhist#start()'])
 call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
 execute join(map(s:_map,{->join([
             \  v:val[0],
