@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 28-Feb-2019.
+"Last Change: 01-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -69,7 +69,7 @@ func! vimrc#mru#start() abort "{{{
         call vimrc#mru#delete_unexist_file_history()
     endif
     call s:load_history()
-    call vimrc#gram#launch(s:hilt)
+    call vimrc#gram#launch(s:bearer)
 endfunc "}}}
 func! vimrc#mru#try_to_enable() abort "{{{
     if !exists('g:mru_history_file')
@@ -110,7 +110,7 @@ func! s:save_history() abort "{{{
     endif
     call writefile(s:mru.history_all,g:mru_history_file)
 endfunc "}}}
-func! s:hilt_filter(user_input) abort "{{{
+func! s:bearer_filter(user_input) abort "{{{
     if a:user_input == ''
         let s:mru.regpat_save = ''
         return s:mru.history_all
@@ -123,10 +123,10 @@ func! s:hilt_filter(user_input) abort "{{{
     let s:mru.user_input_save = a:user_input
     return s:mru.history_filtered
 endfunc "}}}
-func! s:hilt_regpat(user_input) abort "{{{
+func! s:bearer_regpat(user_input) abort "{{{
     return s:mru.regpat_save
 endfunc "}}}
-func! s:hilt_selected(selected_item) abort "{{{
+func! s:bearer_selected(selected_item) abort "{{{
     execute 'edit' fnameescape(a:selected_item)
 endfunc "}}}
 
@@ -148,12 +148,12 @@ endfunc "}}}
 if !exists('s:is_available')
     let s:is_available = vimrc#mru#try_to_enable()
 endif
-if !exists('s:hilt')
-    let s:hilt = {
+if !exists('s:bearer')
+    let s:bearer = {
                 \ 'name' : 'mru',
-                \ 'filter' : function('s:hilt_filter'),
-                \ 'regpat' : function('s:hilt_regpat'),
-                \ 'selected' : function('s:hilt_selected')
+                \ 'filter' : function('s:bearer_filter'),
+                \ 'regpat' : function('s:bearer_regpat'),
+                \ 'selected' : function('s:bearer_selected')
                 \}
 endif
 

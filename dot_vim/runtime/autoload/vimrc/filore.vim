@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 28-Feb-2019.
+"Last Change: 01-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -545,9 +545,9 @@ func! s:history_start_select() abort "{{{
     let s:select_history.alter_bufnr_save = items.alter_bufnr
     let s:select_history.user_input_save = ''
     let s:select_history.regpat_save = ''
-    call vimrc#gram#launch(s:history_hilt)
+    call vimrc#gram#launch(s:history_bearer)
 endfunc "}}}
-func! s:history_hilt_filter(user_input) abort "{{{
+func! s:history_bearer_filter(user_input) abort "{{{
     if a:user_input ==# ''
         let s:select_history.regpat_save = ''
         return s:select_history.item_all
@@ -561,25 +561,25 @@ func! s:history_hilt_filter(user_input) abort "{{{
     let s:select_history.user_input_save = a:user_input
     return s:select_history.item_filtered
 endfunc "}}}
-func! s:history_hilt_regpat(user_input) abort "{{{
+func! s:history_bearer_regpat(user_input) abort "{{{
     return s:select_history.regpat_save
 endfunc "}}}
-func! s:history_hilt_selected(selected_item) abort "{{{
+func! s:history_bearer_selected(selected_item) abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.current_directory = a:selected_item
     call s:browse_fresh_display()
 endfunc "}}}
-func! s:history_hilt_exit() abort "{{{
+func! s:history_bearer_exit() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.alter_bufnr = s:select_history.alter_bufnr_save
 endfunc "}}}
-if !exists('s:history_hilt')
-    let s:history_hilt = {
+if !exists('s:history_bearer')
+    let s:history_bearer = {
                 \ 'name': 'filore-history',
-                \ 'filter': function('s:history_hilt_filter'),
-                \ 'regpat': function('s:history_hilt_regpat'),
-                \ 'selected': function('s:history_hilt_selected'),
-                \ 'exit': function('s:history_hilt_exit')
+                \ 'filter': function('s:history_bearer_filter'),
+                \ 'regpat': function('s:history_bearer_regpat'),
+                \ 'selected': function('s:history_bearer_selected'),
+                \ 'exit': function('s:history_bearer_exit')
                 \}
 endif
 if !exists('s:select_history')

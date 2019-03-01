@@ -1,13 +1,13 @@
 "Plugin Name: buffers.vim
 "Author: mityu
-"Last Change: 28-Feb-2019.
+"Last Change: 01-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
 
 func! vimrc#buffers#start() abort "{{{
     call s:generate_buflist()
-    call vimrc#gram#launch(s:hilt)
+    call vimrc#gram#launch(s:bearer)
 endfunc "}}}
 func! s:generate_buflist() abort "{{{
     let buflist = range(1,bufnr('$'))
@@ -18,7 +18,7 @@ func! s:generate_buflist() abort "{{{
         let s:buflist_all[bufname] = bufnr
     endfor
 endfunc "}}}
-func! s:hilt_filter(user_input) abort "{{{
+func! s:bearer_filter(user_input) abort "{{{
     if a:user_input ==# ''
         let s:regpat_save = ''
         return keys(s:buflist_all)
@@ -31,10 +31,10 @@ func! s:hilt_filter(user_input) abort "{{{
     let s:user_input_save = a:user_input
     return s:buflist_filtered
 endfunc "}}}
-func! s:hilt_regpat(user_input) abort "{{{
+func! s:bearer_regpat(user_input) abort "{{{
     return s:regpat_save
 endfunc "}}}
-func! s:hilt_selected(selected_item) abort "{{{
+func! s:bearer_selected(selected_item) abort "{{{
     execute 'buffer' s:buflist_all[a:selected_item]
 endfunc "}}}
 func! s:initialize_variables() "{{{
@@ -46,11 +46,11 @@ endfunc "}}}
 
 if !exists('s:did_initialize_variables')
     call s:initialize_variables()
-    let s:hilt = {
+    let s:bearer = {
                 \ 'name' : 'buffers',
-                \ 'filter' : function('s:hilt_filter'),
-                \ 'regpat' : function('s:hilt_regpat'),
-                \ 'selected' : function('s:hilt_selected'),
+                \ 'filter' : function('s:bearer_filter'),
+                \ 'regpat' : function('s:bearer_regpat'),
+                \ 'selected' : function('s:bearer_selected'),
                 \ 'exit' : function('s:initialize_variables'),
                 \}
 endif

@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 28-Feb-2019.
+"Last Change: 01-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -12,9 +12,9 @@ if !exists('s:did_initialize_variables') "{{{
                 \ 'line_prompt' : 1,
                 \ 'user_input' : '',
                 \ 'prompt' : '',
-                \ 'hilt': {}
+                \ 'bearer': {}
                 \ }
-    let s:active_hilt = ''
+    let s:active_bearer = ''
     let s:gram_default_config = {
                 \ 'prompt': '>> ',
                 \ 'name' : '',
@@ -131,9 +131,9 @@ func! s:win_is_cmdwin() abort "{{{
 endfunc "}}}
 
 " gram
-func! vimrc#gram#launch(hilt) abort "{{{
+func! vimrc#gram#launch(bearer) abort "{{{
     if s:gram_is_active()
-        call s:notify.warning('gram is already active with a hilt: ' . s:active_hilt)
+        call s:notify.warning('gram is already active with a bearer: ' . s:active_bearer)
         call s:win_foreground()
         return
     endif
@@ -142,16 +142,16 @@ func! vimrc#gram#launch(hilt) abort "{{{
         return
     endif
     for require in ['filter','regpat','selected','name']
-        if !has_key(a:hilt,require)
-            call s:notify.error('This hilt does not have required element: ' . require)
+        if !has_key(a:bearer,require)
+            call s:notify.error('This bearer does not have required element: ' . require)
             return
         endif
     endfor
 
-    let s:gram.hilt = a:hilt
-    call extend(s:gram.hilt,s:gram_default_config,'keep')
-    let s:active_hilt = s:gram.hilt.name
-    let s:gram.prompt = s:gram.hilt.name . ' ' . s:gram.hilt.prompt
+    let s:gram.bearer = a:bearer
+    call extend(s:gram.bearer,s:gram_default_config,'keep')
+    let s:active_bearer = s:gram.bearer.name
+    let s:gram.prompt = s:gram.bearer.name . ' ' . s:gram.bearer.prompt
     call s:win_foreground()
     call s:gram_define_mapping()
     call s:gram_initialize_coloring()
@@ -161,10 +161,10 @@ func! vimrc#gram#launch(hilt) abort "{{{
     augroup gram-open-dummy
         au!
         au User gramOpen "Do nothing.
-        execute 'au User' s:active_hilt . 'Open "Do nothing'
+        execute 'au User' s:active_bearer . 'Open "Do nothing'
     augroup END
     doautocmd User gramOpen
-    execute 'doautocmd User' s:active_hilt . 'Open'
+    execute 'doautocmd User' s:active_bearer . 'Open'
     augroup gram-open-dummy
         au!
     augroup END
@@ -184,29 +184,29 @@ func! s:gram_initialize_coloring() abort "{{{
 endfunc "}}}
 func! s:gram_set_user_input_syntax() abort "{{{
     silent syntax clear gramMatch
-    exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.hilt.regpat,[s:gram.user_input]) . '/'
+    exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.bearer.regpat,[s:gram.user_input]) . '/'
 endfunc "}}}
 func! s:gram_is_active() abort "{{{
-    return s:active_hilt !=# ''
+    return s:active_bearer !=# ''
 endfunc "}}}
 func! s:gram_exit() abort "{{{
     if !s:gram_is_active() | return | endif
     call s:win_background()
     au! gram_coloring
-    if has_key(s:gram.hilt,'exit')
-        call call(s:gram.hilt.exit,[])
+    if has_key(s:gram.bearer,'exit')
+        call call(s:gram.bearer.exit,[])
     endif
-    let s:active_hilt = ''
-    let s:gram.hilt = {}
+    let s:active_bearer = ''
+    let s:gram.bearer = {}
     let s:gram.user_input = ''
 endfunc "}}}
 func! s:gram_flush_display() abort "{{{
     let prompt = s:gram.prompt . s:gram.user_input
-    let contents = call(s:gram.hilt.filter,[s:gram.user_input])
+    let contents = call(s:gram.bearer.filter,[s:gram.user_input])
     if empty(contents) | let contents = ['(No matches)'] | endif
     call s:win_deleteline(1,'$')
     call s:win_setline(1,[prompt] + contents)
-    call s:gram_set_user_input_syntax() " It must be called after calling hilt's filter function.
+    call s:gram_set_user_input_syntax() " It must be called after calling bearer's filter function.
     redraw
 endfunc "}}}
 func! s:gram_is_line_prompt(lnum) abort "{{{
@@ -216,7 +216,7 @@ func! s:gram_select() abort "{{{
     if s:gram_is_line_prompt(line('.')) | return | endif
     let selected_item = getline('.')
     call s:win_background()
-    call call(s:gram.hilt.selected,[selected_item])
+    call call(s:gram.bearer.selected,[selected_item])
     call s:gram_exit()
 endfunc "}}}
 func! s:gram_loop_cursor(movement) abort "{{{
