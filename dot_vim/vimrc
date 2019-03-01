@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 28-Feb-2019.
+" Last Change: 01-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -577,6 +577,8 @@ func! s:cmdwin_enter() abort "{{{
     if cmdwin_type ==# ':'
         nnoremap <buffer> ; <C-c>
 
+        inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion('<C-p>')
+        inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion('<C-n>')
         call s:cmdwin_save_options.store('completeopt')
         setl completeopt=menu,preview
     endif
@@ -585,6 +587,16 @@ func! s:cmdwin_leave() abort "{{{
     " let cmdwin_type = expand('<afile>')
     if exists('s:cmdwin_save_options')
         call s:cmdwin_save_options.restore_all()
+    endif
+endfunc "}}}
+func! s:cmdwin_completion(key) abort "{{{
+    if pumvisible()
+        return a:key
+    else
+        " NOTE: `return nr2char(&wildchar)` doesn't work.
+        " FIXME: Shift?
+        call feedkeys(nr2char(&wildchar), 't')
+        return ''
     endif
 endfunc "}}}
 let s:cmdwin_save_options = s:New('save_options')
