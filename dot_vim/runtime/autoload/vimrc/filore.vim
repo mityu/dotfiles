@@ -118,6 +118,10 @@ endfunc "}}}
 
 " Main
 func! vimrc#filore#start(...) abort "{{{
+    if s:is_cmdwin()
+        call s:notify.error('filore cannot be used in command-line window')
+        return
+    endif
     let current_directory = get(a:000, 0, '')
     if current_directory !=# '' && isdirectory(current_directory)
         " Do nothing.

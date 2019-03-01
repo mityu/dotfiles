@@ -126,12 +126,19 @@ func! s:win_bufhidden() abort "{{{
     let s:window.alter_bufnr = s:NULL
     call s:gram_exit()
 endfunc "}}}
+func! s:win_is_cmdwin() abort "{{{
+    return getcmdwintype() != ''
+endfunc "}}}
 
 " gram
 func! vimrc#gram#launch(hilt) abort "{{{
     if s:gram_is_active()
         call s:notify.warning('gram is already active with a hilt: ' . s:active_hilt)
         call s:win_foreground()
+        return
+    endif
+    if s:win_is_cmdwin()
+        call s:notify.error('gram cannot be used on command-line window.')
         return
     endif
     for require in ['filter','regpat','selected','name']
