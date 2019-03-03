@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 01-Mar-2019.
+"Last Change: 03-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -23,6 +23,7 @@ if !exists('s:did_initialize_variables') "{{{
                 \ 'bufnr' : s:NULL,
                 \ 'alter_bufnr' : s:NULL
                 \ }
+    let s:gram_prompter = {}
 endif
 let s:did_initialize_variables = v:true
  "}}}
@@ -152,6 +153,7 @@ func! vimrc#gram#launch(bearer) abort "{{{
     call extend(s:gram.bearer,s:gram_default_config,'keep')
     let s:active_bearer = s:gram.bearer.name
     let s:gram.prompt = s:gram.bearer.name . ' ' . s:gram.bearer.prompt
+    let s:gram.user_input = ''
     call s:win_foreground()
     call s:gram_define_mapping()
     call s:gram_initialize_coloring()
@@ -169,22 +171,22 @@ func! vimrc#gram#launch(bearer) abort "{{{
         au!
     augroup END
 
-    call s:gram_flush_display()
+    call s:gram_flush_display(s:gram.user_input)
     call cursor(2,0)
 endfunc "}}}
 func! s:gram_initialize_coloring() abort "{{{
     highlight link gramMatch Number
     highlight link gramNoMatches Comment
-    call s:gram_set_user_input_syntax()
+    call s:gram_set_user_input_syntax(s:gram.user_input)
     syntax match gramNoMatches /\m\_^(No matches)$/
     augroup gram_coloring
         au!
         au ColorScheme * call s:gram_initialize_coloring()
     augroup END
 endfunc "}}}
-func! s:gram_set_user_input_syntax() abort "{{{
+func! s:gram_set_user_input_syntax(input) abort "{{{
     silent syntax clear gramMatch
-    exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.bearer.regpat,[s:gram.user_input]) . '/'
+    exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.bearer.regpat,[a:input]) . '/'
 endfunc "}}}
 func! s:gram_is_active() abort "{{{
     return s:active_bearer !=# ''
@@ -200,13 +202,13 @@ func! s:gram_exit() abort "{{{
     let s:gram.bearer = {}
     let s:gram.user_input = ''
 endfunc "}}}
-func! s:gram_flush_display() abort "{{{
-    let prompt = s:gram.prompt . s:gram.user_input
-    let contents = call(s:gram.bearer.filter,[s:gram.user_input])
+func! s:gram_flush_display(input) abort "{{{
+    let prompt = s:gram.prompt . a:input
+    let contents = call(s:gram.bearer.filter,[a:input])
     if empty(contents) | let contents = ['(No matches)'] | endif
     call s:win_deleteline(1,'$')
     call s:win_setline(1,[prompt] + contents)
-    call s:gram_set_user_input_syntax() " It must be called after calling bearer's filter function.
+    call s:gram_set_user_input_syntax(a:input) " It must be called after calling bearer's filter function.
     redraw
 endfunc "}}}
 func! s:gram_is_line_prompt(lnum) abort "{{{
@@ -225,26 +227,22 @@ func! s:gram_loop_cursor(movement) abort "{{{
     let move_to = s:mod(move_to,law) + 2
     call cursor(move_to,col('%'))
 endfunc "}}}
-func! s:gram_start_filtering() abort "{{{
-    augroup gram_filtering
-        au!
-        au CmdlineChanged @ call s:gram_user_inputted()
-    augroup END
-    let user_input = s:gram.user_input
-    try
-        let user_input = input(s:gram.prompt,s:gram.user_input)
-    finally
-        au! gram_filtering
-        if s:gram.user_input !=# user_input
-            let s:gram.user_input = user_input
-            call s:gram_flush_display()
-        endif
-        call cursor(2,0)
-    endtry
+func! s:gram_prompter.on_changed(input) abort "{{{
+    call s:gram_flush_display(a:input)
 endfunc "}}}
-func! s:gram_user_inputted() abort "{{{
-    let s:gram.user_input = getcmdline()
-    call s:gram_flush_display()
+func! s:gram_prompter.on_decided(input) abort "{{{
+    let s:gram.user_input = a:input
+endfunc "}}}
+func! s:gram_prompter.on_exit() abort "{{{
+    call s:gram_flush_display(s:gram.user_input)
+    call cursor(2,0)
+endfunc "}}}
+func! s:gram_start_filtering() abort "{{{
+    let s:gram_prompter.config = {
+                \ 'prompt' : s:gram.prompt,
+                \ 'default_input' : s:gram.user_input,
+                \ }
+    call vimrc#prompt#launch(s:gram_prompter)
 endfunc "}}}
 func! s:gram_define_mapping() abort "{{{
     let map = [
@@ -254,7 +252,7 @@ func! s:gram_define_mapping() abort "{{{
                 \ ['start-filtering','gram_start_filtering()'],
                 \ ['exit','gram_exit()'],
                 \]
-    call map(map,{key,val -> 
+    call map(map,{key,val ->
                 \'nnoremap <silent><buffer> <Plug>(gram-' . val[0] . ') ' .
                 \':<C-u>call <SID>' . val[1] . '<CR>'})
     execute join(map,"\n")
