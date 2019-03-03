@@ -881,7 +881,7 @@ com! Helptags helptags ALL
 com! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
-com! -bar -nargs=? Scratch call s:scratch(<q-args>)
+com! -bang -bar -nargs=* Scratch call s:scratch(<bang>0, <f-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 
@@ -924,11 +924,27 @@ func! s:undraft() abort "{{{
     if !exists('b:vimrc_draft_savedata') | return | endif
     call b:vimrc_draft_savedata.restore_all()
 endfunc "}}}
-func! s:scratch(...) abort "{{{
-    if a:1 ==# ''
+func! s:scratch(had_bang, ...) abort "{{{
+    let config = {
+                \ 'opener': 'split',
+                \ 'name': '',
+                \ }
+    if a:had_bang
+        for arg in a:000
+            let parsed = split(arg, '\:')
+            if len(arg) <= 1
+                call s:echomsg_error('Invalid argument for :Scratch : ' . arg)
+                continue
+            endif
+            let config[parsed[0]] = join(parsed[1:], ':')
+        endfor
+    else
+        let config.name = join(a:000, '\ ')
+    endif
+    if config.name ==# ''
         new
     else
-        execute 'split scratch://' . fnameescape(a:1)
+        execute config.opener printf('scratch://%s', config.name)
     endif
     Draft
 endfunc "}}}
