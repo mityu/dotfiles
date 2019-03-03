@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 01-Mar-2019.
+" Last Change: 03-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -331,8 +331,10 @@ unlet s:_undodir
 
 if has('kaoriya')
     set fileencodings=guess,utf-8
+    set ambiwidth=auto
 else
     set fileencodings=utf-8
+    set ambiwidth=double
 endif
 if s:Unix
     set path& path+=/usr/local/include
@@ -358,10 +360,12 @@ augroup END
 
 " Mapping
 " builtin, extension{{{
-nnoremap ; q:
+nnoremap ; q:i
 nnoremap : ;
-vnoremap ; q:
+vnoremap ; q:i
 vnoremap : ;
+nnoremap <Space>; q:
+vnoremap <Space>; q:
 map <C-j> <ESC>
 imap <C-j> <ESC>
 cmap <C-j> <C-c>
@@ -389,8 +393,6 @@ nnoremap ZQ <Nop>
 nnoremap <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nmap / <Plug>(<SID>curjump)
-nnoremap ? /
 nmap zf <Plug>(operator-vimrc-fold-zf)
 nmap zF <Plug>(operator-vimrc-fold-zF)
 nmap zd <Plug>(operator-vimrc-fold-zd)
@@ -435,11 +437,6 @@ endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
-nnoremap <expr> <Plug>(<SID>curjump-enter) <SID>phantom_cmd('/')
-nnoremap <silent> <Plug>(<SID>curjump-hlsearch) :<C-u>let &hlsearch = &hlsearch<CR>
-nmap <Plug>(<SID>curjump) <Plug>(<SID>curjump-hlsearch)<Plug>(<SID>curjump-enter)
-
-
 func! s:map_fold_cmd(keys) abort "{{{
     let commentstring_save = &l:commentstring
     let &l:commentstring = ' ' . &l:commentstring
@@ -479,7 +476,7 @@ func! s:map_define_operator() abort "{{{
     for keys in split(foldmotions_with_range . foldmotions_standalone,'\zs')
         let keys = 'z' . keys
         let func = [
-                    \ printf('func! %smap_fold_%s(motion_wise)',sid,keys),
+                    \ printf('func! %smap_fold_%s(motion_wise) abort',sid,keys),
                     \ printf('    call s:map_range_fold_cmd(a:motion_wise,"%s")',keys),
                     \ 'endfunc'
                     \]
@@ -497,47 +494,6 @@ func! s:map_define_operator() abort "{{{
     for keys in split(foldmotions_standalone,'\zs')
         let keys = 'z' . keys
         exec printf(map_cmd,keys,keys)
-    endfor
-endfunc "}}}
-" Do something without recoding to history.
-let s:phantom_cmd = {
-            \ 'type': '',
-            \ 'history': [],
-            \ }
-func! s:phantom_cmd(config) abort "{{{
-    let config_type = type(a:config)
-    if config_type == type({})
-        let s:phantom_cmd.type = a:config.type
-        let entering_key = a:config.entering_key
-    else
-        let s:phantom_cmd.type = a:config
-        let entering_key = a:config
-    endif
-    let s:phantom_cmd.history = filter(map(range(1, histnr(s:phantom_cmd.type)),
-                \ 'histget(s:phantom_cmd.type, v:val)'), 'v:val !=# ''')
-    augroup phantom_cmd
-        au!
-        " CmdlineLeave fires even if users leave from command-line window
-        " directly.
-        au CmdlineLeave * call s:phantom_cmd_on_leave()
-    augroup END
-    return entering_key
-endfunc "}}}
-func! s:phantom_cmd_on_leave() abort "{{{
-    " NOTE: expand('<afile>') returns one |cmdwin-char| . For more
-    " information, see :h CmdlineLeave .
-    if expand('<afile>') !=# s:phantom_cmd.type
-        return
-    endif
-    if histget(s:phantom_cmd.type, -1) ==# s:phantom_cmd.type[-1]
-        " History isn't changed.
-        return
-    endif
-
-    " Replace history.
-    call histdel(s:phantom_cmd.type, '.*')
-    for item in s:phantom_cmd.history
-        call histadd(s:phantom_cmd.type, item)
     endfor
 endfunc "}}}
 func! s:toggle_zooming_window() abort "{{{
@@ -573,12 +529,15 @@ func! s:cmdwin_enter() abort "{{{
     nmap <buffer> q <C-c>
     imap <buffer> <C-c> <ESC><C-c>
 
+    " Execute an previous command easiler.
+    nnoremap <buffer> <silent> / :<C-u>call <SID>cmdwin_filtering_start()<CR>
+
     let cmdwin_type = expand('<afile>')
     if cmdwin_type ==# ':'
-        nnoremap <buffer> ; <C-c>
+        nnoremap <buffer> <silent> ; :<C-u>call <SID>cmdwin_move_to_cmdline()<CR>
 
-        inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion('<C-p>')
-        inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion('<C-n>')
+        inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
+        inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
         call s:cmdwin_save_options.store('completeopt')
         setl completeopt=menu,preview
     endif
@@ -589,20 +548,90 @@ func! s:cmdwin_leave() abort "{{{
         call s:cmdwin_save_options.restore_all()
     endif
 endfunc "}}}
-func! s:cmdwin_completion(key) abort "{{{
+func! s:cmdwin_completion(select_next) abort "{{{
+    let key = a:select_next ? '<C-n>' : '<C-p>'
     if pumvisible()
-        return a:key
+        return key
     else
         " NOTE: `return nr2char(&wildchar)` doesn't work.
-        " FIXME: Shift?
         call feedkeys(nr2char(&wildchar), 't')
+        if !a:select_next
+            " Simulate <C-p> popup.
+            call feedkeys("\<C-p>\<C-p>", 'n')
+        endif
         return ''
     endif
 endfunc "}}}
+func! s:cmdwin_move_to_cmdline() abort "{{{
+    let col = col('.')
+    execute "normal! \<C-c>"
+    call setcmdpos(col+1)
+endfunc "}}}
 let s:cmdwin_save_options = s:New('save_options')
 
+augroup vimrc_cmdwin_filtering
+    au CmdWinEnter * call s:cmdwin_filtering.prepare()
+    au CmdWinLeave * call s:cmdwin_filtering.clear()
+augroup END
+let s:cmdwin_filtering = {'commands': [], 'config': {
+            \ 'prompt': '/', 'default_input': ''}}
+func! s:cmdwin_filtering.prepare() abort "{{{
+    let self.commands = getline(1, '$')
+    let self.last_input = ''
+endfunc "}}}
+func! s:cmdwin_filtering.clear() abort "{{{
+    let self.commands = []
+    let self.config.default_input = ''
+endfunc "}}}
+func! s:cmdwin_filtering.start() abort "{{{
+    highlight link CmdwinFilteringCommandsMatch Search
+    call self.delmatch()
+    call self.filtering(self.config.default_input)
+    call vimrc#prompt#launch(self)
+endfunc "}}}
+func! s:cmdwin_filtering.delmatch() abort "{{{
+    syntax clear CmdwinFilteringCommandsMatch
+endfunc "}}}
+func! s:cmdwin_filtering.filtering(input) abort "{{{
+    let col = col('.')
+    call self.delmatch()
+    if a:input ==# ''
+        let candidates = copy(self.commands)
+    else
+        if stridx(self.last_input, a:input) == 0
+            let candidates = getline(1, '$')
+        else
+            let candidates = copy(self.commands)
+        endif
+        call filter(candidates, 'v:val =~? a:input')
+    endif
+    let self.last_input = a:input
+
+    silent % delete _
+    call setline(1, candidates)
+    if a:input !=# ''
+        execute printf('syntax match CmdwinFilteringCommandsMatch /%s/',
+                    \ a:input)
+    endif
+    call cursor(line('$'), col)
+    redraw!
+endfunc "}}}
+func! s:cmdwin_filtering.on_changed(input) abort "{{{
+    call self.filtering(a:input)
+endfunc "}}}
+func! s:cmdwin_filtering.on_decided(input) abort "{{{
+    let self.config.default_input = a:input
+endfunc "}}}
+func! s:cmdwin_filtering.on_exit() abort "{{{
+    call self.delmatch()
+    call self.filtering(self.config.default_input)
+endfunc "}}}
+func! s:cmdwin_filtering_start() abort "{{{
+    call s:cmdwin_filtering.start()
+endfunc "}}}
+
 augroup vimrc_mapping
-    au CmdWinEnter * call s:cmdwin_enter()|startinsert
+    au CmdWinEnter * call s:cmdwin_enter()
     au CmdWinLeave * call s:cmdwin_leave()
     au User vimrc_initialize call s:map_define_operator()
 augroup END
@@ -644,9 +673,9 @@ func! s:plugin_mapping() abort
     delcom OVmap
 
     nnoremap <Plug>(<SID>-open-folding) zv
-    nmap gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
-    nmap <C-p> <Plug>(lsp-previous-error)
-    nmap <C-n> <Plug>(lsp-next-error)
+    nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
+    nmap <silent> <C-p> <Plug>(lsp-previous-error)
+    nmap <silent> <C-n> <Plug>(lsp-next-error)
 endfunc
 func! s:gram_mapping() abort
     let map = [
@@ -692,10 +721,11 @@ func! s:_loop_define(config) abort "{{{
     let mode = get(a:config,'mode','n')
     let plug_map = {}
     for key in ['prefix','main','do']
-        let plug_map[key]=printf("%s(%s)",prefix,key)
+        let plug_map[key] = printf("%s(%s)",prefix,key)
     endfor
-    exec printf('%smap <silent><expr> %s nr2char(getchar(0))',
-                \mode,plug_map.prefix)
+    " exec printf('%smap <silent><expr> %s nr2char(getchar(0))',
+    "            \mode,plug_map.prefix)
+    exec printf('%smap %s <Nop>', mode,plug_map.prefix)
     for [lhs,rhs] in a:config.map
         let com = []
         call add(com,[mode . 'noremap <silent>',
@@ -748,7 +778,7 @@ call s:_loop_define({
             \    ['T',':<C-u>call <SID>map_tabmove(-1)<CR>'],
             \    ['t',':<C-u>call <SID>map_tabmove(1)<CR>']
             \]
-            \}) " FIXME: This mapping does not repeat.
+            \})
 func! s:map_tabmove(delta) abort "{{{
     let tab_count = tabpagenr('$')
     if tab_count == 1 | return | endif
@@ -782,7 +812,6 @@ call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
 call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
-call add(s:_map,['nnoremap','<silent>',';','call vimrc#cmdhist#start()'])
 call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
 execute join(map(s:_map,{->join([
             \  v:val[0],
@@ -1036,6 +1065,7 @@ augroup vimrc_filetype
 augroup END
  "}}}
 " ayncomplete.vim{{{
+let g:asyncomplete_remove_duplicates = 1
 let g:asyncomplete_auto_popup = 1
 let g:asyncomplete_smart_completion = 0
 "}}}
@@ -1074,11 +1104,18 @@ func! s:lsp_register_servers() abort
                     \ })
     endif
     if executable('vint') && executable('efm-langserver')
+        if s:Windows
+            let config_yaml = [expand('%APPDATA%')]
+        else
+            let config_yaml = [expand('~'), '.config']
+        endif
+        let config_yaml = s:filename(config_yaml + ['efm-langserver', 'config.yaml'])
         call lsp#register_server({
                     \ 'name' : 'efm-langserver-vim',
-                    \ 'cmd': {server_info -> ['efm-langserver', '-stdin', &shell, &shellcmdflag, 'vint -']},
+                    \ 'cmd': {server_info -> ['efm-langserver', '-c=' . config_yaml]},
                     \ 'whitelist': ['vim']
                     \ })
+
     endif
 endfunc
 let g:lsp_signs_enabled = 1
@@ -1464,10 +1501,6 @@ if has('gui_running')
     if has('win32')
         set guifont=MS_Gothic:h10:cSHIFTJIS
         set linespace=1
-        "一部のUCS文字の幅を自動計測して決める
-        if has('kaoriya')
-            set ambiwidth=auto
-        endif
 
         set columns=120
     elseif has('mac')
