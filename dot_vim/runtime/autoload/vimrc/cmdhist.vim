@@ -1,6 +1,6 @@
 " Plugin Name: cmdhist.vim
 " Author: mityu
-" Last Change: 01-Mar-2019.
+" Last Change: 03-Mar-2019.
 " License: The MIT License
 " Requirement: gram.vim
 
@@ -11,27 +11,37 @@ set cpoptions&vim
 if !exists('s:did_initialize')
     let s:cmdhist_all = []
     let s:cmdhist_filtered = []
-    let s:user_input_save = ''
+
+    let s:shelter = {
+                \ 'user_input': '',
+                \ 'matcher': '',
+                \ }
 
     let s:did_initialize = 1
 endif
 
 func! vimrc#cmdhist#start() abort "{{{
-    let s:cmdhist_all = map(filter(
+    let s:cmdhist_all = filter(
                 \ map(range(histnr(':'), 1, -1), 'histget(":", v:val)'),
-                \ 'v:val !=# ""'), '{"matcher": tolower(v:val), "cmd": v:val}')
+                \ 'v:val !=# ""')
     call vimrc#gram#launch(s:bearer)
 endfunc "}}}
 func! s:bearer_filter(user_input) abort "{{{
     if a:user_input ==# ''
-        return map(deepcopy(s:cmdhist_all), 'v:val.cmd')
+        let s:shelter.user_input = ''
+        return s:cmdhist_all
     endif
-    if s:user_input_save || stridx(a:user_input, s:user_input_save) != 0
+    if s:shelter.user_input || stridx(a:user_input, s:shelter.user_input) != 0
         let s:cmdhist_filtered = deepcopy(s:cmdhist_all)
     endif
-    let s:user_input_save = a:user_input
-    call filter(s:cmdhist_filtered, 'stridx(v:val.matcher, a:user_input) != -1')
-    return map(deepcopy(s:cmdhist_filtered), 'v:val.cmd')
+    let s:shelter.user_input = a:user_input
+    let s:shelter.matcher = '\m\c' . substitute(escape(a:user_input, '.$^?:~'),
+                \ '\*', '.*', 'g') " TODO: Substitute only non-escaped *.
+    call filter(s:cmdhist_filtered, 'v:val =~? s:shelter.matcher')
+    return s:cmdhist_filtered
+endfunc "}}}
+func! s:bearer_regpat(user_input) abort "{{{
+    return s:shelter.matcher
 endfunc "}}}
 func! s:bearer_selected(selected_item) abort "{{{
     execute a:selected_item
@@ -41,7 +51,7 @@ endfunc "}}}
 let s:bearer = {
             \ 'name': 'cmdhist',
             \ 'filter': function('s:bearer_filter'),
-            \ 'regpat': 'vimrc#gram#escape_regpat',
+            \ 'regpat': function('s:bearer_regpat'),
             \ 'selected': function('s:bearer_selected'),
             \ }
 
