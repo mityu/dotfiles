@@ -7,10 +7,6 @@ set cpoptions&vim
 
 if !exists('s:did_initialize_variables')
     let s:is_active = v:false
-    " let s:prompt = {
-    "            \ 'input': '',
-    "            \ 'prompter': {}
-    "            \ }
     let s:prompter = {}
     let s:default_config = {
                 \ 'prompt': '>> ',
