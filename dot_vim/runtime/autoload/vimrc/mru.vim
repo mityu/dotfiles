@@ -1,24 +1,9 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 01-Mar-2019.
+"Last Change: 07-Mar-2019.
 
-let s:cpo_save = &cpo
-set cpo&vim
-
-" Script local variables
-if !exists('s:did_initialize_variables')
-    let s:default_ignore_pattern = ['\.git']
-    let s:default_history_max= 300
-    let s:default_auto_delete_unexist_file_history = 0
-
-    let s:mru = {
-                \ 'user_input_save' : '',
-                \ 'regpat_save' : '',
-                \ 'history_all' : [],
-                \ 'history_filtered' : [],
-                \}
-endif
-let s:did_initialize_variables = v:true
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
 
 " Utility
 let s:notify = {}
@@ -58,9 +43,9 @@ func! vimrc#mru#onReadFile() abort "{{{
         return
     endif
     call s:load_history()
-    let index = index(s:mru.history_all,file_name)
-    if index != -1 | call remove(s:mru.history_all,index) | endif
-    call insert(s:mru.history_all,file_name)
+    let index = index(s:history,file_name)
+    if index != -1 | call remove(s:history,index) | endif
+    call insert(s:history,file_name)
     call s:save_history()
 endfunc "}}}
 func! vimrc#mru#start() abort "{{{
@@ -69,11 +54,12 @@ func! vimrc#mru#start() abort "{{{
         call vimrc#mru#delete_unexist_file_history()
     endif
     call s:load_history()
+    call s:filterbox.set_items(s:history)
     call vimrc#gram#launch(s:bearer)
 endfunc "}}}
 func! vimrc#mru#try_to_enable() abort "{{{
     if !exists('g:mru_history_file')
-        call s:notify.error('Please set `g:mru_history_file`')
+        call s:notify.error('Please set `g:mru_history_file` to a file name')
         return v:false
     endif
     let perm = getfperm(g:mru_history_file)
@@ -92,7 +78,7 @@ func! vimrc#mru#try_to_enable() abort "{{{
 endfunc "}}}
 func! vimrc#mru#delete_unexist_file_history() abort "{{{
     call s:load_history()
-    call filter(s:mru.history_all,'filereadable(v:val)')
+    call filter(s:history,'filereadable(v:val)')
     call s:save_history()
 endfunc "}}}
 func! s:is_available() abort "{{{
@@ -100,34 +86,24 @@ func! s:is_available() abort "{{{
 endfunc "}}}
 func! s:load_history() abort "{{{
     if !s:is_available() | return | endif
-    let s:mru.history_all = readfile(g:mru_history_file)
+    let s:history = readfile(g:mru_history_file)
 endfunc "}}}
 func! s:save_history() abort "{{{
     if !s:is_available() | return | endif
     let history_max = s:get_config('history_max')
-    if len(s:mru.history_all) > history_max
-        call remove(s:mru.history_all,history_max,-1)
+    if len(s:history) > history_max
+        call remove(s:history,history_max,-1)
     endif
-    call writefile(s:mru.history_all,g:mru_history_file)
+    call writefile(s:history,g:mru_history_file)
 endfunc "}}}
 func! s:bearer_filter(user_input) abort "{{{
-    if a:user_input == ''
-        let s:mru.regpat_save = ''
-        return s:mru.history_all
-    endif
-    let s:mru.regpat_save = vimrc#gram#glob2regpat(a:user_input)
-    if s:mru.user_input_save ==# '' || stridx(a:user_input,s:mru.user_input_save) != 0
-        let s:mru.history_filtered = copy(s:mru.history_all)
-    endif
-    call filter(s:mru.history_filtered,'v:val=~?s:mru.regpat_save')
-    let s:mru.user_input_save = a:user_input
-    return s:mru.history_filtered
-endfunc "}}}
-func! s:bearer_regpat(user_input) abort "{{{
-    return s:mru.regpat_save
+    return s:filterbox.filter(a:user_input)
 endfunc "}}}
 func! s:bearer_selected(selected_item) abort "{{{
     execute 'edit' fnameescape(a:selected_item)
+endfunc "}}}
+func! s:filterbox_expression(user_input) abort "{{{
+    return printf('v:val =~? %s', string(vimrc#gram#glob2regpat(a:user_input)))
 endfunc "}}}
 
 " Editing history
@@ -145,17 +121,25 @@ func! vimrc#mru#edit_history_start(...) abort "{{{
     setlocal nobuflisted noswapfile noundofile
 endfunc "}}}
 
-if !exists('s:is_available')
-    let s:is_available = vimrc#mru#try_to_enable()
-endif
-if !exists('s:bearer')
+if !exists('s:did_initialize')
+    let s:default_ignore_pattern = ['\.git']
+    let s:default_history_max = 300
+    let s:default_auto_delete_unexist_file_history = 0
+
+    let s:history = []
+    let s:filterbox = vimrc#class#new('filterbox',
+               \ function('s:filterbox_expression'))
     let s:bearer = {
                 \ 'name' : 'mru',
                 \ 'filter' : function('s:bearer_filter'),
-                \ 'regpat' : function('s:bearer_regpat'),
+                \ 'regpat' : 'vimrc#gram#glob2regpat',
                 \ 'selected' : function('s:bearer_selected')
-                \}
+                \ }
+
+    let s:is_available = vimrc#mru#try_to_enable()
+
+    let s:did_initialize = v:true
 endif
 
-let &cpo = s:cpo_save
-unlet s:cpo_save
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save

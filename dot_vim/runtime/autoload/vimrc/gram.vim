@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 03-Mar-2019.
+"Last Change: 07-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -116,7 +116,7 @@ func! s:win_append(lnum,expr) abort "{{{
     call s:win_call_buffer_modify_function('appendbufline',[a:lnum,a:expr])
 endfunc "}}}
 func! s:win_deleteline(first,...) abort "{{{
-    call s:win_call_buffer_modify_function('deletebufline',[a:first] + a:000)
+    silent call s:win_call_buffer_modify_function('deletebufline',[a:first] + a:000)
 endfunc "}}}
 func! s:win_bufwipeouted() abort "{{{
     let s:window.bufnr = s:NULL
