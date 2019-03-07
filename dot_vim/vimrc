@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 03-Mar-2019.
+" Last Change: 04-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -573,8 +573,7 @@ augroup vimrc_cmdwin_filtering
     au CmdWinEnter * call s:cmdwin_filtering.prepare()
     au CmdWinLeave * call s:cmdwin_filtering.clear()
 augroup END
-let s:cmdwin_filtering = {'commands': [], 'config': {
-            \ 'prompt': '/', 'default_input': ''}}
+let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 func! s:cmdwin_filtering.prepare() abort "{{{
     let self.commands = getline(1, '$')
     let self.last_input = ''
