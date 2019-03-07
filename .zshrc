@@ -1,6 +1,9 @@
 if [ -f ~/.envrc ]; then
 	cat ~/.envrc | while read path_expr
 	do
+        if [ ${path_expr:0:1} = "#" ]; then
+            continue
+        fi
 		export $(eval echo ${path_expr})
 	done
 fi
@@ -26,18 +29,18 @@ compinit
 PROMPT='%c $ '
 RPROMPT='[%~]'
 
-# 履歴ファイルの保存先
+# The file to save history
 export HISTFILE=${HOME}/.zhistory
-# メモリに保存される履歴の件数
+# How many does zsh record history to memory.
 export HISTSIZE=1000
-# 履歴ファイルに保存される履歴の件数
+# How many does zsh record history to a history file.
 export SAVEHIST=100000
-# 重複を記録しない
+# Remove history duplicates
 setopt hist_ignore_dups
+setopt hist_ignore_all_dups
 # historyを共有
 setopt share_history
-# 履歴に追加されるコマンド行が古いものと同じなら古いものを削除
-setopt hist_ignore_all_dups
-# historyコマンドは履歴に登録しない
+# Do not record `history`
 setopt hist_no_store
+# Enable completion
 setopt menu_complete
