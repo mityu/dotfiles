@@ -1,6 +1,6 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 28-Feb-2019.
+"Last Change: 07-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -88,7 +88,7 @@ func! vimrc#shcmd#cpfile(...) abort "{{{
     endfor
 endfunc "}}}
 func! vimrc#shcmd#rm(has_bang,...) abort "{{{
-    " If `has_bang` is true, I'll delete directories; Otherwize, I'll delete
+    " If `has_bang` is true, I'll delete directories; Otherwise, I'll delete
     " files.
     if a:has_bang
         call s:delete_dirs(s:expand_all(copy(a:000)))
