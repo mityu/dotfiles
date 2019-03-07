@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 04-Mar-2019.
+" Last Change: 07-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -18,7 +18,7 @@ endif
 
 " Utility function
 func! s:SIDPrefix() abort "{{{
-    " Returns "<SNR>{number}_"
+    " Returns "<SNR>{script-ID}_"
     return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSIDPrefix$')
 endfunc "}}}
 func! s:SNR() abort "{{{
@@ -47,14 +47,17 @@ func! s:has(object, to_search) abort "{{{
     let object_type = type(a:object)
     if object_type == type('')
         let func = 'stridx'
+        let not_found = -1
     elseif object_type == type([])
         let func = 'index'
+        let not_found = -1
     elseif object_type == type({})
         let func = 'has_key'
+        let not_found = 0
     else
         return 0
     endif
-    return (call(func, [a:object, a:to_search]) != -1)
+    return (call(func, [a:object, a:to_search]) != not_found)
 endfunc "}}}
 func! s:echomsg_with_color(msg, hl_group) abort "{{{
     execute 'echohl' a:hl_group
@@ -72,54 +75,6 @@ func! s:echomsg_warning(msg) abort "{{{
 endfunc "}}}
 func! s:is_visualmode() abort "{{{
     return s:has(['v', 'V', "\<C-v>"], mode())
-endfunc "}}}
-func! s:New(class_name) abort "{{{
-    let class = 's:' . a:class_name
-    if !exists(class)
-        call s:echomsg_error('s:New(): Class does not exist: ' . a:class_name)
-        return {}
-    endif
-    let new_obj = deepcopy(eval(class))
-    if exists('*new_obj.' . a:class_name)
-        cal call(new_obj[a:class_name], a:000)  " Call constructor.
-    endif
-    return new_obj
-endfunc "}}}
-
-" Classes
-let s:save_options = {}
-func! s:save_options.save_options() abort "{{{
-    call self.clear()
-endfunc "}}}
-func! s:save_options.store(options) abort "{{{
-    let type = type(a:options)
-    if type == v:t_list
-        let options = a:options
-    elseif type == v:t_string
-        let options = [a:options]
-    else
-        call s:echomsg_error('save_options.store(): String or List is required')
-    endif
-    for option in options
-        let self._shelter[option] = eval('&l:' . option)
-    endfor
-endfunc "}}}
-func! s:save_options.restore(option_name) abort "{{{
-    if !has_key(self._shelter, a:option_name)
-        call s:echomsg_error('option have not been stored: ' . a:option_name)
-        return
-    endif
-    execute printf('let &l:%s=%s',
-                \ a:option_name,
-                \ string(self._shelter[a:option_name]))
-endfunc "}}}
-func! s:save_options.restore_all() abort "{{{
-    for option_name in keys(self._shelter)
-        call self.restore(option_name)
-    endfor
-endfunc "}}}
-func! s:save_options.clear() abort "{{{
-    let self._shelter = {}
 endfunc "}}}
 
 " Startup config
@@ -160,7 +115,7 @@ if has('vim_starting')
     let g:loaded_vimballPlugin=1
     let g:loaded_netrwPlugin=1
 
-    exec 'set runtimepath+=' . s:filename([$DOT_VIM,'runtime'])
+    exec 'set runtimepath+=' . escape(s:filename([$DOT_VIM,'runtime']), ' \')
 endif
 "}}}
 
@@ -169,11 +124,11 @@ endif
 let s:_envrc = s:filename([expand('~'), s:rc('envrc')])
 if has('gui_running')&&filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
-    call filter(s:contents, "v:val[0] !=# '#'")
+    call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
     call filter(s:contents, '!empty(v:val)')
     call map(s:contents, "split(v:val,'=')")
     call map(s:contents,
-            \"execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
+            \ "execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
 endif | unlet s:contents s:_envrc
 "}}}
 " Initialize autocmd{{{
@@ -567,7 +522,7 @@ func! s:cmdwin_move_to_cmdline() abort "{{{
     execute "normal! \<C-c>"
     call setcmdpos(col+1)
 endfunc "}}}
-let s:cmdwin_save_options = s:New('save_options')
+let s:cmdwin_save_options = vimrc#class#new('save_options')
 
 augroup vimrc_cmdwin_filtering
     au CmdWinEnter * call s:cmdwin_filtering.prepare()
@@ -915,7 +870,7 @@ func! s:filter(bang,pat,...) abort "{{{
     endif
 endfunc "}}}
 func! s:draft() abort "{{{
-    let b:vimrc_draft_save_options = s:New('save_options')
+    let b:vimrc_draft_save_options = vimrc#class#new('save_options')
     call b:vimrc_draft_save_options.store(['buftype', 'swapfile'])
     setl buftype=nofile noswapfile
 endfunc "}}}
@@ -958,7 +913,6 @@ func! s:list_tasks(args) abort "{{{
 endfunc "}}}
 
 " Function
-" These are useful when using expression register.
 func! FileName() abort "{{{
     return expand('%:p:h')
 endfunc "}}}
@@ -1497,7 +1451,7 @@ endfunc
 " lvimrc{{{
 let s:_lvimrc = s:rc('lvimrc')
 if filereadable(expand('~/' . s:_lvimrc))
-    exec 'com! LocalVimrc e ~/' . s:_lvimrc
+    exec 'com! -bar -nargs=+ LVimrc <args> ~/' . s:_lvimrc
     exec 'source ~/' . s:_lvimrc
 endif | unlet s:_lvimrc
 " }}}
