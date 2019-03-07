@@ -341,6 +341,7 @@ nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
+nnoremap <Space>q :<C-u>quit<CR>
 nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
 nnoremap <expr> @@ (reg_recording()==#''?'@a':'q')
 nnoremap ZZ <Nop>
