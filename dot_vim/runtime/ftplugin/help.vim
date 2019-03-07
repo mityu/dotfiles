@@ -1,4 +1,4 @@
-" Last Change: 28-Feb-2019.
+" Last Change: 07-Mar-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish
@@ -20,7 +20,7 @@ endfunction
 
 function! s:option_to_edit()
     setlocal buftype= modifiable noreadonly
-    setlocal nolist tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab textwidth=78
+    setlocal list tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab textwidth=78
     if exists('+colorcolumn')
         setlocal colorcolumn=+1
     endif
@@ -35,7 +35,11 @@ command! -buffer -bar HelpView call s:option_to_view()
 if &buftype ==# 'help'
     nnoremap <buffer> <silent> q :<C-u>quit<CR>
 
-    if len(filter(range(1,winnr('$')),'getwinvar(v:val,"&buftype")==#"help"')) == 1
+    " Resize only when window isn't splited vertically and there's one help
+    " window.
+    if (&l:textwidth * 2) <= winwidth(0) &&
+                \ len(filter(range(1,winnr('$')),
+                \ 'getwinvar(v:val,"&buftype")==#"help"')) == 1
         wincmd L
         execute 'vertical resize' (&l:textwidth+5)
     endif
