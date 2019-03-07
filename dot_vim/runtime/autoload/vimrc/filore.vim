@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 01-Mar-2019.
+"Last Change: 07-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -600,7 +600,12 @@ func! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
         return a:on_file
     endif
 endfunc "}}}
+func! vimrc#filore#get_current_directory_path() abort "{{{
+    return s:win_get_reference_of_current_items().current_directory
+endfunc "}}}
 func! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
+    " XXX: In cmdwin, line() returns cursor line on cmdwin, not on filore.
+    if s:is_cmdwin() | return '' | endif
     return vimrc#filore#get_file_path_of_line(line('.'))
 endfunc "}}}
 func! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
