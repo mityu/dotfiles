@@ -76,6 +76,9 @@ endfunc "}}}
 func! s:is_visualmode() abort "{{{
     return s:has(['v', 'V', "\<C-v>"], mode())
 endfunc "}}}
+func! s:is_cmdwin() abort "{{{
+    return getcmdwintype() !=# ''
+endfunc "}}}
 
 " Startup config
 " {{{
@@ -505,9 +508,8 @@ func! s:cmdwin_leave() abort "{{{
     endif
 endfunc "}}}
 func! s:cmdwin_completion(select_next) abort "{{{
-    let key = a:select_next ? '<C-n>' : '<C-p>'
     if pumvisible()
-        return key
+        return a:select_next ? '<C-n>' : '<C-p>'
     else
         " NOTE: `return nr2char(&wildchar)` doesn't work.
         call feedkeys(nr2char(&wildchar), 't')
@@ -836,7 +838,7 @@ com! Helptags helptags ALL
 com! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 com! -bar Draft call s:draft()
 com! -bar UnDraft call s:undraft()
-com! -bang -bar -nargs=* Scratch call s:scratch(<bang>0, <f-args>)
+com! -bar -nargs=* Scratch call s:scratch(<f-args>)
 com! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 com! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 
@@ -879,12 +881,14 @@ func! s:undraft() abort "{{{
     if !exists('b:vimrc_draft_savedata') | return | endif
     call b:vimrc_draft_savedata.restore_all()
 endfunc "}}}
-func! s:scratch(had_bang, ...) abort "{{{
+func! s:scratch(...) abort "{{{
     let config = {
                 \ 'opener': 'split',
                 \ 'name': '',
                 \ }
-    if a:had_bang
+    if a:0 == 1
+        let config.name = join(a:000, '\ ')
+    else
         for arg in a:000
             let parsed = split(arg, '\:')
             if len(arg) <= 1
@@ -893,8 +897,6 @@ func! s:scratch(had_bang, ...) abort "{{{
             endif
             let config[parsed[0]] = join(parsed[1:], ':')
         endfor
-    else
-        let config.name = join(a:000, '\ ')
     endif
     if config.name ==# ''
         new
@@ -914,14 +916,14 @@ func! s:list_tasks(args) abort "{{{
 endfunc "}}}
 
 " Function
+func! FilePath() abort "{{{
+    return s:is_cmdwin() ? expand('#') : expand('%')
+endfunc "}}}
 func! FileName() abort "{{{
-    return expand('%:p:h')
+    return fnamemodify(FilePath(), ':p:t')
 endfunc "}}}
 func! FileParent() abort "{{{
-    return expand('%:p:h:h')
-endfunc "}}}
-func! FilePath() abort "{{{
-    return expand('%')
+    return fnamemodify(FilePath(), ':p:h')
 endfunc "}}}
 
 
