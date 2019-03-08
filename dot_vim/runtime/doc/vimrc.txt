@@ -84,7 +84,8 @@ vimrc#gram#glob2regpat({glob})	*vimrc#gram#glob2repat()* *gram#glob2regpat()*
 ------------------------------------------------------------------------------
 EVENTS								*gram-events*
 
-|gram.vim| fires some |User| events. Followings are all {pattern} of |User| .
+|gram.vim| fires some |User| events. Followings are all {pattern} of |User|.
+See |gram-example| to know how to use.
 
 gramOpen							*gramOpen*
 	 After opening the gram window.
@@ -101,14 +102,18 @@ MAPPINGS						*gram-mappings*
 
 <Plug>(gram-exit)			*<Plug>(gram-exit)*
 	Stop using |gram.vim|.
+
 <Plug>(gram-loop-cursor-down)		*<Plug>(gram-loop-cursor-down)*
 	Move on the next line like |j|, but move to the top of items on a buffer
 	when the cursor reachs the end of items.
+
 <Plug>(gram-loop-cursor-up)		*<Plug>(gram-loop-cursor-up)*
 	Move on the previous like |k|, but move to the end of items on a buffer
 	when the cursor reachs the top of items.
+
 <Plug>(gram-select-item)		*<Plug>(gram-select-item)*
 	Select an item.
+
 <Plug>(gram-start-filtering)		*<Plug>(gram-strat-filtering)*
 	Start to filter items interactively by inputting text on a prompt.
 
@@ -126,8 +131,8 @@ EXAMPLE							*gram-example*
 	nmap i <Plug>(gram-start-filtering)
     endfunction
     augroup set-gram-mapping
-	    autocommand!
-	    autocommand User gramOpen call s:set_gram_mappings()
+	    autocmd!
+	    autocmd User gramOpen call s:set_gram_mappings()
     augroup END
 <
 
