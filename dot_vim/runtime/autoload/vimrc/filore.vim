@@ -540,28 +540,15 @@ func! s:history_register(path) abort "{{{
 endfunc "}}}
 func! s:history_start_select() abort "{{{
     let items = s:win_get_reference_of_current_items()
-    let s:select_history.item_all = s:history
-    let s:select_history.alter_bufnr_save = items.alter_bufnr
-    let s:select_history.user_input_save = ''
-    let s:select_history.regpat_save = ''
+    let s:select_history_alter_bufnr_save = items.alter_bufnr
+    call s:filterbox.set_items(s:history)
     call vimrc#gram#launch(s:history_bearer)
 endfunc "}}}
-func! s:history_bearer_filter(user_input) abort "{{{
-    if a:user_input ==# ''
-        let s:select_history.regpat_save = ''
-        return s:select_history.item_all
-    endif
-    let s:select_history.regpat_save = vimrc#gram#glob2regpat(a:user_input)
-    if s:select_history.user_input_save ==# '' ||
-                \ stridx(a:user_input,s:select_history.user_input_save) != 0
-        let s:select_history.item_filtered = copy(s:select_history.item_all)
-    endif
-    call filter(s:select_history.item_filtered,'v:val =~? s:select_history.regpat_save')
-    let s:select_history.user_input_save = a:user_input
-    return s:select_history.item_filtered
+func! s:history_bearer_filter(input) abort "{{{
+    return s:filterbox.filter(a:input)
 endfunc "}}}
-func! s:history_bearer_regpat(user_input) abort "{{{
-    return s:select_history.regpat_save
+func! s:history_bearer_regpat(input) abort "{{{
+    return vimrc#gram#glob2regpat(a:input)
 endfunc "}}}
 func! s:history_bearer_selected(selected_item) abort "{{{
     let items = s:win_get_reference_of_current_items()
@@ -570,8 +557,12 @@ func! s:history_bearer_selected(selected_item) abort "{{{
 endfunc "}}}
 func! s:history_bearer_exit() abort "{{{
     let items = s:win_get_reference_of_current_items()
-    let items.alter_bufnr = s:select_history.alter_bufnr_save
+    let items.alter_bufnr = s:select_history_alter_bufnr_save
 endfunc "}}}
+func! s:history_filterbox_expression(input) abort "{{{
+    return s:filterbox.expression_compare_by_regexp(vimrc#gram#glob2regpat(a:input))
+endfunc "}}}
+
 if !exists('s:history_bearer')
     let s:history_bearer = {
                 \ 'name': 'filore-history',
@@ -582,12 +573,11 @@ if !exists('s:history_bearer')
                 \}
 endif
 if !exists('s:select_history')
-    let s:select_history = {}
-    let s:select_history.item_all = []
-    let s:select_history.item_filtered = []
-    let s:select_history.user_input_save = ''
-    let s:select_history.regpat_save = ''
-    let s:select_history.alter_bufnr_save = s:NULL
+    let s:select_history_alter_bufnr_save = s:NULL
+endif
+if !exists('s:filterbox')
+    let s:filterbox = vimrc#class#new('filterbox',
+                \ function('s:history_filterbox_expression'))
 endif
 if !exists('s:history')
     let s:history = []
