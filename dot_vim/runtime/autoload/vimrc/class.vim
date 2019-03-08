@@ -1,6 +1,6 @@
 " Plugin Name: class.vim
 " Author: mityu
-" Last Change: 07-Mar-2019.
+" Last Change: 08-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -47,6 +47,12 @@ func! s:filterbox.filter(input) abort "{{{
     call filter(self.items_filtered_, call(self.expression, [a:input]))
     let self.last_input_ = a:input
     return self.items_filtered_
+endfunc "}}}
+func! s:filterbox.expression_compare_by_regexp(regexp, ...) abort "{{{
+    let ignore_case = get(a:000, 0, 1)
+    return printf('v:val =~%s %s',
+                \ ignore_case ? '?' : '#',
+                \ string(a:regexp))
 endfunc "}}}
 "}}}
 " save_options{{{
