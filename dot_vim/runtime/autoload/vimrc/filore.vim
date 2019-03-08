@@ -235,7 +235,7 @@ func! s:win_get_available_name() abort "{{{
 endfunc "}}}
 func! s:win_close() abort "{{{
     let alter_bufnr = s:win_get_reference_of_current_items().alter_bufnr
-    if bufnr('%') == alter_bufnr ||
+    if has_key(s:filore_list, bufname(alter_bufnr)) ||
                 \ !bufexists(alter_bufnr) ||
                 \ alter_bufnr == s:NULL
         enew
