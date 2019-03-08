@@ -34,7 +34,7 @@ func! s:filterbox.filterbox(expression) abort "{{{
     let self.expression = a:expression
 endfunc "}}}
 func! s:filterbox.set_items(items) abort "{{{
-    let self.items_all_ = a:items
+    let self.items_all_ = copy(a:items)
     let self.last_input_ = ''
 endfunc "}}}
 func! s:filterbox.filter(input) abort "{{{
