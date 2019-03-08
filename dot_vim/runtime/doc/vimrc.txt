@@ -84,17 +84,17 @@ vimrc#gram#glob2regpat({glob})	*vimrc#gram#glob2repat()* *gram#glob2regpat()*
 ------------------------------------------------------------------------------
 EVENTS								*gram-events*
 
+|gram.vim| fires some |User| events. Followings are all {pattern} of |User| .
+
 gramOpen							*gramOpen*
-	 After opening the gram window. 'gramOpen' is a pattern of |User|
-	 event.
+	 After opening the gram window.
 	 You can use this event to set |gram.vim|-global settings.
 	 See Also: |gram-example|
 
 {source-name}Open
-	 After the open gram window like |gramOpen|. '{source-name}Open' is
-	 also a pattern of |User| event.
-	 Unlike |gramOpen|, you can use this event to set source-local
-	settings.
+	 After the open gram window like |gramOpen|.
+	 However, unlike |gramOpen|, you can use this event to set
+	 source-local settings.
 
 ------------------------------------------------------------------------------
 MAPPINGS						*gram-mappings*
@@ -168,7 +168,8 @@ g:mru_ignore_pattern					*g:mru_ignore_pattern*
 	Default: ['\.git']
 
 	Every file that its name matches at one even of these won't added into
-	the MRU history.
+	the MRU history. To disable default, set this variable to [] (empty
+	list).
 	NOTE: |mru.vim| uses |match()| to check whether |mru.vim| should ignore
 	a file or not.
 
