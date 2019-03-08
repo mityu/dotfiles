@@ -1,4 +1,4 @@
-"Last Change: 28-Feb-2019.
+"Last Change: 08-Mar-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -135,6 +135,7 @@ call s:hi('TabLineSel','black','tenderorange',0)
 
 call s:hi('Underlined',0,0,'underline')
 call s:hi('Ignore',0,0,0)
+call s:hi('SpecialKey','gray',0,0)
 
 call s:hi('Directory','cyan',0,0)
 call s:hi('Question','mediumspringgreen',0,0)
