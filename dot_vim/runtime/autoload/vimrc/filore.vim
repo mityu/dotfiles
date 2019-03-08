@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 07-Mar-2019.
+"Last Change: 08-Mar-2019.
 
 let s:cpo_save = &cpo
 set cpo&vim
@@ -535,13 +535,12 @@ endfunc "}}}
 
 " History
 func! s:history_register(path) abort "{{{
-    let history = s:win_get_reference_of_current_items().history
-    call s:remove_item(history,a:path)
-    call insert(history,a:path)
+    call s:remove_item(s:history, a:path)
+    call insert(s:history, a:path)
 endfunc "}}}
 func! s:history_start_select() abort "{{{
     let items = s:win_get_reference_of_current_items()
-    let s:select_history.item_all = items.history
+    let s:select_history.item_all = s:history
     let s:select_history.alter_bufnr_save = items.alter_bufnr
     let s:select_history.user_input_save = ''
     let s:select_history.regpat_save = ''
@@ -589,6 +588,9 @@ if !exists('s:select_history')
     let s:select_history.user_input_save = ''
     let s:select_history.regpat_save = ''
     let s:select_history.alter_bufnr_save = s:NULL
+endif
+if !exists('s:history')
+    let s:history = []
 endif
 
 " User utility
