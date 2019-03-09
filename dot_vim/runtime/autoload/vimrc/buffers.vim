@@ -27,7 +27,7 @@ function! s:bearer_regpat(user_input) abort "{{{
     return s:regpat_save
 endfunction "}}}
 function! s:bearer_selected(selected_item) abort "{{{
-    execute 'buffer' s:buflist_all[a:selected_item]
+    execute 'buffer' s:buflist[a:selected_item]
 endfunction "}}}
 function! s:filterbox_expression(user_input) abort "{{{
     return printf('v:val =~? %s', string(vimrc#gram#glob2regpat(a:user_input)))
