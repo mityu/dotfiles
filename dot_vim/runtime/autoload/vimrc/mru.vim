@@ -2,8 +2,8 @@
 "Author: mityu
 "Last Change: 09-Mar-2019.
 
-let s:cpoptionsptions_save = &cpoptionsptions
-set cpoptionsptions&vim
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
 
 " Utility
 let s:notify = {}
@@ -145,5 +145,5 @@ if !exists('s:did_initialize')
     let s:did_initialize = v:true
 endif
 
-let &cpoptionsptions = s:cpoptionsptions_save
-unlet s:cpoptionsptions_save
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save

@@ -299,7 +299,7 @@ endif
 if s:Unix
     set path& path+=/usr/local/include
 endif
-if executeutable('ag')
+if executable('ag')
     let &grepprg='ag --vimgrep'
     let &grepformat='%f:%l:%c:%m'
 endif
@@ -1060,14 +1060,14 @@ augroup vimrc_lsp_servers
     au User lsp_setup call s:lsp_register_servers()
 augroup END
 function! s:lsp_register_servers() abort
-    if executeutable('clangd')
+    if executable('clangd')
         call lsp#register_server({
                     \ 'name': 'clangd',
                     \ 'cmd': {server_info -> ['clangd']},
                     \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
                     \ })
     endif
-    if executeutable('vint') && executeutable('efm-langserver')
+    if executable('vint') && executable('efm-langserver')
         if s:Windows
             let config_yaml = [expand('%APPDATA%')]
         else
@@ -1245,7 +1245,7 @@ function! s:working_plugin.cd(has_bang, plugin) abort "{{{
     execute (a:has_bang ? 'lcd' : 'cd') s:filename([self.workplace, a:plugin])
 endfunction "}}}
 function! s:working_plugin.clone(...) abort "{{{
-    if !(self.available && executeutable('git') && a:0)
+    if !(self.available && executable('git') && a:0)
         return
     endif
     if !s:has(a:1, '/')
