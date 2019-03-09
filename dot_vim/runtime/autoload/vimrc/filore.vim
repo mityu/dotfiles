@@ -1,9 +1,9 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 08-Mar-2019.
+"Last Change: 09-Mar-2019.
 
-let s:cpo_save = &cpo
-set cpo&vim
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
 
 let s:NULL = 0
 let s:TRUE = 1
@@ -14,38 +14,38 @@ let s:prompt_lines_count = 0
 
 " Utility
 let s:notify = {}
-func! s:notify.notify(msg,hl_group,cmd) abort "{{{
+function! s:notify.notify(msg,hl_group,cmd) abort "{{{
     execute 'echohl' a:hl_group
     execute a:cmd string('[filore] ' . a:msg)
     echohl None
-endfunc "}}}
-func! s:notify.error(msg) abort "{{{
+endfunction "}}}
+function! s:notify.error(msg) abort "{{{
     call self.notify(a:msg,'Error','echomsg')
-endfunc "}}}
-func! s:notify.warning(msg) abort "{{{
+endfunction "}}}
+function! s:notify.warning(msg) abort "{{{
     call self.notify(a:msg,'Warning','echomsg')
-endfunc "}}}
+endfunction "}}}
 
 let s:filesystem = {}
-func! s:filesystem.name(path) abort "{{{
+function! s:filesystem.name(path) abort "{{{
     if isdirectory(a:path)
         return fnamemodify(a:path,':p:h:t')
     else
         return fnamemodify(a:path,':p:t')
     endif
-endfunc "}}}
-func! s:filesystem.base(path) abort "{{{
+endfunction "}}}
+function! s:filesystem.base(path) abort "{{{
     if isdirectory(a:path)
         return fnamemodify(a:path,':p:h:h')
     else
         return fnamemodify(a:path,':p:h')
     endif
-endfunc "}}}
-func! s:filesystem.abs(path) abort "{{{
+endfunction "}}}
+function! s:filesystem.abs(path) abort "{{{
     return fnamemodify(a:path,':p')
-endfunc "}}}
+endfunction "}}}
 
-func! s:list_files(dir_path) abort "{{{
+function! s:list_files(dir_path) abort "{{{
     let show_hidden = s:win_get_reference_of_current_items().show_hidden_files
     let dir_path = escape(a:dir_path,',')
     let raw_file_list = []
@@ -63,18 +63,18 @@ func! s:list_files(dir_path) abort "{{{
         endif
     endfor
     return [dirs, files]
-endfunc "}}}
-func! s:remove_item(list,item) abort "{{{
+endfunction "}}}
+function! s:remove_item(list,item) abort "{{{
     let index = index(a:list,a:item)
     if index != -1
         return remove(a:list,index)
     endif
     return ''
-endfunc "}}}
-func! s:has_item(list,item) abort "{{{
+endfunction "}}}
+function! s:has_item(list,item) abort "{{{
     return index(a:list,a:item) != -1
-endfunc "}}}
-func! s:extend_pos(list,item,...) "{{{
+endfunction "}}}
+function! s:extend_pos(list,item,...) "{{{
     " NOTE:
     " - Use builtin function when change 'a:list' in order to apply
     "   changes to the entitiy of reference.
@@ -91,15 +91,15 @@ func! s:extend_pos(list,item,...) "{{{
         call extend(a:list, list[:index-1] + a:item + list[index:])
     endif
     return a:list
-endfunc "}}}
-func! s:mod(n,law) abort "{{{
+endfunction "}}}
+function! s:mod(n,law) abort "{{{
     if a:n >= 0
         return a:n % a:law
     else
         return a:n + (-a:n/a:law + ((-a:n%a:law) ? 1 : 0)) * a:law
     endif
-endfunc "}}}
-func! s:isdirectory(item) abort "{{{
+endfunction "}}}
+function! s:isdirectory(item) abort "{{{
     if type(a:item) == s:t_dict
         return a:item.isdirectory
     elseif type(a:item) == s:t_string
@@ -108,16 +108,16 @@ func! s:isdirectory(item) abort "{{{
         call s:notify.warning('Unknown argument type: ' . type(a:item))
         return s:FALSE
     endif
-endfunc "}}}
-func! s:escape_regpat(pat) abort "{{{
+endfunction "}}}
+function! s:escape_regpat(pat) abort "{{{
     return escape(a:pat,'.~/\^$[]:+*')
-endfunc "}}}
-func! s:is_cmdwin() abort "{{{
+endfunction "}}}
+function! s:is_cmdwin() abort "{{{
     return getcmdwintype() !=# ''
-endfunc "}}}
+endfunction "}}}
 
 " Main
-func! vimrc#filore#start(...) abort "{{{
+function! vimrc#filore#start(...) abort "{{{
     if s:is_cmdwin()
         call s:notify.error('filore cannot be used in command-line window')
         return
@@ -131,8 +131,8 @@ func! vimrc#filore#start(...) abort "{{{
         let current_directory = getcwd()
     endif
     call s:win_new(current_directory)
-endfunc "}}}
-func! s:filore_define_plugin_mappings() abort "{{{
+endfunction "}}}
+function! s:filore_define_plugin_mappings() abort "{{{
     let maps = [
             \ ['exit', 'win_close()'],
             \ ['enter-directory', 'browse_enter_directory_under_cursor()'],
@@ -151,13 +151,13 @@ func! s:filore_define_plugin_mappings() abort "{{{
                 \ ':<C-u>call <SID>%s<CR>',
                 \ val[0], val[1])})
     execute join(maps,"\n")
-endfunc "}}}
-func! s:filore_loop_cursor(movement) abort "{{{
+endfunction "}}}
+function! s:filore_loop_cursor(movement) abort "{{{
     let move_to = line('.') - s:prompt_lines_count + a:movement - 1
     let law = line('$') - s:prompt_lines_count
     let move_to = s:mod(move_to,law) + 1 + s:prompt_lines_count
     call cursor(move_to,col('%'))
-endfunc "}}}
+endfunction "}}}
 
 " Window
 if !exists('s:filore_list')
@@ -166,7 +166,7 @@ if !exists('s:filore_list')
     "  - 'items' : filore's file list, history list, and config..
     let s:filore_list = {}
 endif
-func! s:win_new(current_directory) abort "{{{
+function! s:win_new(current_directory) abort "{{{
     let alter_bufnr = bufnr('%')
     call s:win_open_new()
     let items = s:win_get_reference_of_current_items()
@@ -178,8 +178,8 @@ func! s:win_new(current_directory) abort "{{{
     let items.unfolded_directories = []
     let items.history = []
     call s:browse_fresh_display()
-endfunc "}}}
-func! s:win_fork(bufnr_from) abort "{{{
+endfunction "}}}
+function! s:win_fork(bufnr_from) abort "{{{
     " NOTE: Use builtin function when change 'items' in order to apply
     " changes to the entitiy of reference.
     call s:win_open_new()
@@ -187,8 +187,8 @@ func! s:win_fork(bufnr_from) abort "{{{
     call filter(items,'0') " Remove everything to prepare for initializing.
     call extend(items, deepcopy(s:win_get_reference_of_items(a:bufnr_from)))
     call s:browse_fresh_display()
-endfunc "}}}
-func! s:win_open_new() abort "{{{
+endfunction "}}}
+function! s:win_open_new() abort "{{{
     let new_name = s:win_get_available_name()
     execute 'keepjumps silent edit' new_name
     call s:filore_define_plugin_mappings()
@@ -202,7 +202,7 @@ func! s:win_open_new() abort "{{{
     let s:filore_list[new_name].bufnr = bufnr('%')
 
     augroup filore_window
-        au! * <buffer>
+        autocmd! * <buffer>
         au BufHidden,BufWipeOut <buffer> call s:win_BufHidden()
         au BufWinEnter <buffer> call s:win_BufWinEnter()
         au WinEnter <buffer> call s:win_WinEnter()
@@ -215,8 +215,8 @@ func! s:win_open_new() abort "{{{
     setlocal nomodified nomodifiable
 
     call s:browse_color()
-endfunc "}}}
-func! s:win_get_available_name() abort "{{{
+endfunction "}}}
+function! s:win_get_available_name() abort "{{{
     let name_base = 'filore://file-browser:'
     let subscript = 1
     while s:TRUE
@@ -225,15 +225,15 @@ func! s:win_get_available_name() abort "{{{
             return new_name
         elseif s:filore_list[new_name].bufnr == s:NULL
             augroup filore_window
-                execute printf('au! BufWinEnter <buffer=%d>',
+                execute printf('autocmd! BufWinEnter <buffer=%d>',
                             \ bufnr(s:escape_regpat(new_name)))
             augroup END
             return new_name
         endif
         let subscript += 1
     endwhile
-endfunc "}}}
-func! s:win_close() abort "{{{
+endfunction "}}}
+function! s:win_close() abort "{{{
     let alter_bufnr = s:win_get_reference_of_current_items().alter_bufnr
     if has_key(s:filore_list, bufname(alter_bufnr)) ||
                 \ !bufexists(alter_bufnr) ||
@@ -242,73 +242,73 @@ func! s:win_close() abort "{{{
     else
         execute 'keepjumps silent buffer' alter_bufnr
     endif
-endfunc "}}}
-func! s:win_get_reference_of_current_items() abort "{{{
+endfunction "}}}
+function! s:win_get_reference_of_current_items() abort "{{{
     return s:win_get_reference_of_items(bufnr(s:is_cmdwin() ? '#' : '%'))
-endfunc "}}}
-func! s:win_get_reference_of_items(bufnr) abort "{{{
+endfunction "}}}
+function! s:win_get_reference_of_items(bufnr) abort "{{{
     let buffer_name = bufname(a:bufnr)
     if !has_key(s:filore_list,buffer_name)
         call s:notify.error('items is not in s:filore_list: ' . buffer_name)
         return {}
     endif
     return s:filore_list[buffer_name].items
-endfunc "}}}
-func! s:win_BufHidden() abort "{{{
+endfunction "}}}
+function! s:win_BufHidden() abort "{{{
     let s:filore_list[expand('<afile>')].bufnr = s:NULL
     let items = s:win_get_reference_of_current_items()
     let items.alter_bufnr = s:NULL
-endfunc "}}}
-func! s:win_BufWipeout() abort "{{{
+endfunction "}}}
+function! s:win_BufWipeout() abort "{{{
     " NOTE: expand('<abuf>') : Wiped out buffer's name
     call remove(s:filore_list,expand('<abuf>'))
-endfunc "}}}
-func! s:win_BufWinEnter() abort "{{{
+endfunction "}}}
+function! s:win_BufWinEnter() abort "{{{
     " NOTE:
     "  bufnr('%') : New buffer's name
     "  bufnr('#') : Previous buffer's name
     let s:filore_list[expand('%')].bufnr = bufnr('%')
     let items = s:win_get_reference_of_current_items()
     let items.alter_bufnr = bufnr('#')
-endfunc "}}}
-func! s:win_BufEnter() abort "{{{
+endfunction "}}}
+function! s:win_BufEnter() abort "{{{
     if len(win_findbuf(bufnr('%'))) > 1
         call s:win_fork(bufnr('%'))
     endif
-endfunc "}}}
-func! s:win_WinEnter() abort "{{{
+endfunction "}}}
+function! s:win_WinEnter() abort "{{{
     if has_key(s:filore_list, bufname('%')) && len(win_findbuf(bufnr('%'))) > 1
         call s:win_fork(bufnr('%'))
     endif
-endfunc "}}}
-func! s:win_call_buffer_modify_function(func_name,args) abort "{{{
+endfunction "}}}
+function! s:win_call_buffer_modify_function(func_name,args) abort "{{{
     let bufnr = bufnr('%')
     call setbufvar(bufnr,'&modifiable',1)
     silent call call(a:func_name,[bufnr] + a:args)
     call setbufvar(bufnr,'&modified',0)
     call setbufvar(bufnr,'&modifiable',0)
-endfunc "}}}
-func! s:win_setline(lnum,text) abort "{{{
+endfunction "}}}
+function! s:win_setline(lnum,text) abort "{{{
     call s:win_call_buffer_modify_function('setbufline',[a:lnum,a:text])
-endfunc "}}}
-func! s:win_append(lnum,expr) abort "{{{
+endfunction "}}}
+function! s:win_append(lnum,expr) abort "{{{
     call s:win_call_buffer_modify_function('appendbufline',[a:lnum,a:expr])
-endfunc "}}}
-func! s:win_deleteline(first,...) abort "{{{
+endfunction "}}}
+function! s:win_deleteline(first,...) abort "{{{
     call s:win_call_buffer_modify_function('deletebufline',[a:first] + a:000)
-endfunc "}}}
+endfunction "}}}
 
 " Browse
-func! s:browse_fresh_current_directory_info() abort "{{{
+function! s:browse_fresh_current_directory_info() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.file_list = s:browse_list_files(
                 \ items.current_directory, s:NULL) " 'depth' starts with 0.
-endfunc "}}}
-func! s:browse_list_files(parent_dirctory, depth) abort "{{{
+endfunction "}}}
+function! s:browse_list_files(parent_dirctory, depth) abort "{{{
     return s:browse_fill_nested_file_info(s:browse_list_file_info(
                 \ a:parent_dirctory, a:depth))
-endfunc "}}}
-func! s:browse_list_file_info(parent_dirctory,depth) abort "{{{
+endfunction "}}}
+function! s:browse_list_file_info(parent_dirctory,depth) abort "{{{
     let [dirs,files] = s:list_files(a:parent_dirctory)
     let Convert_to_info = {file_name, isdirectory ->
                 \ {
@@ -321,8 +321,8 @@ func! s:browse_list_file_info(parent_dirctory,depth) abort "{{{
     call map(files,'Convert_to_info(v:val,s:FALSE)')
 
     return dirs + files
-endfunc "}}}
-func! s:browse_fill_nested_file_info(file_list) abort "{{{
+endfunction "}}}
+function! s:browse_fill_nested_file_info(file_list) abort "{{{
     let file_list = a:file_list
     let unfolded_directories =
                 \ s:win_get_reference_of_current_items().unfolded_directories
@@ -350,8 +350,8 @@ func! s:browse_fill_nested_file_info(file_list) abort "{{{
     endwhile
 
     return file_list
-endfunc "}}}
-func! s:browse_get_display_text(file_info) abort "{{{
+endfunction "}}}
+function! s:browse_get_display_text(file_info) abort "{{{
     let items = s:win_get_reference_of_current_items()
     let text = repeat(' ', a:file_info.depth * 2) " Make indent
     let text .= '|'
@@ -369,14 +369,14 @@ func! s:browse_get_display_text(file_info) abort "{{{
     let text .= a:file_info.filename
 
     return text
-endfunc "}}}
-func! s:browse_get_index_from_lnum(lnum) abort "{{{
+endfunction "}}}
+function! s:browse_get_index_from_lnum(lnum) abort "{{{
     return a:lnum - 1 - s:prompt_lines_count
-endfunc "}}}
-func! s:browse_get_lnum_from_index(index) abort "{{{
+endfunction "}}}
+function! s:browse_get_lnum_from_index(index) abort "{{{
     return a:index + 1 + s:prompt_lines_count
-endfunc "}}}
-func! s:browse_fresh_display() abort "{{{
+endfunction "}}}
+function! s:browse_fresh_display() abort "{{{
     let curpos_save = getpos('.')
     call s:browse_fresh_current_directory_info()
     let file_list = deepcopy(s:win_get_reference_of_current_items().file_list)
@@ -391,8 +391,8 @@ func! s:browse_fresh_display() abort "{{{
     call map(file_list,'s:browse_get_display_text(v:val)')
     call s:win_setline(1 + s:prompt_lines_count, file_list)
     call setpos('.', curpos_save)
-endfunc "}}}
-func! s:browse_unfold_directory_under_cursor() abort "{{{
+endfunction "}}}
+function! s:browse_unfold_directory_under_cursor() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let lnum = line('.')
     let index = s:browse_get_index_from_lnum(lnum)
@@ -407,8 +407,8 @@ func! s:browse_unfold_directory_under_cursor() abort "{{{
     call s:extend_pos(items.file_list, child_file_list, index + 1)
     call s:win_append(lnum, map(deepcopy(child_file_list),
                 \ 's:browse_get_display_text(v:val)'))
-endfunc "}}}
-func! s:browse_fold_directory_under_cursor() abort "{{{
+endfunction "}}}
+function! s:browse_fold_directory_under_cursor() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let lnum = line('.')
     let index = s:browse_get_index_from_lnum(lnum)
@@ -441,8 +441,8 @@ func! s:browse_fold_directory_under_cursor() abort "{{{
     call remove(file_list, child_start, child_end)
     call s:win_deleteline(s:browse_get_lnum_from_index(child_start),
                 \ s:browse_get_lnum_from_index(child_end))
-endfunc "}}}
-func! s:browse_toggle_directory_folding_under_cursor() abort "{{{
+endfunction "}}}
+function! s:browse_toggle_directory_folding_under_cursor() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let file_info = items.file_list[s:browse_get_index_from_lnum(line('.'))]
     if !s:isdirectory(file_info) | return | endif
@@ -452,19 +452,19 @@ func! s:browse_toggle_directory_folding_under_cursor() abort "{{{
     else
         call s:browse_unfold_directory_under_cursor()
     endif
-endfunc "}}}
-func! s:browse_store_cursor_position_in_cache() abort "{{{
+endfunction "}}}
+function! s:browse_store_cursor_position_in_cache() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.cursorpos[items.current_directory] = line('.')
-endfunc "}}}
-func! s:browse_restore_cursor_position_with_cache() abort "{{{
+endfunction "}}}
+function! s:browse_restore_cursor_position_with_cache() abort "{{{
     let items = s:win_get_reference_of_current_items()
     if !has_key(items.cursorpos, items.current_directory)
         let items.cursorpos[items.current_directory] = 1 + s:prompt_lines_count
     endif
     call cursor(items.cursorpos[items.current_directory], 0)
-endfunc "}}}
-func! s:browse_enter_directory_under_cursor() abort "{{{
+endfunction "}}}
+function! s:browse_enter_directory_under_cursor() abort "{{{
     call s:browse_store_cursor_position_in_cache()
     let items = s:win_get_reference_of_current_items()
     let file_info = items.file_list[s:browse_get_index_from_lnum(line('.'))]
@@ -475,16 +475,16 @@ func! s:browse_enter_directory_under_cursor() abort "{{{
     call s:browse_fresh_display()
     call s:browse_restore_cursor_position_with_cache()
     call s:history_register(items.current_directory)
-endfunc "}}}
-func! s:browse_leave_directory() abort "{{{
+endfunction "}}}
+function! s:browse_leave_directory() abort "{{{
     call s:browse_store_cursor_position_in_cache()
     let items = s:win_get_reference_of_current_items()
     let items.current_directory = s:filesystem.base(items.current_directory)
     call s:browse_fresh_display()
     call s:browse_restore_cursor_position_with_cache()
     call s:history_register(items.current_directory)
-endfunc "}}}
-func! s:browse_toggle_show_hidden_files() abort "{{{
+endfunction "}}}
+function! s:browse_toggle_show_hidden_files() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let flag_save = items.show_hidden_files
     let file_info_save = copy(items.file_list[
@@ -505,14 +505,14 @@ func! s:browse_toggle_show_hidden_files() abort "{{{
     if index != size
         call cursor(s:browse_get_lnum_from_index(index), 0)
     endif
-endfunc "}}}
-func! s:browse_open_file_under_cursor() abort "{{{
+endfunction "}}}
+function! s:browse_open_file_under_cursor() abort "{{{
     let file_info = s:win_get_reference_of_current_items().file_list[
                 \ s:browse_get_index_from_lnum(line('.'))]
     if s:isdirectory(file_info) | return | endif
     execute 'edit' fnameescape(file_info.abs)
-endfunc "}}}
-func! s:browse_color() abort "{{{
+endfunction "}}}
+function! s:browse_color() abort "{{{
     let node_directory = '\(\_^\(\s\s\)*\)\@<=|[+-]\s\@='
     let node_file = '\(\_^\(\s\s\)*\)\@<=|\(\s\s\)\@='
     let SyntaxMatch = {hlgroup, pat ->
@@ -531,37 +531,37 @@ func! s:browse_color() abort "{{{
                 \ printf('\(%s\)\@<=.\+$', node_directory))
     call SyntaxMatch('filoreBrowseNoItem',
                 \ printf('\%%%dl\_^(No\sItem)$', 1 + s:prompt_lines_count))
-endfunc "}}}
+endfunction "}}}
 
 " History
-func! s:history_register(path) abort "{{{
+function! s:history_register(path) abort "{{{
     call s:remove_item(s:history, a:path)
     call insert(s:history, a:path)
-endfunc "}}}
-func! s:history_start_select() abort "{{{
+endfunction "}}}
+function! s:history_start_select() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let s:select_history_alter_bufnr_save = items.alter_bufnr
     call s:filterbox.set_items(s:history)
     call vimrc#gram#launch(s:history_bearer)
-endfunc "}}}
-func! s:history_bearer_filter(input) abort "{{{
+endfunction "}}}
+function! s:history_bearer_filter(input) abort "{{{
     return s:filterbox.filter(a:input)
-endfunc "}}}
-func! s:history_bearer_regpat(input) abort "{{{
+endfunction "}}}
+function! s:history_bearer_regpat(input) abort "{{{
     return vimrc#gram#glob2regpat(a:input)
-endfunc "}}}
-func! s:history_bearer_selected(selected_item) abort "{{{
+endfunction "}}}
+function! s:history_bearer_selected(selected_item) abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.current_directory = a:selected_item
     call s:browse_fresh_display()
-endfunc "}}}
-func! s:history_bearer_exit() abort "{{{
+endfunction "}}}
+function! s:history_bearer_exit() abort "{{{
     let items = s:win_get_reference_of_current_items()
     let items.alter_bufnr = s:select_history_alter_bufnr_save
-endfunc "}}}
-func! s:history_filterbox_expression(input) abort "{{{
+endfunction "}}}
+function! s:history_filterbox_expression(input) abort "{{{
     return s:filterbox.expression_compare_by_regexp(vimrc#gram#glob2regpat(a:input))
-endfunc "}}}
+endfunction "}}}
 
 if !exists('s:history_bearer')
     let s:history_bearer = {
@@ -584,29 +584,29 @@ if !exists('s:history')
 endif
 
 " User utility
-func! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
+function! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
     if s:isdirectory(s:win_get_reference_of_current_items().file_list[
                 \ s:browse_get_index_from_lnum(line('.'))])
         return a:on_directory
     else
         return a:on_file
     endif
-endfunc "}}}
-func! vimrc#filore#get_current_directory_path() abort "{{{
+endfunction "}}}
+function! vimrc#filore#get_current_directory_path() abort "{{{
     return s:win_get_reference_of_current_items().current_directory
-endfunc "}}}
-func! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
+endfunction "}}}
+function! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
     " XXX: In cmdwin, line() returns cursor line on cmdwin, not on filore.
     if s:is_cmdwin() | return '' | endif
     return vimrc#filore#get_file_path_of_line(line('.'))
-endfunc "}}}
-func! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
+endfunction "}}}
+function! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
     if a:lnum < (1 + s:prompt_lines_count) || a:lnum > line('$')
         return ''
     endif
     return s:win_get_reference_of_current_items().file_list[
                 \ s:browse_get_index_from_lnum(a:lnum)].abs
-endfunc "}}}
+endfunction "}}}
 
-let &cpo = s:cpo_save
-unlet s:cpo_save
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save

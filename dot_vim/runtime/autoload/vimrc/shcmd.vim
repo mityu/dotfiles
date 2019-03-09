@@ -1,19 +1,19 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 07-Mar-2019.
+"Last Change: 09-Mar-2019.
 
-let s:cpo_save = &cpo
-set cpo&vim
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
 
-func! s:warning_msg(msg) abort "{{{
+function! s:warning_msg(msg) abort "{{{
     echohl WarningMsg
     echom a:msg
     echohl None
-endfunc "}}}
-func! s:expand_all(files) abort "{{{
+endfunction "}}}
+function! s:expand_all(files) abort "{{{
     return map(a:files,'expand(v:val)')
-endfunc "}}}
-func! vimrc#shcmd#ls(has_bang,...) abort "{{{
+endfunction "}}}
+function! vimrc#shcmd#ls(has_bang,...) abort "{{{
     " If `has_bang` is true, I'll show hidden files.
     let cwd = fnamemodify(get(a:000,0,getcwd(winnr())),':p')
     let children = []
@@ -35,8 +35,8 @@ func! vimrc#shcmd#ls(has_bang,...) abort "{{{
     call map(files,{-> fnamemodify(v:val,':t')})
     call filter(dirs,{-> (v:val!=#'./') && (v:val!=#'../')})
     echo join(dirs + files,"\n")
-endfunc "}}}
-func! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
+endfunction "}}}
+function! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
     " If `has_bang` is true, I'll create intermediate directory.
     let option_path = a:has_bang ? 'p' : ''
     for dir in a:000
@@ -51,8 +51,8 @@ func! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
             continue
         endtry
     endfor
-endfunc "}}}
-func! vimrc#shcmd#touch(...) abort "{{{
+endfunction "}}}
+function! vimrc#shcmd#touch(...) abort "{{{
     for fname in a:000
         if getftype(fname) !=# ''
             call s:warning_msg(printf('File %s exists. Overwrite? [y/n]',fname))
@@ -62,8 +62,8 @@ func! vimrc#shcmd#touch(...) abort "{{{
             call writefile([],fname)
         endif
     endfor
-endfunc "}}}
-func! vimrc#shcmd#cpfile(...) abort "{{{
+endfunction "}}}
+function! vimrc#shcmd#cpfile(...) abort "{{{
     " I won't copy directories.
     let args = s:expand_all(copy(a:000))
     if a:0 == 1
@@ -86,8 +86,8 @@ func! vimrc#shcmd#cpfile(...) abort "{{{
         endif
         call writefile(file_contents,copy_to)
     endfor
-endfunc "}}}
-func! vimrc#shcmd#rm(has_bang,...) abort "{{{
+endfunction "}}}
+function! vimrc#shcmd#rm(has_bang,...) abort "{{{
     " If `has_bang` is true, I'll delete directories; Otherwise, I'll delete
     " files.
     if a:has_bang
@@ -95,8 +95,8 @@ func! vimrc#shcmd#rm(has_bang,...) abort "{{{
     else
         call s:delete_files(s:expand_all(copy(a:000)))
     endif
-endfunc "}}}
-func! s:delete_files(files) abort "{{{
+endfunction "}}}
+function! s:delete_files(files) abort "{{{
     for file in a:files
         echo printf('Delete %s ? [y/n]', file)
         if nr2char(getchar()) !~? 'y'
@@ -106,20 +106,20 @@ func! s:delete_files(files) abort "{{{
         if delete(file) == 0 " Succesfully deleted.
             let file = escape(file,'^[]\/*.+?$:')
             if bufexists(bufname(file))
-                exec 'bwipeout' bufnr(file)
+                execute 'bwipeout' bufnr(file)
             endif
         else
             call s:warning_msg(printf('Failed to delete %s', file))
         endif
     endfor
-endfunc "}}}
-func! s:delete_dirs(dirs) abort "{{{
+endfunction "}}}
+function! s:delete_dirs(dirs) abort "{{{
     for dir in a:dirs
         if delete(dir,'rf') != 0 " Failed to delete.
             call s:warning_msg(printf('Failed to delete %s', dir))
         endif
     endfor
-endfunc "}}}
+endfunction "}}}
 
-let &cpo = s:cpo_save
-unlet s:cpo_save
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save

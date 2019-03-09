@@ -1,4 +1,4 @@
-"Last Change: 08-Mar-2019.
+"Last Change: 09-Mar-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -47,7 +47,7 @@ let s:palette={
 
 let s:gui_running=has('gui_running')
 
-func! s:hi(group,fg,bg,attr) "{{{
+function! s:hi(group,fg,bg,attr) "{{{
     let has_fg=type(a:fg)!=s:TYPE_NUM
     let has_bg=type(a:bg)!=s:TYPE_NUM
     let has_attr=type(a:attr)!=s:TYPE_NUM
@@ -73,12 +73,12 @@ func! s:hi(group,fg,bg,attr) "{{{
         let attr=has_attr? 'cterm=' . a:attr : ''
     endif
     execute 'silent highlight' a:group fg bg attr
-endfunc "}}}
-func! s:echoerr(msg) "{{{
+endfunction "}}}
+function! s:echoerr(msg) "{{{
     echohl Error
     echom printf('[%s] %s',s:colors_name,a:msg)
     echohl None
-endfunc "}}}
+endfunction "}}}
 
 
 call s:hi('Normal','cornsilk','blackgray',0)

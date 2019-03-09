@@ -1,9 +1,9 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 07-Mar-2019.
+"Last Change: 09-Mar-2019.
 
-let s:cpo_save = &cpo
-set cpo&vim
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
 
 " Script local variables
 if !exists('s:did_initialize_variables') "{{{
@@ -30,41 +30,41 @@ let s:did_initialize_variables = v:true
 
 " Utility
 let s:notify = {}
-func! s:notify.notify(msg,hl_group,cmd) abort "{{{
+function! s:notify.notify(msg,hl_group,cmd) abort "{{{
     execute 'echohl' a:hl_group
     execute a:cmd string('[gram] ' . a:msg)
     echohl None
-endfunc "}}}
-func! s:notify.error(msg) abort "{{{
+endfunction "}}}
+function! s:notify.error(msg) abort "{{{
     call self.notify(a:msg,'Error','echomsg')
-endfunc "}}}
-func! s:notify.warning(msg) abort "{{{
+endfunction "}}}
+function! s:notify.warning(msg) abort "{{{
     call self.notify(a:msg,'Warning','echomsg')
-endfunc "}}}
+endfunction "}}}
 " s:shellslash(){{{
 if has('win32')
-    func! s:shellslash() abort
+    function! s:shellslash() abort
         if exists('+shellslash') && &shellslash
             return '/'
         else
             return '\'
         endif
-    endfunc
+    endfunction
 else
-    func! s:shellslash() abort
+    function! s:shellslash() abort
         return '/'
-    endfunc
+    endfunction
 endif "}}}
-func! s:mod(n,law) abort "{{{
+function! s:mod(n,law) abort "{{{
     if a:n >= 0
         return a:n % a:law
     else
         return a:n + (-a:n/a:law + ((-a:n%a:law) ? 1 : 0)) * a:law
     endif
-endfunc "}}}
+endfunction "}}}
 
 " Window management
-func! s:win_foreground() abort "{{{
+function! s:win_foreground() abort "{{{
     if s:win_is_active()
         call win_gotoid(win_findbuf(s:window.bufnr)[0])
         return
@@ -77,17 +77,17 @@ func! s:win_foreground() abort "{{{
         silent e [gram]
         setlocal bufhidden=hide buftype=nofile nobuflisted noswapfile noundofile nomodifiable nomodified
         augroup gram_buffer
-            au! * <buffer>
+            autocmd! * <buffer>
             au BufWipeout <buffer> call s:win_bufwipeouted()
             au BufWinLeave <buffer> call s:win_bufhidden()
         augroup END
     endif
     let s:window.bufnr = bufnr('%')
-endfunc "}}}
-func! s:win_background() abort "{{{
+endfunction "}}}
+function! s:win_background() abort "{{{
     if !s:win_is_active() | return | endif
     augroup gram_buffer
-        au! BufWinLeave <buffer>
+        autocmd! BufWinLeave <buffer>
     augroup END
     if s:window.alter_bufnr == s:NULL ||
                 \!bufexists(s:window.alter_bufnr) ||
@@ -97,42 +97,42 @@ func! s:win_background() abort "{{{
         execute 'silent buffer' s:window.alter_bufnr
     endif
     let s:window.alter_bufnr = s:NULL
-endfunc "}}}
-func! s:win_is_active() abort "{{{
+endfunction "}}}
+function! s:win_is_active() abort "{{{
     if s:window.bufnr == s:NULL | return v:false | endif
     return !empty(win_findbuf(s:window.bufnr))
-endfunc "}}}
-func! s:win_call_buffer_modify_function(func_name,args) abort "{{{
+endfunction "}}}
+function! s:win_call_buffer_modify_function(func_name,args) abort "{{{
     let bufnr = s:window.bufnr
     call setbufvar(bufnr,'&modifiable',1)
     call call(a:func_name,[bufnr] + a:args)
     call setbufvar(bufnr,'&modified',0)
     call setbufvar(bufnr,'&modifiable',0)
-endfunc "}}}
-func! s:win_setline(lnum,text) abort "{{{
+endfunction "}}}
+function! s:win_setline(lnum,text) abort "{{{
     call s:win_call_buffer_modify_function('setbufline',[a:lnum,a:text])
-endfunc "}}}
-func! s:win_append(lnum,expr) abort "{{{
+endfunction "}}}
+function! s:win_append(lnum,expr) abort "{{{
     call s:win_call_buffer_modify_function('appendbufline',[a:lnum,a:expr])
-endfunc "}}}
-func! s:win_deleteline(first,...) abort "{{{
+endfunction "}}}
+function! s:win_deleteline(first,...) abort "{{{
     silent call s:win_call_buffer_modify_function('deletebufline',[a:first] + a:000)
-endfunc "}}}
-func! s:win_bufwipeouted() abort "{{{
+endfunction "}}}
+function! s:win_bufwipeouted() abort "{{{
     let s:window.bufnr = s:NULL
     let s:window.alter_bufnr = s:NULL
     call s:gram_exit()
-endfunc "}}}
-func! s:win_bufhidden() abort "{{{
+endfunction "}}}
+function! s:win_bufhidden() abort "{{{
     let s:window.alter_bufnr = s:NULL
     call s:gram_exit()
-endfunc "}}}
-func! s:win_is_cmdwin() abort "{{{
+endfunction "}}}
+function! s:win_is_cmdwin() abort "{{{
     return getcmdwintype() != ''
-endfunc "}}}
+endfunction "}}}
 
 " gram
-func! vimrc#gram#launch(bearer) abort "{{{
+function! vimrc#gram#launch(bearer) abort "{{{
     if s:gram_is_active()
         call s:notify.warning('gram is already active with a bearer: ' . s:active_bearer)
         call s:win_foreground()
@@ -161,48 +161,48 @@ func! vimrc#gram#launch(bearer) abort "{{{
     " Define dummy autocommands in order to avoid "No matching autocommands"
     " error.
     augroup gram-open-dummy
-        au!
+        autocmd!
         au User gramOpen "Do nothing.
         execute 'au User' s:active_bearer . 'Open "Do nothing'
     augroup END
     doautocmd User gramOpen
     execute 'doautocmd User' s:active_bearer . 'Open'
     augroup gram-open-dummy
-        au!
+        autocmd!
     augroup END
 
     call s:gram_flush_display(s:gram.user_input)
     call cursor(2,0)
-endfunc "}}}
-func! s:gram_initialize_coloring() abort "{{{
+endfunction "}}}
+function! s:gram_initialize_coloring() abort "{{{
     highlight link gramMatch Number
     highlight link gramNoMatches Comment
     call s:gram_set_user_input_syntax(s:gram.user_input)
     syntax match gramNoMatches /\m\_^(No matches)$/
     augroup gram_coloring
-        au!
+        autocmd!
         au ColorScheme * call s:gram_initialize_coloring()
     augroup END
-endfunc "}}}
-func! s:gram_set_user_input_syntax(input) abort "{{{
+endfunction "}}}
+function! s:gram_set_user_input_syntax(input) abort "{{{
     silent syntax clear gramMatch
-    exec 'syntax match gramMatch /\c\%>1l' . call(s:gram.bearer.regpat,[a:input]) . '/'
-endfunc "}}}
-func! s:gram_is_active() abort "{{{
+    execute 'syntax match gramMatch /\c\%>1l' . call(s:gram.bearer.regpat,[a:input]) . '/'
+endfunction "}}}
+function! s:gram_is_active() abort "{{{
     return s:active_bearer !=# ''
-endfunc "}}}
-func! s:gram_exit() abort "{{{
+endfunction "}}}
+function! s:gram_exit() abort "{{{
     if !s:gram_is_active() | return | endif
     call s:win_background()
-    au! gram_coloring
+    autocmd! gram_coloring
     if has_key(s:gram.bearer,'exit')
         call call(s:gram.bearer.exit,[])
     endif
     let s:active_bearer = ''
     let s:gram.bearer = {}
     let s:gram.user_input = ''
-endfunc "}}}
-func! s:gram_flush_display(input) abort "{{{
+endfunction "}}}
+function! s:gram_flush_display(input) abort "{{{
     let prompt = s:gram.prompt . a:input
     let contents = call(s:gram.bearer.filter,[a:input])
     if empty(contents) | let contents = ['(No matches)'] | endif
@@ -210,41 +210,41 @@ func! s:gram_flush_display(input) abort "{{{
     call s:win_setline(1,[prompt] + contents)
     call s:gram_set_user_input_syntax(a:input) " It must be called after calling bearer's filter function.
     redraw
-endfunc "}}}
-func! s:gram_is_line_prompt(lnum) abort "{{{
+endfunction "}}}
+function! s:gram_is_line_prompt(lnum) abort "{{{
     return a:lnum == s:gram.line_prompt
-endfunc "}}}
-func! s:gram_select() abort "{{{
+endfunction "}}}
+function! s:gram_select() abort "{{{
     if s:gram_is_line_prompt(line('.')) | return | endif
     let selected_item = getline('.')
     call s:win_background()
     call call(s:gram.bearer.selected,[selected_item])
     call s:gram_exit()
-endfunc "}}}
-func! s:gram_loop_cursor(movement) abort "{{{
+endfunction "}}}
+function! s:gram_loop_cursor(movement) abort "{{{
     let move_to = line('.') - s:gram.line_prompt + a:movement - 1
     let law = line('$') - s:gram.line_prompt
     let move_to = s:mod(move_to,law) + 2
     call cursor(move_to,col('%'))
-endfunc "}}}
-func! s:gram_prompter.on_changed(input) abort "{{{
+endfunction "}}}
+function! s:gram_prompter.on_changed(input) abort "{{{
     call s:gram_flush_display(a:input)
-endfunc "}}}
-func! s:gram_prompter.on_decided(input) abort "{{{
+endfunction "}}}
+function! s:gram_prompter.on_decided(input) abort "{{{
     let s:gram.user_input = a:input
-endfunc "}}}
-func! s:gram_prompter.on_exit() abort "{{{
+endfunction "}}}
+function! s:gram_prompter.on_exit() abort "{{{
     call s:gram_flush_display(s:gram.user_input)
     call cursor(2,0)
-endfunc "}}}
-func! s:gram_start_filtering() abort "{{{
+endfunction "}}}
+function! s:gram_start_filtering() abort "{{{
     let s:gram_prompter.config = {
                 \ 'prompt' : s:gram.prompt,
                 \ 'default_input' : s:gram.user_input,
                 \ }
     call vimrc#prompt#launch(s:gram_prompter)
-endfunc "}}}
-func! s:gram_define_mapping() abort "{{{
+endfunction "}}}
+function! s:gram_define_mapping() abort "{{{
     let map = [
                 \ ['loop-cursor-up','gram_loop_cursor(-v:count1)'],
                 \ ['loop-cursor-down','gram_loop_cursor(v:count1)'],
@@ -256,13 +256,13 @@ func! s:gram_define_mapping() abort "{{{
                 \'nnoremap <silent><buffer> <Plug>(gram-' . val[0] . ') ' .
                 \':<C-u>call <SID>' . val[1] . '<CR>'})
     execute join(map,"\n")
-endfunc "}}}
+endfunction "}}}
 
 " User utility
-func! vimrc#gram#escape_regpat(pat) abort "{{{
+function! vimrc#gram#escape_regpat(pat) abort "{{{
     return escape(a:pat,'.~/\^$[]:+*')
-endfunc "}}}
-func! vimrc#gram#glob2regpat(glob) abort "{{{
+endfunction "}}}
+function! vimrc#gram#glob2regpat(glob) abort "{{{
     let separator = '\' . s:shellslash()
     let special_chars_adapter = {
                 \ '.' : {-> '\.'},
@@ -290,8 +290,8 @@ func! vimrc#gram#glob2regpat(glob) abort "{{{
         let regpat .= vimrc#gram#escape_regpat(normal_chars)
     endif
     return regpat
-endfunc
+endfunction
 "}}}
 
-let &cpo = s:cpo_save
-unlet s:cpo_save
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save

@@ -1,6 +1,6 @@
 " Plugin Name: prompt.vim
 " Author: mityu
-" Last Change: 03-Mar-2019.
+" Last Change: 09-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -22,7 +22,7 @@ endif
 " Config:
 "  prompt : prompt text.
 "  default_input : default input text.
-func! vimrc#prompt#launch(prompter) abort "{{{
+function! vimrc#prompt#launch(prompter) abort "{{{
     if s:is_active | return | endif
     let s:is_active = 1
     let s:prompter = a:prompter
@@ -34,7 +34,7 @@ func! vimrc#prompt#launch(prompter) abort "{{{
                 \ extend(s:prompter.config, s:default_config, 'keep')
 
     augroup prompt_observer
-        au!
+        autocmd!
         au CmdlineChanged @ call s:callback('on_changed', getcmdline())
     augroup END
 
@@ -42,16 +42,16 @@ func! vimrc#prompt#launch(prompter) abort "{{{
         let input = input(s:prompter.config.prompt, s:prompter.config.default_input)
         call s:callback('on_decided', input)
     finally
-        au! prompt_observer
+        autocmd! prompt_observer
         let s:is_active = 0
         call s:callback('on_exit')
     endtry
-endfunc "}}}
-func! s:callback(func_name, ...) abort "{{{
+endfunction "}}}
+function! s:callback(func_name, ...) abort "{{{
     if has_key(s:prompter, a:func_name)
         call call(s:prompter[a:func_name], a:000)
     endif
-endfunc "}}}
+endfunction "}}}
 
 let &cpoptions = s:cpoptions_save
 unlet s:cpoptions_save
