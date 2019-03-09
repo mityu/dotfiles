@@ -1,6 +1,6 @@
 " Plugin Name: class.vim
 " Author: mityu
-" Last Change: 08-Mar-2019.
+" Last Change: 09-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -89,6 +89,35 @@ func! s:save_options.restore_all() abort "{{{
 endfunc "}}}
 func! s:save_options.clear() abort "{{{
     let self._shelter = {}
+endfunc "}}}
+"}}}
+" notify{{{
+let s:notify = {}
+func! s:notify.notify(identifier) abort "{{{
+    let self.identifier_ = a:identifier
+endfunc "}}}
+func! s:notify._base(cmd, hlgroup, msg) abort "{{{
+    execute 'echohl' a:hlgroup
+    execute a:cmd string(printf('[%s] %s', self.identifier_, a:msg))
+    echohl None
+endfunc "}}}
+func! s:notify.echo_color(hlgroup, msg) abort "{{{
+    call self._base('echo', a:hlgroup, a:msg)
+endfunc "}}}
+func! s:notify.echomsg_color(hlgroup, msg) abort "{{{
+    call self._base('echomsg', a:hlgroup, a:msg)
+endfunc "}}}
+func! s:notify.error_msg(msg) abort "{{{
+    call self.echomsg_color('Error', a:msg)
+endfunc "}}}
+func! s:notify.warning_msg(msg) abort "{{{
+    call self.echomsg_color('WarningMsg', a:msg)
+endfunc "}}}
+func! s:notify.error(msg) abort "{{{
+    call self.echo_color('Error', a:msg)
+endfunc "}}}
+func! s:notify.warning(msg) abort "{{{
+    call self.echo_color('WarningMsg', a:msg)
 endfunc "}}}
 "}}}
 
