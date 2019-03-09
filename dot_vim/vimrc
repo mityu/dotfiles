@@ -1144,6 +1144,10 @@ endif
 if isdirectory(g:memolist_path)
     com! -bar -nargs=+ -complete=customlist,VimrcMemolistComplete
                 \ MemoDelete call s:memo_delete(<f-args>)
+    augroup vimrc_memolist
+        " Overwrite default :MemoList
+        au User vimrc_initialize com! MemoList call s:memolist()
+    augroup END
     func! s:memo_list_memos() abort "{{{
         return map(
                     \ split(glob(s:filename([g:memolist_path, '*'])), "\n"),
