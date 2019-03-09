@@ -830,7 +830,8 @@ command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
 command! -bar Draft call s:draft()
 command! -bar UnDraft call s:undraft()
-command! -bar -nargs=* Scratch call s:scratch(<f-args>)
+command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
+            \ Scratch call s:scratch(<q-args>)
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 
@@ -873,30 +874,22 @@ function! s:undraft() abort "{{{
     if !exists('b:vimrc_draft_savedata') | return | endif
     call b:vimrc_draft_savedata.restore_all()
 endfunction "}}}
-function! s:scratch(...) abort "{{{
-    let config = {
-                \ 'opener': 'split',
-                \ 'name': '',
-                \ }
-    if a:0 == 1
-        let config.name = join(a:000, '\ ')
-    else
-        for arg in a:000
-            let parsed = split(arg, '\:')
-            if len(arg) <= 1
-                call s:echomsg_error('Invalid argument for :Scratch : ' . arg)
-                continue
-            endif
-            let config[parsed[0]] = join(parsed[1:], ':')
-        endfor
-    endif
-    if config.name ==# ''
+function! s:scratch(opener) abort "{{{
+    let opener = a:opener
+    let name = input('New buffer name? ')
+    if name ==# ''
+        " Ignore opener
         new
     else
-        execute config.opener printf('scratch://%s', config.name)
+        if opener ==# '' | let opener = 'split' | endif
+        execute opener printf('scratch://%s', name)
     endif
     Draft
 endfunction "}}}
+function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort "{{{
+    let pat = '^' . a:arg_lead
+    return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
+endfunc "}}}
 function! s:list_tasks(args) abort "{{{
     let target = '%'
     if a:args =~# 'rf'
