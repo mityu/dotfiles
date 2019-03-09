@@ -1142,10 +1142,39 @@ if !isdirectory(g:memolist_path)
     call mkdir(g:memolist_path, 'p')
 endif
 if isdirectory(g:memolist_path)
+    com! -bar -nargs=+ -complete=customlist,VimrcMemolistComplete
+                \ MemoDelete call s:memo_delete(<f-args>)
+    func! s:memo_list_memos() abort "{{{
+        return map(
+                    \ split(glob(s:filename([g:memolist_path, '*'])), "\n"),
+                    \ 'fnamemodify(v:val, ":p:t")')
+    endfunc "}}}
     func! s:memolist() abort "{{{
         call vimrc#anything#start(
-                    \ map(split(glob(s:filename([g:memolist_path, '*'])), "\n"), 'fnamemodify(v:val, ":p:t")'),
-                    \ {selected -> execute('edit ' . string(fnameescape(selected)))})
+                    \ s:memo_list_memos(),
+                    \ {selected -> execute('edit ' . fnameescape(s:filename([g:memolist_path, selected])))})
+    endfunc "}}}
+    func! s:memo_delete(...) abort "{{{
+        for memo in a:000
+            if getfperm(s:filename([g:memolist_path, memo])) ==# ''
+                call s:echomsg('Memo does not exists: ' . memo)
+                continue
+            endif
+            call s:echomsg(printf('Delete a Memo? %s [y/n]', memo))
+            if nr2char(getchar()) !~? 'y'
+                call s:echomsg('Canceled.')
+                continue
+            endif
+            if delete(s:filename([g:memolist_path, memo])) == 0
+                call s:echomsg('Successfully deleted: ' . memo)
+            else
+                call s:echomsg_error('Failed to delete: ' . memo)
+            endif
+        endfor
+    endfunc "}}}
+    func! VimrcMemolistComplete(arg_lead, cmd_line, cur_pos) abort "{{{
+        return map(filter(s:memo_list_memos(), 'v:val =~? a:arg_lead'),
+                    \ 'fnameescape(v:val)')
     endfunc "}}}
 endif
 "}}}
