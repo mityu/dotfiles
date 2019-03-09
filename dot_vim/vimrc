@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 07-Mar-2019.
+" Last Change: 08-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -184,8 +184,6 @@ func! s:pack_register() abort "{{{
     "call minpac#add('lambdalisue/fila.vim')
     call minpac#add('thinca/vim-ft-help_fold')
     call minpac#add('vim-jp/syntax-vim-ex')
-    call minpac#add('mattn/vim-reading-vimrc')
-    call minpac#add('mityu/vim-readingvimrc-files')
     call minpac#add('prabirshrestha/async.vim')
     call minpac#add('prabirshrestha/asyncomplete.vim')
     call minpac#add('prabirshrestha/vim-lsp')
@@ -200,6 +198,8 @@ func! s:pack_register() abort "{{{
     call minpac#add('previm/previm',{'type': 'opt'})
     call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
     call minpac#add('thinca/vim-partedit',{'type': 'opt'})
+    call minpac#add('mattn/vim-reading-vimrc', {'type': 'opt'})
+    call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
 endfunc "}}}
 func! s:pack_init() abort "{{{
     try
@@ -251,6 +251,7 @@ set smarttab
 set softtabstop=4
 set hls
 set display=lastline
+set listchars=tab:\|-
 
 set noundofile nobackup noswapfile
 set autoread
@@ -342,6 +343,7 @@ nnoremap Y y$
 nnoremap <C-h> :<C-u>nohls<CR>
 nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
+nnoremap <silent> <C-w>q :<C-u>copen<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
 nnoremap <Space>q :<C-u>quit<CR>
@@ -600,7 +602,7 @@ if has('win32')
 endif
 "}}}
 " Plugin{{{
-func! s:plugin_mapping() abort
+func! s:plugin_mapping() abort "{{{
     " These mapping commands are must be executed after loaded plugins in
     " order to override plugin default mappings.
     map J <Plug>(jplus)
@@ -633,34 +635,35 @@ func! s:plugin_mapping() abort
     nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
     nmap <silent> <C-p> <Plug>(lsp-previous-error)
     nmap <silent> <C-n> <Plug>(lsp-next-error)
-endfunc
-func! s:gram_mapping() abort
+endfunc "}}}
+func! s:gram_mapping() abort "{{{
     let map = [
-                \ ['k','loop-cursor-up'],
-                \ ['j','loop-cursor-down'],
-                \ ['<CR>','select-item'],
-                \ ['i','start-filtering'],
-                \ ['q','exit'],
+                \ ['k', 'loop-cursor-up'],
+                \ ['j', 'loop-cursor-down'],
+                \ ['<CR>', 'select-item'],
+                \ ['i', 'start-filtering'],
+                \ ['q', 'exit'],
                 \]
-    call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
+    call map(map,{key,val ->
+                \ 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
     execute join(map,"\n")
-endfunc
-func! s:filore_mapping() abort
+endfunc "}}}
+func! s:filore_mapping() abort "{{{
     let map = [
-                \ ['q','exit'],
-                \ ['o','toggle-directory-folding'],
-                \ ['l','enter-directory'],
-                \ ['h','leave-directory'],
-                \ ['.','toggle-show-hidden-files'],
-                \ ['k','loop-cursor-up'],
-                \ ['j','loop-cursor-down'],
-                \ ['<CR>','open-file'],
+                \ ['q', 'exit'],
+                \ ['o', 'toggle-directory-folding'],
+                \ ['l', 'enter-directory'],
+                \ ['h', 'leave-directory'],
+                \ ['.', 'toggle-show-hidden-files'],
+                \ ['k', 'loop-cursor-up'],
+                \ ['j', 'loop-cursor-down'],
+                \ ['<CR>', 'open-file'],
                 \ ['H', 'start-history'],
                 \]
-    call map(map,{key,val-> 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
+    call map(map,{key,val ->
+                \ 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
     execute join(map,"\n")
-endfunc
-
+endfunc "}}}
 augroup vimrc_plugin_settings
     au User vimrc_initialize call s:plugin_mapping()
 augroup END
@@ -722,7 +725,6 @@ call s:_simple_loop_define({
             \'enter_with': '<C-w>',
             \'follow_key': '<>-+'
             \})
-" XXX: Sometimes gh starts selection mode.
  call s:_loop_define({
              \'id': 'TabChange',
              \'enter_with': 'g',
@@ -769,7 +771,6 @@ call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
 call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
-call add(s:_map,['nnoremap','<silent>','q','call <SID>map_toggle_QuickFix()'])
 execute join(map(s:_map,{->join([
             \  v:val[0],
             \  v:val[1],
@@ -777,15 +778,6 @@ execute join(map(s:_map,{->join([
             \  printf(':<C-u>%s<CR>',v:val[3])
             \ ],' ')}),"\n")
 unlet s:_map
-
-func! s:map_toggle_QuickFix() abort
-    let win_count = winnr('$')
-    cclose
-    if win_count != winnr('$') | return | endif
-    try | copen | catch
-        echohl Error | echom v:exception | echohl None
-    endtry
-endfunc
 "}}}
 " Shift-ten-key{{{
 func! s:shift_ten_key(enablize) abort "{{{
@@ -823,8 +815,6 @@ iabbrev todo: TODO:
 iabbrev fixme: FIXME:
 iabbrev xxx: XXX:
 iabbrev note: NOTE:
-cabbrev gina Gina
-cabbrev gista Gista
 "}}}
 
 " Command
