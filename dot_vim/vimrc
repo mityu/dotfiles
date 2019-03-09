@@ -194,6 +194,7 @@ func! s:pack_register() abort "{{{
     call minpac#add('junegunn/vim-easy-align')
     call minpac#add('tyru/caw.vim')
     call minpac#add('thinca/vim-ambicmd')
+    call minpac#add('glidenote/memolist.vim')
 
     call minpac#add('previm/previm',{'type': 'opt'})
     call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -771,6 +772,7 @@ call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
 call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
+call add(s:_map,['nnoremap','<silent>','m','call <SID>memolist()'])
 execute join(map(s:_map,{->join([
             \  v:val[0],
             \  v:val[1],
@@ -1133,6 +1135,19 @@ let g:caw_no_default_keymappings = 1
 " previm{{{
 let g:previm_show_header = 0
 let g:previm_enable_realtime = 1
+"}}}
+" memolist.vim{{{
+let g:memolist_path = s:filename([expand('~'), '.cache', 'vim', 'memolist'])
+if !isdirectory(g:memolist_path)
+    call mkdir(g:memolist_path, 'p')
+endif
+if isdirectory(g:memolist_path)
+    func! s:memolist() abort "{{{
+        call vimrc#anything#start(
+                    \ map(split(glob(s:filename([g:memolist_path, '*'])), "\n"), 'fnamemodify(v:val, ":p:t")'),
+                    \ {selected -> execute('edit ' . string(fnameescape(selected)))})
+    endfunc "}}}
+endif
 "}}}
 " ReadingVimrc{{{
 com! -bar StartReadingVimrc call s:start_readingvimrc()
