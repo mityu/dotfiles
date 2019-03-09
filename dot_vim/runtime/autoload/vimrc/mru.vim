@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 07-Mar-2019.
+"Last Change: 09-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -58,6 +58,9 @@ func! vimrc#mru#start() abort "{{{
     call vimrc#gram#launch(s:bearer)
 endfunc "}}}
 func! vimrc#mru#try_to_enable() abort "{{{
+    let s:is_available = s:try_to_enable_impl()
+endfunc "}}}
+func! s:try_to_enable_impl() abort "{{{
     if !exists('g:mru_history_file')
         call s:notify.error('Please set `g:mru_history_file` to a file name')
         return v:false
@@ -136,7 +139,8 @@ if !exists('s:did_initialize')
                 \ 'selected' : function('s:bearer_selected')
                 \ }
 
-    let s:is_available = vimrc#mru#try_to_enable()
+    let s:is_available = 0
+    call vimrc#mru#try_to_enable()
 
     let s:did_initialize = v:true
 endif
