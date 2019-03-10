@@ -540,14 +540,18 @@ augroup vimrc_cmdwin_filtering
 augroup END
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
-    let self.commands = getline(1, '$')
     let self.last_input = ''
 endfunction "}}}
 function! s:cmdwin_filtering.clear() abort "{{{
-    let self.commands = []
+    if !empty(self.commands)
+        let self.commands = []
+    endif
     let self.config.default_input = ''
 endfunction "}}}
 function! s:cmdwin_filtering.start() abort "{{{
+    if empty(self.commands)
+        let self.commands = getline(1, '$')
+    endif
     highlight link CmdwinFilteringCommandsMatch Search
     call self.delmatch()
     call self.filtering(self.config.default_input)
