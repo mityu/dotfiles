@@ -195,7 +195,6 @@ function! s:pack_register() abort "{{{
     call minpac#add('prabirshrestha/vim-lsp')
     call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
     call minpac#add('machakann/vim-Verdin')
-    call minpac#add('mityu/vim-asyncomplete-Verdin')
     call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
     call minpac#add('junegunn/vim-easy-align')
     call minpac#add('tyru/caw.vim')
