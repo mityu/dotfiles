@@ -901,6 +901,7 @@ function! s:list_tasks(args) abort "{{{
     endif
     execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunction "}}}
+
 let s:notes = {'save_dir_': ''}
 function! s:notes.instance(path) abort "{{{
     let new_obj = deepcopy(self)
@@ -921,7 +922,7 @@ function! s:notes.new(opener) abort "{{{
         let name = self.expand_filename(name)
     endif
     let filepath = s:filename([self.save_dir_, name])
-    execute (a:opener ==# '' ? 'edit' : a:opener) filepath
+    execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
 endfunction "}}}
 function! s:notes.list() abort "{{{
     call vimrc#anything#start(
@@ -943,10 +944,14 @@ function! s:notes.delete(...) abort "{{{
         endif
     endfor
 endfunction "}}}
-function! s:notes.get_save_dir() abort
+function! s:notes.get_save_dir() abort "{{{
     return self.save_dir_
-endfunction
-
+endfunction "}}}
+function! s:notes.get_completion(arg_lead) abort "{{{
+    return map(filter(self.list_files(), 'v:val =~? a:arg_lead'),
+                \ 'fnameescape(v:val)')
+endfunction "}}}
+" :Memo* :Otameshi*{{{
 for s:type_ in ['memo', 'otameshi']
     let s:{s:type_} = s:notes.instance(s:filename(
             \ [expand('~'), '.cache', 'vimrc', s:type_]))
@@ -957,8 +962,8 @@ for s:type_ in ['memo', 'otameshi']
         let s:com_prefix_ = toupper(s:type_[0]) . s:type_[1:]
         execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
                     \ s:com_prefix_, s:type_)
-        execute printf('command! -bar -nargs=+ %sDelete call s:%s.delete(<f-qrgs>)',
-                    \ s:com_prefix_, s:type_)
+        execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-qrgs>)',
+                    \ s:com_prefix_, s:com_prefix_, s:type_)
         execute printf('command! -bar %sList call s:%s.list()',
                     \ s:com_prefix_, s:type_)
         unlet s:com_prefix_
@@ -989,6 +994,13 @@ function! s:otameshi.expand_filename(name) abort "{{{
         endif
     endtry
 endfunction "}}}
+function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort "{{{
+    return s:memo.get_completion(a:arg_lead)
+endfunction "}}}
+function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort "{{{
+    return s:otameshi.get_completion(a:arg_lead)
+endfunction "}}}
+"}}}
 
 " Function
 function! FilePath() abort "{{{
