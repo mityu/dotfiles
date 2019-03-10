@@ -1,6 +1,6 @@
 " Plugin Name: prompt.vim
 " Author: mityu
-" Last Change: 09-Mar-2019.
+" Last Change: 10-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -35,7 +35,7 @@ function! vimrc#prompt#launch(prompter) abort "{{{
 
     augroup prompt_observer
         autocmd!
-        au CmdlineChanged @ call s:callback('on_changed', getcmdline())
+        autocmd CmdlineEnter,CmdlineChanged @ call s:eat_default_inputs()
     augroup END
 
     try
@@ -51,6 +51,15 @@ function! s:callback(func_name, ...) abort "{{{
     if has_key(s:prompter, a:func_name)
         call call(s:prompter[a:func_name], a:000)
     endif
+endfunction "}}}
+function! s:eat_default_inputs() abort "{{{
+    if getcmdline() !=# s:prompter.config.default_input
+        return
+    endif
+    augroup prompt_observer
+        autocmd!
+        autocmd CmdlineChanged @ call s:callback('on_changed', getcmdline())
+    augroup END
 endfunction "}}}
 
 let &cpoptions = s:cpoptions_save
