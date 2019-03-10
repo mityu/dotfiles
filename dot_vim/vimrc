@@ -197,7 +197,6 @@ function! s:pack_register() abort "{{{
     call minpac#add('junegunn/vim-easy-align')
     call minpac#add('tyru/caw.vim')
     call minpac#add('thinca/vim-ambicmd')
-    call minpac#add('glidenote/memolist.vim')
 
     call minpac#add('previm/previm',{'type': 'opt'})
     call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
@@ -1219,52 +1218,6 @@ let g:caw_no_default_keymappings = 1
 " previm{{{
 let g:previm_show_header = 0
 let g:previm_enable_realtime = 1
-"}}}
-" memolist.vim{{{
-let g:memolist_path = s:filename([expand('~'), '.cache', 'vim', 'memolist'])
-if !isdirectory(g:memolist_path)
-    call mkdir(g:memolist_path, 'p')
-endif
-if isdirectory(g:memolist_path)
-    command! -bar -nargs=+ -complete=customlist,VimrcMemolistComplete
-                \ MemoDelete call s:memo_delete(<f-args>)
-    augroup vimrc_memolist
-        " Overwrite default :MemoList
-        au User vimrc_initialize command! MemoList call s:memolist()
-    augroup END
-    function! s:memo_list_memos() abort "{{{
-        return map(
-                    \ split(glob(s:filename([g:memolist_path, '*'])), "\n"),
-                    \ 'fnamemodify(v:val, ":p:t")')
-    endfunction "}}}
-    function! s:memolist() abort "{{{
-        call vimrc#anything#start(
-                    \ s:memo_list_memos(),
-                    \ {selected -> execute('edit ' . fnameescape(s:filename([g:memolist_path, selected])))})
-    endfunction "}}}
-    function! s:memo_delete(...) abort "{{{
-        for memo in a:000
-            if getfperm(s:filename([g:memolist_path, memo])) ==# ''
-                call s:echomsg('Memo does not exists: ' . memo)
-                continue
-            endif
-            call s:echomsg(printf('Delete a Memo? %s [y/n]', memo))
-            if nr2char(getchar()) !~? 'y'
-                call s:echomsg('Canceled.')
-                continue
-            endif
-            if delete(s:filename([g:memolist_path, memo])) == 0
-                call s:echomsg('Successfully deleted: ' . memo)
-            else
-                call s:echomsg_error('Failed to delete: ' . memo)
-            endif
-        endfor
-    endfunction "}}}
-    function! VimrcMemolistComplete(arg_lead, cmd_line, cur_pos) abort "{{{
-        return map(filter(s:memo_list_memos(), 'v:val =~? a:arg_lead'),
-                    \ 'fnameescape(v:val)')
-    endfunction "}}}
-endif
 "}}}
 " ReadingVimrc{{{
 command! -bar StartReadingVimrc call s:start_readingvimrc()
