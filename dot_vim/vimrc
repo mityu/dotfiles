@@ -82,6 +82,9 @@ endfunction "}}}
 function! s:glob(expr) abort "{{{
     return split(glob(a:expr), "\n")
 endfunction "}}}
+function! s:getchar_string(...) abort
+    return nr2char(call('getchar', a:000))
+endfunction
 
 " Startup config
 " {{{
@@ -935,6 +938,11 @@ function! s:notes.delete(...) abort "{{{
     for target in a:000
         if !s:has(files, target)
             call s:echomsg_error('File does not exists: ' . target)
+            continue
+        endif
+        call s:echomsg(printf('Delete %s ? [y/n]', target))
+        if s:getchar_string() !~? 'y'
+            call s:echomsg('Canceled.')
             continue
         endif
         if delete(s:filename([self.save_dir_, target])) == 0
