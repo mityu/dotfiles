@@ -886,8 +886,8 @@ function! s:scratch(opener) abort "{{{
     let opener = a:opener
     let name = input('New buffer name? ')
     if name ==# ''
-        " Ignore opener
-        new
+        if opener ==# '' | let opener = 'new' | endif
+        execute opener
     else
         if opener ==# '' | let opener = 'split' | endif
         execute opener printf('scratch://%s', name)
