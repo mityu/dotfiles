@@ -962,7 +962,7 @@ for s:type_ in ['memo', 'otameshi']
         let s:com_prefix_ = toupper(s:type_[0]) . s:type_[1:]
         execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
                     \ s:com_prefix_, s:type_)
-        execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-qrgs>)',
+        execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
                     \ s:com_prefix_, s:com_prefix_, s:type_)
         execute printf('command! -bar %sList call s:%s.list()',
                     \ s:com_prefix_, s:type_)
