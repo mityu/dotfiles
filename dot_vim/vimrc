@@ -82,9 +82,9 @@ endfunction "}}}
 function! s:glob(expr) abort "{{{
     return split(glob(a:expr), "\n")
 endfunction "}}}
-function! s:getchar_string(...) abort
+function! s:getchar_string(...) abort "{{{
     return nr2char(call('getchar', a:000))
-endfunction
+endfunction "}}}
 
 " Startup config
 " {{{
@@ -1351,7 +1351,7 @@ function! s:working_plugin.rm(...) abort "{{{
             continue
         endif
         call s:echomsg(printf('Delete %s ? [y/n]', plugin))
-        if nr2char(getchar()) !~? 'y'
+        if s:getchar_string() !~? 'y'
             call s:echomsg('Canceled.')
             continue
         endif
