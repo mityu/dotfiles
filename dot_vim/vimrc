@@ -1246,17 +1246,19 @@ let g:previm_enable_realtime = 1
 let g:mru_history_file = s:join_path(expand('~'), '.cache', 'vimrc', 'mru', 'history')
 "}}}
 " ReadingVimrc{{{
-command! -bar StartReadingVimrc call s:start_readingvimrc()
-function! s:start_readingvimrc() abort
+command! -bar ReadingVimrc call s:readingvimrc()
+function! s:readingvimrc() abort
     try
         packadd vim-reading-vimrc
         ReadingVimrc
+    catch
     endtry
     try
         packadd vim-readingvimrc-files
         let g:readingvimrc_files_listing_window_open_command = 'tabedit'
         ReadingVimrcFiles
         unlet g:readingvimrc_files_listing_window_open_command
+    catch
     endtry
 endfunction
 "}}}
