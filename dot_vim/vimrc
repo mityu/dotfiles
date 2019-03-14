@@ -40,8 +40,8 @@ endfunction "}}}
 function! s:rc(fname) abort "{{{
     return s:filesystem.rcfile_prefix . a:fname
 endfunction "}}}
-function! s:filename(path) abort "{{{
-    return join(a:path,s:filesystem.slash)
+function! s:join_path(...) abort "{{{
+    return join(a:000,s:filesystem.slash)
 endfunction "}}}
 function! s:has(object, to_search) abort "{{{
     let object_type = type(a:object)
@@ -124,13 +124,13 @@ if has('vim_starting')
     let g:loaded_vimballPlugin=1
     let g:loaded_netrwPlugin=1
 
-    execute 'set runtimepath+=' . escape(s:filename([$DOT_VIM,'runtime']), ' \')
+    execute 'set runtimepath+=' . escape(s:join_path($DOT_VIM,'runtime'), ' \')
 endif
 "}}}
 
 " Before laading this file
 " Set environment variables on gVim.{{{
-let s:_envrc = s:filename([expand('~'), s:rc('envrc')])
+let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
 if has('gui_running')&&filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
     call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
@@ -212,7 +212,7 @@ function! s:pack_init() abort "{{{
         packadd minpac
     catch /^Vim\%((\a\+)\)\=:E919/
         "Download minpac...
-        let minpac_path = s:filename([$DOT_VIM, 'pack', 'minpac', 'opt', 'minpac'])
+        let minpac_path = s:join_path($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
         call s:echomsg('Downloading minpac...')
         call system('git clone https://github.com/k-takata/minpac.git ' .
                     \ minpac_path)
@@ -284,7 +284,7 @@ set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
 
-let s:_undodir = s:filename([expand('~'), '.cache', 'vimrc', 'undodir'])
+let s:_undodir = s:join_path(expand('~'), '.cache', 'vimrc', 'undodir')
 if !isdirectory(s:_undodir) && exists('*mkdir')
     call mkdir(s:_undodir,'p')
 endif
@@ -917,7 +917,7 @@ function! s:notes.instance(path) abort "{{{
     return new_obj
 endfunc "}}}
 function! s:notes.list_files() abort "{{{
-    return map(s:glob(s:filename([self.save_dir_, '*.*'])),
+    return map(s:glob(s:join_path(self.save_dir_, '*.*')),
                 \ 'fnamemodify(v:val, ":p:t")')
 endfunction "}}}
 function! s:notes.new(opener) abort "{{{
@@ -929,13 +929,13 @@ function! s:notes.new(opener) abort "{{{
     if s:has(self, 'expand_filename')
         let name = self.expand_filename(name)
     endif
-    let filepath = s:filename([self.save_dir_, name])
+    let filepath = s:join_path(self.save_dir_, name)
     execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
 endfunction "}}}
 function! s:notes.list() abort "{{{
     call vimrc#anything#start(
                 \ self.list_files(),
-                \ {selected -> execute('edit ' . fnameescape(s:filename([self.save_dir_, selected])))}
+                \ {selected -> execute('edit ' . fnameescape(s:join_path(self.save_dir_, selected)))}
                 \ )
 endfunction "}}}
 function! s:notes.delete(...) abort "{{{
@@ -950,7 +950,7 @@ function! s:notes.delete(...) abort "{{{
             call s:echomsg('Canceled.')
             continue
         endif
-        if delete(s:filename([self.save_dir_, target])) == 0
+        if delete(s:join_path(self.save_dir_, target)) == 0
             call s:echomsg('Successfully deleted: ' .target)
         else
             call s:echomsg('Failed to delete: ' .target)
@@ -966,8 +966,8 @@ function! s:notes.get_completion(arg_lead) abort "{{{
 endfunction "}}}
 " :Memo* :Otameshi*{{{
 for s:type_ in ['memo', 'otameshi']
-    let s:{s:type_} = s:notes.instance(s:filename(
-            \ [expand('~'), '.cache', 'vimrc', s:type_]))
+    let s:{s:type_} = s:notes.instance(s:join_path(
+            \ expand('~'), '.cache', 'vimrc', s:type_))
     if !isdirectory(s:{s:type_}.get_save_dir())
         call mkdir(s:{s:type_}.get_save_dir(), 'p')
     endif
@@ -1177,11 +1177,11 @@ function! s:lsp_register_servers() abort
     endif
     if executable('vint') && executable('efm-langserver')
         if s:Windows
-            let config_yaml = [expand('%APPDATA%')]
+            let config_yaml = expand('%APPDATA%')
         else
-            let config_yaml = [expand('~'), '.config']
+            let config_yaml = s:join_path(expand('~'), '.config')
         endif
-        let config_yaml = s:filename(config_yaml + ['efm-langserver', 'config.yaml'])
+        let config_yaml = s:join_path(config_yaml, 'efm-langserver', 'config.yaml')
         call lsp#register_server({
                     \ 'name' : 'efm-langserver-vim',
                     \ 'cmd': {server_info -> ['efm-langserver', '-c=' . config_yaml]},
@@ -1204,7 +1204,7 @@ let g:lsp_diagnostics_echo_cursor = 1
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
 let g:sonictemplate_intelligent_key='<Plug>(nop-sonictemplate-intelligent)'
 let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
-let g:sonictemplate_vim_template_dir = [s:filename([expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates'])]
+let g:sonictemplate_vim_template_dir = [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
 " osyo-manga/textobj-multiblock{{{
 let g:textobj_multiblock_blocks = [
         \['(',')'],
@@ -1270,7 +1270,7 @@ command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
             \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
 
 let s:working_plugin = {}
-let s:working_plugin.workplace = s:filename([expand('$DOT_VIM'), 'workplace'])
+let s:working_plugin.workplace = s:join_path(expand('$DOT_VIM'), 'workplace')
 let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
 function! s:working_plugin.list_plugins() abort "{{{
     if !self.available | return [] | endif
@@ -1287,12 +1287,12 @@ function! s:working_plugin.load(...) abort "{{{
             call s:echomsg_error('Failed to load: ' . plugin)
             continue
         endif
-        let plugin_dir = s:filename([self.workplace, plugin])
+        let plugin_dir = s:join_path(self.workplace, plugin)
         call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
         call add(rtp, plugin_dir)
         for file_name in extend(
-                \ split(glob(s:filename([plugin_dir, 'plugin', '*.vim'])), "\n"),
-                \ split(glob(s:filename([plugin_dir, 'after', 'plugin', '*.vim'])), "\n")
+                \ split(glob(s:join_path(plugin_dir, 'plugin', '*.vim')), "\n"),
+                \ split(glob(s:join_path(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
                 \)
             execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
         endfor
@@ -1302,7 +1302,7 @@ function! s:working_plugin.load(...) abort "{{{
 endfunction "}}}
 function! s:working_plugin.cd(has_bang, plugin) abort "{{{
     if !self.available | return | endif
-    execute (a:has_bang ? 'lcd' : 'cd') s:filename([self.workplace, a:plugin])
+    execute (a:has_bang ? 'lcd' : 'cd') s:join_path(self.workplace, a:plugin)
 endfunction "}}}
 function! s:working_plugin.clone(...) abort "{{{
     if !(self.available && executable('git') && a:0)
@@ -1323,7 +1323,7 @@ function! s:working_plugin.clone(...) abort "{{{
         call s:echomsg_error('Directory already exists: ' . clone_to)
         return
     endif
-    let clone_to = s:filename([self.workplace, clone_to])
+    let clone_to = s:join_path(self.workplace, clone_to)
     execute '!git clone' repository clone_to
 endfunction "}}}
 function! s:working_plugin.new(...) abort "{{{
@@ -1333,14 +1333,14 @@ function! s:working_plugin.new(...) abort "{{{
         return
     endif
     for plugin in a:000
-        let base_dir = s:filename([self.workplace, plugin])
+        let base_dir = s:join_path(self.workplace, plugin)
         if isdirectory(base_dir)
             call s:echomsg_error('Plugin already exists: ' . base_dir)
             continue
         endif
         call mkdir(base_dir)
-        call mkdir(s:filename([base_dir, 'plugin']))
-        call mkdir(s:filename([base_dir, 'autoload']))
+        call mkdir(s:join_path(base_dir, 'plugin'))
+        call mkdir(s:join_path(base_dir, 'autoload'))
         call s:echomsg('Created: ' . plugin)
     endfor
 endfunction "}}}
@@ -1358,7 +1358,7 @@ function! s:working_plugin.rm(...) abort "{{{
             call s:echomsg('Canceled.')
             continue
         endif
-        if delete(s:filename([self.workplace, plugin]), 'rf') != 0
+        if delete(s:join_path(self.workplace, plugin), 'rf') != 0
             call s:echomsg_error('Failed to delete: ' . plugin)
         else
             call s:echomsg('Succesfully deleted: ' . plugin)
