@@ -347,8 +347,13 @@ nnoremap <S-CR> O<ESC>
 nnoremap Y y$
 nnoremap <C-h> :<C-u>nohls<CR>
 nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
+nnoremap <silent> <C-w><C-s> :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
+nnoremap <silent> <C-w><C-v> :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <C-w>q :<C-u>copen<CR>
+nnoremap <silent> <C-w><C-q> :<C-u>copen<CR>
+nnoremap <silent> <C-w>t :<C-u>tabnew<CR>
+nnoremap <silent> <C-w><C-t> :<C-u>tabnew<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
 nnoremap <Space>q :<C-u>quit<CR>
@@ -356,7 +361,8 @@ nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
 nnoremap <expr> @@ (reg_recording()==#''?'@a':'q')
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
+nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
+nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap n nzzzv
 nnoremap N Nzzzv
 nmap zf <Plug>(operator-vimrc-fold-zf)
