@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Mar-2019.
+" Last Change: 14-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -138,7 +138,8 @@ if has('gui_running')&&filereadable(s:_envrc)
     call map(s:contents, "split(v:val,'=')")
     call map(s:contents,
             \ "execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
-endif | unlet s:contents s:_envrc
+    unlet s:contents
+endif | unlet s:_envrc
 "}}}
 " Initialize autocmd{{{
 let s:_augroups = readfile(expand('<sfile>'))
