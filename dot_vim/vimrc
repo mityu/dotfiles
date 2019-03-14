@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 14-Mar-2019.
+" Last Change: 15-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -309,16 +309,16 @@ if executable('ag')
 endif
 
 augroup vimrc_syntax
-    au User vimrc_initialize syntax on
+    autocmd User vimrc_initialize syntax on
 augroup END
 augroup vimrc_filetype
-    " au FileType * let &l:commentstring=' ' . &l:commentstring
-    au FileType c,cpp setl foldmethod=indent
-    au BufRead .envrc set filetype=sh
-    au FileType makefile setl noexpandtab nosmarttab
+    " autocmd FileType * let &l:commentstring=' ' . &l:commentstring
+    autocmd FileType c,cpp setl foldmethod=indent
+    autocmd BufRead .envrc set filetype=sh
+    autocmd FileType makefile setl noexpandtab nosmarttab
 augroup END
 augroup vimrc_mru
-    au BufRead,BufWritePost * call vimrc#mru#onReadFile()
+    autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
  "}}}
 
@@ -541,8 +541,8 @@ endfunction "}}}
 let s:cmdwin_save_options = vimrc#class#new('save_options')
 
 augroup vimrc_cmdwin_filtering
-    au CmdWinEnter * call s:cmdwin_filtering.prepare()
-    au CmdWinLeave * call s:cmdwin_filtering.clear()
+    autocmd CmdWinEnter * call s:cmdwin_filtering.prepare()
+    autocmd CmdWinLeave * call s:cmdwin_filtering.clear()
 augroup END
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
@@ -605,9 +605,9 @@ function! s:cmdwin_filtering_start() abort "{{{
 endfunction "}}}
 
 augroup vimrc_mapping
-    au CmdWinEnter * call s:cmdwin_enter()
-    au CmdWinLeave * call s:cmdwin_leave()
-    au User vimrc_initialize call s:map_define_operator()
+    autocmd CmdWinEnter * call s:cmdwin_enter()
+    autocmd CmdWinLeave * call s:cmdwin_leave()
+    autocmd User vimrc_initialize call s:map_define_operator()
 augroup END
 
 if has('mac') | let mapleader='_' | endif
@@ -679,14 +679,46 @@ function! s:filore_mapping() abort "{{{
                 \ 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
     execute join(map,"\n")
 endfunction "}}}
-augroup vimrc_plugin_settings
-    au User vimrc_initialize call s:plugin_mapping()
-augroup END
-augroup vimrc_gram
-    au User gramOpen call s:gram_mapping()
-augroup END
-augroup vimrc_filore
-    au FileType filore call s:filore_mapping()
+" gina{{{
+function! s:gina_mapping() abort "{{{
+    if exists(':Gina') != 2
+        return
+    endif
+    function! s:gina_nnoremap(scheme, lhs, rhs) abort "{{{
+        call gina#custom#mapping#nmap(
+                    \ a:scheme, a:lhs, a:rhs,
+                    \ {'noremap': 1, 'silent' : 1})
+    endfunction "}}}
+
+    " <C-]> is expeimental.
+    call s:gina_nnoremap('status', '<C-]>', ':<C-u>Gina commit<CR>')
+    call s:gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
+
+    " Jump between unadded files with n/p .
+    let rhs_base = printf(
+                \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
+                \ s:SIDPrefix())
+    call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
+    call s:gina_nnoremap('status', 'p', printf(rhs_base, 1))
+
+    call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
+
+    " Cleanup
+    delfunction s:gina_nnoremap
+endfunction "}}}
+function! s:gina_status_select_another(repeat_count, search_previous) abort "{{{
+    let flags = 'w'
+    let flags .= a:search_previous ? 'b' : ''
+    for i in range(1, a:repeat_count)
+        call search('\e[31.\+\e[m', flags)
+    endfor
+endfunction "}}}
+"}}}
+augroup vimrc_plugin_mapping
+    autocmd User vimrc_initialize call s:plugin_mapping()
+    autocmd User gramOpen call s:gram_mapping()
+    autocmd FileType filore call s:filore_mapping()
+    autocmd User vimrc_initialize call s:gina_mapping()
 augroup END
 "}}}
 " Loop {{{
@@ -1036,9 +1068,9 @@ endfunction "}}}
 " EmphasisIndent{{{
 hi link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
-    au WinEnter * call s:emphasize_indent()
-    au OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
-    au User vimrc_initialize call s:emphasize_indent()
+    autocmd WinEnter * call s:emphasize_indent()
+    autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
+    autocmd User vimrc_initialize call s:emphasize_indent()
 augroup END
 function! s:emphasize_indent() abort "{{{
     if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
@@ -1073,9 +1105,9 @@ command! EmphasisIndentEnable call s:emphasis_indent_enable()
 " WarningSpace{{{
 hi link WarningSpace Error
 augroup vimrc_warningspace
-    au WinEnter * call s:warningspace()
-    au OptionSet * call s:warningspace()
-    au User vimrc_initialize call s:warningspace()
+    autocmd WinEnter * call s:warningspace()
+    autocmd OptionSet * call s:warningspace()
+    autocmd User vimrc_initialize call s:warningspace()
 augroup END
 function! s:warningspace() abort "{{{
     " Clean up.
@@ -1138,7 +1170,7 @@ nnoremap <expr> <C-c> quickrun#is_running() ?
             \ ':<C-u>call quickrun#sweep_sessions()<CR>' :
             \ '<C-c>'
 augroup vimrc_filetype
-    au FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
+    autocmd FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
 augroup END
  "}}}
 " ayncomplete.vim{{{
@@ -1165,12 +1197,12 @@ function! s:register_asyncomplete_sources() abort
                 \ })
 endfunction
 augroup vimrc_asyncomplete_sources
-    au User asyncomplete_setup call s:register_asyncomplete_sources()
+    autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
 augroup END
 "}}}
 " vim-lsp{{{
 augroup vimrc_lsp_servers
-    au User lsp_setup call s:lsp_register_servers()
+    autocmd User lsp_setup call s:lsp_register_servers()
 augroup END
 function! s:lsp_register_servers() abort
     if executable('clangd')
@@ -1389,15 +1421,15 @@ endfunction "}}}
 " Utility
 " tabpage_cd{{{
 augroup vimrc_tabpage_cd
-    au TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
-    au TabLeave * let t:vimrc_cwd = getcwd(-1)
+    autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
+    autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
 augroup END
  "}}}
 " showmode{{{
 augroup vimrc_showmode
-    au ColorScheme * call s:showmode_init()
-    au User vimrc_initialize call s:showmode_init()
-    au WinEnter,BufWinEnter * call s:showmode_update()
+    autocmd ColorScheme * call s:showmode_init()
+    autocmd User vimrc_initialize call s:showmode_init()
+    autocmd WinEnter,BufWinEnter * call s:showmode_update()
 augroup END
 function! Vimrc_showmode_filename() abort "{{{
     if &l:buftype==#'help'
@@ -1555,7 +1587,7 @@ endfunction "}}}
 "}}}
 " :terminal{{{
 augroup vimrc_terminal
-    au TerminalOpen * call s:terminal_open()
+    autocmd TerminalOpen * call s:terminal_open()
 augroup END
 function! s:terminal_open() abort
     setlocal nonumber norelativenumber
@@ -1597,7 +1629,7 @@ if has('gui_running')
     if has('multi_byte_ime') || has('xim')
         set iminsert=0 imsearch=0
         augroup vimrc_iminsert
-            au InsertLeave * set iminsert=0
+            autocmd InsertLeave * set iminsert=0
         augroup END
     endif
 endif
@@ -1606,13 +1638,13 @@ endif
 " Initialize when loading this file.{{{
 augroup vimrc_initialize_dummy
     " Do not provide an error. For more information, see `:h E217`
-    au User vimrc_initialize " Do nothing.
+    autocmd User vimrc_initialize " Do nothing.
 augroup END
 if has('vim_starting') "{{{
     augroup vimrc_initialize
-        au VimEnter * doau User vimrc_initialize
+        autocmd VimEnter * doautocmd User vimrc_initialize
     augroup END
 else
-    doau User vimrc_initialize
+    doautocmd User vimrc_initialize
 endif "}}}
 "}}}
