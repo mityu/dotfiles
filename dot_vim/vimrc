@@ -1205,6 +1205,7 @@ let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
 let g:sonictemplate_intelligent_key='<Plug>(nop-sonictemplate-intelligent)'
 let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
 let g:sonictemplate_vim_template_dir = [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
+" }}}
 " osyo-manga/textobj-multiblock{{{
 let g:textobj_multiblock_blocks = [
         \['(',')'],
@@ -1241,6 +1242,9 @@ let g:caw_no_default_keymappings = 1
 " previm{{{
 let g:previm_show_header = 0
 let g:previm_enable_realtime = 1
+"}}}
+" mru{{{
+let g:mru_history_file = s:join_path(expand('~'), '.cache', 'vimrc', 'mru', 'history')
 "}}}
 " ReadingVimrc{{{
 command! -bar StartReadingVimrc call s:start_readingvimrc()
