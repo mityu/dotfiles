@@ -284,7 +284,7 @@ set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
 
-let s:_undodir = s:filename([expand('$DOT_VIM'), '_vim_cache', 'undodir'])
+let s:_undodir = s:filename([expand('~'), '.cache', 'vimrc', 'undodir'])
 if !isdirectory(s:_undodir) && exists('*mkdir')
     call mkdir(s:_undodir,'p')
 endif
@@ -1204,9 +1204,7 @@ let g:lsp_diagnostics_echo_cursor = 1
 let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
 let g:sonictemplate_intelligent_key='<Plug>(nop-sonictemplate-intelligent)'
 let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
-if has('mac')
-    let g:sonictemplate_vim_template_dir=[expand('~/.vim/_vim_cache/sonictemplates')]
-endif "}}}
+let g:sonictemplate_vim_template_dir = [s:filename([expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates'])]
 " osyo-manga/textobj-multiblock{{{
 let g:textobj_multiblock_blocks = [
         \['(',')'],
