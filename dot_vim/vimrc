@@ -370,6 +370,9 @@ nmap zF <Plug>(operator-vimrc-fold-zF)
 nmap zd <Plug>(operator-vimrc-fold-zd)
 nmap zD <Plug>(operator-vimrc-fold-zD)
 nmap zE <Plug>(operator-vimrc-fold-zE)
+" Avoid to regester a command, calling textobj function to the
+" command-history when use textobj via dot.
+nnoremap <silent> . .
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -693,6 +696,8 @@ function! s:gina_mapping() abort "{{{
     " <C-]> is expeimental.
     call s:gina_nnoremap('status', '<C-]>', ':<C-u>Gina commit<CR>')
     call s:gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
+    call s:gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
+    call s:gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
 
     " Jump between unadded files with n/p .
     let rhs_base = printf(
@@ -820,6 +825,7 @@ call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
 call add(s:_map,['nnoremap','<silent>','m','MemoList'])
 call add(s:_map,['nnoremap','<silent>','o','OtameshiList'])
+call add(s:_map,['nnoremap','','g','Gina status'])
 execute join(map(s:_map,{->join([
             \  v:val[0],
             \  v:val[1],
