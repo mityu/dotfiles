@@ -1,6 +1,12 @@
 if [ -f ~/.envrc ]; then
 	cat ~/.envrc | while read path_expr
 	do
+        # Ignore blank line.
+        if [ -z ${path_expr} ]; then
+            continue
+        fi
+
+        # Ignore comment.
         if [ ${path_expr:0:1} = "#" ]; then
             continue
         fi
