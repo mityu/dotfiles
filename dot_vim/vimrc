@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Mar-2019.
+" Last Change: 16-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -124,7 +124,7 @@ if has('vim_starting')
     let g:loaded_vimballPlugin=1
     let g:loaded_netrwPlugin=1
 
-    execute 'set runtimepath+=' . escape(s:join_path($DOT_VIM,'runtime'), ' \')
+    let &runtimepath .= ',' . escape(s:join_path($DOT_VIM,'runtime'), ' \')
 endif
 "}}}
 
@@ -351,8 +351,8 @@ nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w><C-s> :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <C-w><C-v> :<C-u>belowright wincmd v<CR>
-nnoremap <silent> <C-w>q :<C-u>copen<CR>
-nnoremap <silent> <C-w><C-q> :<C-u>copen<CR>
+nnoremap <silent> <C-w>q :<C-u>belowright copen<CR>
+nnoremap <silent> <C-w><C-q> :<C-u>belowright copen<CR>
 nnoremap <silent> <C-w>t :<C-u>tabnew<CR>
 nnoremap <silent> <C-w><C-t> :<C-u>tabnew<CR>
 nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
