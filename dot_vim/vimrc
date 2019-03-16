@@ -193,6 +193,7 @@ function! s:pack_register() abort "{{{
     call minpac#add('thinca/vim-prettyprint')
     call minpac#add('thinca/vim-quickrun')
     call minpac#add('thinca/vim-textobj-between')
+    call minpac#add('thinca/vim-themis')
     call minpac#add('tyru/capture.vim')
     call minpac#add('tyru/caw.vim')
     call minpac#add('tyru/open-browser.vim')
