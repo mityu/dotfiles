@@ -414,7 +414,9 @@ tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
 function! s:map_fold_cmd(keys) abort "{{{
-    let commentstring_save = &l:commentstring
+    let save_options = vimrc#class#new('save_options')
+    call save_options.store(['commentstring', 'foldmethod'])
+    let &l:foldmethod = 'marker'
     let &l:commentstring = ' ' . &l:commentstring
     try
         execute 'normal!' a:keys
@@ -422,8 +424,9 @@ function! s:map_fold_cmd(keys) abort "{{{
         echohl Error
         echom v:exception
         echohl None
+    finally
+        call save_options.restore_all()
     endtry
-    let &l:commentstring = commentstring_save
 endfunction "}}}
 function! s:map_range_fold_cmd(motion_wizeness,keys) abort "{{{
     let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
