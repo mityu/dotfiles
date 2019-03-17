@@ -1096,7 +1096,7 @@ function! s:emphasize_indent() abort "{{{
         call matchdelete(w:emphasis_indent_id)
     endif
 
-    let pat = '\v%(^%(%s)*)@<=%s'
+    let pat = '\v%%(^%%(%s)*)@<=%s'
     if &l:expandtab || &l:smarttab
         let pat = printf(pat, repeat('\s', shiftwidth()), '\s')
     else
