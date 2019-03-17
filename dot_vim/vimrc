@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 16-Mar-2019.
+" Last Change: 17-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -930,15 +930,21 @@ function! s:undraft() abort "{{{
 endfunction "}}}
 function! s:scratch(opener) abort "{{{
     let opener = a:opener
-    let name = input('New buffer name? ')
+    let prefix = 'scratch://'
+    let name = input('Scratch buffer name? ')
     if name ==# ''
-        if opener ==# '' | let opener = 'new' | endif
-        execute opener
-    else
-        if opener ==# '' | let opener = 'split' | endif
-        execute opener printf('scratch://%s', name)
+        let identifier = 1
+        let name = 'nameless/buffer-'
+        while bufexists(prefix . name . identifier)
+            let identifier += 1
+        endwhile
+        let name .= identifier
     endif
-    Draft
+    if opener ==# ''
+        let opener = 'split'
+    endif
+    execute opener prefix . name
+    call s:draft()
 endfunction "}}}
 function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort "{{{
     let pat = '^' . a:arg_lead
