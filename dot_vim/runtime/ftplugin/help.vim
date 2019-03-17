@@ -1,4 +1,4 @@
-" Last Change: 07-Mar-2019.
+" Last Change: 16-Mar-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish
@@ -60,8 +60,8 @@ else
             put =''
         else
             keeppatterns /^License:\|Maintainer:/+1
-            let header = printf('%s%s*%s-contents*', (ja ? "目次\t" : 'CONTENTS'),
-            \                       repeat("\t", 5), plug_name)
+            let header = printf('%s%s*%s-contents*', (ja ? "目次" : 'CONTENTS'),
+            \                       repeat(' ', 50), plug_name)
             silent put =[repeat('=', 78), header, '']
         endif
 
@@ -69,24 +69,19 @@ else
 
         let lines = []
         while search('^\([=-]\)\1\{77}$', 'W')
-            let head = getline('.') =~# '=' ? '' : '  '
+            let prefix = getline('.') =~# '=' ? '' : '  '
             .+1
-            let caption = matchlist(getline('.'), '^\([^\t]*\)\t\+\*\(\S*\)\*$')
+            let caption = matchlist(getline('.'), '^\(\u*\)\s\+\*\(\S*\)\*$')
             if !empty(caption)
                 let [title, tag] = caption[1 : 2]
-                call add(lines, printf("%s%s\t%s|%s|", head, title, head, tag))
+                let margin = repeat(' ', 30 - strlen(prefix . title))
+                call add(lines, printf('%s%s%s|%s|', prefix, title, margin, tag))
             endif
         endwhile
 
         call setpos('.', contents_pos)
 
-        silent put =lines + repeat([''], 3)
-        call setpos('.', contents_pos)
-        let len = len(lines)
-        setlocal expandtab tabstop=32
-        execute '.,.+' . len . 'retab'
-        setlocal noexpandtab tabstop=8
-        execute '.,.+' . len . 'retab!'
+        silent put =lines + repeat([''], 2)
 
         call setpos('.', cursor)
     endfunction
