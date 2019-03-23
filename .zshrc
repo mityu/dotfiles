@@ -1,6 +1,6 @@
 if [ -f ~/.envrc ]; then
-	cat ~/.envrc | while read path_expr
-	do
+    cat ~/.envrc | while read path_expr
+    do
         # Ignore blank line.
         if [ -z ${path_expr} ]; then
             continue
@@ -10,18 +10,18 @@ if [ -f ~/.envrc ]; then
         if [ ${path_expr:0:1} = "#" ]; then
             continue
         fi
-		export $(eval echo ${path_expr})
-	done
+        export $(eval echo ${path_expr})
+    done
 fi
 
 if [ -n "$VIM_TERMINAL" ] && [ -n "$VIM_SERVERNAME" ]; then
-	function mvim(){
-		$VIMBINARY --servername $VIM_SERVERNAME --remote-tab-wait $@
-	}
+    function mvim(){
+        $VIMBINARY --servername $VIM_SERVERNAME --remote-tab-wait $@
+    }
 else
-	function mvim(){
-		$VIMBINARY $@
-	}
+    function mvim(){
+        $VIMBINARY $@
+    }
 fi
 
 #alias mvim=$VIMBINARY
