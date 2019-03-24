@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 09-Mar-2019.
+"Last Change: 24-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -103,7 +103,7 @@ function! s:bearer_filter(user_input) abort "{{{
     return s:filterbox.filter(a:user_input)
 endfunction "}}}
 function! s:bearer_selected(selected_item) abort "{{{
-    execute 'edit' fnameescape(a:selected_item)
+    execute 'edit' fnameescape(fnamemodify(a:selected_item, ':~:.'))
 endfunction "}}}
 function! s:filterbox_expression(user_input) abort "{{{
     return printf('v:val =~? %s', string(vimrc#gram#glob2regpat(a:user_input)))
