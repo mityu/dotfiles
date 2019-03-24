@@ -824,7 +824,7 @@ let s:_map = []
 call add(s:_map,['nnoremap','','ev','edit $MYVIMRC'])
 call add(s:_map,['nnoremap','','sv','source $MYVIMRC'])
 call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
-call add(s:_map,['nnoremap','<silent>','j','call vimrc#cwdfile#start()'])
+call add(s:_map,['nnoremap','<silent>','j','call vimrc#files#start()'])
 call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
 call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
 call add(s:_map,['nnoremap','<silent>','m','MemoList'])
@@ -986,10 +986,7 @@ function! s:notes.new(opener) abort "{{{
     execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
 endfunction "}}}
 function! s:notes.list() abort "{{{
-    call vimrc#anything#start(
-                \ self.list_files(),
-                \ {selected -> execute('edit ' . fnameescape(s:join_path(self.save_dir_, selected)))}
-                \ )
+    call vimrc#files#start(self.save_dir_)
 endfunction "}}}
 function! s:notes.delete(...) abort "{{{
     let files = self.list_files()
