@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-Mar-2019.
+" Last Change: 24-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -1441,117 +1441,137 @@ augroup vimrc_tabpage_cd
     autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
 augroup END
  "}}}
-" showmode{{{
-augroup vimrc_showmode
-    autocmd ColorScheme * call s:showmode_init()
-    autocmd User vimrc_initialize call s:showmode_init()
-    autocmd WinEnter,BufWinEnter * call s:showmode_update()
-augroup END
-function! Vimrc_showmode_filename() abort "{{{
-    if &l:buftype==#'help'
-        return expand('%:t')
-    elseif &l:buftype==#'[quickfix]'
-        return '[quickfix]'
-    elseif &previewwindow
-        return '[preview]'
-    elseif &l:buftype==#'terminal'
-        return 'terminal:' . expand('%')
-    elseif &l:buftype==#'prompt'
-        return '[prompt]'
-    elseif expand('%')!=#''
-        return pathshorten(expand('%:.'))
-    elseif &l:buftype==#'nofile'
-        return '[draft]'
-    else
-        return '[No name]'
+" statusline{{{
+function! s:statusline_init() abort "{{{
+    let s:statusline = {
+                \ 'active': s:statusline_generater(1),
+                \ 'inactive': s:statusline_generater(0),
+                \ }
+    if !has('vim_starting')
+        for tabnr in range(1, tabpagenr('$'))
+            for winnr in range(1, tabpagewinnr(tabnr, '$'))
+                call settabwinvar(tabnr, winnr, '&statusline',
+                            \ s:statusline.inactive)
+            endfor
+        endfor
     endif
+    let &l:statusline = s:statusline.active
+    call s:showmode_init()
 endfunction "}}}
-function! Vimrc_showmode() abort "{{{
-    call s:showmode_highlight()
-    let l:map={
-        \'n': 'NORMAL',
-        \'i': 'INSERT',
-        \'R': 'REPLACE',
-        \'v': 'VISUAL',
-        \'V': 'V-LINE',
-        \"\<C-v>": 'V-BLOCK',
-        \'c': 'COMMAND',
-        \'ce': 'EX-COM',
-        \'s': 'SELECT',
-        \'S': 'S-LINE',
-        \"\<C-s>": 'S-BLOCK',
-        \'t': 'T-INSERT',
-        \'no': 'OPERATOR',
-        \'niI': 'N-INSERT',
-        \'niR': 'N-REPLACE',
-        \'niV': 'N-V-REPLACE',
-        \}
-    return get(l:map,mode(),'UNKNOWN')
+function! s:statusline_generater(active_page) "{{{
+    let statusline =
+                \ '%m' .
+                \ (a:active_page ? s:showmode_label() : '') .
+                \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
+                \ '[#%{bufnr("%")}]' .
+                \ '%{<SID>filename_label(bufnr("%"))}' .
+                \ '%<%=' .
+                \ '[%{pathshorten(getcwd(winnr()))}]'
+    return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
+endfunction "}}}
+function! s:statusline_set(kind) abort "{{{
+    call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
+endfunction "}}}
+function! s:statusline_update(...) abort "{{{
+    let event = exists('a:1') ? a:1 : ''
+    if event ==? 'CmdwinEnter'
+        call s:statusline_set('inactive')
+        let &statusline = s:statusline.active
+        return
+    elseif event ==? 'CmdwinLeave'
+        call s:statusline_set('active')
+        return
+    endif
+
+    if exists('t:vimrc_showmode_winID')
+        call s:statusline_set('inactive')
+    endif
+    let t:vimrc_showmode_winID = win_getid()
+    if &modifiable
+        call s:statusline_set('active')
+    endif
 endfunction "}}}
 function! s:showmode_init() abort "{{{
     let colors={
-        \'normal': [['22','148'],['#005f00','#afdf00']],
-        \'insert': [['23','117'],['#005f5f','#87dfff']],
-        \'visual': [['88','208'],['#870000','#ff8700']],
-        \'replace': [['231','160'],['#ffffff','#df0000']],
-        \}
+        \ 'normal': [['22','148'],['#005f00','#afdf00']],
+        \ 'insert': [['23','117'],['#005f5f','#87dfff']],
+        \ 'visual': [['88','208'],['#870000','#ff8700']],
+        \ 'replace': [['231','160'],['#ffffff','#df0000']],
+        \ }
     for mode in keys(colors)
         execute printf('hi VimrcShowMode_%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
-                    \mode,
-                    \colors[mode][0][0],
-                    \colors[mode][0][1],
-                    \colors[mode][1][0],
-                    \colors[mode][1][1])
+                    \ mode,
+                    \ colors[mode][0][0],
+                    \ colors[mode][0][1],
+                    \ colors[mode][1][0],
+                    \ colors[mode][1][1])
     endfor
 endfunction "}}}
-function! s:showmode_highlight_type() abort "{{{
-    return get({
-            \'n': 'normal',
-            \'c': 'normal',
-            \'niI': 'normal',
-            \'niR': 'normal',
-            \'niV': 'normal',
-            \'ce': 'normal',
-            \'s': 'normal',
-            \'S': 'normal',
-            \"\<C-s>": 'normal',
-            \'no': 'normal',
-            \'i': 'insert',
-            \'t': 'insert',
-            \'R': 'replace',
-            \'v': 'visual',
-            \'V': 'visual',
-            \"\<C-v>": 'visual',
-            \},
-        \mode(),'normal')
+function! s:showmode_mode() abort "{{{
+    call s:showmode_highlight()
+    let map = {
+        \ 'n': 'NORMAL',
+        \ 'i': 'INSERT',
+        \ 'R': 'REPLACE',
+        \ 'v': 'VISUAL',
+        \ 'V': 'V-LINE',
+        \ "\<C-v>": 'V-BLOCK',
+        \ 'c': 'COMMAND',
+        \ 'ce': 'EX-COM',
+        \ 's': 'SELECT',
+        \ 'S': 'S-LINE',
+        \ "\<C-s>": 'S-BLOCK',
+        \ 't': 'T-INSERT',
+        \ 'no': 'OPERATOR',
+        \ 'niI': 'N-INSERT',
+        \ 'niR': 'N-REPLACE',
+        \ 'niV': 'N-V-REPLACE',
+        \ }
+    return get(map, mode(), 'UNKNOWN')
 endfunction "}}}
 function! s:showmode_highlight() abort "{{{
-    let type=s:showmode_highlight_type()
+    let type = get({
+        \    'i': 'insert',
+        \    't': 'insert',
+        \    'R': 'replace',
+        \    'v': 'visual',
+        \    'V': 'visual',
+        \    "\<C-v>": 'visual',
+        \    },
+        \ mode(), 'normal')
     execute 'hi link VimrcShowMode VimrcShowMode_' . type
+    return ''
 endfunction "}}}
-function! s:showmode_update() abort "{{{
-    call s:showmode_highlight()
-    let line=[s:showmode_statusline(0),s:showmode_statusline(1)]
-    let w=winnr()
-    for n in range(1,winnr('$'))
-        call setwinvar(n,'&statusline', line[n==w])
-    endfor
+function! s:showmode_label() abort "{{{
+    return '%#VimrcShowMode# %{<SID>showmode_mode()} %#StatusLine#'
 endfunction "}}}
-function! s:showmode_statusline(active) abort "{{{
-    let line='[%{&ft==#""?"No ft":&ft}][#%{bufnr("%")}] %{Vimrc_showmode_filename()}%<%=[%{pathshorten(getcwd())}]'
-    let info='%m'
-    if a:active
-        if &buftype!=#'terminal'&&!&l:ma
-            let info='%#StatusLine#' . info
-        else
-            let info='%#StatusLine#' . info . '%#VimrcShowMode# %{Vimrc_showmode()} %#StatusLine#'
-        endif
+function! s:filename_label(bufnr) abort "{{{
+    let buftype = getbufvar(a:bufnr, '&buftype')
+    let bufname = bufname(a:bufnr)
+    if buftype ==# 'help'
+        return fnamemodify(bufname, ':t')
+    elseif buftype ==# 'quickfix'
+        return '[quickfix]'
+    elseif getbufvar(a:bufnr, '&previewwindow')
+        return '[preview]'
+    elseif buftype ==# 'terminal'
+        return 'terminal:' . bufname
+    elseif buftype ==# 'prompt'
+        return '[prompt]'
     else
-        let info='%#StatusLineNC#' . info
+        return (buftype ==# 'nofile' ? '[NoFile]' : '') .
+            \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
     endif
-    return info . line
 endfunction "}}}
- "}}}
+augroup vimrc_statusline
+    autocmd ColorScheme * call s:statusline_init()
+    autocmd User vimrc_initialize call s:statusline_init()
+    autocmd WinEnter,BufWinEnter * call s:statusline_update()
+    autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
+    autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
+augroup END
+call s:statusline_init()
+"}}}
 " tabline{{{
 let &tabline=printf('%%!%stabline()',s:SIDPrefix())
 function! s:tabline() abort "{{{
@@ -1568,36 +1588,16 @@ function! s:tabline() abort "{{{
         endif
         let tabline .= '%T|'
     endfor
-    let tabline .= '%>%=%{Vimrc_showmode_filename()} [%{pathshorten(getcwd())}]'
+    let tabline .= '%>%=[%{pathshorten(getcwd())}]'
 
-    return tabline
-endfunction "}}}
-function! s:buffer_name(bufnr) abort "{{{
-    let l:buftype=getbufvar(a:bufnr,'&buftype')
-    if l:buftype==#'help'
-        return fnamemodify(bufname(a:bufnr),':t')
-    elseif l:buftype==#'[quickfix]'
-        return '[quickfix]'
-    elseif &previewwindow
-        return '[preview]'
-    elseif l:buftype==#'terminal'
-        return '[terminal]'
-    elseif l:buftype==#'prompt'
-        return '[prompt]'
-    elseif bufname(a:bufnr)!=#''
-        return pathshorten(fnamemodify(bufname(a:bufnr),':.'))
-    elseif l:buftype==#'nofile'
-        return '[draft]'
-    else
-        return '[No name]'
-    endif
+    return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction "}}}
 function! s:generate_tabinfo(tabnr) abort "{{{
     let l:tablist=tabpagebuflist(a:tabnr)
     let l:info=''
     let l:info .= len(filter(copy(l:tablist),'getbufvar(v:val,"&mod")'))? '[+]': ''
     let l:info .= '[' . tabpagewinnr(a:tabnr,'$') . ']'
-    let l:info .= s:buffer_name(tabpagebuflist(a:tabnr)[tabpagewinnr(a:tabnr)-1])
+    let l:info .= s:filename_label(tabpagebuflist(a:tabnr)[tabpagewinnr(a:tabnr)-1])
     return l:info
 endfunction "}}}
 "}}}
