@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 09-Mar-2019.
+"Last Change: 24-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -131,6 +131,7 @@ function! vimrc#filore#start(...) abort "{{{
         let current_directory = getcwd()
     endif
     call s:win_new(current_directory)
+    call s:history_register(current_directory)
 endfunction "}}}
 function! s:filore_define_plugin_mappings() abort "{{{
     let maps = [
@@ -510,7 +511,7 @@ function! s:browse_open_file_under_cursor() abort "{{{
     let file_info = s:win_get_reference_of_current_items().file_list[
                 \ s:browse_get_index_from_lnum(line('.'))]
     if s:isdirectory(file_info) | return | endif
-    execute 'edit' fnameescape(file_info.abs)
+    execute 'edit' fnameescape(fnamemodify(file_info.abs, ':~:.'))
 endfunction "}}}
 function! s:browse_color() abort "{{{
     let node_directory = '\(\_^\(\s\s\)*\)\@<=|[+-]\s\@='
