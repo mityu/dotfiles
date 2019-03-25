@@ -1,4 +1,4 @@
-"Last Change: 09-Mar-2019.
+"Last Change: 24-Mar-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -162,7 +162,9 @@ call s:hi('DiffText', 0, 'darkorange', 0)
 
 call s:hi('cStatement','violet',0,0)
 
-hi link Error ErrorMsg
-hi link TabLineFill TabLine
+hi! link Error ErrorMsg
+hi! link TabLineFill TabLine
+hi! link StatusLineTerm StatusLine
+hi! link StatusLineTermNC StatusLineNC
 
 " vim: set expandtab smarttab
