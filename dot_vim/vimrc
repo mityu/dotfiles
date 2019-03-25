@@ -1,242 +1,219 @@
 " Author: mityu
 " Last Change: 25-Mar-2019.
-" vim: foldmethod=marker
-"
-" Naming rules:
+" vim: foldmethod=marker shiftwidth=2
+" Naming rules{{{
 "  - Augroup name :
-"     `augroup vimrc_{kind}`
+"   `augroup vimrc_{kind}`
 "  - Mapping prefix :
-"     `<Plug>(<SID>-{kind})`
+"   `<Plug>(<SID>-{kind})`
 "  - Global function :
-"     Use `Vimrc` as its prefix.
-
-" Encoding
+"   Use `Vimrc` as its prefix. (But, there're some exception to this rule.)
+"}}}
+" Encoding{{{
 if has('vim_starting')
-    set encoding=utf-8
-    scriptencoding utf-8
-endif
-
-" Utility function
-function! s:SIDPrefix() abort "{{{
-    " Returns "<SNR>{script-ID}_"
-    return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSIDPrefix$')
-endfunction "}}}
-function! s:SNR() abort "{{{
-    return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
-endfunction "}}}
-function! VimrcSIDPrefix() abort "{{{
-    return s:SIDPrefix()
-endfunction "}}}
-function! VimrcCall(func, ...) abort "{{{
-    return call('s:' . a:func, a:000)
-endfunction "}}}
-function! VimrcGetVar(...) abort "{{{
-    if a:0 == 0
-        return s:
-    else
-        return call('get', [s:] + a:000)
-    endif
-endfunction "}}}
-function! s:rc(fname) abort "{{{
-    return s:filesystem.rcfile_prefix . a:fname
-endfunction "}}}
-function! s:join_path(...) abort "{{{
-    return join(a:000,s:filesystem.slash)
-endfunction "}}}
-function! s:has(object, to_search) abort "{{{
-    let object_type = type(a:object)
-    if object_type == type('')
-        let func = 'stridx'
-        let not_found = -1
-    elseif object_type == type([])
-        let func = 'index'
-        let not_found = -1
-    elseif object_type == type({})
-        let func = 'has_key'
-        let not_found = 0
-    else
-        return 0
-    endif
-    return (call(func, [a:object, a:to_search]) != not_found)
-endfunction "}}}
-function! s:echomsg_with_color(msg, hl_group) abort "{{{
-    execute 'echohl' a:hl_group
-    execute 'echomsg "[vimrc]"' string(a:msg)
-    echohl NONE
-endfunction "}}}
-function! s:echomsg(msg) abort "{{{
-    call s:echomsg_with_color(a:msg, 'NONE')
-endfunction "}}}
-function! s:echomsg_error(msg) abort "{{{
-    call s:echomsg_with_color(a:msg, 'Error')
-endfunction "}}}
-function! s:echomsg_warning(msg) abort "{{{
-    call s:echomsg_with_color(a:msg, 'WarningMsg')
-endfunction "}}}
-function! s:is_visualmode() abort "{{{
-    return s:has(['v', 'V', "\<C-v>"], mode())
-endfunction "}}}
-function! s:is_cmdwin() abort "{{{
-    return getcmdwintype() !=# ''
-endfunction "}}}
-function! s:glob(expr) abort "{{{
-    return split(glob(a:expr), "\n")
-endfunction "}}}
-function! s:getchar_string(...) abort "{{{
-    return nr2char(call('getchar', a:000))
-endfunction "}}}
-
-" Startup config
-" {{{
-if has('vim_starting')
-
-    if has('multi_lang')
-        if has('menu')
-            set langmenu=ja.utf-8
-        endif
-    endif
-
-    let s:Windows = has('win32')
-    let s:Unix = !s:Windows
-    lockvar s:Windows
-    lockvar s:Unix
-
-
-    let s:filesystem = {}
-    if s:Windows
-        let $DOT_VIM = expand('~\vimfiles')
-        let s:filesystem.slash = '\'
-        let s:filesystem.path_separator = ';'
-        let s:filesystem.rcfile_prefix = '_'
-    else
-        let $DOT_VIM = expand('~/.vim')
-        let s:filesystem.slash = '/'
-        let s:filesystem.path_separator = ':'
-        let s:filesystem.rcfile_prefix = '.'
-    endif
-
-    " disable default plugins
-    let g:loaded_2html_plugin=1
-    let g:loaded_getscriptPlugin=1
-    let g:loaded_gzip=1
-    let g:loaded_zipPlugin=1
-    let g:loaded_tarPlugin=1
-    let g:loaded_vimballPlugin=1
-    let g:loaded_netrwPlugin=1
-
-    let &runtimepath .= ',' . escape(s:join_path($DOT_VIM,'runtime'), ' \')
+  set encoding=utf-8
+  scriptencoding utf-8
 endif
 "}}}
+" Local utility functions{{{
+function! s:SIDPrefix() abort "{{{
+  " Returns "<SNR>{script-ID}_"
+  return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSIDPrefix$')
+endfunction "}}}
+function! s:SNR() abort "{{{
+  return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
+endfunction "}}}
+function! s:rc(fname) abort "{{{
+  return s:filesystem.rcfile_prefix . a:fname
+endfunction "}}}
+function! s:join_path(...) abort "{{{
+  return join(a:000, s:filesystem.slash)
+endfunction "}}}
+function! s:has(object, to_search) abort "{{{
+  let object_type = type(a:object)
+  if object_type == type('')
+    let func = 'stridx'
+    let not_found = -1
+  elseif object_type == type([])
+    let func = 'index'
+    let not_found = -1
+  elseif object_type == type({})
+    let func = 'has_key'
+    let not_found = 0
+  else
+    return 0
+  endif
+  return (call(func, [a:object, a:to_search]) != not_found)
+endfunction "}}}
+function! s:echomsg_with_color(msg, hl_group) abort "{{{
+  execute 'echohl' a:hl_group
+  execute 'echomsg "[vimrc]"' string(a:msg)
+  echohl NONE
+endfunction "}}}
+function! s:echomsg(msg) abort "{{{
+  call s:echomsg_with_color(a:msg, 'NONE')
+endfunction "}}}
+function! s:echomsg_error(msg) abort "{{{
+  call s:echomsg_with_color(a:msg, 'Error')
+endfunction "}}}
+function! s:echomsg_warning(msg) abort "{{{
+  call s:echomsg_with_color(a:msg, 'WarningMsg')
+endfunction "}}}
+function! s:is_visualmode() abort "{{{
+  return s:has(['v', 'V', "\<C-v>"], mode())
+endfunction "}}}
+function! s:is_cmdwin() abort "{{{
+  return getcmdwintype() !=# ''
+endfunction "}}}
+function! s:glob(expr) abort "{{{
+  return split(glob(a:expr), "\n")
+endfunction "}}}
+function! s:getchar_string(...) abort "{{{
+  return nr2char(call('getchar', a:000))
+endfunction "}}}
+"}}}
+" Global utility functions{{{
+function! VimrcSIDPrefix() abort "{{{
+  return s:SIDPrefix()
+endfunction "}}}
+function! VimrcCall(func, ...) abort "{{{
+  return call('s:' . a:func, a:000)
+endfunction "}}}
+function! VimrcGetVar(...) abort "{{{
+  if a:0 == 0
+    return s:
+  else
+    return call('get', [s:] + a:000)
+  endif
+endfunction "}}}
+function! FilePath() abort "{{{
+  return s:is_cmdwin() ? expand('#') : expand('%')
+endfunction "}}}
+function! FileName() abort "{{{
+  return fnamemodify(FilePath(), ':p:t')
+endfunction "}}}
+function! FileParent() abort "{{{
+  return fnamemodify(FilePath(), ':p:h')
+endfunction "}}}
+"}}}
+" Startup config{{{
+if has('vim_starting')
+  if has('multi_lang')
+    if has('menu')
+      set langmenu=ja.utf-8
+    endif
+  endif
 
-" Before laading this file
-" Set environment variables on gVim.{{{
-let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
-if has('gui_running')&&filereadable(s:_envrc)
+  let s:Windows = has('win32')
+  let s:Unix = !s:Windows
+  lockvar s:Windows
+  lockvar s:Unix
+
+
+  let s:filesystem = {}
+  if s:Windows
+    let $DOT_VIM = expand('~\vimfiles')
+    let s:filesystem.slash = '\'
+    let s:filesystem.path_separator = ';'
+    let s:filesystem.rcfile_prefix = '_'
+  else
+    let $DOT_VIM = expand('~/.vim')
+    let s:filesystem.slash = '/'
+    let s:filesystem.path_separator = ':'
+    let s:filesystem.rcfile_prefix = '.'
+  endif
+
+  " disable default plugins
+  let g:loaded_2html_plugin = 1
+  let g:loaded_getscriptPlugin = 1
+  let g:loaded_gzip = 1
+  let g:loaded_zipPlugin = 1
+  let g:loaded_tarPlugin = 1
+  let g:loaded_vimballPlugin = 1
+  let g:loaded_netrwPlugin = 1
+
+  let &runtimepath .= ', ' . escape(s:join_path($DOT_VIM, 'runtime'), ' \')
+
+  " Set environment variables on gVim.{{{
+  let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
+  if has('gui_running') && filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
     call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
     call filter(s:contents, '!empty(v:val)')
-    call map(s:contents, "split(v:val,'=')")
+    call map(s:contents, "split(v:val, '=')")
     call map(s:contents,
-            \ "execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
+        \ "execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
     unlet s:contents
-endif | unlet s:_envrc
+  endif | unlet s:_envrc
+  "}}}
+endif
 "}}}
 " Initialize autocmd{{{
 let s:_augroups = readfile(expand('<sfile>'))
 let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
-call filter(s:_augroups,'stridx(v:val,"aug")!=-1')
-call filter(s:_augroups,'v:val=~#s:_pattern')
-call map(s:_augroups,'matchstr(v:val,s:_pattern)')
-call uniq(sort(filter(s:_augroups,'v:val!~?"END"')))
+call filter(s:_augroups, 'stridx(v:val, "aug") != -1')
+call filter(s:_augroups, 'v:val =~# s:_pattern')
+call map(s:_augroups, 'matchstr(v:val, s:_pattern)')
+call uniq(sort(filter(s:_augroups, 'v:val !~? "END"')))
 for s:_augroup in s:_augroups
-    execute 'augroup' s:_augroup
-        autocmd!
-    execute 'augroup END'
+  execute 'augroup' s:_augroup
+    autocmd!
+  execute 'augroup END'
 endfor | unlet s:_augroup s:_augroups s:_pattern
  "}}}
+" Register install plugins {{{
+function! s:pack_register() abort
+  call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-" minpac
-function! s:pack_register() abort "{{{
-    call minpac#add('k-takata/minpac',{'type': 'opt'})
+  call minpac#add('itchyny/vim-cursorword')
+  call minpac#add('junegunn/vim-easy-align')
+  call minpac#add('kana/vim-altr')
+  call minpac#add('kana/vim-gf-user')
+  call minpac#add('kana/vim-operator-replace')
+  call minpac#add('kana/vim-operator-user')
+  call minpac#add('kana/vim-textobj-entire')
+  call minpac#add('kana/vim-textobj-function')
+  call minpac#add('kana/vim-textobj-indent')
+  call minpac#add('kana/vim-textobj-line')
+  call minpac#add('kana/vim-textobj-user')
+  " call minpac#add('lambdalisue/fila.vim')
+  call minpac#add('lambdalisue/gina.vim')
+  call minpac#add('lambdalisue/vim-gista')
+  call minpac#add('machakann/vim-Verdin')
+  call minpac#add('mattn/sonictemplate-vim')
+  call minpac#add('mityu/vim-textobj-multitextobj')
+  call minpac#add('osyo-manga/vim-jplus')
+  call minpac#add('osyo-manga/vim-operator-swap')
+  call minpac#add('osyo-manga/vim-textobj-multiblock')
+  call minpac#add('prabirshrestha/async.vim')
+  call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
+  call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
+  call minpac#add('prabirshrestha/asyncomplete.vim')
+  call minpac#add('prabirshrestha/vim-lsp')
+  call minpac#add('previm/previm')
+  call minpac#add('rhysd/vim-operator-surround')
+  call minpac#add('sgur/vim-gf-autoload')
+  call minpac#add('sgur/vim-operator-openbrowser')
+  call minpac#add('thinca/vim-ambicmd')
+  call minpac#add('thinca/vim-ft-help_fold')
+  " call minpac#add('thinca/vim-operator-sequence')
+  call minpac#add('thinca/vim-prettyprint')
+  call minpac#add('thinca/vim-quickrun')
+  call minpac#add('thinca/vim-textobj-between')
+  call minpac#add('thinca/vim-themis')
+  call minpac#add('tyru/capture.vim')
+  call minpac#add('tyru/caw.vim')
+  call minpac#add('tyru/open-browser.vim')
+  call minpac#add('vim-jp/syntax-vim-ex')
+  call minpac#add('vim-jp/vimdoc-ja')
+  call minpac#add('vim-jp/vital.vim')
+  call minpac#add('vim-scripts/autodate.vim')
 
-    call minpac#add('itchyny/vim-cursorword')
-    call minpac#add('junegunn/vim-easy-align')
-    call minpac#add('kana/vim-altr')
-    call minpac#add('kana/vim-gf-user')
-    call minpac#add('kana/vim-operator-replace')
-    call minpac#add('kana/vim-operator-user')
-    call minpac#add('kana/vim-textobj-entire')
-    call minpac#add('kana/vim-textobj-function')
-    call minpac#add('kana/vim-textobj-indent')
-    call minpac#add('kana/vim-textobj-line')
-    call minpac#add('kana/vim-textobj-user')
-    " call minpac#add('lambdalisue/fila.vim')
-    call minpac#add('lambdalisue/gina.vim')
-    call minpac#add('lambdalisue/vim-gista')
-    call minpac#add('machakann/vim-Verdin')
-    call minpac#add('mattn/sonictemplate-vim')
-    call minpac#add('mityu/vim-textobj-multitextobj')
-    call minpac#add('osyo-manga/vim-jplus')
-    call minpac#add('osyo-manga/vim-operator-swap')
-    call minpac#add('osyo-manga/vim-textobj-multiblock')
-    call minpac#add('prabirshrestha/async.vim')
-    call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
-    call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-    call minpac#add('prabirshrestha/asyncomplete.vim')
-    call minpac#add('prabirshrestha/vim-lsp')
-    call minpac#add('previm/previm')
-    call minpac#add('rhysd/vim-operator-surround')
-    call minpac#add('sgur/vim-gf-autoload')
-    call minpac#add('sgur/vim-operator-openbrowser')
-    call minpac#add('thinca/vim-ambicmd')
-    call minpac#add('thinca/vim-ft-help_fold')
-    " call minpac#add('thinca/vim-operator-sequence')
-    call minpac#add('thinca/vim-prettyprint')
-    call minpac#add('thinca/vim-quickrun')
-    call minpac#add('thinca/vim-textobj-between')
-    call minpac#add('thinca/vim-themis')
-    call minpac#add('tyru/capture.vim')
-    call minpac#add('tyru/caw.vim')
-    call minpac#add('tyru/open-browser.vim')
-    call minpac#add('vim-jp/syntax-vim-ex')
-    call minpac#add('vim-jp/vimdoc-ja')
-    call minpac#add('vim-jp/vital.vim')
-    call minpac#add('vim-scripts/autodate.vim')
-
-    call minpac#add('gyim/vim-boxdraw',{'type': 'opt'})
-    call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
-    call minpac#add('thinca/vim-partedit',{'type': 'opt'})
+  call minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
+  call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
+  call minpac#add('thinca/vim-partedit', {'type': 'opt'})
 endfunction "}}}
-function! s:pack_init() abort "{{{
-    try
-        packadd minpac
-    catch /^Vim\%((\a\+)\)\=:E919/
-        "Download minpac...
-        let minpac_path = s:join_path($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
-        call s:echomsg('Downloading minpac...')
-        call system('git clone https://github.com/k-takata/minpac.git ' .
-                    \ minpac_path)
-        try
-            packadd minpac
-        catch
-            echoerr v:exception
-            return 0
-        endtry
-    endtry
-
-    call minpac#init()
-    call s:pack_register()
-
-    return 1
-endfunction "}}}
-function! s:pack_update() abort "{{{
-    if s:pack_init() | call minpac#update() | endif
-endfunction "}}}
-function! s:pack_clean() abort "{{{
-    if s:pack_init() | call minpac#clean() | endif
-endfunction "}}}
-
-" Options
+" Options{{{
 "{{{
 syntax on
 filetype plugin indent on
@@ -288,44 +265,43 @@ set lazyredraw
 
 let s:_undodir = s:join_path(expand('~'), '.cache', 'vimrc', 'undodir')
 if !isdirectory(s:_undodir) && exists('*mkdir')
-    call mkdir(s:_undodir,'p')
+  call mkdir(s:_undodir, 'p')
 endif
 if isdirectory(s:_undodir)
-    set undofile
-    let &undodir = s:_undodir
+  set undofile
+  let &undodir = s:_undodir
 endif
 unlet s:_undodir
 
 if has('kaoriya')
-    set fileencodings=guess,utf-8
-    set ambiwidth=auto
+  set fileencodings=guess,utf-8
+  set ambiwidth=auto
 else
-    set fileencodings=utf-8
-    set ambiwidth=double
+  set fileencodings=utf-8
+  set ambiwidth=double
 endif
 if s:Unix
-    set path& path+=/usr/local/include
+  set path& path+=/usr/local/include
 endif
 if executable('ag')
-    let &grepprg='ag --vimgrep'
-    let &grepformat='%f:%l:%c:%m'
+  let &grepprg = 'ag --vimgrep'
+  let &grepformat = '%f:%l:%c:%m'
 endif
 
 augroup vimrc_syntax
-    autocmd User vimrc_initialize syntax on
+  autocmd User vimrc_initialize syntax on
 augroup END
 augroup vimrc_filetype
-    " autocmd FileType * let &l:commentstring=' ' . &l:commentstring
-    autocmd FileType c,cpp setl foldmethod=indent
-    autocmd BufRead .envrc set filetype=sh
-    autocmd FileType makefile setl noexpandtab nosmarttab
+  autocmd FileType c, cpp setlocal foldmethod=indent
+  autocmd BufRead envrc set filetype=sh
+  autocmd FileType makefile setlocal noexpandtab nosmarttab
 augroup END
 augroup vimrc_mru
-    autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
+  autocmd BufRead, BufWritePost * call vimrc#mru#onReadFile()
 augroup END
  "}}}
-
-" Mapping
+"}}}
+" Mapping{{{
 " builtin, extension{{{
 nnoremap ; q:i
 nnoremap : ;
@@ -368,11 +344,6 @@ nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap n nzzzv
 nnoremap N Nzzzv
-nmap zf <Plug>(operator-vimrc-fold-zf)
-nmap zF <Plug>(operator-vimrc-fold-zF)
-nmap zd <Plug>(operator-vimrc-fold-zd)
-nmap zD <Plug>(operator-vimrc-fold-zD)
-nmap zE <Plug>(operator-vimrc-fold-zE)
 " Avoid to regester a command, calling textobj function to the
 " command-history when use textobj via dot.
 nnoremap <silent> . .
@@ -384,11 +355,6 @@ inoremap <C-@> <C-x>
 vnoremap <C-e> $
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
-vmap zf <Plug>(operator-vimrc-fold-zf)
-vmap zF <Plug>(operator-vimrc-fold-zF)
-vmap zd <Plug>(operator-vimrc-fold-zd)
-vmap zD <Plug>(operator-vimrc-fold-zD)
-vmap zE <Plug>(operator-vimrc-fold-zE)
 
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
@@ -398,305 +364,555 @@ cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 
 let s:Omap = {range, lhs, rhs ->
-            \[execute(printf('onoremap %s%s %s%s', range, lhs, range, rhs)),
-            \execute(printf('vnoremap %s%s %s%s', range, lhs, range, rhs))]}
+      \[execute(printf('onoremap %s%s %s%s', range, lhs, range, rhs)),
+      \execute(printf('vnoremap %s%s %s%s', range, lhs, range, rhs))]}
 let s:EnhancedOmap = {lhs, rhs ->
-            \ [s:Omap('a',lhs,rhs),s:Omap('i',lhs,rhs)]
-            \}
-call s:EnhancedOmap('2','"')
-call s:EnhancedOmap('7',"'")
-call s:EnhancedOmap('8','(')
-call s:EnhancedOmap(',','<')
+      \ [s:Omap('a', lhs, rhs), s:Omap('i', lhs, rhs)]
+      \}
+call s:EnhancedOmap('2', '"')
+call s:EnhancedOmap('7', "'")
+call s:EnhancedOmap('8', '(')
+call s:EnhancedOmap(', ', '<')
 unlet s:Omap s:EnhancedOmap
 
-for [s:lhs,s:rhs] in [[';',':'],[':',';'],['<ESC>','N']]
-    execute printf('tnoremap <C-w>%s <C-w>%s',s:lhs,s:rhs)
+for [s:lhs, s:rhs] in [[';', ':'], [':', ';'], ['<ESC>', 'N']]
+  execute printf('tnoremap <C-w>%s <C-w>%s', s:lhs, s:rhs)
 endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
 tmap <C-j> <C-w><ESC>
 
-function! s:map_fold_cmd(keys) abort "{{{
-    let save_options = vimrc#class#new('save_options')
-    call save_options.store(['commentstring', 'foldmethod'])
-    let &l:foldmethod = 'marker'
-    let &l:commentstring = ' ' . &l:commentstring
-    try
-        execute 'normal!' a:keys
-    catch " Usaully this :catch gets E490, 'Folding not found.'
-        echohl Error
-        echom v:exception
-        echohl None
-    finally
-        call save_options.restore_all()
-    endtry
+" Loop {{{
+function! s:_loop_define(config) abort "{{{
+  let prefix = printf('<Plug>(<SID>-loop-%s)', a:config.id)
+  let enter_with = a:config.enter_with
+  let mode = get(a:config, 'mode', 'n')
+  let plug_map = {}
+  for key in ['prefix', 'main', 'do']
+    let plug_map[key] = printf("%s(%s)", prefix, key)
+  endfor
+  " execute printf('%smap <silent><expr> %s nr2char(getchar(0))',
+  "      \mode, plug_map.prefix)
+  execute printf('%smap %s <Nop>', mode, plug_map.prefix)
+  for [lhs, rhs] in a:config.map
+    let com = []
+    call add(com, [mode . 'noremap <silent>',
+          \ plug_map.do . lhs,
+          \ rhs])
+    call add(com, [mode . 'map',
+          \ enter_with . lhs,
+          \ plug_map.main . lhs])
+    call add(com, [mode . 'map',
+          \ plug_map.main . lhs,
+          \ plug_map.do . lhs . plug_map.prefix
+          \])
+    call add(com, [mode . 'map',
+          \ plug_map.prefix . lhs,
+          \ plug_map.main . lhs])
+    execute join(map(com, 'join(v:val, " ")'), "\n")
+  endfor
 endfunction "}}}
-function! s:map_range_fold_cmd(motion_wizeness,keys) abort "{{{
-    let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
-    call s:map_fold_cmd(printf('`[%s`]%s',v_cmd,a:keys))
-
-    " Remove spaces in beginning of the line which are inserted when the line was
-    " an empty line.
-    if &foldmethod ==# 'marker'
-        let marker_only_pat = '\m^\s\+%s'
-        let marker_pair = ["'[","']"]
-        let foldmarker_pair = split(&l:foldmarker,',')
-        for index in range(0,len(foldmarker_pair)-1)
-            let marker = marker_pair[index]
-            let foldmarker = printf(&l:commentstring,foldmarker_pair[index])
-            let lnum = getpos(marker)[1]
-            if getline(lnum) =~# printf(marker_only_pat,foldmarker)
-                call setline(lnum, foldmarker)
-            endif
-        endfor
-    endif
+function! s:_simple_loop_define(config) abort "{{{
+  let config = deepcopy(a:config)
+  let config.map = map(split(config.follow_key, '\zs'),
+        \ '[v:val, config.enter_with . v:val]')
+  call s:_loop_define(config)
 endfunction "}}}
-function! s:map_define_operator() abort "{{{
-    let foldmotions_with_range = 'fF'
-    let foldmotions_standalone = 'dDE'
-    let sid = s:SIDPrefix()
-    for keys in split(foldmotions_with_range . foldmotions_standalone,'\zs')
-        let keys = 'z' . keys
-        let func = [
-                    \ printf('function! %smap_fold_%s(motion_wise) abort',sid,keys),
-                    \ printf('    call s:map_range_fold_cmd(a:motion_wise,"%s")',keys),
-                    \ 'endfunction'
-                    \]
-        execute join(func,"\n")
-        call operator#user#define(
-                    \ 'vimrc-fold-' . keys,
-                    \ sid . 'map_fold_' . keys)
+"Window management
+call s:_simple_loop_define({
+      \ 'id': 'WinChange',
+      \ 'enter_with': '<C-w>',
+      \ 'follow_key': 'hjkl'
+      \ })
+call s:_simple_loop_define({
+      \ 'id': 'WinMove',
+      \ 'enter_with': '<C-w>',
+      \ 'follow_key': 'HJKL'
+      \ })
+call s:_simple_loop_define({
+      \ 'id': 'WinResize',
+      \ 'enter_with': '<C-w>',
+      \ 'follow_key': '<>-+'
+      \ })
+ call s:_loop_define({
+       \ 'id': 'TabChange',
+       \ 'enter_with': 'g',
+       \ 'map': [['h', 'gT'], ['l', 'gt']]
+       \ })
+call s:_loop_define({
+      \ 'id': 'TabMove',
+      \ 'enter_with': 'g',
+      \ 'map': [
+      \   ['T', ':<C-u>call <SID>map_tabmove(-1)<CR>'],
+      \   ['t', ':<C-u>call <SID>map_tabmove(1)<CR>']
+      \ ]
+      \ })
+function! s:map_tabmove(delta) abort "{{{
+  let tab_count = tabpagenr('$')
+  if tab_count == 1 | return | endif
+  let current = tabpagenr() - 1
+  let move_to = current + a:delta
+  if move_to < 0
+    while move_to < 0
+      let move_to += tab_count
+    endwhile
+  endif
+  if move_to >= tab_count
+    let move_to = move_to % tab_count
+  endif
+  let movement = move_to - current
+  let command = 'tabmove '
+  if movement < 0
+    let command .= string(movement)
+  else
+    let command .= '+' . movement
+  endif
+  execute command
+endfunction "}}}
+delfunc s:_loop_define
+delfunc s:_simple_loop_define
+"}}}
+" Shift-ten-key{{{
+function! s:shift_ten_key(enablize) abort "{{{
+  let ten_key_pair = [
+        \['1', '!'],
+        \['2', '"'],
+        \['3', '#'],
+        \['4', '$'],
+        \['5', '%'],
+        \['6', '&'],
+        \['7', "'"],
+        \['8', '('],
+        \['9', ')'],
+        \]
+  if a:enablize
+    for [key1, key2] in ten_key_pair
+      execute 'inoremap' key1 key2
+      execute 'inoremap' key2 key1
     endfor
-
-    " Override for normal mode; A range isn't need for following commands.
-    let map_cmd = join(['nnoremap',
-                \ '<silent>',
-                \ '<Plug>(operator-vimrc-fold-%s)',
-                \ ':<C-u>call <SID>map_fold_cmd("%s")<CR>'],' ')
-    for keys in split(foldmotions_standalone,'\zs')
-        let keys = 'z' . keys
-        execute printf(map_cmd,keys,keys)
+  else
+    for [key1, key2] in ten_key_pair
+      execute 'silent! iunmap' key1
+      execute 'silent! iunmap' key2
     endfor
+  endif
 endfunction "}}}
+command! -bar EnableShiftTenKey call s:shift_ten_key(1)
+command! -bar DisableShiftTenKey call s:shift_ten_key(0)
+if has('vim_starting') | EnableShiftTenKey | endif
+"}}}
+
 function! s:toggle_zooming_window() abort "{{{
-    if winnr('$') == 1 | return | endif
-    if !exists('t:vimrc_zooming_window')
-        let t:vimrc_zooming_window = {
-                    \ 'zoomed_winnr': 0,
-                    \ 'winrestcmd': '',
-                    \ }
-    endif
-    if t:vimrc_zooming_window.zoomed_winnr
-        execute t:vimrc_zooming_window.winrestcmd
-    endif
-    if t:vimrc_zooming_window.zoomed_winnr == winnr()
-        let t:vimrc_zooming_window.zoomed_winnr = 0
-        let t:vimrc_zooming_window.winrestcmd = ''
-    else
-        let t:vimrc_zooming_window.zoomed_winnr = winnr()
-        let t:vimrc_zooming_window.winrestcmd = winrestcmd()
-        wincmd _
-        wincmd |
-    endif
+  if winnr('$') == 1 | return | endif
+  if !exists('t:vimrc_zooming_window')
+    let t:vimrc_zooming_window = {
+          \ 'zoomed_winnr': 0,
+          \ 'winrestcmd': '',
+          \ }
+  endif
+  if t:vimrc_zooming_window.zoomed_winnr
+    execute t:vimrc_zooming_window.winrestcmd
+  endif
+  if t:vimrc_zooming_window.zoomed_winnr == winnr()
+    let t:vimrc_zooming_window.zoomed_winnr = 0
+    let t:vimrc_zooming_window.winrestcmd = ''
+  else
+    let t:vimrc_zooming_window.zoomed_winnr = winnr()
+    let t:vimrc_zooming_window.winrestcmd = winrestcmd()
+    wincmd _
+    wincmd |
+  endif
 endfunction "}}}
 function! s:cmdwin_enter() abort "{{{
-    call s:cmdwin_save_options.clear()
+  call s:cmdwin_save_options.clear()
 
-    " Type <CR> to execute current line in command-line window.
-    nnoremap <buffer> <CR> <CR>
+  " Type <CR> to execute current line in command-line window.
+  nnoremap <buffer> <CR> <CR>
 
-    " Return back to the current window from command-line window with
-    " inputting <C-c> once.
-    nnoremap <buffer> <C-c> <C-c><C-c>
-    nmap <buffer> q <C-c>
-    imap <buffer> <C-c> <ESC><C-c>
+  " Return back to the current window from command-line window with
+  " inputting <C-c> once.
+  nnoremap <buffer> <C-c> <C-c><C-c>
+  nmap <buffer> q <C-c>
+  imap <buffer> <C-c> <ESC><C-c>
 
-    " Execute an previous command easiler.
-    nnoremap <buffer> <silent> / :<C-u>call <SID>cmdwin_filtering_start()<CR>
+  " Execute an previous command easiler.
+  nnoremap <buffer> <silent> / :<C-u>call <SID>cmdwin_filtering_start()<CR>
 
-    let cmdwin_type = expand('<afile>')
-    if cmdwin_type ==# ':'
-        nnoremap <buffer> <silent> ; :<C-u>call <SID>cmdwin_move_to_cmdline()<CR>
+  let cmdwin_type = expand('<afile>')
+  if cmdwin_type ==# ':'
+    nnoremap <buffer> <silent> ; :<C-u>call <SID>cmdwin_move_to_cmdline()<CR>
 
-        inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
-        inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
-        call s:cmdwin_save_options.store('completeopt')
-        setl completeopt=menu,preview
-    endif
+    inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
+    inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
+    call s:cmdwin_save_options.store('completeopt')
+    setlocal completeopt=menu,preview
+  endif
 endfunction "}}}
 function! s:cmdwin_leave() abort "{{{
-    " let cmdwin_type = expand('<afile>')
-    if exists('s:cmdwin_save_options')
-        call s:cmdwin_save_options.restore_all()
-    endif
+  if exists('s:cmdwin_save_options')
+    call s:cmdwin_save_options.restore_all()
+  endif
 endfunction "}}}
 function! s:cmdwin_completion(select_next) abort "{{{
-    if pumvisible()
-        return a:select_next ? '<C-n>' : '<C-p>'
-    else
-        " NOTE: `return nr2char(&wildchar)` doesn't work.
-        call feedkeys(nr2char(&wildchar), 't')
-        if !a:select_next
-            " Simulate <C-p> popup.
-            call feedkeys("\<C-p>\<C-p>", 'n')
-        endif
-        return ''
+  if pumvisible()
+    return a:select_next ? '<C-n>' : '<C-p>'
+  else
+    " NOTE: `return nr2char(&wildchar)` doesn't work.
+    call feedkeys(nr2char(&wildchar), 't')
+    if !a:select_next
+      " Simulate <C-p> popup.
+      call feedkeys("\<C-p>\<C-p>", 'n')
     endif
+    return ''
+  endif
 endfunction "}}}
 function! s:cmdwin_move_to_cmdline() abort "{{{
-    let col = col('.')
-    execute "normal! \<C-c>"
-    call setcmdpos(col+1)
+  let col = col('.')
+  execute "normal! \<C-c>"
+  call setcmdpos(col + 1)
 endfunction "}}}
 let s:cmdwin_save_options = vimrc#class#new('save_options')
 
 augroup vimrc_cmdwin_filtering
-    autocmd CmdWinEnter * call s:cmdwin_filtering.prepare()
-    autocmd CmdWinLeave * call s:cmdwin_filtering.clear()
+  autocmd CmdWinEnter * call s:cmdwin_filtering.prepare()
+  autocmd CmdWinLeave * call s:cmdwin_filtering.clear()
 augroup END
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
-    let self.last_input = ''
+  let self.last_input = ''
 endfunction "}}}
 function! s:cmdwin_filtering.clear() abort "{{{
-    if !empty(self.commands)
-        let self.commands = []
-    endif
-    let self.config.default_input = ''
+  if !empty(self.commands)
+    let self.commands = []
+  endif
+  let self.config.default_input = ''
 endfunction "}}}
 function! s:cmdwin_filtering.start() abort "{{{
-    if empty(self.commands)
-        let self.commands = getline(1, '$')
-    endif
-    highlight link CmdwinFilteringCommandsMatch Search
-    call self.delmatch()
-    call self.filtering(self.config.default_input)
-    call vimrc#prompt#launch(self)
+  if empty(self.commands)
+    let self.commands = getline(1, '$')
+  endif
+  highlight link CmdwinFilteringCommandsMatch Search
+  call self.delmatch()
+  call self.filtering(self.config.default_input)
+  call vimrc#prompt#launch(self)
 endfunction "}}}
 function! s:cmdwin_filtering.delmatch() abort "{{{
-    syntax clear CmdwinFilteringCommandsMatch
+  syntax clear CmdwinFilteringCommandsMatch
 endfunction "}}}
 function! s:cmdwin_filtering.filtering(input) abort "{{{
-    let col = col('.')
-    call self.delmatch()
-    if a:input ==# ''
-        let candidates = copy(self.commands)
+  let col = col('.')
+  call self.delmatch()
+  if a:input ==# ''
+    let candidates = copy(self.commands)
+  else
+    if stridx(self.last_input, a:input) == 0
+      let candidates = getline(1, '$')
     else
-        if stridx(self.last_input, a:input) == 0
-            let candidates = getline(1, '$')
-        else
-            let candidates = copy(self.commands)
-        endif
-        call filter(candidates, 'v:val =~? a:input')
+      let candidates = copy(self.commands)
     endif
-    let self.last_input = a:input
+    call filter(candidates, 'v:val =~? a:input')
+  endif
+  let self.last_input = a:input
 
-    silent % delete _
-    call setline(1, candidates)
-    if a:input !=# ''
-        execute printf('syntax match CmdwinFilteringCommandsMatch /%s/',
-                    \ a:input)
-    endif
-    call cursor(line('$'), col)
-    redraw!
+  silent % delete _
+  call setline(1, candidates)
+  if a:input !=# ''
+    execute printf('syntax match CmdwinFilteringCommandsMatch /%s/',
+          \ a:input)
+  endif
+  call cursor(line('$'), col)
+  redraw!
 endfunction "}}}
 function! s:cmdwin_filtering.on_changed(input) abort "{{{
-    call self.filtering(a:input)
+  call self.filtering(a:input)
 endfunction "}}}
 function! s:cmdwin_filtering.on_decided(input) abort "{{{
-    let self.config.default_input = a:input
+  let self.config.default_input = a:input
 endfunction "}}}
 function! s:cmdwin_filtering.on_exit() abort "{{{
-    call self.delmatch()
-    call self.filtering(self.config.default_input)
+  call self.delmatch()
+  call self.filtering(self.config.default_input)
 endfunction "}}}
 function! s:cmdwin_filtering_start() abort "{{{
-    call s:cmdwin_filtering.start()
+  call s:cmdwin_filtering.start()
 endfunction "}}}
 
 augroup vimrc_mapping
-    autocmd CmdWinEnter * call s:cmdwin_enter()
-    autocmd CmdWinLeave * call s:cmdwin_leave()
-    autocmd User vimrc_initialize call s:map_define_operator()
+  autocmd CmdWinEnter * call s:cmdwin_enter()
+  autocmd CmdWinLeave * call s:cmdwin_leave()
+  autocmd User vimrc_initialize call s:map_define_operator()
 augroup END
 
 if has('mac') | let mapleader='_' | endif
 if has('win32')
-    inoremap \ _
-    inoremap _ \
+  inoremap \ _
+  inoremap _ \
 endif
 "}}}
-" Plugin{{{
-function! s:plugin_mapping() abort "{{{
-    " These mapping commands are must be executed after loaded plugins in
-    " order to override plugin default mappings.
-    map J <Plug>(jplus)
-    map ,sa <Plug>(operator-surround-append)
-    map ,sd <Plug>(operator-surround-delete)
-    map ,sr <Plug>(operator-surround-replace)
-    map ,r  <Plug>(operator-replace)
-    map ,sy <Plug>(operator-swap-marking)
-    map ,sp <Plug>(operator-swap)
-    map ,c <Plug>(caw:hatpos:toggle:operator)
+" Command{{{
+let s:_map = []
+call add(s:_map, ['nnoremap', '', 'ev', 'edit $MYVIMRC'])
+call add(s:_map, ['nnoremap', '', 'sv', 'source $MYVIMRC'])
+call add(s:_map, ['nnoremap', '<silent>', 'k', 'call vimrc#mru#start()'])
+call add(s:_map, ['nnoremap', '<silent>', 'j', 'call vimrc#files#start()'])
+call add(s:_map, ['nnoremap', '<silent>', 'b', 'call vimrc#buffers#start()'])
+call add(s:_map, ['nnoremap', '<silent>', 'f', 'call vimrc#filore#start()'])
+call add(s:_map, ['nnoremap', '<silent>', 'm', 'MemoList'])
+call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
+execute join(map(s:_map, {->join([
+      \  v:val[0],
+      \  v:val[1],
+      \  '<Space>' . v:val[2],
+      \  printf(':<C-u>%s<CR>', v:val[3])
+      \ ], ' ')}), "\n")
+unlet s:_map
+"}}}
+"}}}
+" Abbreviates "{{{
+iabbrev todo: TODO:
+iabbrev fixme: FIXME:
+iabbrev xxx: XXX:
+iabbrev note: NOTE:
+"}}}
+" Commands{{{
+" Declarations{{{
+command! -bar CdCurrent cd %:p:h
+command! -bar LcdCurrent lcd %:p:h
+command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
+command! CopyToClipboard let @*=@"
+command! ClearMessage execute repeat("echom ''\n", 201)
+command! Helptags helptags ALL
+command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0, <f-args>)
+command! -bar Draft call s:draft()
+command! -bar UnDraft call s:undraft()
+command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
+      \ Scratch call s:scratch(<q-args>)
+command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
+command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 
-    command! -nargs=+ OVmap execute 'omap' <q-args>|execute 'vmap' <q-args>
-    OVmap ab <Plug>(textobj-multiblock-a)
-    OVmap ib <Plug>(textobj-multiblock-i)
-    OVmap ad <Plug>(textobj-multitextobj-a)
-    OVmap id <Plug>(textobj-multitextobj-i)
-    OVmap aF <Plug>(textobj-between-a)
-    OVmap iF <Plug>(textobj-between-i)
-    OVmap if <Plug>(textobj-function-i)
-    OVmap af <Plug>(textobj-function-a)
-    OVmap ii <Plug>(textobj-indent-i)
-    OVmap iI <Plug>(textobj-indent-same-i)
-    OVmap ai <Plug>(textobj-indent-a)
-    OVmap aI <Plug>(textobj-indent-same-a)
-    vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
-    vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
-    delcom OVmap
+" Plugin Shortcuts
+command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
+command! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
+command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
+command! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0, <f-args>)
+command! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0, <f-args>)
+command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
+command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
+command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
+"}}}
+function! Execute_list(com) abort "{{{
+  return split(execute(a:com), "\n")
+endfunction "}}}
+function! Filter(pat, com) abort "{{{
+  let output = Execute_list(a:com)
+  call filter(output, 'v:val=~?a:pat')
+  return output
+endfunction "}}}
+function! s:filter(bang, pat, ...) abort "{{{
+  let output = join(Filter(a:pat, join(a:000, ' ')), "\n")
+  if a:bang
+    echom output
+  else
+    echo output
+  endif
+endfunction "}}}
+function! s:draft() abort "{{{
+  let b:vimrc_draft_save_options = vimrc#class#new('save_options')
+  call b:vimrc_draft_save_options.store(['buftype', 'swapfile'])
+  setlocal buftype=nofile noswapfile
+endfunction "}}}
+function! s:undraft() abort "{{{
+  if !exists('b:vimrc_draft_savedata') | return | endif
+  call b:vimrc_draft_savedata.restore_all()
+endfunction "}}}
+function! s:scratch(opener) abort "{{{
+  let opener = a:opener
+  let prefix = 'scratch://'
+  let name = input('Scratch buffer name? ')
+  if name ==# ''
+    let identifier = 1
+    let name = 'nameless/buffer-'
+    while bufexists(prefix . name . identifier)
+      let identifier += 1
+    endwhile
+    let name .= identifier
+  endif
+  if opener ==# ''
+    let opener = 'split'
+  endif
+  execute opener prefix . name
+  call s:draft()
+endfunction "}}}
+function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort "{{{
+  let pat = '^' . a:arg_lead
+  return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
+endfunc "}}}
+function! s:list_tasks(args) abort "{{{
+  let target = '%'
+  if a:args =~# 'rf'
+    let target = '**/*.' . expand('%:e')
+  elseif a:args !=# ''
+    let target = a:args
+  endif
+  execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
+endfunction "}}}
+"}}}
+" minpac{{{
+function! s:pack_init() abort "{{{
+  try
+    packadd minpac
+  catch /^Vim\%((\a\+)\)\=:E919/
+    "Download minpac...
+    let minpac_path = s:join_path($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
+    call s:echomsg('Downloading minpac...')
+    call system('git clone https://github.com/k-takata/minpac.git ' .
+          \ minpac_path)
+    try
+      packadd minpac
+    catch
+      echoerr v:exception
+      return 0
+    endtry
+  endtry
 
-    nnoremap <Plug>(<SID>-open-folding) zv
-    nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
-    nmap <silent> <C-p> <Plug>(lsp-previous-error)
-    nmap <silent> <C-n> <Plug>(lsp-next-error)
+  call minpac#init()
+  call s:pack_register()
+
+  return 1
 endfunction "}}}
-function! s:gram_mapping() abort "{{{
-    let map = [
-                \ ['k', 'loop-cursor-up'],
-                \ ['j', 'loop-cursor-down'],
-                \ ['<CR>', 'select-item'],
-                \ ['i', 'start-filtering'],
-                \ ['q', 'exit'],
-                \]
-    call map(map,{key,val ->
-                \ 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
-    execute join(map,"\n")
+function! s:pack_update() abort "{{{
+  if s:pack_init() | call minpac#update() | endif
 endfunction "}}}
-function! s:filore_mapping() abort "{{{
-    let map = [
-                \ ['q', 'exit'],
-                \ ['o', 'toggle-directory-folding'],
-                \ ['l', 'enter-directory'],
-                \ ['h', 'leave-directory'],
-                \ ['.', 'toggle-show-hidden-files'],
-                \ ['k', 'loop-cursor-up'],
-                \ ['j', 'loop-cursor-down'],
-                \ ['<CR>', 'open-file'],
-                \ ['H', 'start-history'],
-                \]
-    call map(map,{key,val ->
-                \ 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
-    execute join(map,"\n")
+function! s:pack_clean() abort "{{{
+  if s:pack_init() | call minpac#clean() | endif
 endfunction "}}}
-" gina{{{
-function! s:gina_mapping() abort "{{{
-    if exists(':Gina') != 2
-        return
+command! -bar PackInit   call s:pack_init()
+command! -bar PackUpdate call s:pack_update()
+command! -bar PackClean  call s:pack_clean()
+"}}}
+" Plugin chacker{{{
+let s:plugin = {}
+let s:plugin.plugins_ = map(filter(s:glob(
+      \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
+      \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+function! s:plugin.exists(plugin) abort
+  return s:has(self.plugins_, a:plugin)
+endfunction
+"}}}
+" Installed plugins{{{
+" kana/vim-operator-replace{{{
+if s:plugin.exists('vim-operator-replace')
+  map ,r  <Plug>(operator-replace)
+endif
+"}}}
+" kana/vim-operator-user{{{
+if s:plugin.exists('vim-operator-user')
+  nmap zf <Plug>(operator-vimrc-fold-zf)
+  nmap zF <Plug>(operator-vimrc-fold-zF)
+  nmap zd <Plug>(operator-vimrc-fold-zd)
+  nmap zD <Plug>(operator-vimrc-fold-zD)
+  nmap zE <Plug>(operator-vimrc-fold-zE)
+  vmap zf <Plug>(operator-vimrc-fold-zf)
+  vmap zF <Plug>(operator-vimrc-fold-zF)
+  vmap zd <Plug>(operator-vimrc-fold-zd)
+  vmap zD <Plug>(operator-vimrc-fold-zD)
+  vmap zE <Plug>(operator-vimrc-fold-zE)
+  function! s:map_fold_cmd(keys) abort "{{{
+    " Available only when foldmethod is marker or manual.
+    if !s:has(['marker', 'manual'], &l:foldmethod)
+      return
     endif
+    let save_options = vimrc#class#new('save_options')
+    call save_options.store(['commentstring'])
+    let &l:commentstring = ' ' . &l:commentstring
+    try
+      execute 'normal!' a:keys
+    catch " Usaully this :catch gets E490, 'Folding not found.'
+      call s:echomsg_error(v:exception)
+    finally
+      call save_options.restore_all()
+    endtry
+  endfunction "}}}
+  function! s:map_range_fold_cmd(motion_wizeness, keys) abort "{{{
+    let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
+    call s:map_fold_cmd(printf('`[%s`]%s', v_cmd, a:keys))
+
+    " Remove spaces in beginning of the line which are inserted when the line was
+    " an empty line.
+    if &foldmethod ==# 'marker'
+      let marker_only_pat = '\m^\s\+%s'
+      let marker_pair = ["'[", "']"]
+      let foldmarker_pair = split(&l:foldmarker, ', ')
+      for index in range(0, len(foldmarker_pair)-1)
+        let marker = marker_pair[index]
+        let foldmarker = printf(&l:commentstring, foldmarker_pair[index])
+        let lnum = getpos(marker)[1]
+        if getline(lnum) =~# printf(marker_only_pat, foldmarker)
+          call setline(lnum, foldmarker)
+        endif
+      endfor
+    endif
+  endfunction "}}}
+  function! s:map_define_operator() abort "{{{
+    let foldmotions_with_range = 'fF'
+    let foldmotions_standalone = 'dDE'
+    let sid = s:SIDPrefix()
+    for keys in split(foldmotions_with_range . foldmotions_standalone, '\zs')
+      let keys = 'z' . keys
+      let func = [
+            \ printf('function! %smap_fold_%s(motion_wise) abort', sid, keys),
+            \ printf('  call s:map_range_fold_cmd(a:motion_wise, "%s")', keys),
+            \ 'endfunction'
+            \]
+      execute join(func, "\n")
+      call operator#user#define(
+            \ 'vimrc-fold-' . keys,
+            \ sid . 'map_fold_' . keys)
+    endfor
+
+    " Override for normal mode; Any ranges aren't need for following commands.
+    let map_cmd = join(['nnoremap',
+          \ '<silent>',
+          \ '<Plug>(operator-vimrc-fold-%s)',
+          \ ':<C-u>call <SID>map_fold_cmd("%s")<CR>'], ' ')
+    for keys in split(foldmotions_standalone, '\zs')
+      let keys = 'z' . keys
+      execute printf(map_cmd, keys, keys)
+    endfor
+  endfunction "}}}
+  augroup vimrc_mapping
+    autocmd User vimrc_initialize call s:map_define_operator()
+  augroup END
+endif
+"}}}
+" kana/vim-textobj-function{{{
+if s:plugin.exists('vim-textobj-function')
+  omap if <Plug>(textobj-function-i)
+  omap af <Plug>(textobj-function-a)
+  vmap if <Plug>(textobj-function-i)
+  vmap af <Plug>(textobj-function-a)
+  let g:textobj_function_no_default_key_mappings = 1
+endif
+"}}}
+" kana/vim-textobj-indent{{{
+if s:plugin.exists('vim-textobj-indent')
+  omap ii <Plug>(textobj-indent-i)
+  omap iI <Plug>(textobj-indent-same-i)
+  omap ai <Plug>(textobj-indent-a)
+  omap aI <Plug>(textobj-indent-same-a)
+  vmap ii <Plug>(textobj-indent-i)
+  vmap iI <Plug>(textobj-indent-same-i)
+  vmap ai <Plug>(textobj-indent-a)
+  vmap aI <Plug>(textobj-indent-same-a)
+  let g:textobj_indent_no_default_key_mappings = 1
+endif
+"}}}
+" lambdalisue/gina.vim{{{
+if s:plugin.exists('gina.vim')
+  function! s:gina_mapping() abort "{{{
     function! s:gina_nnoremap(scheme, lhs, rhs) abort "{{{
-        call gina#custom#mapping#nmap(
-                    \ a:scheme, a:lhs, a:rhs,
-                    \ {'noremap': 1, 'silent' : 1})
+      call gina#custom#mapping#nmap(
+            \ a:scheme, a:lhs, a:rhs,
+            \ {'noremap': 1, 'silent' : 1})
     endfunction "}}}
 
     " <C-]> is expeimental.
@@ -704,11 +920,12 @@ function! s:gina_mapping() abort "{{{
     call s:gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
     call s:gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
     call s:gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
+    nnoremap <silent> <Space>g :<C-u>Gina status<CR>
 
     " Jump between unadded files with n/p .
     let rhs_base = printf(
-                \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
-                \ s:SIDPrefix())
+          \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
+          \ s:SIDPrefix())
     call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
     call s:gina_nnoremap('status', 'p', printf(rhs_base, 1))
 
@@ -716,403 +933,686 @@ function! s:gina_mapping() abort "{{{
 
     " Cleanup
     delfunction s:gina_nnoremap
-endfunction "}}}
-function! s:gina_status_select_another(repeat_count, search_previous) abort "{{{
+  endfunction "}}}
+  function! s:gina_status_select_another(repeat_count, search_previous) abort "{{{
     let flags = 'w'
     let flags .= a:search_previous ? 'b' : ''
     for i in range(1, a:repeat_count)
-        call search('\e[31.\+\e[m', flags)
+      call search('\e[31.\+\e[m', flags)
     endfor
-endfunction "}}}
-"}}}
-augroup vimrc_plugin_mapping
-    autocmd User vimrc_initialize call s:plugin_mapping()
-    autocmd User gramOpen call s:gram_mapping()
-    autocmd FileType filore call s:filore_mapping()
+  endfunction "}}}
+  augroup vimrc_gina
     autocmd User vimrc_initialize call s:gina_mapping()
-augroup END
+  augroup END
+endif
 "}}}
-" Loop {{{
-function! s:_loop_define(config) abort "{{{
-    let prefix = printf('<Plug>(<SID>-loop-%s)',a:config.id)
-    let enter_with = a:config.enter_with
-    let mode = get(a:config,'mode','n')
-    let plug_map = {}
-    for key in ['prefix','main','do']
-        let plug_map[key] = printf("%s(%s)",prefix,key)
+" mattn/sonictemplate{{{
+if s:plugin.exists('sonictemplate-vim')
+  " Disable default mappings.
+  let g:sonictemplate_key = '<Plug>(nop-sonictemplate)'
+  let g:sonictemplate_intelligent_key = '<Plug>(nop-sonictemplate-intelligent)'
+  let g:sonictemplate_postfix_key = '<Plug>(nop-sonictemplate-postfix)'
+  let g:sonictemplate_vim_template_dir =
+        \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
+endif
+" }}}
+" mityu/vim-textobj-multitextobj{{{
+if s:plugin.exists('vim-textobj-multitextobj')
+  omap am <Plug>(textobj-multitextobj-a)
+  omap im <Plug>(textobj-multitextobj-i)
+  vmap am <Plug>(textobj-multitextobj-a)
+  vmap im <Plug>(textobj-multitextobj-i)
+  vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
+  vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
+  let g:textobj_multitextobj_no_default_key_mappings = 1
+  let g:textobj_multitextobj_textobjects_i = [
+      \ { 'textobj': "i'", 'is_cursor_in': 1},
+      \ { 'textobj': 'i"', 'is_cursor_in': 1},
+      \ 'i(',
+      \ 'i[',
+      \ 'i{',
+      \ 'i<',
+      \ '<Plug>(textobj-indent-i)',
+      \ '<Plug>(textobj-function-i)',
+      \]
+  let g:textobj_multitextobj_textobjects_a = [
+      \ { 'textobj': "a'", 'is_cursor_in': 1},
+      \ { 'textobj': 'a"', 'is_cursor_in': 1},
+      \ 'a(',
+      \ 'a[',
+      \ 'a{',
+      \ 'a<',
+      \ '<Plug>(textobj-indent-a)',
+      \ '<Plug>(textobj-function-a)',
+      \]
+endif
+"}}}
+" osyo-manga/vim-jplus{{{
+if s:plugin.exists('vim-jplus')
+  map J <Plug>(jplus)
+endif
+"}}}
+" osyo-manga/vim-operator-swap{{{
+if s:plugin.exists('vim-operator-swap')
+  map ,sy <Plug>(operator-swap-marking)
+  map ,sp <Plug>(operator-swap)
+endif
+"}}}
+" osyo-manga/vim-textobj-multiblock{{{
+if s:plugin.exists('vim-textobj-multiblock')
+  omap ab <Plug>(textobj-multiblock-a)
+  omap ib <Plug>(textobj-multiblock-i)
+  vmap ab <Plug>(textobj-multiblock-a)
+  vmap ib <Plug>(textobj-multiblock-i)
+  let g:textobj_multiblock_no_default_key_mappings = 1
+  let g:textobj_multiblock_blocks = [
+      \['(', ')'],
+      \['[', ']'],
+      \['{', '}'],
+      \['<', '>'],
+      \]
+endif
+" }}}
+" prabirshrestha/ayncomplete.vim{{{
+if s:plugin.exists('asyncomplete.vim')
+  let g:asyncomplete_remove_duplicates = 1
+  let g:asyncomplete_auto_popup = 1
+  let g:asyncomplete_smart_completion = 0
+
+  function! s:register_asyncomplete_sources() abort
+    let Register = {options ->
+          \ asyncomplete#register_source(
+          \ asyncomplete#sources#{options.name}#get_source_options(
+          \ options))
+          \ }
+    if s:plugin.exists('vim-Verdin')
+      call Register({
+            \ 'name': 'Verdin',
+            \ 'whitelist': ['vim'],
+            \ 'completor':
+            \   function('asyncomplete#sources#Verdin#completor'),
+            \ })
+    endif
+    if s:plugin.exists('asyncomplete-buffer.vim')
+      call Register({
+            \ 'name': 'buffer',
+            \ 'whitelist': ['*'],
+            \ 'completor':
+            \   function('asyncomplete#sources#buffer#completor'),
+            \ })
+    endif
+  endfunction
+  augroup vimrc_asyncomplete_sources
+    autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
+  augroup END
+endif
+"}}}
+" prabirshrestha/vim-lsp{{{
+if s:plugin.exists('vim-lsp')
+  augroup vimrc_lsp_servers
+    autocmd User lsp_setup call s:lsp_register_servers()
+  augroup END
+  function! s:lsp_register_servers() abort
+    if executable('clangd')
+      call lsp#register_server({
+            \ 'name': 'clangd',
+            \ 'cmd': {server_info -> ['clangd']},
+            \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
+            \ })
+    endif
+    if executable('vint') && executable('efm-langserver')
+      if s:Windows
+        let config_yaml = expand('%APPDATA%')
+      else
+        let config_yaml = s:join_path(expand('~'), '.config')
+      endif
+      let config_yaml = s:join_path(
+            \ config_yaml, 'efm-langserver', 'config.yaml')
+      call lsp#register_server({
+            \ 'name' : 'efm-langserver-vim',
+            \ 'cmd': {server_info ->
+            \     ['efm-langserver', '-c=' . config_yaml]},
+            \ 'whitelist': ['vim']
+            \ })
+
+    endif
+    if executable('lua-lsp')
+      call lsp#register_server({
+            \ 'name': 'lua-lsp',
+            \ 'cmd': {server_info -> [&shell, &shellcmdflag, 'lua-lsp']},
+            \ 'whitelist': ['lua'],
+            \ })
+    endif
+  endfunction
+  let g:lsp_signs_enabled = 1
+  let g:lsp_signs_error = {'text': '>>'}
+  let g:lsp_signs_warning = {'text': '--'}
+  let g:lsp_signs_information = {'text': '--'}
+  let g:lsp_signs_hint = {'text': '? '}
+  let g:lsp_diagnostics_echo_delay = 10
+  let g:lsp_diagnostics_enabled = 1
+  let g:lsp_diagnostics_echo_cursor = 1
+
+  nnoremap <Plug>(<SID>-open-folding) zv
+  nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
+  nmap <silent> <C-p> <Plug>(lsp-previous-error)
+  nmap <silent> <C-n> <Plug>(lsp-next-error)
+endif
+"}}}
+" previm/previm{{{
+if s:plugin.exists('previm')
+  let g:previm_show_header = 0
+  let g:previm_enable_realtime = 1
+endif
+"}}}
+" rhysd/vim-operator-surround{{{
+if s:plugin.exists('vim-operator-surround')
+  map ,sa <Plug>(operator-surround-append)
+  map ,sd <Plug>(operator-surround-delete)
+  map ,sr <Plug>(operator-surround-replace)
+endif
+"}}}
+" thinca/vim-quickrun {{{
+if s:plugin.exists('vim-quickrun')
+  let g:quickrun_config = {}
+  let g:quickrun_config._ = {
+    \  'outputter/message': 1,
+    \  'outputter/message/log': 1,
+    \  'outputter/buffer/close_on_empty': 1,
+    \  'runner': 'job',
+    \}
+  let g:quickrun_config.cpp = {
+    \  'cmdopt' : '-std=c++17'
+    \}
+  " TODO: Improve. (Support windows, etc)
+  let g:quickrun_config['cpp/sfml'] = {
+    \  'type' : 'cpp',
+    \  'cmdopt' : '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
+    \}
+  let g:quickrun_config.objc = {
+    \  'command' : 'cc',
+    \  'execute' : ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
+    \  'tempfile' : '%{tempname()}.m',
+    \}
+  let g:quickrun_config.applescript = {
+    \  'command' : 'osascript',
+    \  'execute' : '%c %s:p',
+    \  'tempfile' : '%{tempname()}.applescript',
+    \}
+  let g:quickrun_config.swift = {
+    \  'command' : 'swift',
+    \  'execute' : '%c %s%p',
+    \  'tempfile' : '%{tempname()}.swift',
+    \}
+  nnoremap <expr> <C-c> quickrun#is_running() ?
+        \ ':<C-u>call quickrun#sweep_sessions()<CR>' :
+        \ '<C-c>'
+  augroup vimrc_filetype
+    autocmd FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
+  augroup END
+endif
+"}}}
+" thinca/vim-textobj-between{{{
+if s:plugin.exists('vim-textobj-between')
+  omap ad <Plug>(textobj-between-a)
+  omap id <Plug>(textobj-between-i)
+  vmap ad <Plug>(textobj-between-a)
+  vmap id <Plug>(textobj-between-i)
+  let g:textobj_between_no_default_key_mappings = 1
+endif
+"}}}
+" tyru/caw.vim{{{
+if s:plugin.exists('caw.vim')
+  map ,c <Plug>(caw:hatpos:toggle:operator)
+  let g:caw_no_default_keymappings = 1
+endif
+"}}}
+" ReadingVimrc{{{
+command! -bar ReadingVimrc call s:readingvimrc()
+function! s:readingvimrc() abort
+  try
+    packadd vim-reading-vimrc
+    ReadingVimrc
+  catch
+  endtry
+  try
+    packadd vim-readingvimrc-files
+    let g:readingvimrc_files_listing_window_open_command = 'tabedit'
+    ReadingVimrcFiles
+    unlet g:readingvimrc_files_listing_window_open_command
+  catch
+  endtry
+endfunction
+"}}}
+"}}}
+" Additional plugins{{{
+" :WorkingPlugin* {{{
+command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
+      \ WorkingPluginLoad call s:working_plugin.load(<f-args>)
+command! -bar -bang -nargs=1 -complete=customlist,VimrcWorkingPluginComplete
+      \ WorkingPluginCd call s:working_plugin.cd(<bang>0, <q-args>)
+command! -bar -nargs=+ WorkingPluginClone call s:working_plugin.clone(<f-args>)
+command! -bar -nargs=+ WorkingPluginNew call s:working_plugin.new(<f-args>)
+command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
+      \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
+
+let s:working_plugin = {}
+let s:working_plugin.workplace = s:join_path(expand('$DOT_VIM'), 'workplace')
+let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
+function! s:working_plugin.list_plugins() abort "{{{
+  if !self.available | return [] | endif
+  return map(filter(split(globpath(self.workplace, '*'), "\n"),
+        \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+endfunction "}}}
+function! s:working_plugin.load(...) abort "{{{
+  if !(self.available && a:0) | return | endif
+  let rtp = split(&rtp, ', ')
+  let plugins = self.list_plugins()
+
+  for plugin in a:000
+    if index(plugins, plugin) == -1
+      call s:echomsg_error('Failed to load: ' . plugin)
+      continue
+    endif
+    let plugin_dir = s:join_path(self.workplace, plugin)
+    call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
+    call add(rtp, plugin_dir)
+    for file_name in extend(
+        \ split(glob(s:join_path(plugin_dir, 'plugin', '*.vim')), "\n"),
+        \ split(glob(s:join_path(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
+        \)
+      " TODO: Do this unlet with autocmd?
+      execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
     endfor
-    " execute printf('%smap <silent><expr> %s nr2char(getchar(0))',
-    "            \mode,plug_map.prefix)
-    execute printf('%smap %s <Nop>', mode,plug_map.prefix)
-    for [lhs,rhs] in a:config.map
-        let com = []
-        call add(com,[mode . 'noremap <silent>',
-                    \plug_map.do . lhs,
-                    \rhs])
-        call add(com,[mode . 'map',
-                    \enter_with . lhs,
-                    \plug_map.main . lhs])
-        call add(com,[mode . 'map',
-                    \plug_map.main . lhs,
-                    \plug_map.do . lhs . plug_map.prefix
-                    \])
-        call add(com,[mode . 'map',
-                    \plug_map.prefix . lhs,
-                    \plug_map.main . lhs])
-        execute join(map(com,'join(v:val," ")'),"\n")
-    endfor
+  endfor
+  let &rtp = join(rtp, ', ')
+  runtime! plugin/*.vim
 endfunction "}}}
-function! s:_simple_loop_define(config) abort "{{{
-    let config = deepcopy(a:config)
-    let config.map = map(split(config.follow_key,'\zs'),'[v:val,config.enter_with . v:val]')
-    call s:_loop_define(config)
+function! s:working_plugin.cd(has_bang, plugin) abort "{{{
+  if !self.available | return | endif
+  execute (a:has_bang ? 'lcd' : 'cd') s:join_path(self.workplace, a:plugin)
 endfunction "}}}
-"Window management
-call s:_simple_loop_define({
-            \'id': 'WinChange',
-            \'enter_with': '<C-w>',
-            \'follow_key': 'hjkl'
-            \})
-call s:_simple_loop_define({
-            \'id': 'WinMove',
-            \'enter_with': '<C-w>',
-            \'follow_key': 'HJKL'
-            \})
-call s:_simple_loop_define({
-            \'id': 'WinResize',
-            \'enter_with': '<C-w>',
-            \'follow_key': '<>-+'
-            \})
- call s:_loop_define({
-             \'id': 'TabChange',
-             \'enter_with': 'g',
-             \'map': [['h','gT'],['l','gt']]
-             \})
-call s:_loop_define({
-            \'id': 'TabMove',
-            \'enter_with': 'g',
-            \'map': [
-            \    ['T',':<C-u>call <SID>map_tabmove(-1)<CR>'],
-            \    ['t',':<C-u>call <SID>map_tabmove(1)<CR>']
-            \]
-            \})
-function! s:map_tabmove(delta) abort "{{{
-    let tab_count = tabpagenr('$')
-    if tab_count == 1 | return | endif
-    let current = tabpagenr() - 1
-    let move_to = current + a:delta
-    if move_to < 0
-        while move_to < 0
-            let move_to += tab_count
-        endwhile
+function! s:working_plugin.clone(...) abort "{{{
+  if !(self.available && executable('git') && a:0)
+    return
+  endif
+  if !s:has(a:1, '/')
+    call s:echomsg_error(string(a:1) . ' is not a repository.')
+    return
+  endif
+  let repository = printf('https://github.com/%s.git', a:1)
+  let clone_to = ''
+  if a:0 == 1
+    let clone_to = split(a:1, '/')[1]
+  else
+    let clone_to = a:2
+  endif
+  if s:has(self.list_plugins(), clone_to)
+    call s:echomsg_error('Directory already exists: ' . clone_to)
+    return
+  endif
+  let clone_to = s:join_path(self.workplace, clone_to)
+  execute '!git clone' repository clone_to
+endfunction "}}}
+function! s:working_plugin.new(...) abort "{{{
+  if !self.available | return | endif
+  if !exists('*mkdir')
+    call s:echomsg_error('Built-in mkdir() function is not available.')
+    return
+  endif
+  for plugin in a:000
+    let base_dir = s:join_path(self.workplace, plugin)
+    if isdirectory(base_dir)
+      call s:echomsg_error('Plugin already exists: ' . base_dir)
+      continue
     endif
-    if move_to >= tab_count
-        let move_to = move_to % tab_count
+    call mkdir(base_dir)
+    call mkdir(s:join_path(base_dir, 'plugin'))
+    call mkdir(s:join_path(base_dir, 'autoload'))
+    call s:echomsg('Created: ' . plugin)
+  endfor
+endfunction "}}}
+function! s:working_plugin.rm(...) abort "{{{
+  if !self.available | return | endif
+
+  let plugin_list = self.list_plugins()
+  for plugin in a:000
+    if !s:has(plugin_list, plugin)
+      call s:echomsg_error('Plugin does not exist: ' . plugin)
+      continue
     endif
-    let movement = move_to - current
-    let command = 'tabmove '
-    if movement < 0
-        let command .= string(movement)
+    call s:echomsg(printf('Delete %s ? [y/n]', plugin))
+    if s:getchar_string() !~? 'y'
+      call s:echomsg('Canceled.')
+      continue
+    endif
+    if delete(s:join_path(self.workplace, plugin), 'rf') != 0
+      call s:echomsg_error('Failed to delete: ' . plugin)
     else
-        let command .= '+' . movement
+      call s:echomsg('Succesfully deleted: ' . plugin)
     endif
-    execute command
+  endfor
 endfunction "}}}
-delfunc s:_loop_define
-delfunc s:_simple_loop_define
-"}}}
-" Command{{{
-let s:_map = []
-call add(s:_map,['nnoremap','','ev','edit $MYVIMRC'])
-call add(s:_map,['nnoremap','','sv','source $MYVIMRC'])
-call add(s:_map,['nnoremap','<silent>','k','call vimrc#mru#start()'])
-call add(s:_map,['nnoremap','<silent>','j','call vimrc#files#start()'])
-call add(s:_map,['nnoremap','<silent>','b','call vimrc#buffers#start()'])
-call add(s:_map,['nnoremap','<silent>','f','call vimrc#filore#start()'])
-call add(s:_map,['nnoremap','<silent>','m','MemoList'])
-call add(s:_map,['nnoremap','<silent>','o','OtameshiList'])
-call add(s:_map,['nnoremap','','g','Gina status'])
-execute join(map(s:_map,{->join([
-            \  v:val[0],
-            \  v:val[1],
-            \  '<Space>' . v:val[2],
-            \  printf(':<C-u>%s<CR>',v:val[3])
-            \ ],' ')}),"\n")
-unlet s:_map
-"}}}
-" Shift-ten-key{{{
-function! s:shift_ten_key(enablize) abort "{{{
-    let ten_key_pair = [
-                \['1','!'],
-                \['2','"'],
-                \['3','#'],
-                \['4','$'],
-                \['5','%'],
-                \['6','&'],
-                \['7',"'"],
-                \['8','('],
-                \['9',')'],
-                \]
-    if a:enablize
-        for [key1,key2] in ten_key_pair
-            execute 'inoremap' key1 key2
-            execute 'inoremap' key2 key1
-        endfor
-    else
-        for [key1,key2] in ten_key_pair
-            execute 'silent! iunmap' key1
-            execute 'silent! iunmap' key2
-        endfor
-    endif
+function! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
+  if !self.available | return [] | endif
+  return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
+        \ 'fnameescape(v:val)')
 endfunction "}}}
-command! -bar EnableShiftTenKey call s:shift_ten_key(1)
-command! -bar DisableShiftTenKey call s:shift_ten_key(0)
-if has('vim_starting') | EnableShiftTenKey | endif
-"}}}
-
-" Abbreviates
-"{{{
-iabbrev todo: TODO:
-iabbrev fixme: FIXME:
-iabbrev xxx: XXX:
-iabbrev note: NOTE:
-"}}}
-
-" Command
-" Declarations{{{
-command! -bar CdCurrent cd %:p:h
-command! -bar LcdCurrent lcd %:p:h
-command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
-command! CopyToClipboard let @*=@"
-command! ClearMessage execute repeat("echom ''\n",201)
-command! Helptags helptags ALL
-command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0,<f-args>)
-command! -bar Draft call s:draft()
-command! -bar UnDraft call s:undraft()
-command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
-            \ Scratch call s:scratch(<q-args>)
-command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
-command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
-
-command! -bar PackInit   call s:pack_init()
-command! -bar PackUpdate call s:pack_update()
-command! -bar PackClean  call s:pack_clean()
-
-" Plugin Shortcuts
-command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
-command! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
-command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
-command! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0,<f-args>)
-command! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,<f-args>)
-command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
-command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
-command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0,<f-args>)
-"}}}
-function! Execute_list(com) abort "{{{
-    return split(execute(a:com),"\n")
+function! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
+  return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
 endfunction "}}}
-function! Filter(pat,com) abort "{{{
-    let output = Execute_list(a:com)
-    call filter(output,'v:val=~?a:pat')
-    return output
-endfunction "}}}
-function! s:filter(bang,pat,...) abort "{{{
-    let output = join(Filter(a:pat,join(a:000,' ')),"\n")
-    if a:bang
-        echom output
-    else
-        echo output
-    endif
-endfunction "}}}
-function! s:draft() abort "{{{
-    let b:vimrc_draft_save_options = vimrc#class#new('save_options')
-    call b:vimrc_draft_save_options.store(['buftype', 'swapfile'])
-    setl buftype=nofile noswapfile
-endfunction "}}}
-function! s:undraft() abort "{{{
-    if !exists('b:vimrc_draft_savedata') | return | endif
-    call b:vimrc_draft_savedata.restore_all()
-endfunction "}}}
-function! s:scratch(opener) abort "{{{
-    let opener = a:opener
-    let prefix = 'scratch://'
-    let name = input('Scratch buffer name? ')
-    if name ==# ''
-        let identifier = 1
-        let name = 'nameless/buffer-'
-        while bufexists(prefix . name . identifier)
-            let identifier += 1
-        endwhile
-        let name .= identifier
-    endif
-    if opener ==# ''
-        let opener = 'split'
-    endif
-    execute opener prefix . name
-    call s:draft()
-endfunction "}}}
-function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort "{{{
-    let pat = '^' . a:arg_lead
-    return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
-endfunc "}}}
-function! s:list_tasks(args) abort "{{{
-    let target = '%'
-    if a:args =~# 'rf'
-        let target = '**/*.' . expand('%:e')
-    elseif a:args !=# ''
-        let target = a:args
-    endif
-    execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
-endfunction "}}}
-
+" }}}
+" Taking notes{{{
 let s:notes = {'save_dir_': ''}
 function! s:notes.instance(path) abort "{{{
-    let new_obj = deepcopy(self)
-    let new_obj.save_dir_ = a:path
-    return new_obj
+  let new_obj = deepcopy(self)
+  let new_obj.save_dir_ = a:path
+  return new_obj
 endfunc "}}}
 function! s:notes.list_files() abort "{{{
-    return map(s:glob(s:join_path(self.save_dir_, '*.*')),
-                \ 'fnamemodify(v:val, ":p:t")')
+  return map(s:glob(s:join_path(self.save_dir_, '*.*')),
+        \ 'fnamemodify(v:val, ":p:t")')
 endfunction "}}}
 function! s:notes.new(opener) abort "{{{
-    let name = input('Name: ')
-    if name ==# ''
-        call s:echo('Canceled.')
-        return
-    endif
-    if s:has(self, 'expand_filename')
-        let name = self.expand_filename(name)
-    endif
-    let filepath = s:join_path(self.save_dir_, name)
-    execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
+  let name = input('Name: ')
+  if name ==# ''
+    call s:echo('Canceled.')
+    return
+  endif
+  if s:has(self, 'expand_filename')
+    let name = self.expand_filename(name)
+  endif
+  let filepath = s:join_path(self.save_dir_, name)
+  execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
 endfunction "}}}
 function! s:notes.list() abort "{{{
-    call vimrc#files#start(self.save_dir_)
+  call vimrc#files#start(self.save_dir_)
 endfunction "}}}
 function! s:notes.delete(...) abort "{{{
-    let files = self.list_files()
-    for target in a:000
-        if !s:has(files, target)
-            call s:echomsg_error('File does not exists: ' . target)
-            continue
-        endif
-        call s:echomsg(printf('Delete %s ? [y/n]', target))
-        if s:getchar_string() !~? 'y'
-            call s:echomsg('Canceled.')
-            continue
-        endif
-        if delete(s:join_path(self.save_dir_, target)) == 0
-            call s:echomsg('Successfully deleted: ' .target)
-        else
-            call s:echomsg('Failed to delete: ' .target)
-        endif
-    endfor
+  let files = self.list_files()
+  for target in a:000
+    if !s:has(files, target)
+      call s:echomsg_error('File does not exists: ' . target)
+      continue
+    endif
+    call s:echomsg(printf('Delete %s ? [y/n]', target))
+    if s:getchar_string() !~? 'y'
+      call s:echomsg('Canceled.')
+      continue
+    endif
+    if delete(s:join_path(self.save_dir_, target)) == 0
+      call s:echomsg('Successfully deleted: ' .target)
+    else
+      call s:echomsg('Failed to delete: ' .target)
+    endif
+  endfor
 endfunction "}}}
 function! s:notes.get_save_dir() abort "{{{
-    return self.save_dir_
+  return self.save_dir_
 endfunction "}}}
 function! s:notes.get_completion(arg_lead) abort "{{{
-    return map(filter(self.list_files(), 'v:val =~? a:arg_lead'),
-                \ 'fnameescape(v:val)')
+  return map(filter(self.list_files(), 'v:val =~? a:arg_lead'),
+        \ 'fnameescape(v:val)')
 endfunction "}}}
-" :Memo* :Otameshi*{{{
+" Define :Memo* :Otameshi*{{{
 for s:type_ in ['memo', 'otameshi']
-    let s:{s:type_} = s:notes.instance(s:join_path(
-            \ expand('~'), '.cache', 'vimrc', s:type_))
-    if !isdirectory(s:{s:type_}.get_save_dir())
-        call mkdir(s:{s:type_}.get_save_dir(), 'p')
-    endif
-    if isdirectory(s:{s:type_}.get_save_dir())
-        let s:com_prefix_ = toupper(s:type_[0]) . s:type_[1:]
-        execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
-                    \ s:com_prefix_, s:type_)
-        execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
-                    \ s:com_prefix_, s:com_prefix_, s:type_)
-        execute printf('command! -bar %sList call s:%s.list()',
-                    \ s:com_prefix_, s:type_)
-        unlet s:com_prefix_
-    endif
+  let s:{s:type_} = s:notes.instance(s:join_path(
+      \ expand('~'), '.cache', 'vimrc', s:type_))
+  if !isdirectory(s:{s:type_}.get_save_dir())
+    call mkdir(s:{s:type_}.get_save_dir(), 'p')
+  endif
+  if isdirectory(s:{s:type_}.get_save_dir())
+    let s:com_prefix_ = toupper(s:type_[0]) . s:type_[1:]
+    execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
+          \ s:com_prefix_, s:type_)
+    execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
+          \ s:com_prefix_, s:com_prefix_, s:type_)
+    execute printf('command! -bar %sList call s:%s.list()',
+          \ s:com_prefix_, s:type_)
+    unlet s:com_prefix_
+  endif
 endfor | unlet s:type_
-
+"}}}
 function! s:memo.expand_filename(name) abort "{{{
-    let name = a:name
-    if !s:has(name, '.')
-        " Add .md extension only when use didn't specificate extension.
-        let name .= '.md'
-    endif
-    let name = strftime('%Y-%m-%d %H:%M ') . name
-    return name
+  let name = a:name
+  if !s:has(name, '.')
+    " Add .md extension only when use didn't specificate extension.
+    let name .= '.md'
+  endif
+  let name = strftime('%Y-%m-%d %H:%M ') . name
+  return name
 endfunction "}}}
 function! s:otameshi.expand_filename(name) abort "{{{
-    if s:has(a:name, '.') " Filename already has an extension.
-        return a:name
+  if s:has(a:name, '.') " Filename already has an extension.
+    return a:name
+  endif
+  try
+    let extension = ''
+    let extension = input('Extension? (Empty will be non-extension file):')
+  finally
+    if extension ==# ''
+      return a:name
+    else
+      return a:name . '.' . extension
     endif
-    try
-        let extension = ''
-        let extension = input('Extension? (Empty will be non-extension file):')
-    finally
-        if extension ==# ''
-            return a:name
-        else
-            return a:name . '.' . extension
-        endif
-    endtry
+  endtry
 endfunction "}}}
 function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort "{{{
-    return s:memo.get_completion(a:arg_lead)
+  return s:memo.get_completion(a:arg_lead)
 endfunction "}}}
 function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort "{{{
-    return s:otameshi.get_completion(a:arg_lead)
+  return s:otameshi.get_completion(a:arg_lead)
 endfunction "}}}
 "}}}
-
-" Function
-function! FilePath() abort "{{{
-    return s:is_cmdwin() ? expand('#') : expand('%')
+" tabpage_cd{{{
+augroup vimrc_tabpage_cd
+  autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
+  autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
+augroup END
+ "}}}
+" statusline{{{
+function! s:statusline_init() abort "{{{
+  let s:statusline = {
+        \ 'active': s:statusline_generater(1),
+        \ 'inactive': s:statusline_generater(0),
+        \ }
+  if !has('vim_starting')
+    for tabnr in range(1, tabpagenr('$'))
+      for winnr in range(1, tabpagewinnr(tabnr, '$'))
+        call settabwinvar(tabnr, winnr, '&statusline',
+              \ s:statusline.inactive)
+      endfor
+    endfor
+  endif
+  let &l:statusline = s:statusline.active
+  call s:showmode_init()
 endfunction "}}}
-function! FileName() abort "{{{
-    return fnamemodify(FilePath(), ':p:t')
+function! s:statusline_generater(active_page) "{{{
+  let statusline =
+        \ (a:active_page ? '%#StatusLine#' : '') .
+        \ '%m' .
+        \ (a:active_page ? s:showmode_label() : '') .
+        \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
+        \ '[#%{bufnr("%")}]' .
+        \ '%{<SID>filename_label(bufnr("%"))}' .
+        \ '%<%=' .
+        \ '[%{pathshorten(getcwd(winnr()))}]'
+  return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction "}}}
-function! FileParent() abort "{{{
-    return fnamemodify(FilePath(), ':p:h')
+function! s:statusline_set(kind) abort "{{{
+  call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
 endfunction "}}}
+function! s:statusline_update(...) abort "{{{
+  let event = exists('a:1') ? a:1 : ''
+  if event ==? 'CmdwinEnter'
+    call s:statusline_set('inactive')
+    let &statusline = s:statusline.active
+  elseif s:has(['CmdWinLeave', 'OptionSet'], event)
+    call s:statusline_set('active')
+  endif
+  if event !=# '' | return | endif
 
+  if exists('t:vimrc_showmode_winID')
+    call s:statusline_set('inactive')
+  endif
+  let t:vimrc_showmode_winID = win_getid()
+  if &modifiable || &buftype ==# 'terminal'
+    call s:statusline_set('active')
+  endif
+endfunction "}}}
+function! s:showmode_init() abort "{{{
+  let colors={
+    \ 'normal': [['22', '148'], ['#005f00', '#afdf00']],
+    \ 'insert': [['23', '117'], ['#005f5f', '#87dfff']],
+    \ 'visual': [['88', '208'], ['#870000', '#ff8700']],
+    \ 'replace': [['231', '160'], ['#ffffff', '#df0000']],
+    \ }
+  for mode in keys(colors)
+    execute printf('hi VimrcShowMode_%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
+          \ mode,
+          \ colors[mode][0][0],
+          \ colors[mode][0][1],
+          \ colors[mode][1][0],
+          \ colors[mode][1][1])
+  endfor
+endfunction "}}}
+function! s:showmode_mode() abort "{{{
+  call s:showmode_highlight()
+  let map = {
+    \ 'n': 'NORMAL',
+    \ 'i': 'INSERT',
+    \ 'R': 'REPLACE',
+    \ 'v': 'VISUAL',
+    \ 'V': 'V-LINE',
+    \ "\<C-v>": 'V-BLOCK',
+    \ 'c': 'COMMAND',
+    \ 'ce': 'EX-COM',
+    \ 's': 'SELECT',
+    \ 'S': 'S-LINE',
+    \ "\<C-s>": 'S-BLOCK',
+    \ 't': 'T-INSERT',
+    \ 'no': 'OPERATOR',
+    \ 'niI': 'N-INSERT',
+    \ 'niR': 'N-REPLACE',
+    \ 'niV': 'N-V-REPLACE',
+    \ }
+  return get(map, mode(), 'UNKNOWN')
+endfunction "}}}
+function! s:showmode_highlight() abort "{{{
+  let type = get({
+    \  'i': 'insert',
+    \  't': 'insert',
+    \  'R': 'replace',
+    \  'v': 'visual',
+    \  'V': 'visual',
+    \  "\<C-v>": 'visual',
+    \  },
+    \ mode(), 'normal')
+  execute 'hi link VimrcShowMode VimrcShowMode_' . type
+  return ''
+endfunction "}}}
+function! s:showmode_label() abort "{{{
+  return '%#VimrcShowMode# %{<SID>showmode_mode()} %#StatusLine#'
+endfunction "}}}
+function! s:filename_label(bufnr) abort "{{{
+  let buftype = getbufvar(a:bufnr, '&buftype')
+  let bufname = bufname(a:bufnr)
+  if buftype ==# 'help'
+    return fnamemodify(bufname, ':t')
+  elseif buftype ==# 'quickfix'
+    return '[quickfix]'
+  elseif getbufvar(a:bufnr, '&previewwindow')
+    return '[preview]'
+  elseif buftype ==# 'terminal'
+    return 'terminal:' . bufname
+  elseif buftype ==# 'prompt'
+    return '[prompt]'
+  else
+    return (buftype ==# 'nofile' ? '[NoFile]' : '') .
+      \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
+  endif
+endfunction "}}}
+augroup vimrc_statusline
+  autocmd VimEnter * let t:vimrc_showmode_winID = win_getid()
+  autocmd ColorScheme * call s:statusline_init()
+  autocmd User vimrc_initialize call s:statusline_init()
+  autocmd WinEnter,BufWinEnter * call s:statusline_update()
+  autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
+  autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
+  autocmd OptionSet modifiable, buftype call s:statusline_update('OptionSet')
+augroup END
+call s:statusline_init()
+"}}}
+" tabline{{{
+let &tabline=printf('%%!%stabline()', s:SIDPrefix())
+function! s:tabline() abort "{{{
+  let tabline='%#TabLine#'
+  let t=tabpagenr()
 
-" Highlight
+  for n in range(1, tabpagenr('$'))
+    let tabline .= '%' . n . 'T'
+    let info=' ' . s:generate_tabinfo(n) . ' '
+    if t==n
+      let tabline .= '%#TabLineSel# %999Xx%X' . info . '%#TabLine#'
+    else
+      let tabline .= info
+    endif
+    let tabline .= '%T|'
+  endfor
+  let tabline .= '%>%=[%{pathshorten(getcwd())}]'
+
+  return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
+endfunction "}}}
+function! s:generate_tabinfo(tabnr) abort "{{{
+  let l:tablist=tabpagebuflist(a:tabnr)
+  let l:info=''
+  let l:info .= len(filter(copy(l:tablist), 'getbufvar(v:val, "&mod")'))? '[+]': ''
+  let l:info .= '[' . tabpagewinnr(a:tabnr, '$') . ']'
+  let l:info .= s:filename_label(tabpagebuflist(a:tabnr)[tabpagewinnr(a:tabnr)-1])
+  return l:info
+endfunction "}}}
+"}}}
+" :terminal{{{
+augroup vimrc_terminal
+  autocmd TerminalOpen * call s:terminal_open()
+augroup END
+function! s:terminal_open() abort
+  setlocal nonumber norelativenumber
+endfunction
+"}}}
 " EmphasisIndent{{{
 hi link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
-    autocmd WinEnter * call s:emphasize_indent()
-    autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
-    autocmd User vimrc_initialize call s:emphasize_indent()
+  autocmd WinEnter * call s:emphasize_indent()
+  autocmd OptionSet expandtab, smarttab, tabstop, shiftwidth call s:emphasize_indent()
+  autocmd User vimrc_initialize call s:emphasize_indent()
 augroup END
 function! s:emphasize_indent() abort "{{{
-    if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
-        return
-    endif
-    if exists('w:emphasis_indent_id')
-        call matchdelete(w:emphasis_indent_id)
-    endif
+  if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
+    return
+  endif
+  if exists('w:emphasis_indent_id')
+    call matchdelete(w:emphasis_indent_id)
+  endif
 
-    let pat = '\v%%(^%%(%s)*)@<=%s'
-    if &l:expandtab || &l:smarttab
-        let pat = printf(pat, repeat('\s', shiftwidth()), '\s')
-    else
-        let pat = printf(pat, '\t\t', '\t')
-    endif
-    let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent', pat)
+  let pat = '\v%%(^%%(%s)*)@<=%s'
+  if &l:expandtab || &l:smarttab
+    let pat = printf(pat, repeat('\s', shiftwidth()), '\s')
+  else
+    let pat = printf(pat, '\t\t', '\t')
+  endif
+  let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent', pat)
 endfunction "}}}
 function! s:emphasis_indent_enable() abort "{{{
-    let w:disable_emphasis_indent = 0
-    call s:emphasize_indent()
+  let w:disable_emphasis_indent = 0
+  call s:emphasize_indent()
 endfunction "}}}
 function! s:emphasis_indent_disable() abort "{{{
-    let w:disable_emphasis_indent = 1
-    if exists('w:emphasis_indent_id')
-        call matchdelete(w:emphasis_indent_id)
-        unlet w:emphasis_indent_id
-    endif
+  let w:disable_emphasis_indent = 1
+  if exists('w:emphasis_indent_id')
+    call matchdelete(w:emphasis_indent_id)
+    unlet w:emphasis_indent_id
+  endif
 endfunction "}}}
 command! EmphasisIndentDisable call s:emphasis_indent_disable()
 command! EmphasisIndentEnable call s:emphasis_indent_enable()
@@ -1120,554 +1620,121 @@ command! EmphasisIndentEnable call s:emphasis_indent_enable()
 " WarningSpace{{{
 hi link WarningSpace Error
 augroup vimrc_warningspace
-    autocmd WinEnter * call s:warningspace()
-    autocmd OptionSet * call s:warningspace()
-    autocmd User vimrc_initialize call s:warningspace()
+  autocmd WinEnter * call s:warningspace()
+  autocmd OptionSet * call s:warningspace()
+  autocmd User vimrc_initialize call s:warningspace()
 augroup END
 function! s:warningspace() abort "{{{
-    " Clean up.
-    if exists('w:twobyte_space_id')
-        call matchdelete(w:twobyte_space_id)
-        unlet w:twobyte_space_id
-    endif
-    if exists('w:end_of_line_space_id')
-        call matchdelete(w:end_of_line_space_id)
-        unlet w:end_of_line_space_id
-    endif
+  " Clean up.
+  if exists('w:twobyte_space_id')
+    call matchdelete(w:twobyte_space_id)
+    unlet w:twobyte_space_id
+  endif
+  if exists('w:end_of_line_space_id')
+    call matchdelete(w:end_of_line_space_id)
+    unlet w:end_of_line_space_id
+  endif
 
-    if &buftype!=#'' || !(&ma) | return | endif
+  if &buftype!=#'' || !(&ma) | return | endif
 
-    " Zenkaku space
-    " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
-    let w:twobyte_space_id=matchadd('WarningSpace','\%d12288')
+  " Zenkaku space
+  " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
+  let w:twobyte_space_id=matchadd('WarningSpace', '\%d12288')
 
-    " End of line's space
-    let w:end_of_line_space_id=matchadd('WarningSpace','\s\+$')
+  " End of line's space
+  let w:end_of_line_space_id=matchadd('WarningSpace', '\s\+$')
 endfunction "}}}
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
-
-" ---Plugin---
-" Setting
-" thinca/quickrun{{{
-let g:quickrun_config={}
-let g:quickrun_config._={
-    \    'outputter/message': 1,
-    \    'outputter/message/log': 1,
-    \    'outputter/buffer/close_on_empty': 1,
-    \    'runner': 'job',
-    \}
-let g:quickrun_config.cpp={
-    \    'cmdopt' : '-std=c++17'
-    \}
-" TODO: Improve. (Support windows, etc)
-let g:quickrun_config['cpp/sfml']={
-    \    'type' : 'cpp',
-    \    'cmdopt' : '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
-    \}
-let g:quickrun_config.objc={
-    \    'command' : 'cc',
-    \    'execute' : ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
-    \    'tempfile' : '%{tempname()}.m',
-    \}
-let g:quickrun_config.applescript={
-    \    'command' : 'osascript',
-    \    'execute' : '%c %s:p',
-    \    'tempfile' : '%{tempname()}.applescript',
-    \}
-let g:quickrun_config.swift={
-    \    'command' : 'swift',
-    \    'execute' : '%c %s%p',
-    \    'tempfile' : '%{tempname()}.swift',
-    \}
-nnoremap <expr> <C-c> quickrun#is_running() ?
-            \ ':<C-u>call quickrun#sweep_sessions()<CR>' :
-            \ '<C-c>'
-augroup vimrc_filetype
-    autocmd FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
-augroup END
- "}}}
-" ayncomplete.vim{{{
-let g:asyncomplete_remove_duplicates = 1
-let g:asyncomplete_auto_popup = 1
-let g:asyncomplete_smart_completion = 0
-"}}}
-" asyncomplete.vim's sources{{{
-function! s:register_asyncomplete_sources() abort
-    let Register = {options ->
-                \ asyncomplete#register_source(
-                \ asyncomplete#sources#{options.name}#get_source_options(
-                \ options))
-                \ }
-    call Register({
-                \ 'name': 'Verdin',
-                \ 'whitelist': ['vim'],
-                \ 'completor': function('asyncomplete#sources#Verdin#completor'),
-                \ })
-    call Register({
-                \ 'name': 'buffer',
-                \ 'whitelist': ['*'],
-                \ 'completor': function('asyncomplete#sources#buffer#completor'),
-                \ })
-endfunction
-augroup vimrc_asyncomplete_sources
-    autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
-augroup END
-"}}}
-" vim-lsp{{{
-augroup vimrc_lsp_servers
-    autocmd User lsp_setup call s:lsp_register_servers()
-augroup END
-function! s:lsp_register_servers() abort
-    if executable('clangd')
-        call lsp#register_server({
-                    \ 'name': 'clangd',
-                    \ 'cmd': {server_info -> ['clangd']},
-                    \ 'whitelist': ['c', 'cpp', 'objc', 'objcpp']
-                    \ })
-    endif
-    if executable('vint') && executable('efm-langserver')
-        if s:Windows
-            let config_yaml = expand('%APPDATA%')
-        else
-            let config_yaml = s:join_path(expand('~'), '.config')
-        endif
-        let config_yaml = s:join_path(config_yaml, 'efm-langserver', 'config.yaml')
-        call lsp#register_server({
-                    \ 'name' : 'efm-langserver-vim',
-                    \ 'cmd': {server_info -> ['efm-langserver', '-c=' . config_yaml]},
-                    \ 'whitelist': ['vim']
-                    \ })
-
-    endif
-    if executable('lua-lsp')
-        call lsp#register_server({
-                    \ 'name': 'lua-lsp',
-                    \ 'cmd': {server_info -> [&shell, &shellcmdflag, 'lua-lsp']},
-                    \ 'whitelist': ['lua'],
-                    \ })
-    endif
-endfunction
-let g:lsp_signs_enabled = 1
-let g:lsp_signs_error = {'text': '>>'}
-let g:lsp_signs_warning = {'text': '--'}
-let g:lsp_signs_information = {'text': '--'}
-let g:lsp_signs_hint = {'text': '? '}
-let g:lsp_diagnostics_echo_delay = 10
-let g:lsp_diagnostics_enabled = 1
-let g:lsp_diagnostics_echo_cursor = 1
-"}}}
-" mattn/sonictemplate{{{
-" I don't allow sonictemplate to define default mappings.
-let g:sonictemplate_key='<Plug>(nop-sonictemplate)'
-let g:sonictemplate_intelligent_key='<Plug>(nop-sonictemplate-intelligent)'
-let g:sonictemplate_postfix_key='<Plug>(nop-sonictemplate-postfix)'
-let g:sonictemplate_vim_template_dir = [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
-" }}}
-" osyo-manga/textobj-multiblock{{{
-let g:textobj_multiblock_blocks = [
-        \['(',')'],
-        \['[',']'],
-        \['{','}'],
-        \['<','>'],
-        \]
-" }}}
-" textobj-multitextobj{{{
-let g:textobj_multitextobj_textobjects_i = [
-        \ { 'textobj': "i'", 'is_cursor_in': 1},
-        \ { 'textobj': 'i"', 'is_cursor_in': 1},
-        \ 'i(',
-        \ 'i[',
-        \ 'i{',
-        \ 'i<',
-        \ '<Plug>(textobj-indent-i)',
-        \ '<Plug>(textobj-function-i)',
-        \]
-let g:textobj_multitextobj_textobjects_a = [
-        \ { 'textobj': "a'", 'is_cursor_in': 1},
-        \ { 'textobj': 'a"', 'is_cursor_in': 1},
-        \ 'a(',
-        \ 'a[',
-        \ 'a{',
-        \ 'a<',
-        \ '<Plug>(textobj-indent-a)',
-        \ '<Plug>(textobj-function-a)',
-        \]
-"}}}
-" caw.vim{{{
-let g:caw_no_default_keymappings = 1
-"}}}
-" previm{{{
-let g:previm_show_header = 0
-let g:previm_enable_realtime = 1
-"}}}
 " mru{{{
 let g:mru_history_file = s:join_path(expand('~'), '.cache', 'vimrc', 'mru', 'history')
 "}}}
-" ReadingVimrc{{{
-command! -bar ReadingVimrc call s:readingvimrc()
-function! s:readingvimrc() abort
-    try
-        packadd vim-reading-vimrc
-        ReadingVimrc
-    catch
-    endtry
-    try
-        packadd vim-readingvimrc-files
-        let g:readingvimrc_files_listing_window_open_command = 'tabedit'
-        ReadingVimrcFiles
-        unlet g:readingvimrc_files_listing_window_open_command
-    catch
-    endtry
-endfunction
-"}}}
-
-" :WorkingPlugin*
-" {{{
-command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
-            \ WorkingPluginLoad call s:working_plugin.load(<f-args>)
-command! -bar -bang -nargs=1 -complete=customlist,VimrcWorkingPluginComplete
-            \ WorkingPluginCd call s:working_plugin.cd(<bang>0, <q-args>)
-command! -bar -nargs=+ WorkingPluginClone call s:working_plugin.clone(<f-args>)
-command! -bar -nargs=+ WorkingPluginNew call s:working_plugin.new(<f-args>)
-command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
-            \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
-
-let s:working_plugin = {}
-let s:working_plugin.workplace = s:join_path(expand('$DOT_VIM'), 'workplace')
-let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
-function! s:working_plugin.list_plugins() abort "{{{
-    if !self.available | return [] | endif
-    return map(filter(split(globpath(self.workplace, '*'), "\n"),
-                \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+" gram, filore{{{
+function! s:gram_mapping() abort "{{{
+  let map = [
+        \ ['k', 'loop-cursor-up'],
+        \ ['j', 'loop-cursor-down'],
+        \ ['<CR>', 'select-item'],
+        \ ['i', 'start-filtering'],
+        \ ['q', 'exit'],
+        \]
+  call map(map, {key, val ->
+        \ 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
+  execute join(map, "\n")
 endfunction "}}}
-function! s:working_plugin.load(...) abort "{{{
-    if !(self.available && a:0) | return | endif
-    let rtp = split(&rtp, ',')
-    let plugins = self.list_plugins()
-
-    for plugin in a:000
-        if index(plugins, plugin) == -1
-            call s:echomsg_error('Failed to load: ' . plugin)
-            continue
-        endif
-        let plugin_dir = s:join_path(self.workplace, plugin)
-        call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
-        call add(rtp, plugin_dir)
-        for file_name in extend(
-                \ split(glob(s:join_path(plugin_dir, 'plugin', '*.vim')), "\n"),
-                \ split(glob(s:join_path(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
-                \)
-            execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
-        endfor
-    endfor
-    let &rtp = join(rtp, ',')
-    runtime! plugin/*.vim
+function! s:filore_mapping() abort "{{{
+  let map = [
+        \ ['q', 'exit'],
+        \ ['o', 'toggle-directory-folding'],
+        \ ['l', 'enter-directory'],
+        \ ['h', 'leave-directory'],
+        \ ['.', 'toggle-show-hidden-files'],
+        \ ['k', 'loop-cursor-up'],
+        \ ['j', 'loop-cursor-down'],
+        \ ['<CR>', 'open-file'],
+        \ ['H', 'start-history'],
+        \]
+  call map(map, {key, val ->
+        \ 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
+  execute join(map, "\n")
 endfunction "}}}
-function! s:working_plugin.cd(has_bang, plugin) abort "{{{
-    if !self.available | return | endif
-    execute (a:has_bang ? 'lcd' : 'cd') s:join_path(self.workplace, a:plugin)
-endfunction "}}}
-function! s:working_plugin.clone(...) abort "{{{
-    if !(self.available && executable('git') && a:0)
-        return
-    endif
-    if !s:has(a:1, '/')
-        call s:echomsg_error(string(a:1) . ' is not a repository.')
-        return
-    endif
-    let repository = printf('https://github.com/%s.git', a:1)
-    let clone_to = ''
-    if a:0 == 1
-        let clone_to = split(a:1, '/')[1]
-    else
-        let clone_to = a:2
-    endif
-    if s:has(self.list_plugins(), clone_to)
-        call s:echomsg_error('Directory already exists: ' . clone_to)
-        return
-    endif
-    let clone_to = s:join_path(self.workplace, clone_to)
-    execute '!git clone' repository clone_to
-endfunction "}}}
-function! s:working_plugin.new(...) abort "{{{
-    if !self.available | return | endif
-    if !exists('*mkdir')
-        call s:echomsg_error('Built-in mkdir() function is not available.')
-        return
-    endif
-    for plugin in a:000
-        let base_dir = s:join_path(self.workplace, plugin)
-        if isdirectory(base_dir)
-            call s:echomsg_error('Plugin already exists: ' . base_dir)
-            continue
-        endif
-        call mkdir(base_dir)
-        call mkdir(s:join_path(base_dir, 'plugin'))
-        call mkdir(s:join_path(base_dir, 'autoload'))
-        call s:echomsg('Created: ' . plugin)
-    endfor
-endfunction "}}}
-function! s:working_plugin.rm(...) abort "{{{
-    if !self.available | return | endif
-
-    let plugin_list = self.list_plugins()
-    for plugin in a:000
-        if !s:has(plugin_list, plugin)
-            call s:echomsg_error('Plugin does not exist: ' . plugin)
-            continue
-        endif
-        call s:echomsg(printf('Delete %s ? [y/n]', plugin))
-        if s:getchar_string() !~? 'y'
-            call s:echomsg('Canceled.')
-            continue
-        endif
-        if delete(s:join_path(self.workplace, plugin), 'rf') != 0
-            call s:echomsg_error('Failed to delete: ' . plugin)
-        else
-            call s:echomsg('Succesfully deleted: ' . plugin)
-        endif
-    endfor
-endfunction "}}}
-function! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
-    if !self.available | return [] | endif
-    return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
-                \ 'fnameescape(v:val)')
-endfunction "}}}
-function! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
-    return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
-endfunction "}}}
-" }}}
-
-" Utility
-" tabpage_cd{{{
-augroup vimrc_tabpage_cd
-    autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
-    autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
+augroup vimrc_additional_plugins
+  autocmd User gramOpen call s:gram_mapping()
+  autocmd FileType filore call s:filore_mapping()
 augroup END
- "}}}
-" statusline{{{
-function! s:statusline_init() abort "{{{
-    let s:statusline = {
-                \ 'active': s:statusline_generater(1),
-                \ 'inactive': s:statusline_generater(0),
-                \ }
-    if !has('vim_starting')
-        for tabnr in range(1, tabpagenr('$'))
-            for winnr in range(1, tabpagewinnr(tabnr, '$'))
-                call settabwinvar(tabnr, winnr, '&statusline',
-                            \ s:statusline.inactive)
-            endfor
-        endfor
-    endif
-    let &l:statusline = s:statusline.active
-    call s:showmode_init()
-endfunction "}}}
-function! s:statusline_generater(active_page) "{{{
-    let statusline =
-                \ (a:active_page ? '%#StatusLine#' : '') .
-                \ '%m' .
-                \ (a:active_page ? s:showmode_label() : '') .
-                \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
-                \ '[#%{bufnr("%")}]' .
-                \ '%{<SID>filename_label(bufnr("%"))}' .
-                \ '%<%=' .
-                \ '[%{pathshorten(getcwd(winnr()))}]'
-    return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
-endfunction "}}}
-function! s:statusline_set(kind) abort "{{{
-    call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
-endfunction "}}}
-function! s:statusline_update(...) abort "{{{
-    let event = exists('a:1') ? a:1 : ''
-    if event ==? 'CmdwinEnter'
-        call s:statusline_set('inactive')
-        let &statusline = s:statusline.active
-    elseif s:has(['CmdWinLeave', 'OptionSet'], event)
-        call s:statusline_set('active')
-    endif
-    if event !=# '' | return | endif
-
-    if exists('t:vimrc_showmode_winID')
-        call s:statusline_set('inactive')
-    endif
-    let t:vimrc_showmode_winID = win_getid()
-    if &modifiable || &buftype ==# 'terminal'
-        call s:statusline_set('active')
-    endif
-endfunction "}}}
-function! s:showmode_init() abort "{{{
-    let colors={
-        \ 'normal': [['22','148'],['#005f00','#afdf00']],
-        \ 'insert': [['23','117'],['#005f5f','#87dfff']],
-        \ 'visual': [['88','208'],['#870000','#ff8700']],
-        \ 'replace': [['231','160'],['#ffffff','#df0000']],
-        \ }
-    for mode in keys(colors)
-        execute printf('hi VimrcShowMode_%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
-                    \ mode,
-                    \ colors[mode][0][0],
-                    \ colors[mode][0][1],
-                    \ colors[mode][1][0],
-                    \ colors[mode][1][1])
-    endfor
-endfunction "}}}
-function! s:showmode_mode() abort "{{{
-    call s:showmode_highlight()
-    let map = {
-        \ 'n': 'NORMAL',
-        \ 'i': 'INSERT',
-        \ 'R': 'REPLACE',
-        \ 'v': 'VISUAL',
-        \ 'V': 'V-LINE',
-        \ "\<C-v>": 'V-BLOCK',
-        \ 'c': 'COMMAND',
-        \ 'ce': 'EX-COM',
-        \ 's': 'SELECT',
-        \ 'S': 'S-LINE',
-        \ "\<C-s>": 'S-BLOCK',
-        \ 't': 'T-INSERT',
-        \ 'no': 'OPERATOR',
-        \ 'niI': 'N-INSERT',
-        \ 'niR': 'N-REPLACE',
-        \ 'niV': 'N-V-REPLACE',
-        \ }
-    return get(map, mode(), 'UNKNOWN')
-endfunction "}}}
-function! s:showmode_highlight() abort "{{{
-    let type = get({
-        \    'i': 'insert',
-        \    't': 'insert',
-        \    'R': 'replace',
-        \    'v': 'visual',
-        \    'V': 'visual',
-        \    "\<C-v>": 'visual',
-        \    },
-        \ mode(), 'normal')
-    execute 'hi link VimrcShowMode VimrcShowMode_' . type
-    return ''
-endfunction "}}}
-function! s:showmode_label() abort "{{{
-    return '%#VimrcShowMode# %{<SID>showmode_mode()} %#StatusLine#'
-endfunction "}}}
-function! s:filename_label(bufnr) abort "{{{
-    let buftype = getbufvar(a:bufnr, '&buftype')
-    let bufname = bufname(a:bufnr)
-    if buftype ==# 'help'
-        return fnamemodify(bufname, ':t')
-    elseif buftype ==# 'quickfix'
-        return '[quickfix]'
-    elseif getbufvar(a:bufnr, '&previewwindow')
-        return '[preview]'
-    elseif buftype ==# 'terminal'
-        return 'terminal:' . bufname
-    elseif buftype ==# 'prompt'
-        return '[prompt]'
-    else
-        return (buftype ==# 'nofile' ? '[NoFile]' : '') .
-            \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
-    endif
-endfunction "}}}
-augroup vimrc_statusline
-    autocmd ColorScheme * call s:statusline_init()
-    autocmd User vimrc_initialize call s:statusline_init()
-    autocmd WinEnter,BufWinEnter * call s:statusline_update()
-    autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
-    autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
-    autocmd OptionSet modifiable,buftype call s:statusline_update('OptionSet')
-augroup END
-call s:statusline_init()
 "}}}
-" tabline{{{
-let &tabline=printf('%%!%stabline()',s:SIDPrefix())
-function! s:tabline() abort "{{{
-    let tabline='%#TabLine#'
-    let t=tabpagenr()
-
-    for n in range(1,tabpagenr('$'))
-        let tabline .= '%' . n . 'T'
-        let info=' ' . s:generate_tabinfo(n) . ' '
-        if t==n
-            let tabline .= '%#TabLineSel# %999Xx%X' . info . '%#TabLine#'
-        else
-            let tabline .= info
-        endif
-        let tabline .= '%T|'
-    endfor
-    let tabline .= '%>%=[%{pathshorten(getcwd())}]'
-
-    return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
-endfunction "}}}
-function! s:generate_tabinfo(tabnr) abort "{{{
-    let l:tablist=tabpagebuflist(a:tabnr)
-    let l:info=''
-    let l:info .= len(filter(copy(l:tablist),'getbufvar(v:val,"&mod")'))? '[+]': ''
-    let l:info .= '[' . tabpagewinnr(a:tabnr,'$') . ']'
-    let l:info .= s:filename_label(tabpagebuflist(a:tabnr)[tabpagewinnr(a:tabnr)-1])
-    return l:info
-endfunction "}}}
 "}}}
-" :terminal{{{
-augroup vimrc_terminal
-    autocmd TerminalOpen * call s:terminal_open()
-augroup END
-function! s:terminal_open() abort
-    setlocal nonumber norelativenumber
-endfunction
-"}}}
-
 " lvimrc{{{
 let s:_lvimrc = s:rc('lvimrc')
 if filereadable(expand('~/' . s:_lvimrc))
-    execute 'command! -bar -nargs=+ LVimrc <args> ~/' . s:_lvimrc
-    execute 'source ~/' . s:_lvimrc
+  execute 'command! -bar -nargs=+ LVimrc <args> ~/' . s:_lvimrc
+  execute 'source ~/' . s:_lvimrc
 endif | unlet s:_lvimrc
 " }}}
 " gvimrc{{{
 if has('gui_running')
-    if has('vim_starting')
-        set lines=999
-        set columns=9999
-    endif
-    set guioptions& guioptions-=e guioptions-=T
-    set guioptions-=R guioptions-=r guioptions-=L guioptions-=l
-    set mouse=a
-    set nomousefocus
-    set mousehide
+  if has('vim_starting')
+    set lines=999
+    set columns=9999
+  endif
+  set guioptions& guioptions-=e guioptions-=T
+  set guioptions-=R guioptions-=r guioptions-=L guioptions-=l
+  set mouse=a
+  set nomousefocus
+  set mousehide
 
-    if has('win32')
-        set guifont=MS_Gothic:h10:cSHIFTJIS
-        set linespace=1
+  if has('win32')
+    set guifont=MS_Gothic:h10:cSHIFTJIS
+    set linespace=1
 
-        set columns=120
-    elseif has('mac')
-        set guifont=Osaka-Mono:h14
-        "set columns=120
-    elseif has('xfontset')
-        "for unix (use xfontset)
-        set guifont=a14,r14,k14
-    endif
+    set columns=120
+  elseif has('mac')
+    set guifont=Osaka-Mono:h14
+    "set columns=120
+  elseif has('xfontset')
+    "for unix (use xfontset)
+    set guifont=a14,r14,k14
+  endif
 
-    if has('multi_byte_ime') || has('xim')
-        set iminsert=0 imsearch=0
-        augroup vimrc_iminsert
-            autocmd InsertLeave * set iminsert=0
-        augroup END
-    endif
+  if has('multi_byte_ime') || has('xim')
+    set iminsert=0 imsearch=0
+    augroup vimrc_iminsert
+      autocmd InsertLeave * set iminsert=0
+    augroup END
+  endif
 endif
  "}}}
-
 " Initialize when loading this file.{{{
 augroup vimrc_initialize_dummy
-    " Do not provide an error. For more information, see `:h E217`
-    autocmd User vimrc_initialize " Do nothing.
+  " Do not provide an error. For more information, see `:h E217`
+  autocmd User vimrc_initialize " Do nothing.
 augroup END
 if has('vim_starting') "{{{
-    augroup vimrc_initialize
-        autocmd VimEnter * doautocmd User vimrc_initialize
-    augroup END
+  augroup vimrc_initialize
+    autocmd VimEnter * doautocmd User vimrc_initialize
+  augroup END
 else
-    doautocmd User vimrc_initialize
+  doautocmd User vimrc_initialize
 endif "}}}
 "}}}
