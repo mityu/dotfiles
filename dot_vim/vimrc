@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 24-Mar-2019.
+" Last Change: 25-Mar-2019.
 " vim: foldmethod=marker
 "
 " Naming rules:
@@ -216,10 +216,12 @@ function! s:pack_init() abort "{{{
         call s:echomsg('Downloading minpac...')
         call system('git clone https://github.com/k-takata/minpac.git ' .
                     \ minpac_path)
-        packadd minpac
-    catch
-        echoerr v:exception
-        return 0
+        try
+            packadd minpac
+        catch
+            echoerr v:exception
+            return 0
+        endtry
     endtry
 
     call minpac#init()
@@ -1239,6 +1241,13 @@ function! s:lsp_register_servers() abort
                     \ })
 
     endif
+    if executable('lua-lsp')
+        call lsp#register_server({
+                    \ 'name': 'lua-lsp',
+                    \ 'cmd': {server_info -> [&shell, &shellcmdflag, 'lua-lsp']},
+                    \ 'whitelist': ['lua'],
+                    \ })
+    endif
 endfunction
 let g:lsp_signs_enabled = 1
 let g:lsp_signs_error = {'text': '>>'}
@@ -1457,6 +1466,7 @@ function! s:statusline_init() abort "{{{
 endfunction "}}}
 function! s:statusline_generater(active_page) "{{{
     let statusline =
+                \ (a:active_page ? '%#StatusLine#' : '') .
                 \ '%m' .
                 \ (a:active_page ? s:showmode_label() : '') .
                 \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
@@ -1474,17 +1484,16 @@ function! s:statusline_update(...) abort "{{{
     if event ==? 'CmdwinEnter'
         call s:statusline_set('inactive')
         let &statusline = s:statusline.active
-        return
-    elseif event ==? 'CmdwinLeave'
+    elseif s:has(['CmdWinLeave', 'OptionSet'], event)
         call s:statusline_set('active')
-        return
     endif
+    if event !=# '' | return | endif
 
     if exists('t:vimrc_showmode_winID')
         call s:statusline_set('inactive')
     endif
     let t:vimrc_showmode_winID = win_getid()
-    if &modifiable
+    if &modifiable || &buftype ==# 'terminal'
         call s:statusline_set('active')
     endif
 endfunction "}}}
@@ -1566,6 +1575,7 @@ augroup vimrc_statusline
     autocmd WinEnter,BufWinEnter * call s:statusline_update()
     autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
     autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
+    autocmd OptionSet modifiable,buftype call s:statusline_update('OptionSet')
 augroup END
 call s:statusline_init()
 "}}}
