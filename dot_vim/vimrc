@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 25-Mar-2019.
+" Last Change: 28-Mar-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -154,13 +154,22 @@ let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
 call filter(s:_augroups, 'stridx(v:val, "aug") != -1')
 call filter(s:_augroups, 'v:val =~# s:_pattern')
 call map(s:_augroups, 'matchstr(v:val, s:_pattern)')
-call uniq(sort(filter(s:_augroups, 'v:val !~? "END"')))
+call uniq(sort(filter(s:_augroups, 'v:val !=? "END"')))
 for s:_augroup in s:_augroups
   execute 'augroup' s:_augroup
     autocmd!
   execute 'augroup END'
 endfor | unlet s:_augroup s:_augroups s:_pattern
  "}}}
+" List installed plugins{{{
+let s:plugin = {}
+let s:plugin.plugins_ = map(filter(s:glob(
+      \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
+      \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+function! s:plugin.exists(plugin) abort
+  return s:has(self.plugins_, a:plugin)
+endfunction
+"}}}
 " Register install plugins {{{
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
@@ -181,6 +190,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vim-gista')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mattn/sonictemplate-vim')
+  call minpac#add('mityu/vim-ambicmd', {'branch': 'dev'})
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
@@ -194,7 +204,7 @@ function! s:pack_register() abort
   call minpac#add('rhysd/vim-operator-surround')
   call minpac#add('sgur/vim-gf-autoload')
   call minpac#add('sgur/vim-operator-openbrowser')
-  call minpac#add('thinca/vim-ambicmd')
+  " call minpac#add('thinca/vim-ambicmd')
   call minpac#add('thinca/vim-ft-help_fold')
   " call minpac#add('thinca/vim-operator-sequence')
   call minpac#add('thinca/vim-prettyprint')
@@ -297,7 +307,7 @@ augroup vimrc_filetype
   autocmd FileType makefile setlocal noexpandtab nosmarttab
 augroup END
 augroup vimrc_mru
-  autocmd BufRead, BufWritePost * call vimrc#mru#onReadFile()
+  autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
  "}}}
 "}}}
@@ -570,12 +580,7 @@ function! s:cmdwin_move_to_cmdline() abort "{{{
   execute "normal! \<C-c>"
   call setcmdpos(col + 1)
 endfunction "}}}
-let s:cmdwin_save_options = vimrc#class#new('save_options')
-
-augroup vimrc_cmdwin_filtering
-  autocmd CmdWinEnter * call s:cmdwin_filtering.prepare()
-  autocmd CmdWinLeave * call s:cmdwin_filtering.clear()
-augroup END
+" CmdwinFiltering{{{
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
   let self.last_input = ''
@@ -635,7 +640,12 @@ endfunction "}}}
 function! s:cmdwin_filtering_start() abort "{{{
   call s:cmdwin_filtering.start()
 endfunction "}}}
-
+augroup vimrc_cmdwin_filtering
+  autocmd CmdWinEnter * call s:cmdwin_filtering.prepare()
+  autocmd CmdWinLeave * call s:cmdwin_filtering.clear()
+augroup END
+ "}}}
+let s:cmdwin_save_options = vimrc#class#new('save_options')
 augroup vimrc_mapping
   autocmd CmdWinEnter * call s:cmdwin_enter()
   autocmd CmdWinLeave * call s:cmdwin_leave()
@@ -788,15 +798,6 @@ endfunction "}}}
 command! -bar PackInit   call s:pack_init()
 command! -bar PackUpdate call s:pack_update()
 command! -bar PackClean  call s:pack_clean()
-"}}}
-" Plugin chacker{{{
-let s:plugin = {}
-let s:plugin.plugins_ = map(filter(s:glob(
-      \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
-      \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-function! s:plugin.exists(plugin) abort
-  return s:has(self.plugins_, a:plugin)
-endfunction
 "}}}
 " Installed plugins{{{
 " kana/vim-operator-replace{{{
@@ -956,6 +957,18 @@ if s:plugin.exists('sonictemplate-vim')
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
 endif
 " }}}
+" mityu/vim-ambicmd{{{
+if s:plugin.exists('vim-ambicmd')
+  augroup vimrc_ambicmd
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> ambicmd#expand("\<Space>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> ambicmd#expand("\<CR>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> ambicmd#expand("\<bar>")
+  augroup END
+  cnoremap <expr> <Space> ambicmd#expand("\<Space>")
+  cnoremap <expr> <CR> ambicmd#expand("\<CR>")
+  cnoremap <expr> <bar> ambicmd#expand("\<bar>")
+endif
+"}}}
 " mityu/vim-textobj-multitextobj{{{
 if s:plugin.exists('vim-textobj-multitextobj')
   omap am <Plug>(textobj-multitextobj-a)
@@ -1447,7 +1460,7 @@ function! s:statusline_update(...) abort "{{{
   if event ==? 'CmdwinEnter'
     call s:statusline_set('inactive')
     let &statusline = s:statusline.active
-  elseif s:has(['CmdWinLeave', 'OptionSet'], event)
+  elseif s:has(['CmdwinLeave', 'OptionSet'], event)
     call s:statusline_set('active')
   endif
   if event !=# '' | return | endif
@@ -1528,7 +1541,7 @@ function! s:filename_label(bufnr) abort "{{{
   elseif buftype ==# 'prompt'
     return '[prompt]'
   else
-    return (buftype ==# 'nofile' ? '[NoFile]' : '') .
+    return (buftype ==# 'nofile' ? ' *NoFile* ' : '') .
       \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
 endfunction "}}}
@@ -1539,7 +1552,7 @@ augroup vimrc_statusline
   autocmd WinEnter,BufWinEnter * call s:statusline_update()
   autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
   autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
-  autocmd OptionSet modifiable, buftype call s:statusline_update('OptionSet')
+  autocmd OptionSet modifiable,buftype call s:statusline_update('OptionSet')
 augroup END
 call s:statusline_init()
 "}}}
@@ -1584,7 +1597,7 @@ endfunction
 hi link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
   autocmd WinEnter * call s:emphasize_indent()
-  autocmd OptionSet expandtab, smarttab, tabstop, shiftwidth call s:emphasize_indent()
+  autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
   autocmd User vimrc_initialize call s:emphasize_indent()
 augroup END
 function! s:emphasize_indent() abort "{{{
