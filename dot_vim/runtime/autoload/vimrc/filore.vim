@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 24-Mar-2019.
+"Last Change: 30-Mar-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -177,7 +177,6 @@ function! s:win_new(current_directory) abort "{{{
     let items.alter_bufnr = alter_bufnr
     let items.cursorpos = {}
     let items.unfolded_directories = []
-    let items.history = []
     call s:browse_fresh_display()
 endfunction "}}}
 function! s:win_fork(bufnr_from) abort "{{{
