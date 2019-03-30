@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Mar-2019.
+" Last Change: 30-Mar-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -95,6 +95,16 @@ endfunction "}}}
 function! FileParent() abort "{{{
   return fnamemodify(FilePath(), ':p:h')
 endfunction "}}}
+function! SetUndoFtplugin(config) abort "{{{
+  let restorer = 'execute ' . string(a:config)
+  if exists('b:undo_ftplugin')
+    let b:undo_ftplugin = restorer . '|' . b:undo_ftplugin
+  else
+    let b:undo_ftplugin = restorer
+  endif
+endfunction "}}}
+command! -nargs=1 -complete=command SetUndoFtplugin
+      \ call SetUndoFtplugin(<q-args>)
 "}}}
 " Startup config{{{
 if has('vim_starting')

@@ -1,11 +1,14 @@
 " Vim filetype plugin.
-" Last Change: 09-Mar-2019.
+" Last Change: 30-Mar-2019.
 
 if exists('b:did_ftplugin_after')
     finish
 endif
 let b:did_ftplugin_after = 1
 
+SetUndoFtplugin setlocal shiftwidth<
+SetUndoFtplugin delcommand AddAbort
+setlocal shiftwidth=2
 
 command! -buffer -range=% AddAbort call s:add_abort(<line1>,<line2>)
 function! s:add_abort(start,end) abort
