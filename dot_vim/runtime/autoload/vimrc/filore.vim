@@ -162,9 +162,6 @@ endfunction "}}}
 
 " Window
 if !exists('s:filore_list')
-  " Keys
-  "  - 'bufnr' : Buffer number of filore
-  "  - 'items' : filore's file list, history list, and config..
   let s:filore_list = {}
 endif
 if !exists('s:cursorpos')
@@ -246,7 +243,7 @@ function! s:win_close() abort "{{{
   endif
 endfunction "}}}
 function! s:win_get_reference_of_current_items() abort "{{{
-  return s:win_get_reference_of_items(bufnr(s:is_cmdwin() ? '#' : '%'))
+  return s:win_get_reference_of_items(bufnr('%'))
 endfunction "}}}
 function! s:win_get_reference_of_items(bufnr) abort "{{{
   let buffer_name = bufname(a:bufnr)
@@ -585,6 +582,14 @@ if !exists('s:history')
   let s:history = []
 endif
 
+" Command-line and command-line window
+function! s:cmdline_current_bufnr() abort "{{{
+  return s:is_cmdwin() ? bufnr('#') : bufnr('%')
+endfunction "}}}
+function! s:cmdline_is_current_filore() abort "{{{
+  return has_key(s:filore_list, bufname(s:cmdline_current_bufnr()))
+endfunction "}}}
+
 " User utility
 function! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
   if s:isdirectory(s:win_get_reference_of_current_items().file_list[
@@ -595,14 +600,17 @@ function! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
   endif
 endfunction "}}}
 function! vimrc#filore#get_current_directory_path() abort "{{{
-  return s:win_get_reference_of_current_items().current_directory
+  return s:win_get_reference_of_items(s:cmdline_current_bufnr()).current_directory
 endfunction "}}}
 function! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
-  " XXX: In cmdwin, line() returns cursor line on cmdwin, not on filore.
+  " FIXME: In cmdwin, line() returns cursor line on cmdwin, not on filore.
   if s:is_cmdwin() | return '' | endif
   return vimrc#filore#get_file_path_of_line(line('.'))
 endfunction "}}}
 function! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
+  if !s:cmdline_is_current_filore()
+    return ''
+  endif
   if a:lnum < (1 + s:prompt_lines_count) || a:lnum > line('$')
     return ''
   endif
