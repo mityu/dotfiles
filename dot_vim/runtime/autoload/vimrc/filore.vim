@@ -167,6 +167,9 @@ if !exists('s:filore_list')
   "  - 'items' : filore's file list, history list, and config..
   let s:filore_list = {}
 endif
+if !exists('s:cursorpos')
+  let s:cursorpos = {}
+endif
 function! s:win_new(current_directory) abort "{{{
   let alter_bufnr = bufnr('%')
   call s:win_open_new()
@@ -175,7 +178,6 @@ function! s:win_new(current_directory) abort "{{{
   let items.file_list = []
   let items.show_hidden_files = s:FALSE
   let items.alter_bufnr = alter_bufnr
-  let items.cursorpos = {}
   let items.unfolded_directories = []
   call s:browse_fresh_display()
 endfunction "}}}
@@ -454,15 +456,15 @@ function! s:browse_toggle_directory_folding_under_cursor() abort "{{{
   endif
 endfunction "}}}
 function! s:browse_store_cursor_position_in_cache() abort "{{{
-  let items = s:win_get_reference_of_current_items()
-  let items.cursorpos[items.current_directory] = line('.')
+  let s:cursorpos[s:win_get_reference_of_current_items().current_directory]
+        \ = line('.')
 endfunction "}}}
 function! s:browse_restore_cursor_position_with_cache() abort "{{{
-  let items = s:win_get_reference_of_current_items()
-  if !has_key(items.cursorpos, items.current_directory)
-    let items.cursorpos[items.current_directory] = 1 + s:prompt_lines_count
+  let cwd = s:win_get_reference_of_current_items().current_directory
+  if !has_key(s:cursorpos, cwd)
+    let s:cursorpos[cwd] = 1 + s:prompt_lines_count
   endif
-  call cursor(items.cursorpos[items.current_directory], 0)
+  call cursor(s:cursorpos[cwd], 0)
 endfunction "}}}
 function! s:browse_enter_directory_under_cursor() abort "{{{
   call s:browse_store_cursor_position_in_cache()
