@@ -115,6 +115,10 @@ endfunction "}}}
 function! s:is_cmdwin() abort "{{{
   return getcmdwintype() !=# ''
 endfunction "}}}
+function! s:path_slash() abort "{{{
+  " Get path separator from directory's full-path.
+  return fnamemodify(getcwd(), ':p')[-1:]
+endfunction "}}}
 
 " Main
 function! vimrc#filore#start(...) abort "{{{
@@ -600,7 +604,23 @@ function! vimrc#filore#smart_map(on_directory, on_file) abort "{{{
   endif
 endfunction "}}}
 function! vimrc#filore#get_current_directory_path() abort "{{{
-  return s:win_get_reference_of_items(s:cmdline_current_bufnr()).current_directory
+  let dir = s:win_get_reference_of_items(
+        \ s:cmdline_current_bufnr()).current_directory
+  let dir = fnamemodify(dir, ':p')
+
+  " Relate to current directory.
+  let modified = fnamemodify(dir, ':.')
+  if dir !=# modified
+    return '.' . s:path_slash() . modified
+  endif
+
+  " Relate to $HOME.
+  let modified = fnamemodify(dir, ':~')
+  if dir !=# modified
+    return modified
+  endif
+
+  return dir
 endfunction "}}}
 function! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
   " FIXME: In cmdwin, line() returns cursor line on cmdwin, not on filore.
