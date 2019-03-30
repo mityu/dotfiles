@@ -807,7 +807,11 @@ function! s:pack_clean() abort "{{{
   if s:pack_init() | call minpac#clean() | endif
 endfunction "}}}
 function! s:pack_status() abort "{{{
-  if s:pack_init() | call minpac#status() | endif
+  if exists('*minpac#status')
+    call minpac#status()
+  else
+    call s:echomsg_error('minpac isn''t loaded yet.')
+  endif
 endfunction "}}}
 command! -bar PackInit   call s:pack_init()
 command! -bar PackUpdate call s:pack_update()
