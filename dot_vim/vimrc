@@ -220,6 +220,7 @@ function! s:pack_register() abort
   call minpac#add('thinca/vim-prettyprint')
   call minpac#add('thinca/vim-quickrun')
   call minpac#add('thinca/vim-textobj-between')
+  call minpac#add('thinca/vim-textobj-comment')
   call minpac#add('thinca/vim-themis')
   call minpac#add('tyru/capture.vim')
   call minpac#add('tyru/caw.vim')
@@ -1190,6 +1191,15 @@ if s:plugin.exists('vim-textobj-between')
   vmap ad <Plug>(textobj-between-a)
   vmap id <Plug>(textobj-between-i)
   let g:textobj_between_no_default_key_mappings = 1
+endif
+"}}}
+" thinca/vim-textobj-comment{{{
+if s:plugin.exists('vim-textobj-comment')
+  omap ac <Plug>(textobj-comment-a)
+  omap ic <Plug>(textobj-comment-i)
+  vmap ac <Plug>(textobj-comment-a)
+  vmap ic <Plug>(textobj-comment-i)
+  let g:textobj_comment_no_default_key_mapings = 1
 endif
 "}}}
 " tyru/caw.vim{{{
