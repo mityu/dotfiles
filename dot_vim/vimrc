@@ -973,10 +973,12 @@ if s:plugin.exists('vim-ambicmd')
     autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> ambicmd#expand("\<Space>")
     autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> ambicmd#expand("\<CR>")
     autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> ambicmd#expand("\<bar>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <C-l> ambicmd#expand('')
   augroup END
   cnoremap <expr> <Space> ambicmd#expand("\<Space>")
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
+  cnoremap <expr> <C-l> ambicmd#expand('')
 endif
 "}}}
 " mityu/vim-textobj-multitextobj{{{
@@ -1188,8 +1190,30 @@ endif
 "}}}
 " tyru/caw.vim{{{
 if s:plugin.exists('caw.vim')
-  map ,c <Plug>(caw:hatpos:toggle:operator)
+  inoremap <Plug>(vimrc:caw:builtin:ESC) <ESC>
+  inoremap <silent> <Plug>(vimrc:caw:oneline:comment)
+        \ <C-r>=b:caw_oneline_comment . g:caw_dollarpos_sp_right<CR>
+  function! s:caw_oneline_comment(key) "{{{
+    if !exists('b:caw_oneline_comment')
+      execute 'inoremap <silent> <Plug>(vimrc:caw:oneline:no-expand) ' .
+            \ printf('<C-r>=%s<CR>', string(a:key))
+      return "\<Plug>(vimrc:caw:oneline:no-expand)"
+    endif
+
+    let prefix = "\<Plug>(vimrc:caw:builtin:ESC)"
+    if getline('.') =~# '\m^\s*$'
+      return prefix . "\<Plug>(caw:hatpos:comment)"
+    elseif col('.') == col('$')
+      return prefix . "\<Plug>(caw:dollarpos:comment)"
+    else
+      return "\<Plug>(vimrc:caw:oneline:comment)"
+    endif
+  endfunction "}}}
+
+  map // <Plug>(caw:hatpos:toggle:operator)
+  imap <expr> // <SID>caw_oneline_comment('//')
   let g:caw_no_default_keymappings = 1
+  let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
 endif
 "}}}
 " ReadingVimrc{{{
