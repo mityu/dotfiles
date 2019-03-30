@@ -1,4 +1,4 @@
-" Last Change: 16-Mar-2019.
+" Last Change: 17-Mar-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish
@@ -20,7 +20,7 @@ endfunction
 
 function! s:option_to_edit()
     setlocal buftype= modifiable noreadonly
-    setlocal list tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab textwidth=78
+    setlocal list textwidth=78
     if exists('+colorcolumn')
         setlocal colorcolumn=+1
     endif
