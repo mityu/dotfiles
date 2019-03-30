@@ -805,9 +805,13 @@ endfunction "}}}
 function! s:pack_clean() abort "{{{
   if s:pack_init() | call minpac#clean() | endif
 endfunction "}}}
+function! s:pack_status() abort "{{{
+  if s:pack_init() | call minpac#status() | endif
+endfunction "}}}
 command! -bar PackInit   call s:pack_init()
 command! -bar PackUpdate call s:pack_update()
 command! -bar PackClean  call s:pack_clean()
+command! -bar PackStatus call s:pack_status()
 "}}}
 " Installed plugins{{{
 " kana/vim-operator-replace{{{
