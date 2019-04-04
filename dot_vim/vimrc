@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 30-Mar-2019.
+" Last Change: 01-Apr-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -31,13 +31,13 @@ function! s:join_path(...) abort "{{{
 endfunction "}}}
 function! s:has(object, to_search) abort "{{{
   let object_type = type(a:object)
-  if object_type == type('')
+  if object_type == v:t_string
     let func = 'stridx'
     let not_found = -1
-  elseif object_type == type([])
+  elseif object_type == v:t_list
     let func = 'index'
     let not_found = -1
-  elseif object_type == type({})
+  elseif object_type == v:t_dict
     let func = 'has_key'
     let not_found = 0
   else
@@ -70,6 +70,15 @@ function! s:glob(expr) abort "{{{
 endfunction "}}}
 function! s:getchar_string(...) abort "{{{
   return nr2char(call('getchar', a:000))
+endfunction "}}}
+function! s:mkdir(dir, ...) abort "{{{
+  " Return 1 when process finished without errors; otherwise, return 0.
+  if isdirectory(a:dir) | return 1 | endif
+  if !exists('*mkdir')
+    call s:echomsg_error('built-in mkdir() not found.')
+    return 0
+  endif
+  return call('mkdir', [a:dir] + a:000)
 endfunction "}}}
 "}}}
 " Global utility functions{{{
@@ -132,6 +141,9 @@ if has('vim_starting')
     let s:filesystem.path_separator = ':'
     let s:filesystem.rcfile_prefix = '.'
   endif
+
+  let s:cache_dir = s:join_path(expand('~'), '.cache', 'vimrc')
+  call s:mkdir(s:cache_dir, 'p')
 
   " disable default plugins
   let g:loaded_2html_plugin = 1
@@ -235,7 +247,6 @@ function! s:pack_register() abort
   call minpac#add('thinca/vim-partedit', {'type': 'opt'})
 endfunction "}}}
 " Options{{{
-"{{{
 syntax on
 filetype plugin indent on
 colorscheme domusaurea
@@ -259,7 +270,6 @@ set hls
 set display=lastline
 set listchars=tab:\|-
 
-set noundofile nobackup noswapfile
 set autoread
 set incsearch ignorecase
 set showmatch matchtime=1
@@ -284,15 +294,24 @@ set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
 
-let s:_undodir = s:join_path(expand('~'), '.cache', 'vimrc', 'undodir')
-if !isdirectory(s:_undodir) && exists('*mkdir')
-  call mkdir(s:_undodir, 'p')
-endif
-if isdirectory(s:_undodir)
+let s:_undodir = s:join_path(s:cache_dir, 'undodir')
+if s:mkdir(s:_undodir, 'p')
   set undofile
   let &undodir = s:_undodir
+else
+  set noundofile
 endif
 unlet s:_undodir
+
+let s:_directory = s:join_path(s:cache_dir, 'swapfile')
+if s:mkdir(s:_directory, 'p')
+  set swapfile
+  let &directory = s:join_path(fnamemodify(s:_directory, ':p'), '')
+else
+  set noswapfile
+endif
+unlet s:_directory
+set nobackup nowritebackup
 
 if has('kaoriya')
   set fileencodings=guess,utf-8
@@ -313,14 +332,13 @@ augroup vimrc_syntax
   autocmd User vimrc_initialize syntax on
 augroup END
 augroup vimrc_filetype
-  autocmd FileType c, cpp setlocal foldmethod=indent
+  autocmd FileType c,cpp setlocal foldmethod=indent
   autocmd BufRead .envrc set filetype=sh
   autocmd FileType makefile setlocal noexpandtab nosmarttab
 augroup END
 augroup vimrc_mru
   autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
- "}}}
 "}}}
 " Mapping{{{
 " builtin, extension{{{
@@ -400,7 +418,6 @@ for [s:lhs, s:rhs] in [[';', ':'], [':', ';'], ['<ESC>', 'N']]
   execute printf('tnoremap <C-w>%s <C-w>%s', s:lhs, s:rhs)
 endfor | unlet s:lhs s:rhs
 tmap <C-w><C-j> <C-w><ESC>
-tmap <C-j> <C-w><ESC>
 
 " Loop {{{
 function! s:_loop_define(config) abort "{{{
@@ -988,6 +1005,11 @@ if s:plugin.exists('vim-ambicmd')
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
   cnoremap <expr> <C-l> ambicmd#expand('')
+
+  let g:ambicmd#spotter = {
+        \ 'Capture': {'bang': 'optional', 'location': [1]},
+        \ 'Filter': {'bang': 'optional', 'location': [2]}
+        \ }
 endif
 "}}}
 " mityu/vim-textobj-multitextobj{{{
@@ -1228,7 +1250,7 @@ if s:plugin.exists('caw.vim')
     endif
   endfunction "}}}
 
-  map // <Plug>(caw:hatpos:toggle:operator)
+  map ,c <Plug>(caw:hatpos:toggle:operator)
   imap <expr> // <SID>caw_oneline_comment('//')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
@@ -1424,7 +1446,7 @@ endfunction "}}}
 " Define :Memo* :Otameshi*{{{
 for s:type_ in ['memo', 'otameshi']
   let s:{s:type_} = s:notes.instance(s:join_path(
-      \ expand('~'), '.cache', 'vimrc', s:type_))
+      \ s:cache_dir, s:type_))
   if !isdirectory(s:{s:type_}.get_save_dir())
     call mkdir(s:{s:type_}.get_save_dir(), 'p')
   endif
@@ -1510,11 +1532,11 @@ function! s:statusline_set(kind) abort "{{{
   call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
 endfunction "}}}
 function! s:statusline_update(...) abort "{{{
-  let event = exists('a:1') ? a:1 : ''
-  if event ==? 'CmdwinEnter'
+  let event = exists('a:1') ? tolower(a:1) : ''
+  if event ==# 'cmdwinenter'
     call s:statusline_set('inactive')
     let &statusline = s:statusline.active
-  elseif s:has(['CmdwinLeave', 'OptionSet'], event)
+  elseif s:has(['cmdwinleave', 'optionset'], event)
     call s:statusline_set('active')
   endif
   if event !=# '' | return | endif
@@ -1715,7 +1737,7 @@ command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 " mru{{{
-let g:mru_history_file = s:join_path(expand('~'), '.cache', 'vimrc', 'mru', 'history')
+let g:mru_history_file = s:join_path(s:cache_dir, 'mru', 'history')
 "}}}
 " gram, filore{{{
 function! s:gram_mapping() abort "{{{
@@ -1754,9 +1776,11 @@ augroup END
 "}}}
 " lvimrc{{{
 let s:_lvimrc = s:rc('lvimrc')
-if filereadable(expand('~/' . s:_lvimrc))
-  execute 'command! -bar -nargs=+ LVimrc <args> ~/' . s:_lvimrc
-  execute 'source ~/' . s:_lvimrc
+if filereadable(s:join_path(expand('~'), s:_lvimrc))
+  let s:_lvimrc = s:join_path('~', s:_lvimrc)
+  execute 'command! -bar -nargs=* LVimrc ' .
+        \ 'execute ((<q-args> ==# "") ? "edit" : <q-args>)' string(s:_lvimrc)
+  execute 'source' s:_lvimrc
 endif | unlet s:_lvimrc
 " }}}
 " gvimrc{{{
