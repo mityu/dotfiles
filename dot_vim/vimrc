@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 01-Apr-2019.
+" Last Change: 04-Apr-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -196,6 +196,7 @@ endfunction
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
+  call minpac#add('cohama/vim-lexima')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -209,6 +210,7 @@ function! s:pack_register() abort
   call minpac#add('kana/vim-textobj-user')
   " call minpac#add('lambdalisue/fila.vim')
   call minpac#add('lambdalisue/gina.vim')
+  call minpac#add('lambdalisue/vim-findent')
   call minpac#add('lambdalisue/vim-gista')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mattn/sonictemplate-vim')
@@ -245,6 +247,7 @@ function! s:pack_register() abort
   call minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
   call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
   call minpac#add('thinca/vim-partedit', {'type': 'opt'})
+  call minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
 endfunction "}}}
 " Options{{{
 syntax on
