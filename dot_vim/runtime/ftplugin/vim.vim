@@ -1,11 +1,6 @@
 " Vim filetype plugin.
 " Last Change: 30-Mar-2019.
 
-if exists('b:did_ftplugin_after')
-    finish
-endif
-let b:did_ftplugin_after = 1
-
 SetUndoFtplugin setlocal shiftwidth<
 SetUndoFtplugin delcommand AddAbort
 setlocal shiftwidth=2
