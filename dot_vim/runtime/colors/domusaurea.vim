@@ -1,4 +1,4 @@
-"Last Change: 24-Mar-2019.
+"Last Change: 12-Apr-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -48,30 +48,27 @@ let s:palette={
 let s:gui_running=has('gui_running')
 
 function! s:hi(group,fg,bg,attr) "{{{
-    let has_fg=type(a:fg)!=s:TYPE_NUM
-    let has_bg=type(a:bg)!=s:TYPE_NUM
-    let has_attr=type(a:attr)!=s:TYPE_NUM
+    let has_fg=type(a:fg) != s:TYPE_NUM
+    let has_bg=type(a:bg) != s:TYPE_NUM
+    let has_attr=type(a:attr) != s:TYPE_NUM
 
     if has_fg&&!has_key(s:palette,a:fg)
-        call s:echoerr(printf('color: %s does not exists. (specificated in %s, %sfg)',
-                    \a:fg,a:group,s:gui_running? 'gui': 'cterm'))
+        call s:echoerr(printf('color: %s does not exists. (specificated in %s)',
+                    \a:fg,a:group))
         return
     endif
     if has_bg&&!has_key(s:palette,a:bg)
-        call s:echoerr(printf('color: %s does not exists. (specificated in %s, %sbg)',
-                    \a:bg,a:group,s:gui_running? 'gui': 'cterm'))
+        call s:echoerr(printf('color: %s does not exists. (specificated in %s)',
+                    \a:bg,a:group))
         return
     endif
 
-    if s:gui_running
-        let fg=has_fg? 'guifg=' . s:palette[a:fg][1]: ''
-        let bg=has_bg? 'guibg=' . s:palette[a:bg][1]: ''
-        let attr=has_attr? 'gui=' . a:attr : ''
-    else
-        let fg=has_fg? 'ctermfg=' . s:palette[a:fg][0]: ''
-        let bg=has_bg? 'ctermbg=' . s:palette[a:bg][0]: ''
-        let attr=has_attr? 'cterm=' . a:attr : ''
-    endif
+    for [type, kind] in map(['cterm', 'gui'], '[v:val, v:key]')
+        let fg = has_fg ? printf('%sfg=%s', type, s:palette[a:fg][kind]) : ''
+        let bg = has_bg ? printf('%sbg=%s', type, s:palette[a:bg][kind]) : ''
+        let attr = has_attr ? printf('%s=%s', type, a:attr) : ''
+        execute 'silent highlight' a:group fg bg attr
+    endfor
     execute 'silent highlight' a:group fg bg attr
 endfunction "}}}
 function! s:echoerr(msg) "{{{
