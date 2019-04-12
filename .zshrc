@@ -1,5 +1,5 @@
 # Set environmental variables (Only when outside of vim.)
-if [ -n "$VIM_SERVERNAME" ] && [ -f ~/.envrc ]; then
+if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
     cat ~/.envrc | while read path_expr
     do
         # Ignore blank line.
@@ -15,6 +15,38 @@ if [ -n "$VIM_SERVERNAME" ] && [ -f ~/.envrc ]; then
     done
 fi
 
+alias mvim=$VIMBINARY
+alias vim='mvim'
+alias winecmd='wine cmd /k "C:\setenv"'
+# alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
+
+# autoload -U compinit
+# compinit
+
+# The file to save history
+export HISTFILE=${HOME}/.zhistory
+# How many does zsh record history to memory.
+export HISTSIZE=1000
+# How many does zsh record history to a history file.
+export SAVEHIST=100000
+# Remove history duplicates
+setopt hist_ignore_all_dups
+setopt hist_ignore_dups
+# historyを共有
+setopt share_history
+# Do not record `history`
+setopt hist_no_store
+# Enable completion
+setopt menu_complete
+
+# Use vi like keybinds
+bindkey -d # Reset keybinds
+bindkey -v
+bindkey -M viins '^j' vi-cmd-mode
+bindkey -M vicmd '^e' vi-end-of-line
+bindkey -M vicmd '^a' vi-first-non-blank
+
+# NOTE: $luarocks --lua-dir=/usr/local/opt/lua@5.1 {args}
 # if [ -n "$VIM_TERMINAL" ] && [ -n "$VIM_SERVERNAME" ]; then
 #     function mvim(){
 #         $VIMBINARY --servername $VIM_SERVERNAME --remote-tab-wait $@
@@ -58,6 +90,13 @@ fi
 if zplug check junegunn/fzf-bin; then
     export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
     export FZF_DEFAULT_OPTS="--reverse"
+
+    function select-history(){
+        BUFFER=$(history -n 1 | fzf --tac +m)
+        CURSOR=$#BUFFER
+    }
+    zle -N select-history
+    bindkey '^r' select-history
 fi
 # if zplug check b4b4r07/enhancd; then
 #     export ENHANCD_FILTER=peco:fzf
@@ -69,33 +108,3 @@ function update_components(){
     pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U
     zplug update
 }
-
-# alias mvim=$VIMBINARY
-alias vim='mvim'
-alias winecmd='wine cmd /k "C:\setenv"'
-# alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
-
-# autoload -U compinit
-# compinit
-
-# The file to save history
-export HISTFILE=${HOME}/.zhistory
-# How many does zsh record history to memory.
-export HISTSIZE=1000
-# How many does zsh record history to a history file.
-export SAVEHIST=100000
-# Remove history duplicates
-setopt hist_ignore_all_dups
-setopt hist_ignore_dups
-# historyを共有
-setopt share_history
-# Do not record `history`
-setopt hist_no_store
-# Enable completion
-setopt menu_complete
-
-# Use vi like keybinds
-bindkey -d # Reset keybinds
-bindkey -v
-bindkey '^j' vi-cmd-mode
-# NOTE: $luarocks --lua-dir=/usr/local/opt/lua@5.1 {args}
