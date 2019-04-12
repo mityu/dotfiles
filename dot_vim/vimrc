@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 04-Apr-2019.
+" Last Change: 09-Apr-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -7,7 +7,7 @@
 "  - Mapping prefix :
 "   `<Plug>(<SID>-{kind})`
 "  - Global function :
-"   Use `Vimrc` as its prefix. (But, there're some exception to this rule.)
+"   Use `Vimrc` as its prefix. (But, there're some exceptions to this rule.)
 "}}}
 " Encoding{{{
 if has('vim_starting')
@@ -156,7 +156,7 @@ if has('vim_starting')
 
   let &runtimepath .= ', ' . escape(s:join_path($DOT_VIM, 'runtime'), ' \')
 
-  " Set environment variables on gVim.{{{
+  " Set environmental variables on gVim.{{{
   let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
   if has('gui_running') && filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
@@ -196,7 +196,8 @@ endfunction
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  call minpac#add('cohama/vim-lexima')
+  " call minpac#add('cohama/lexima.vim')
+  " call minpac#add('itchyny/lightline.vim')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -212,9 +213,9 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/gina.vim')
   call minpac#add('lambdalisue/vim-findent')
   call minpac#add('lambdalisue/vim-gista')
+  call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mattn/sonictemplate-vim')
-  call minpac#add('mityu/vim-ambicmd', {'branch': 'dev'})
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
@@ -228,7 +229,7 @@ function! s:pack_register() abort
   call minpac#add('rhysd/vim-operator-surround')
   call minpac#add('sgur/vim-gf-autoload')
   call minpac#add('sgur/vim-operator-openbrowser')
-  " call minpac#add('thinca/vim-ambicmd')
+  call minpac#add('thinca/vim-ambicmd')
   call minpac#add('thinca/vim-ft-help_fold')
   " call minpac#add('thinca/vim-operator-sequence')
   call minpac#add('thinca/vim-prettyprint')
@@ -513,27 +514,35 @@ delfunc s:_loop_define
 delfunc s:_simple_loop_define
 "}}}
 " Shift-ten-key{{{
+let s:ten_key_pair = [
+      \['1', '!'],
+      \['2', '"'],
+      \['3', '#'],
+      \['4', '$'],
+      \['5', '%'],
+      \['6', '&'],
+      \['7', "'"],
+      \['8', '('],
+      \['9', ')'],
+      \]
+let s:ten_key_mapbase = '<Plug>(vimrc-tenkey-%s)'
+for s:pair in s:ten_key_pair
+  for s:key in s:pair
+    execute 'inoremap' printf(s:ten_key_mapbase, s:key) s:key
+  endfor
+  unlet s:key
+endfor
+unlet s:pair
 function! s:shift_ten_key(enablize) abort "{{{
-  let ten_key_pair = [
-        \['1', '!'],
-        \['2', '"'],
-        \['3', '#'],
-        \['4', '$'],
-        \['5', '%'],
-        \['6', '&'],
-        \['7', "'"],
-        \['8', '('],
-        \['9', ')'],
-        \]
   if a:enablize
-    for [key1, key2] in ten_key_pair
-      execute 'inoremap' key1 key2
-      execute 'inoremap' key2 key1
+    for [key1, key2] in s:ten_key_pair
+      execute 'imap' key1 printf(s:ten_key_mapbase, key2)
+      execute 'imap' key2 printf(s:ten_key_mapbase, key1)
     endfor
   else
-    for [key1, key2] in ten_key_pair
-      execute 'silent! iunmap' key1
-      execute 'silent! iunmap' key2
+    for [key1, key2] in s:ten_key_pair
+      execute 'imap' key1 printf(s:ten_key_mapbase, key1)
+      execute 'imap' key2 printf(s:ten_key_mapbase, key2)
     endfor
   endif
 endfunction "}}}
@@ -580,7 +589,8 @@ function! s:cmdwin_enter() abort "{{{
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
-    nnoremap <buffer> <silent> ; :<C-u>call <SID>cmdwin_move_to_cmdline()<CR>
+    " NOTE: Map to <C-c><Right> doesn't work; The screen won't be redrawn.
+    nnoremap <buffer> <silent> ; :<C-u>call feedkeys("\<lt>C-c>\<lt>Right>", 'n')<CR>
 
     inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
     inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
@@ -597,19 +607,8 @@ function! s:cmdwin_completion(select_next) abort "{{{
   if pumvisible()
     return a:select_next ? '<C-n>' : '<C-p>'
   else
-    " NOTE: `return nr2char(&wildchar)` doesn't work.
-    call feedkeys(nr2char(&wildchar), 't')
-    if !a:select_next
-      " Simulate <C-p> popup.
-      call feedkeys("\<C-p>\<C-p>", 'n')
-    endif
-    return ''
+    return "\<C-x>\<C-v>"
   endif
-endfunction "}}}
-function! s:cmdwin_move_to_cmdline() abort "{{{
-  let col = col('.')
-  execute "normal! \<C-c>"
-  call setcmdpos(col + 1)
 endfunction "}}}
 " CmdwinFiltering{{{
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
@@ -839,6 +838,48 @@ command! -bar PackClean  call s:pack_clean()
 command! -bar PackStatus call s:pack_status()
 "}}}
 " Installed plugins{{{
+" cohama/lexima.vim{{{
+let g:loaded_lexima = 1
+if s:plugin.exists('lexima.vim') && 0  " Disable.
+  function! s:setup_lexima() abort
+    call lexima#add_rule({'char': '<BS>', 'at': '<\%#>', 'delete': 1})
+    call lexima#add_rule({'char': '<', 'input_after': '>'})
+    call lexima#add_rule({'char': '>', 'at': '\%#>', 'leave': 1})
+    call lexima#add_rule({
+          \ 'char': '<CR>',
+          \ 'at': '\C\v^\s*%(Describe|Context|Before|After|It)>.*%#$',
+          \ 'except': '\C\v^(\s*)\S.*%#\n%(%(\s*|\1\s.+)\n)*\1End',
+          \ 'input': '<CR>',
+          \ 'input_after': '<CR>End',
+          \ 'filetype': 'vimspec',
+          \ })
+
+    for key in split('()''"', '\zs')
+      execute 'inoremap <silent> <expr>' printf(s:ten_key_mapbase, key)
+            \ printf('lexima#expand(%s, "i")', string(key))
+    endfor
+
+    inoremap <silent> <expr> <CR> '<C-g>u' . lexima#expand('<lt>CR>', 'i')
+    imap <C-h> <BS>
+  endfunction
+  augroup vimrc_setup_lexima
+    autocmd User vimrc_initialize call s:setup_lexima()
+  augroup END
+  if has('vim_starting')
+    " Overwrite lexima's mappings.
+    augroup vimrc_setup_shifttenkey
+      autocmd User vimrc_initialize EnableShiftTenKey
+            \ |autocmd! vimrc_setup_shifttenkey
+    augroup END
+  endif
+endif
+"}}}
+" itchyny/lightline.vim{{{
+" if s:plugin.exists('lightline.vim')
+"   let g:lightline = {}
+"   let g:lightline.enable = {'statusline': 0, 'tabline': 0}
+" endif
+"}}}
 " kana/vim-operator-replace{{{
 if s:plugin.exists('vim-operator-replace')
   map ,r  <Plug>(operator-replace)
@@ -924,6 +965,15 @@ if s:plugin.exists('vim-operator-user')
   augroup END
 endif
 "}}}
+" kana/vim-textobj-entire{{{
+if s:plugin.exists('vim-textobj-entire')
+  omap aa <Plug>(textobj-entire-a)
+  omap ia <Plug>(textobj-entire-i)
+  vmap aa <Plug>(textobj-entire-a)
+  vmap ia <Plug>(textobj-entire-i)
+  let g:textobj_entire_no_default_key_mappings = 1
+endif
+"}}}
 " kana/vim-textobj-function{{{
 if s:plugin.exists('vim-textobj-function')
   omap if <Plug>(textobj-function-i)
@@ -986,6 +1036,13 @@ if s:plugin.exists('gina.vim')
   augroup END
 endif
 "}}}
+" lambdalisue/vim-findent{{{
+if s:plugin.exists('vim-findent')
+  augroup vimrc_findent
+    autocmd FileType vim Findent
+  augroup END
+endif
+"}}}
 " mattn/sonictemplate-vim{{{
 if s:plugin.exists('sonictemplate-vim')
   " Disable default mappings.
@@ -996,25 +1053,6 @@ if s:plugin.exists('sonictemplate-vim')
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
 endif
 " }}}
-" mityu/vim-ambicmd{{{
-if s:plugin.exists('vim-ambicmd')
-  augroup vimrc_ambicmd
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> ambicmd#expand("\<Space>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> ambicmd#expand("\<CR>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> ambicmd#expand("\<bar>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <C-l> ambicmd#expand('')
-  augroup END
-  cnoremap <expr> <Space> ambicmd#expand("\<Space>")
-  cnoremap <expr> <CR> ambicmd#expand("\<CR>")
-  cnoremap <expr> <bar> ambicmd#expand("\<bar>")
-  cnoremap <expr> <C-l> ambicmd#expand('')
-
-  let g:ambicmd#spotter = {
-        \ 'Capture': {'bang': 'optional', 'location': [1]},
-        \ 'Filter': {'bang': 'optional', 'location': [2]}
-        \ }
-endif
-"}}}
 " mityu/vim-textobj-multitextobj{{{
 if s:plugin.exists('vim-textobj-multitextobj')
   omap am <Plug>(textobj-multitextobj-a)
@@ -1071,7 +1109,7 @@ if s:plugin.exists('vim-textobj-multiblock')
       \['<', '>'],
       \]
 endif
-" }}}
+"}}}
 " prabirshrestha/ayncomplete.vim{{{
 if s:plugin.exists('asyncomplete.vim')
   " let g:asyncomplete_remove_duplicates = 1
@@ -1102,6 +1140,12 @@ if s:plugin.exists('asyncomplete.vim')
             \   function('asyncomplete#sources#buffer#completor'),
             \ })
     endif
+    call Register({
+          \ 'name': 'vimspec',
+          \ 'whitelist': ['vimspec'],
+          \ 'completor':
+          \   function('asyncomplete#sources#vimspec#completor'),
+          \ })
   endfunction
   augroup vimrc_asyncomplete_sources
     autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
@@ -1173,6 +1217,44 @@ if s:plugin.exists('vim-operator-surround')
   map ,sr <Plug>(operator-surround-replace)
 endif
 "}}}
+" thinca/vim-ambicmd{{{
+if s:plugin.exists('vim-ambicmd')
+  function! s:ambicmd_expand(key)
+    let expander = ambicmd#expand(a:key)
+    return (expander ==# a:key ? '' : "\<C-g>u") . expander
+  endfunction
+  augroup vimrc_ambicmd
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
+    autocmd CmdwinEnter : inoremap <buffer> <expr> <C-l> <SID>ambicmd_expand('')
+  augroup END
+  cnoremap <expr> <Space> ambicmd#expand("\<Space>")
+  cnoremap <expr> <CR> ambicmd#expand("\<CR>")
+  cnoremap <expr> <bar> ambicmd#expand("\<bar>")
+  cnoremap <expr> <C-l> ambicmd#expand('')
+
+  let g:ambicmd#show_completion_menu = 1
+
+  function! s:ambicmd_build_rule(cmd) abort
+    let rule = []
+    let rule += ['\c^' . a:cmd . '$']
+    let rule += ['\c^' . a:cmd]
+    let rule += ['\c' . a:cmd]
+
+    for len in range(1, strlen(a:cmd))
+      let [prefix, suffix] = [strpart(a:cmd, 0, len), a:cmd[len :]]
+      let prefix = substitute(toupper(prefix), '.\zs', '\\l*', 'g')
+      let matcher ='\C^' . prefix . suffix
+      let rule += [matcher . '$', matcher]
+    endfor
+
+    let rule += ['.*' . substitute(a:cmd, '.\zs', '.*', 'g')]
+    return rule
+  endfunction
+  let g:ambicmd#build_rule = s:SIDPrefix() . 'ambicmd_build_rule'
+endif
+"}}}
 " thinca/vim-quickrun {{{
 if s:plugin.exists('vim-quickrun')
   let g:quickrun_config = {}
@@ -1234,27 +1316,41 @@ endif
 " tyru/caw.vim{{{
 if s:plugin.exists('caw.vim')
   inoremap <Plug>(vimrc:caw:builtin:ESC) <ESC>
+  inoremap <Plug>(vimrc:caw:separate-undo) <C-g>u
   inoremap <silent> <Plug>(vimrc:caw:oneline:comment)
         \ <C-r>=b:caw_oneline_comment . g:caw_dollarpos_sp_right<CR>
+  imap <Plug>(vimrc:caw:hatpos:comment)
+        \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:hatpos:comment)
+  imap <Plug>(vimrc:caw:dollarpos:comment)
+        \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:dollarpos:comment)
+
+  function! s:caw_oneline_comment_map(key) "{{{
+    execute printf(
+          \ 'inoremap <silent> <Plug>(vimrc:caw:oneline:do-input)%s %s',
+          \ a:key, a:key)
+    execute printf('imap <expr> %s <SID>caw_oneline_comment(%s)',
+          \ a:key, string(a:key))
+  endfunction "}}}
   function! s:caw_oneline_comment(key) "{{{
+    let do_input = "\<Plug>(vimrc:caw:oneline:do-input)" . a:key
     if !exists('b:caw_oneline_comment')
-      execute 'inoremap <silent> <Plug>(vimrc:caw:oneline:no-expand) ' .
-            \ printf('<C-r>=%s<CR>', string(a:key))
-      return "\<Plug>(vimrc:caw:oneline:no-expand)"
+      return do_input
     endif
 
-    let prefix = "\<Plug>(vimrc:caw:builtin:ESC)"
+    let prefix = do_input . "\<Plug>(vimrc:caw:separate-undo)" .
+          \ repeat("\<C-h>", strlen(a:key))
     if getline('.') =~# '\m^\s*$'
-      return prefix . "\<Plug>(caw:hatpos:comment)"
+      let key = "\<Plug>(vimrc:caw:hatpos:comment)"
     elseif col('.') == col('$')
-      return prefix . "\<Plug>(caw:dollarpos:comment)"
+      let key = "\<Plug>(vimrc:caw:dollarpos:comment)"
     else
-      return "\<Plug>(vimrc:caw:oneline:comment)"
+      let key = "\<Plug>(vimrc:caw:oneline:comment)"
     endif
+    return prefix . key
   endfunction "}}}
 
   map ,c <Plug>(caw:hatpos:toggle:operator)
-  imap <expr> // <SID>caw_oneline_comment('//')
+  call s:caw_oneline_comment_map('//')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
 endif
@@ -1526,6 +1622,9 @@ function! s:statusline_generater(active_page) "{{{
         \ (a:active_page ? s:showmode_label() : '') .
         \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
         \ '[#%{bufnr("%")}]' .
+        \ (s:plugin.exists('gina.vim') ?
+        \   '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
+        \   '') .
         \ '%{<SID>filename_label(bufnr("%"))}' .
         \ '%<%=' .
         \ '[%{pathshorten(getcwd(winnr()))}]'
@@ -1534,13 +1633,20 @@ endfunction "}}}
 function! s:statusline_set(kind) abort "{{{
   call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
 endfunction "}}}
+function! s:statusline_should_showmode(...) "{{{
+  let bufnr = a:0 ? winbufnr(a:1) : bufnr('%')
+  return getbufvar(bufnr, '&modifiable') ||
+        \ getbufvar(bufnr, '&buftype') == 'terminal'
+endfunction "}}}
 function! s:statusline_update(...) abort "{{{
   let event = exists('a:1') ? tolower(a:1) : ''
   if event ==# 'cmdwinenter'
     call s:statusline_set('inactive')
     let &statusline = s:statusline.active
   elseif s:has(['cmdwinleave', 'optionset'], event)
-    call s:statusline_set('active')
+    if s:statusline_should_showmode(t:vimrc_showmode_winID)
+      call s:statusline_set('active')
+    endif
   endif
   if event !=# '' | return | endif
 
@@ -1548,7 +1654,7 @@ function! s:statusline_update(...) abort "{{{
     call s:statusline_set('inactive')
   endif
   let t:vimrc_showmode_winID = win_getid()
-  if &modifiable || &buftype ==# 'terminal'
+  if s:statusline_should_showmode()
     call s:statusline_set('active')
   endif
 endfunction "}}}
