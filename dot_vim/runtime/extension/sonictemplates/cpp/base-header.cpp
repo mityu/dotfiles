@@ -5,4 +5,4 @@ namespace {{_cursor_}}{
 
 }
 
-#endif //{{_expr_:toupper(substitute(expand('%:p:t'),'\.','_','g'))}}
+#endif //  {{_expr_:toupper(substitute(expand('%:p:t'),'\.','_','g'))}}
