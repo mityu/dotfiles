@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Apr-2019.
+" Last Change: 12-May-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -240,6 +240,7 @@ function! s:pack_register() abort
   call minpac#add('tyru/capture.vim')
   call minpac#add('tyru/caw.vim')
   call minpac#add('tyru/open-browser.vim')
+  call minpac#add('vim-jp/autofmt')
   call minpac#add('vim-jp/syntax-vim-ex')
   call minpac#add('vim-jp/vimdoc-ja')
   call minpac#add('vim-jp/vital.vim')
@@ -1112,11 +1113,25 @@ endif
 "}}}
 " prabirshrestha/ayncomplete.vim{{{
 if s:plugin.exists('asyncomplete.vim')
-  " let g:asyncomplete_remove_duplicates = 1
+  " Ignorecase.
+  function! s:asyncomplete_preprocessor(context, matches) abort
+    let completions = []
+    let base = tolower(a:context.base)
+    for [source, matches] in items(a:matches)
+      for candidate in matches.items
+        if stridx(tolower(candidate.word), base) == 0
+          call add(completions, candidate)
+        endif
+      endfor
+    endfor
+    call asyncomplete#preprocess_complete(a:context, completions)
+  endfunction
+
   let g:asyncomplete_auto_popup = 1
   let g:asyncomplete_smart_completion = 0
   let g:asyncomplete_force_refresh_on_context_changed = 1
   let g:asyncomplete_smart_completion = 1
+  let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
 
   function! s:register_asyncomplete_sources() abort
     let Register = {options ->
@@ -1240,7 +1255,6 @@ if s:plugin.exists('vim-ambicmd')
     let rule = []
     let rule += ['\c^' . a:cmd . '$']
     let rule += ['\c^' . a:cmd]
-    let rule += ['\c' . a:cmd]
 
     for len in range(1, strlen(a:cmd))
       let [prefix, suffix] = [strpart(a:cmd, 0, len), a:cmd[len :]]
@@ -1249,6 +1263,7 @@ if s:plugin.exists('vim-ambicmd')
       let rule += [matcher . '$', matcher]
     endfor
 
+    let rule += ['\c' . a:cmd]
     let rule += ['.*' . substitute(a:cmd, '.\zs', '.*', 'g')]
     return rule
   endfunction
@@ -1351,8 +1366,14 @@ if s:plugin.exists('caw.vim')
 
   map ,c <Plug>(caw:hatpos:toggle:operator)
   call s:caw_oneline_comment_map('//')
+  " call s:caw_oneline_comment_map('<C-/>')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
+endif
+"}}}
+" vim-jp/autofmt{{{
+if s:plugin.exists('autofmt')
+  set formatexpr=autofmt#japanese#formatexpr()
 endif
 "}}}
 " ReadingVimrc{{{
