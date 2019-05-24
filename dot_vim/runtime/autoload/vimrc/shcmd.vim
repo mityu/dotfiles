@@ -1,6 +1,6 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 30-Mar-2019.
+"Last Change: 24-May-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -59,8 +59,8 @@ function! vimrc#shcmd#touch(...) abort "{{{
       if nr2char(getchar()) !~? 'y'
         continue
       endif
-      call writefile([],fname)
     endif
+    call writefile([],fname)
   endfor
 endfunction "}}}
 function! vimrc#shcmd#cpfile(...) abort "{{{
