@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 28-May-2019.
+" Last Change: 01-Jun-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -196,7 +196,6 @@ endfunction
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  " call minpac#add('cohama/lexima.vim')
   " call minpac#add('itchyny/lightline.vim')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
@@ -247,9 +246,10 @@ function! s:pack_register() abort
   call minpac#add('vim-scripts/autodate.vim')
 
   call minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
-  call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
+  " call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
   call minpac#add('thinca/vim-partedit', {'type': 'opt'})
   call minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
+  call minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
 endfunction "}}}
 " Options{{{
 syntax on
@@ -839,42 +839,6 @@ command! -bar PackClean  call s:pack_clean()
 command! -bar PackStatus call s:pack_status()
 "}}}
 " Installed plugins{{{
-" cohama/lexima.vim{{{
-let g:loaded_lexima = 1
-if s:plugin.exists('lexima.vim') && 0  " Disable.
-  function! s:setup_lexima() abort
-    call lexima#add_rule({'char': '<BS>', 'at': '<\%#>', 'delete': 1})
-    call lexima#add_rule({'char': '<', 'input_after': '>'})
-    call lexima#add_rule({'char': '>', 'at': '\%#>', 'leave': 1})
-    call lexima#add_rule({
-          \ 'char': '<CR>',
-          \ 'at': '\C\v^\s*%(Describe|Context|Before|After|It)>.*%#$',
-          \ 'except': '\C\v^(\s*)\S.*%#\n%(%(\s*|\1\s.+)\n)*\1End',
-          \ 'input': '<CR>',
-          \ 'input_after': '<CR>End',
-          \ 'filetype': 'vimspec',
-          \ })
-
-    for key in split('()''"', '\zs')
-      execute 'inoremap <silent> <expr>' printf(s:ten_key_mapbase, key)
-            \ printf('lexima#expand(%s, "i")', string(key))
-    endfor
-
-    inoremap <silent> <expr> <CR> '<C-g>u' . lexima#expand('<lt>CR>', 'i')
-    imap <C-h> <BS>
-  endfunction
-  augroup vimrc_setup_lexima
-    autocmd User vimrc_initialize call s:setup_lexima()
-  augroup END
-  if has('vim_starting')
-    " Overwrite lexima's mappings.
-    augroup vimrc_setup_shifttenkey
-      autocmd User vimrc_initialize EnableShiftTenKey
-            \ |autocmd! vimrc_setup_shifttenkey
-    augroup END
-  endif
-endif
-"}}}
 " itchyny/lightline.vim{{{
 " if s:plugin.exists('lightline.vim')
 "   let g:lightline = {}
@@ -1388,11 +1352,16 @@ function! s:readingvimrc() abort
     ReadingVimrc
   catch
   endtry
+  " try
+  "   packadd vim-readingvimrc-files
+  "   let g:readingvimrc_files_listing_window_open_command = 'tabedit'
+  "   ReadingVimrcFiles
+  "   unlet g:readingvimrc_files_listing_window_open_command
+  " catch
+  " endtry
   try
-    packadd vim-readingvimrc-files
-    let g:readingvimrc_files_listing_window_open_command = 'tabedit'
-    ReadingVimrcFiles
-    unlet g:readingvimrc_files_listing_window_open_command
+    packadd vim-reading-vimrc
+    ReadingVimrcNext
   catch
   endtry
 endfunction
