@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 12-May-2019.
+" Last Change: 28-May-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1132,6 +1132,10 @@ if s:plugin.exists('asyncomplete.vim')
   let g:asyncomplete_force_refresh_on_context_changed = 1
   let g:asyncomplete_smart_completion = 1
   let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
+
+  inoremap <C-n> <C-x><C-n>
+  inoremap <C-p> <C-x><C-p>
+  inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
 
   function! s:register_asyncomplete_sources() abort
     let Register = {options ->
