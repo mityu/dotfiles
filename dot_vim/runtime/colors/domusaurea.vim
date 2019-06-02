@@ -1,4 +1,4 @@
-"Last Change: 12-Apr-2019.
+"Last Change: 02-Jun-2019.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -144,12 +144,6 @@ call s:hi('Pmenu','cornsilk','vividorange',0)
 call s:hi('PmenuSel','cornsilk','tenderorange',0)
 call s:hi('PmenuSbar',0,'white',0)
 call s:hi('PmenuThumb',0,'gray',0)
-
-" Experiment
-"call s:hi('Pmenu','cornsilk','darkorange',0)
-"call s:hi('PmenuSel','cornsilk','deeplydarkorange',0)
-"call s:hi('PmenuSbar',0,'darkgray',0)
-"call s:hi('PmenuThumb',0,'gray',0)
 
 
 call s:hi('DiffAdd', 0, 'deeplydarkorange', 0)
