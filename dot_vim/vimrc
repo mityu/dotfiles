@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 02-Jun-2019.
+" Last Change: 03-Jun-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1017,7 +1017,7 @@ if s:plugin.exists('sonictemplate-vim')
   let g:sonictemplate_vim_template_dir =
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
 
-  function! s:sonictemplate(...) abort
+  function! s:sonictemplate_template(...) abort "{{{
     let apply_snip = search('[^ \t]', 'wn')
     call call('sonictemplate#apply', a:000)
     if apply_snip
@@ -1053,12 +1053,60 @@ if s:plugin.exists('sonictemplate-vim')
         call cursor(1, 1)
       endif
     endtry
-  endfunction
-  augroup vimrc_sonictemplate
+  endfunction "}}}
+  augroup vimrc_sonictemplate_template
     autocmd User vimrc_initialize
           \ command! -nargs=1 -complete=customlist,sonictemplate#complete
-          \ Template call s:sonictemplate(<f-args>, 'n')
+          \ Template call s:sonictemplate_template(<f-args>, 'n')
   augroup END
+
+  if s:plugin.exists('asyncomplete.vim')
+    if !exists('s:sonictemplate_snips')
+      let s:sonictemplate_snips = {}
+    endif
+    function! s:sonictemplate_snippet_completor(options, context) abort "{{{
+      if !has_key(s:sonictemplate_snips, &filetype)
+        let s:sonictemplate_snips[&filetype] = map(
+              \ sonictemplate#complete('', '', 0),
+              \ '{"word": v:val, "menu": "[sonictemplate]"}'
+              \ )
+      endif
+      let target = matchstr(a:context.typed, '^\s*\a\+$')
+      if strlen(target) < 1
+        return
+      endif
+      let filter = '^' . target
+      let candidates = filter(deepcopy(s:sonictemplate_snips[&filetype]),
+            \ 'v:val.word =~? filter')
+      let startcol = a:context.col - strlen(target)
+      call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
+    endfunction "}}}
+    function! s:sonictemplate_snip_trigger() "{{{
+      if empty(v:completed_item) || v:completed_item.menu !=# '[sonictemplate]'
+        return
+      endif
+      if !exists('b:sonictemplate')
+        let b:sonictemplate = {}
+      endif
+      let opt_prefix_save = get(b:sonictemplate, 'prefix', '')
+      let b:sonictemplate.prefix = 'snip'
+      try
+        call search('\zs\<' . v:completed_item.word . '\>\s\{-}\%#', 'bcW')
+        let [line, col] = [line('.'), col('.')]
+        let text = getline('.')
+        let text = strpart(text, 0, col - 1) .
+              \ text[col + strlen(v:completed_item.word) - 1 :]
+        call setline(line, text)
+        call cursor(line, col)
+        call sonictemplate#apply(v:completed_item.word, 'i', 0)
+      finally
+        let b:sonictemplate.prefix = opt_prefix_save
+      endtry
+    endfunction "}}}
+    augroup sonictemplate_snip_trigger
+      autocmd CompleteDone * call s:sonictemplate_snip_trigger()
+    augroup END
+  endif
 endif
 " }}}
 " mityu/vim-textobj-multitextobj{{{
@@ -1172,6 +1220,14 @@ if s:plugin.exists('asyncomplete.vim')
           \ 'completor':
           \   function('asyncomplete#sources#vimspec#completor'),
           \ })
+
+    if s:plugin.exists('sonictemplate-vim')
+      call asyncomplete#register_source({
+            \ 'name': 'sonictemplate',
+            \ 'whitelist': ['*'],
+            \ 'completor': function('s:sonictemplate_snippet_completor'),
+            \ })
+    endif
   endfunction
   augroup vimrc_asyncomplete_sources
     autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
