@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 01-Jun-2019.
+" Last Change: 02-Jun-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1016,6 +1016,49 @@ if s:plugin.exists('sonictemplate-vim')
   let g:sonictemplate_postfix_key = '<Plug>(nop-sonictemplate-postfix)'
   let g:sonictemplate_vim_template_dir =
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'sonictemplates')]
+
+  function! s:sonictemplate(...) abort
+    let apply_snip = search('[^ \t]', 'wn')
+    call call('sonictemplate#apply', a:000)
+    if apply_snip
+      return
+    endif
+    try
+      if line('.') != 1 || col('.') != 1
+        execute "normal! i{{_cursor_}}\<ESC>"
+        call cursor(1, 1)
+      endif
+      if getline('.') !~# '^:'
+        return
+      endif
+      call search('\v^%([^:].*)$|^:\s*fini%[sh]>', 'W')
+      let line_script_end = line('.') - (getline('.') !~# '^:')
+      let script = getline(1, line_script_end)
+      execute 'silent 1,' . line_script_end . 'delete _'
+
+      let tmpfile = tempname() . '.vim'
+      try
+        if writefile(script, tmpfile) == 0
+          source `=tmpfile`
+        endif
+      finally
+        if filereadable(tmpfile)
+          call delete(tmpfile)
+        endif
+      endtry
+    finally
+      if search('{{_cursor_}}')
+        execute 'normal! "_da}'
+      else
+        call cursor(1, 1)
+      endif
+    endtry
+  endfunction
+  augroup vimrc_sonictemplate
+    autocmd User vimrc_initialize
+          \ command! -nargs=1 -complete=customlist,sonictemplate#complete
+          \ Template call s:sonictemplate(<f-args>, 'n')
+  augroup END
 endif
 " }}}
 " mityu/vim-textobj-multitextobj{{{
