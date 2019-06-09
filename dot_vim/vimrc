@@ -1098,7 +1098,6 @@ if s:plugin.exists('sonictemplate-vim')
       if !exists('b:sonictemplate')
         let b:sonictemplate = {}
       endif
-      redraw!
       let opt_prefix_save = get(b:sonictemplate, 'prefix', '')
       let b:sonictemplate.prefix = 'snip'
       try
