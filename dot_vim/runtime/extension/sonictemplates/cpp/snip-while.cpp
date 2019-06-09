@@ -1,0 +1,2 @@
+while ({{_cursor_}}){
+}
