@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 03-Jun-2019.
+" Last Change: 09-Jun-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1037,6 +1037,14 @@ if s:plugin.exists('sonictemplate-vim')
       execute 'silent 1,' . line_script_end . 'delete _'
 
       let tmpfile = tempname() . '.vim'
+
+      " Hide "{{_cursor_}}" marker.
+      let save_options = vimrc#class#new('save_options')
+      call save_options.store(['cursorcolumn', 'cursorline',
+            \ 'conceallevel', 'concealcursor'])
+      setlocal nocursorcolumn nocursorline concealcursor=nciv conceallevel=3
+      let match_id = matchadd('Conceal', '{{_cursor_}}', 10, -1, {'conceal': '|'})
+      redraw!
       try
         if writefile(script, tmpfile) == 0
           source `=tmpfile`
@@ -1047,6 +1055,8 @@ if s:plugin.exists('sonictemplate-vim')
         endif
       endtry
     finally
+      call save_options.restore_all()
+      call matchdelete(match_id)
       if search('{{_cursor_}}')
         execute 'normal! "_da}'
       else
@@ -1088,6 +1098,7 @@ if s:plugin.exists('sonictemplate-vim')
       if !exists('b:sonictemplate')
         let b:sonictemplate = {}
       endif
+      redraw!
       let opt_prefix_save = get(b:sonictemplate, 'prefix', '')
       let b:sonictemplate.prefix = 'snip'
       try
@@ -1095,7 +1106,7 @@ if s:plugin.exists('sonictemplate-vim')
         let [line, col] = [line('.'), col('.')]
         let text = getline('.')
         let text = strpart(text, 0, col - 1) .
-              \ text[col + strlen(v:completed_item.word) - 1 :]
+             \ text[col + strlen(v:completed_item.word) - 1 :]
         call setline(line, text)
         call cursor(line, col)
         call sonictemplate#apply(v:completed_item.word, 'i', 0)
