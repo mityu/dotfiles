@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Jun-2019.
+" Last Change: 28-Jun-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -215,6 +215,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mattn/sonictemplate-vim')
+  call minpac#add('mityu/vim-brownie')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
@@ -231,6 +232,7 @@ function! s:pack_register() abort
   call minpac#add('thinca/vim-ambicmd')
   call minpac#add('thinca/vim-ft-help_fold')
   " call minpac#add('thinca/vim-operator-sequence')
+  call minpac#add('thinca/vim-partedit')
   call minpac#add('thinca/vim-prettyprint')
   call minpac#add('thinca/vim-quickrun')
   call minpac#add('thinca/vim-textobj-between')
@@ -247,7 +249,6 @@ function! s:pack_register() abort
 
   call minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
   " call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
-  call minpac#add('thinca/vim-partedit', {'type': 'opt'})
   call minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
   call minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
 endfunction "}}}
@@ -290,6 +291,7 @@ set shortmess& shortmess+=Ic
 set helplang=ja
 set foldmethod=marker
 set hidden
+set diffopt=internal,algorithm:histogram
 "set breakindent
 
 "set virtualedit& virtualedit+=block
@@ -386,8 +388,8 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
-nnoremap n nzzzv
-nnoremap N Nzzzv
+nnoremap <expr> n 'Nn'[v:searchforward] . 'zzzv'
+nnoremap <expr> N 'nN'[v:searchforward] . 'zzzv'
 " Avoid to regester a command, calling textobj function to the
 " command-history when use textobj via dot.
 nnoremap <silent> . .
@@ -1053,10 +1055,10 @@ if s:plugin.exists('sonictemplate-vim')
         if filereadable(tmpfile)
           call delete(tmpfile)
         endif
+        call save_options.restore_all()
+        call matchdelete(match_id)
       endtry
     finally
-      call save_options.restore_all()
-      call matchdelete(match_id)
       if search('{{_cursor_}}')
         execute 'normal! "_da}'
       else
