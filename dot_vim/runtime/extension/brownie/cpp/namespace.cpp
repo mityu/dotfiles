@@ -1,0 +1,2 @@
+namespace {{_cursor_}}{
+}
