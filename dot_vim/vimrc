@@ -1011,7 +1011,7 @@ if s:plugin.exists('vim-findent')
 endif
 "}}}
 " mattn/sonictemplate-vim{{{
-if s:plugin.exists('sonictemplate-vim')
+if s:plugin.exists('sonictemplate-vim') && 0  " Disable
   " Disable default mappings.
   let g:sonictemplate_key = '<Plug>(nop-sonictemplate)'
   let g:sonictemplate_intelligent_key = '<Plug>(nop-sonictemplate-intelligent)'
@@ -1121,6 +1121,51 @@ if s:plugin.exists('sonictemplate-vim')
   endif
 endif
 " }}}
+" mityu/vim-brownie{{{
+if s:plugin.exists('vim-brownie')
+  let g:brownie_template_dirs =
+        \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
+
+  if s:plugin.exists('asyncomplete.vim')
+    if !exists('s:brownie_snip_cache')
+      let s:brownie_snip_cache = {}
+    endif
+    function! s:brownie_snip_completor(options, context) "{{{
+      if !has_key(s:brownie_snip_cache, &filetype)
+        let s:brownie_snip_cache[&filetype] = map(
+              \ brownie#list(&filetype, 'snippet'),
+              \ '{"word": v:val, "menu": "[brownie]"}'
+              \ )
+      endif
+      if empty(s:brownie_snip_cache[&filetype])
+        return
+      endif
+      let target = matchstr(a:context.typed, '^\s*\a\+$')
+      if target ==# ''
+        return
+      endif
+      let filter = '^' . target
+      let candidates = filter(deepcopy(s:brownie_snip_cache[&filetype]),
+            \ 'v:val.word =~? filter')
+      let startcol = a:context.col - strlen(target)
+      call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
+    endfunction "}}}
+    function! s:brownie_snip_trigger() "{{{
+      if empty(v:completed_item) ||
+            \ v:completed_item.menu !=# '[brownie]' ||
+            \ !brownie#exists(&filetype, 'snippet', v:completed_item.word)
+        return
+      endif
+      let strlen = strlen(v:completed_item.word)
+      execute 'normal! v' . strlen . 'h"_d'
+      call brownie#extract(&filetype, 'snippet', v:completed_item.word)
+    endfunction "}}}
+    augroup brownie_snip_trigger
+      autocmd CompleteDone * call s:brownie_snip_trigger()
+    augroup END
+  endif
+endif
+"}}}
 " mityu/vim-textobj-multitextobj{{{
 if s:plugin.exists('vim-textobj-multitextobj')
   omap am <Plug>(textobj-multitextobj-a)
@@ -1233,12 +1278,19 @@ if s:plugin.exists('asyncomplete.vim')
           \   function('asyncomplete#sources#vimspec#completor'),
           \ })
 
-    if s:plugin.exists('sonictemplate-vim')
+    " if s:plugin.exists('sonictemplate-vim')
+    "   call asyncomplete#register_source({
+    "        \ 'name': 'sonictemplate',
+    "        \ 'whitelist': ['*'],
+    "        \ 'completor': function('s:sonictemplate_snippet_completor'),
+    "        \ })
+    " endif
+    if s:plugin.exists('vim-brownie')
       call asyncomplete#register_source({
-            \ 'name': 'sonictemplate',
-            \ 'whitelist': ['*'],
-            \ 'completor': function('s:sonictemplate_snippet_completor'),
-            \ })
+           \ 'name': 'brownie',
+           \ 'whitelist': ['*'],
+           \ 'completor': function('s:brownie_snip_completor'),
+           \  })
     endif
   endfunction
   augroup vimrc_asyncomplete_sources
