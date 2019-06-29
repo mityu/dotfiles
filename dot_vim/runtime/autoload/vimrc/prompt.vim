@@ -1,6 +1,6 @@
 " Plugin Name: prompt.vim
 " Author: mityu
-" Last Change: 30-Mar-2019.
+" Last Change: 29-Jun-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -41,6 +41,8 @@ function! vimrc#prompt#launch(prompter) abort "{{{
   try
     let input = input(s:prompter.config.prompt, s:prompter.config.default_input)
     call s:callback('on_decided', input)
+  catch /\C^Vim:Interrupt$/
+    " Ignore.
   finally
     autocmd! prompt_observer
     let s:is_active = 0
