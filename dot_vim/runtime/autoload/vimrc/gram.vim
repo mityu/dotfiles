@@ -1,6 +1,6 @@
 "Plugin Name: gram.vim
 "Author: mityu
-"Last Change: 30-Mar-2019.
+"Last Change: 29-Jun-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -78,8 +78,8 @@ function! s:win_foreground() abort "{{{
     setlocal bufhidden=hide buftype=nofile nobuflisted noswapfile noundofile nomodifiable nomodified
     augroup gram_buffer
       autocmd! * <buffer>
-      au BufWipeout <buffer> call s:win_bufwipeouted()
-      au BufWinLeave <buffer> call s:win_bufhidden()
+      autocmd BufWipeout <buffer> call s:win_bufwipeouted()
+      autocmd BufWinLeave <buffer> call s:win_bufhidden()
     augroup END
   endif
   let s:window.bufnr = bufnr('%')
@@ -162,8 +162,8 @@ function! vimrc#gram#launch(bearer) abort "{{{
   " error.
   augroup gram-open-dummy
     autocmd!
-    au User gramOpen "Do nothing.
-    execute 'au User' s:active_bearer . 'Open "Do nothing'
+    autocmd User gramOpen "Do nothing.
+    execute 'autocmd User' s:active_bearer . 'Open "Do nothing'
   augroup END
   doautocmd User gramOpen
   execute 'doautocmd User' s:active_bearer . 'Open'
@@ -181,7 +181,7 @@ function! s:gram_initialize_coloring() abort "{{{
   syntax match gramNoMatches /\m\_^(No matches)$/
   augroup gram_coloring
     autocmd!
-    au ColorScheme * call s:gram_initialize_coloring()
+    autocmd ColorScheme * call s:gram_initialize_coloring()
   augroup END
 endfunction "}}}
 function! s:gram_set_user_input_syntax(input) abort "{{{
