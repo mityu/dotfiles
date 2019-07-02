@@ -217,7 +217,6 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vim-gista')
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
-  call minpac#add('mattn/sonictemplate-vim')
   call minpac#add('mityu/vim-brownie')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
