@@ -1,5 +1,9 @@
-:call brownie#highlight('\C\<LOADGUARD\>')
-:call brownie#replace('\C\<LOADGUARD\>', toupper(brownie#input('load guard? ', substitute(expand('%:p:t'),'\.','_','g'))))
+:let load_guard = substitute(expand('%:p:t'),'\.','_','g')
+:if load_guard ==# ''
+:  call brownie#highlight('\C\<LOADGUARD\>')
+:  let load_guard = brownie#input('Load Guard? ')
+:endif
+:call brownie#replace('\C\<LOADGUARD\>', toupper(load_guard))
 #ifndef LOADGUARD
 #define LOADGUARD
 
