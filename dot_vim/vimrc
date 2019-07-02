@@ -987,7 +987,7 @@ if s:plugin.exists('gina.vim')
           \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
           \ s:SIDPrefix())
     call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
-    call s:gina_nnoremap('status', 'p', printf(rhs_base, 1))
+    call s:gina_nnoremap('status', 'N', printf(rhs_base, 1))
 
     call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
 
