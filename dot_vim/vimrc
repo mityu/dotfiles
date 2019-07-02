@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 28-Jun-2019.
+" Last Change: 02-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -79,6 +79,9 @@ function! s:mkdir(dir, ...) abort "{{{
     return 0
   endif
   return call('mkdir', [a:dir] + a:000)
+endfunction "}}}
+function! s:strdivpos(str, pos) abort "{{{
+  return [strpart(a:str, 0, a:pos), a:str[a:pos :]]
 endfunction "}}}
 "}}}
 " Global utility functions{{{
@@ -1157,7 +1160,11 @@ if s:plugin.exists('vim-brownie')
         return
       endif
       let strlen = strlen(v:completed_item.word)
-      execute 'normal! v' . strlen . 'h"_d'
+      let [line, col] = [line('.'), col('.')]
+      let text = getline('.')
+      let text = strpart(text, 0, col - strlen - 1) . text[col - 1 :]
+      call setline(line, text)
+      call cursor(line, col - strlen)
       call brownie#extract(&filetype, 'snippet', v:completed_item.word)
     endfunction "}}}
     augroup brownie_snip_trigger
