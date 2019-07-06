@@ -1028,11 +1028,7 @@ if s:plugin.exists('vim-brownie')
   endfunction
 
   function! s:brownie_extract_on_cursor() abort
-    if mode() !=# 'n'
-      call s:echomsg_warning('Normal mode only')
-      return ''
-    endif
-    let curpos = '\%' . col('.') . 'c'
+    let curpos = '\%' . (col('.') - (mode() ==# 'i' ? 1 : 0)) . 'c'
     if matchstr(getline('.'), curpos . '\a') ==# ''
       call s:echomsg_warning("Any words aren't on the cursor!")
       return ''
@@ -1046,7 +1042,8 @@ if s:plugin.exists('vim-brownie')
     call brownie#extract(&filetype, 'snippet', word)
     return ''
   endfunction
-  nnoremap <silent> <Space><C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
+  nnoremap <silent> <C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
+  inoremap <silent> <C-k> <C-r>=<SID>brownie_extract_on_cursor()<CR>
 
   if s:plugin.exists('asyncomplete.vim')
     if !exists('s:brownie_snip_cache')
