@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 02-Jul-2019.
+" Last Change: 06-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1016,6 +1016,12 @@ endif
 if s:plugin.exists('vim-brownie')
   let g:brownie_template_dirs =
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
+
+  command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
+        \ call brownie#extract(&filetype, 'template', <q-args>)
+  function! VimrcTemplateComplete(arg, line, pos) abort
+    return filter(brownie#list(&filetype, 'template'), 's:has(v:val, a:arg)')
+  endfunction
 
   if s:plugin.exists('asyncomplete.vim')
     if !exists('s:brownie_snip_cache')
