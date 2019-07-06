@@ -1016,6 +1016,9 @@ endif
 if s:plugin.exists('vim-brownie')
   let g:brownie_template_dirs =
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
+  let g:brownie_extra_imports = {
+        \ 'cpp' : ['c'],
+        \ }
 
   function! s:brownie_ft() abort
     return getbufvar(brownie#get_current_bufnr(), '&ft')
