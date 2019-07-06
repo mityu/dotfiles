@@ -1027,6 +1027,27 @@ if s:plugin.exists('vim-brownie')
     return filter(brownie#list(s:brownie_ft(), 'template'), 's:has(v:val, a:arg)')
   endfunction
 
+  function! s:brownie_extract_on_cursor() abort
+    if mode() !=# 'n'
+      call s:echomsg_warning('Normal mode only')
+      return ''
+    endif
+    let curpos = '\%' . col('.') . 'c'
+    if matchstr(getline('.'), curpos . '\a') ==# ''
+      call s:echomsg_warning("Any words aren't on the cursor!")
+      return ''
+    endif
+    let begin = match(getline('.'), '\a*\ze' . curpos)
+    let end = match(getline('.'), curpos . '\a*\zs\ze')
+    let [pre, word] = s:strdivpos(getline('.'), begin)
+    let [word, suf] = s:strdivpos(word, end - begin)
+    call setline('.', pre . suf)
+    call cursor(line('.'), begin + 1)
+    call brownie#extract(&filetype, 'snippet', word)
+    return ''
+  endfunction
+  nnoremap <silent> <Space><C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
+
   if s:plugin.exists('asyncomplete.vim')
     if !exists('s:brownie_snip_cache')
       let s:brownie_snip_cache = {}
