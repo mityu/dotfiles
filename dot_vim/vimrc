@@ -1017,10 +1017,14 @@ if s:plugin.exists('vim-brownie')
   let g:brownie_template_dirs =
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
 
+  function! s:brownie_ft() abort
+    return getbufvar(brownie#get_current_bufnr(), '&ft')
+  endfunction
+
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
-        \ call brownie#extract(&filetype, 'template', <q-args>)
+        \ call brownie#extract(s:brownie_ft(), 'template', <q-args>)
   function! VimrcTemplateComplete(arg, line, pos) abort
-    return filter(brownie#list(&filetype, 'template'), 's:has(v:val, a:arg)')
+    return filter(brownie#list(s:brownie_ft(), 'template'), 's:has(v:val, a:arg)')
   endfunction
 
   if s:plugin.exists('asyncomplete.vim')
@@ -1037,13 +1041,11 @@ if s:plugin.exists('vim-brownie')
       if empty(s:brownie_snip_cache[&filetype])
         return
       endif
-      let target = matchstr(a:context.typed, '^\s*\a\+$')
-      if target ==# ''
-        return
+      let target = matchstr(a:context.typed, '^\s*\zs\a\+$')
+      let candidates = deepcopy(s:brownie_snip_cache[&filetype])
+      if target !=# ''
+        let candidates = filter(candidates, 's:has(v:val.word, target)')
       endif
-      let filter = '^' . target
-      let candidates = filter(deepcopy(s:brownie_snip_cache[&filetype]),
-            \ 'v:val.word =~? filter')
       let startcol = a:context.col - strlen(target)
       call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
     endfunction "}}}
