@@ -83,6 +83,13 @@ endfunction "}}}
 function! s:strdivpos(str, pos) abort "{{{
   return [strpart(a:str, 0, a:pos), a:str[a:pos :]]
 endfunction "}}}
+function! s:input(prompt, ...) abort "{{{
+  try
+    return call('input', [a:prompt] + a:000)
+  catch /\C^Vim:Interrupt$/
+    return ''
+  endtry
+endfunction "}}}
 "}}}
 " Global utility functions{{{
 function! VimrcSIDPrefix() abort "{{{
@@ -338,7 +345,7 @@ if executable('ag')
 endif
 
 augroup vimrc_syntax
-  autocmd User vimrc_initialize syntax on
+  autocmd User vimrc_initialize syntax enable
 augroup END
 augroup vimrc_filetype
   autocmd FileType c,cpp setlocal foldmethod=indent
@@ -772,7 +779,7 @@ endfunction "}}}
 function! s:scratch(opener) abort "{{{
   let opener = a:opener
   let prefix = 'scratch://'
-  let name = input('Scratch buffer name? ')
+  let name = s:input('Scratch buffer name? ')
   if name ==# ''
     let identifier = 1
     let name = 'nameless/buffer-'
@@ -1036,13 +1043,18 @@ if s:plugin.exists('vim-brownie')
       call s:echomsg_warning("Any words aren't on the cursor!")
       return ''
     endif
+    let original_curpos = getpos('.')
     let begin = match(getline('.'), '\a*\ze' . curpos)
     let end = match(getline('.'), curpos . '\a*\zs\ze')
     let [pre, word] = s:strdivpos(getline('.'), begin)
     let [word, suf] = s:strdivpos(word, end - begin)
     call setline('.', pre . suf)
     call cursor(line('.'), begin + 1)
-    call brownie#extract(&filetype, 'snippet', word)
+    if !brownie#extract(&filetype, 'snippet', word)
+      " When failed to extract a snippet.
+      call setline('.', pre . word . suf)
+      call setpos('.', original_curpos)
+    endif
     return ''
   endfunction
   nnoremap <silent> <C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
@@ -1182,7 +1194,7 @@ if s:plugin.exists('asyncomplete.vim')
     if s:plugin.exists('vim-Verdin')
       call Register({
             \ 'name': 'Verdin',
-            \ 'whitelist': ['vim'],
+            \ 'whitelist': ['vim', 'vimspec'],
             \ 'completor':
             \   function('asyncomplete#sources#Verdin#completor'),
             \ })
@@ -1195,20 +1207,7 @@ if s:plugin.exists('asyncomplete.vim')
             \   function('asyncomplete#sources#buffer#completor'),
             \ })
     endif
-    call Register({
-          \ 'name': 'vimspec',
-          \ 'whitelist': ['vimspec'],
-          \ 'completor':
-          \   function('asyncomplete#sources#vimspec#completor'),
-          \ })
 
-    " if s:plugin.exists('sonictemplate-vim')
-    "   call asyncomplete#register_source({
-    "        \ 'name': 'sonictemplate',
-    "        \ 'whitelist': ['*'],
-    "        \ 'completor': function('s:sonictemplate_snippet_completor'),
-    "        \ })
-    " endif
     if s:plugin.exists('vim-brownie')
       call asyncomplete#register_source({
            \ 'name': 'brownie',
@@ -1583,7 +1582,7 @@ function! s:notes.list_files() abort "{{{
         \ 'fnamemodify(v:val, ":p:t")')
 endfunction "}}}
 function! s:notes.new(opener) abort "{{{
-  let name = input('Name: ')
+  let name = s:input('Name: ')
   if name ==# ''
     call s:echo('Canceled.')
     return
@@ -1655,16 +1654,12 @@ function! s:otameshi.expand_filename(name) abort "{{{
   if s:has(a:name, '.') " Filename already has an extension.
     return a:name
   endif
-  try
-    let extension = ''
-    let extension = input('Extension? (Empty will be non-extension file):')
-  finally
-    if extension ==# ''
-      return a:name
-    else
-      return a:name . '.' . extension
-    endif
-  endtry
+  let extension = s:input('Extension? (Empty will be non-extension file):')
+  if extension ==# ''
+    return a:name
+  else
+    return a:name . '.' . extension
+  endif
 endfunction "}}}
 function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort "{{{
   return s:memo.get_completion(a:arg_lead)
