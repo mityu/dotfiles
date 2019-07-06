@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 30-Mar-2019.
+"Last Change: 06-Jul-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -206,12 +206,12 @@ function! s:win_open_new() abort "{{{
 
   augroup filore_window
     autocmd! * <buffer>
-    au BufHidden,BufWipeOut <buffer> call s:win_BufHidden()
-    au BufWinEnter <buffer> call s:win_BufWinEnter()
-    au WinEnter <buffer> call s:win_WinEnter()
-    au BufEnter <buffer> call s:win_BufEnter()
-    au BufEnter <buffer> call s:browse_color()
-    au ColorScheme <buffer> call s:browse_color()
+    autocmd BufHidden,BufWipeOut <buffer> call s:win_BufHidden()
+    autocmd BufWinEnter <buffer> call s:win_BufWinEnter()
+    autocmd WinEnter <buffer> call s:win_WinEnter()
+    autocmd BufEnter <buffer> call s:win_BufEnter()
+    autocmd BufEnter <buffer> call s:browse_color()
+    autocmd ColorScheme <buffer> call s:browse_color()
   augroup END
 
   setlocal nobuflisted noswapfile noundofile filetype=filore
