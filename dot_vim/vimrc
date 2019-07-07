@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 06-Jul-2019.
+" Last Change: 07-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -90,6 +90,15 @@ function! s:input(prompt, ...) abort "{{{
     return ''
   endtry
 endfunction "}}}
+function! s:win_execute(id, command, ...) abort
+  let eventignore_save = &eventignore
+  set eventignore=all
+  try
+    return call('win_execute', [a:id, a:command] + a:000)
+  finally
+    let &eventignore = eventignore_save
+  endtry
+endfunction
 "}}}
 " Global utility functions{{{
 function! VimrcSIDPrefix() abort "{{{
@@ -359,11 +368,19 @@ augroup END
 " Mapping{{{
 " builtin, extension{{{
 nnoremap ; q:i
-nnoremap : ;
 vnoremap ; q:i
-vnoremap : ;
 nnoremap <Space>; q:
 vnoremap <Space>; q:
+nnoremap / q/i
+vnoremap / q/i
+nnoremap <Space>/ q/
+vnoremap <Space>/ q/
+nnoremap ? q?i
+vnoremap ? q?i
+nnoremap <Space>? q?
+vnoremap <Space>? q?
+nnoremap : ;
+vnoremap : ;
 map <C-j> <ESC>
 imap <C-j> <ESC>
 cmap <C-j> <C-c>
@@ -608,11 +625,37 @@ function! s:cmdwin_enter() abort "{{{
     inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
     call s:cmdwin_save_options.store('completeopt')
     setlocal completeopt=menu,preview
+  elseif s:has('/?', cmdwin_type)
+    " NOTE: :set hlsearch here does not work.
+    augroup vimrc_incsearch
+      autocmd!
+      autocmd TextChanged,TextchangedI,CursorMoved <buffer>
+           \ call s:cmdwin_incsearch()
+    augroup END
+    let s:cmdwin_incsearch = {'pattern_save': @/}
+    if exists('*win_execute')
+      let s:cmdwin_incsearch.current_winid = win_getid(winnr('#'))
+      function! s:cmdwin_incsearch.win_execute(command) abort
+        return s:win_execute(self.current_winid, a:command)
+      endfunction
+      call s:cmdwin_incsearch.win_execute(
+            \ 'let s:cmdwin_incsearch.curpos = getpos(".")')
+    endif
   endif
 endfunction "}}}
 function! s:cmdwin_leave() abort "{{{
   if exists('s:cmdwin_save_options')
     call s:cmdwin_save_options.restore_all()
+  endif
+  if s:has('/?', expand('<afile>'))
+    let @/ = s:cmdwin_incsearch.pattern_save
+    if has_key(s:cmdwin_incsearch, 'curpos')
+      call s:cmdwin_incsearch.win_execute(
+            \ 'call setpos(".", s:cmdwin_incsearch.curpos)')
+    endif
+    augroup vimrc_incsearch
+      autocmd!
+    augroup END
   endif
 endfunction "}}}
 function! s:cmdwin_completion(select_next) abort "{{{
@@ -622,6 +665,21 @@ function! s:cmdwin_completion(select_next) abort "{{{
     return "\<C-x>\<C-v>"
   endif
 endfunction "}}}
+function! s:cmdwin_incsearch() abort "{{{
+  let @/ = getline('.')
+  if exists('*win_execute')
+    call s:cmdwin_incsearch.win_execute('call s:cmdwin_incsearch_jump()')
+  endif
+  set hlsearch
+  redraw!
+endfunction "}}}
+function! s:cmdwin_incsearch_jump() abort
+  call setpos('.', s:cmdwin_incsearch.curpos)
+  try
+    normal! n
+  catch
+  endtry
+endfunction
 " CmdwinFiltering{{{
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
@@ -1296,12 +1354,10 @@ if s:plugin.exists('vim-ambicmd')
     autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
     autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
     autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <C-l> <SID>ambicmd_expand('')
   augroup END
   cnoremap <expr> <Space> ambicmd#expand("\<Space>")
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
-  cnoremap <expr> <C-l> ambicmd#expand('')
 
   let g:ambicmd#show_completion_menu = 1
 
