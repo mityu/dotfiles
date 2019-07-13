@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 07-Jul-2019.
+" Last Change: 08-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1092,7 +1092,8 @@ if s:plugin.exists('vim-brownie')
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
         \ call brownie#extract(s:brownie_ft(), 'template', <q-args>)
   function! VimrcTemplateComplete(arg, line, pos) abort
-    return filter(brownie#list(s:brownie_ft(), 'template'), 's:has(v:val, a:arg)')
+    return filter(brownie#list(s:brownie_ft(), 'template'),
+          \ 'stridx(v:val, a:arg) == 0')
   endfunction
 
   function! s:brownie_extract_on_cursor() abort
@@ -1135,7 +1136,10 @@ if s:plugin.exists('vim-brownie')
       let target = matchstr(a:context.typed, '^\s*\zs\a\+$')
       let candidates = deepcopy(s:brownie_snip_cache[&filetype])
       if target !=# ''
-        let candidates = filter(candidates, 's:has(v:val.word, target)')
+        " Use ignorecase.
+        let target = tolower(target)
+        let candidates = filter(candidates,
+              \ 'stridx(tolower(v:val.word), target) == 0')
       endif
       let startcol = a:context.col - strlen(target)
       call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
