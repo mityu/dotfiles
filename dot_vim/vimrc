@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Jul-2019.
+" Last Change: 14-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -234,6 +234,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mityu/vim-brownie')
+  call minpac#add('mityu/vim-textobj-commentblock')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
@@ -254,7 +255,6 @@ function! s:pack_register() abort
   call minpac#add('thinca/vim-prettyprint')
   call minpac#add('thinca/vim-quickrun')
   call minpac#add('thinca/vim-textobj-between')
-  call minpac#add('thinca/vim-textobj-comment')
   call minpac#add('thinca/vim-themis')
   call minpac#add('tyru/capture.vim')
   call minpac#add('tyru/caw.vim')
@@ -1164,6 +1164,21 @@ if s:plugin.exists('vim-brownie')
   endif
 endif
 "}}}
+" mityu/vim-textobj-commentblock
+if s:plugin.exists('vim-textobj-commentblock')
+  omap ac <Plug>(textobj-commentblock-a)
+  omap ic <Plug>(textobj-commentblock-i)
+  vmap ac <Plug>(textobj-commentblock-a)
+  vmap ic <Plug>(textobj-commentblock-i)
+  let g:textobj_commentblock_no_default_key_mapings = 1
+
+  augroup vimrc_textobj_commentblock
+    execute 'autocmd Filetype * call textobj#commentblock#pick#' .
+          \   (s:plugin.exists('caw.vim') ? 'caw' :
+          \   'commentstring')
+          \ . '()'
+  augroup END
+endif
 " mityu/vim-textobj-multitextobj{{{
 if s:plugin.exists('vim-textobj-multitextobj')
   omap am <Plug>(textobj-multitextobj-a)
@@ -1435,15 +1450,6 @@ if s:plugin.exists('vim-textobj-between')
   let g:textobj_between_no_default_key_mappings = 1
 endif
 "}}}
-" thinca/vim-textobj-comment{{{
-if s:plugin.exists('vim-textobj-comment')
-  omap ac <Plug>(textobj-comment-a)
-  omap ic <Plug>(textobj-comment-i)
-  vmap ac <Plug>(textobj-comment-a)
-  vmap ic <Plug>(textobj-comment-i)
-  let g:textobj_comment_no_default_key_mapings = 1
-endif
-"}}}
 " tyru/caw.vim{{{
 if s:plugin.exists('caw.vim')
   inoremap <Plug>(vimrc:caw:builtin:ESC) <ESC>
@@ -1555,8 +1561,8 @@ function! s:working_plugin.load(...) abort "{{{
       execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
     endfor
   endfor
-  let &rtp = join(rtp, ', ')
-  runtime! plugin/*.vim
+  let &rtp = join(rtp, ',')
+  runtime! plugin/**/*.vim
 endfunction "}}}
 function! s:working_plugin.cd(has_bang, plugin) abort "{{{
   if !self.available | return | endif
