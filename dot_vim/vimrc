@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 14-Jul-2019.
+" Last Change: 15-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1083,6 +1083,7 @@ if s:plugin.exists('vim-brownie')
         \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
   let g:brownie_extra_imports = {
         \ 'cpp' : ['c'],
+        \ 'vimspec': ['vim'],
         \ }
 
   function! s:brownie_ft() abort
