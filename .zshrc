@@ -105,6 +105,7 @@ fi
 function update_components(){
     brew upgrade
     brew cleanup
-    pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U
+    pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
+    vim --noplugin -c PackUpdate -c quit
 }
