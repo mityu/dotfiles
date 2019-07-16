@@ -45,9 +45,12 @@ function! s:has(object, to_search) abort "{{{
   endif
   return (call(func, [a:object, a:to_search]) != not_found)
 endfunction "}}}
+function! s:get_msg_string(msg) abort "{{{
+  return '[vimrc] ' . a:msg
+endfunction "}}}
 function! s:echomsg_with_color(msg, hl_group) abort "{{{
   execute 'echohl' a:hl_group
-  execute 'echomsg "[vimrc]"' string(a:msg)
+  execute 'echomsg' s:get_msg_string(a:msg)
   echohl NONE
 endfunction "}}}
 function! s:echomsg(msg) abort "{{{
@@ -58,6 +61,13 @@ function! s:echomsg_error(msg) abort "{{{
 endfunction "}}}
 function! s:echomsg_warning(msg) abort "{{{
   call s:echomsg_with_color(a:msg, 'WarningMsg')
+endfunction "}}}
+function! s:echo_question(question) abort "{{{
+  echon s:get_msg_string(a:question) . ' '
+  echohl Question
+  echon '[Y/N]'
+  echohl NONE
+  echon "\n"
 endfunction "}}}
 function! s:is_visualmode() abort "{{{
   return s:has(['v', 'V', "\<C-v>"], mode())
@@ -70,6 +80,10 @@ function! s:glob(expr) abort "{{{
 endfunction "}}}
 function! s:getchar_string(...) abort "{{{
   return nr2char(call('getchar', a:000))
+endfunction "}}}
+function! s:ask(question) abort "{{{
+  call s:echo_question(a:question)
+  return s:has(['y', 'Y'], s:getchar_string())
 endfunction "}}}
 function! s:mkdir(dir, ...) abort "{{{
   " Return 1 when process finished without errors; otherwise, return 0.
@@ -90,7 +104,7 @@ function! s:input(prompt, ...) abort "{{{
     return ''
   endtry
 endfunction "}}}
-function! s:win_execute(id, command, ...) abort
+function! s:win_execute(id, command, ...) abort "{{{
   let eventignore_save = &eventignore
   set eventignore=all
   try
@@ -98,7 +112,7 @@ function! s:win_execute(id, command, ...) abort
   finally
     let &eventignore = eventignore_save
   endtry
-endfunction
+endfunction "}}}
 "}}}
 " Global utility functions{{{
 function! VimrcSIDPrefix() abort "{{{
@@ -798,6 +812,7 @@ command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
       \ Scratch call s:scratch(<q-args>)
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
+command! DeleteUndoFiles call vimrc#delete_undofiles()
 
 " Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
