@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Jul-2019.
+" Last Change: 16-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Naming rules{{{
 "  - Augroup name :
@@ -1108,12 +1108,12 @@ if s:plugin.exists('vim-brownie')
     let end = match(getline('.'), curpos . '\a*\zs\ze')
     let [pre, word] = s:strdivpos(getline('.'), begin)
     let [word, suf] = s:strdivpos(word, end - begin)
-    call setline('.', pre . suf)
-    call cursor(line('.'), begin + 1)
-    if !brownie#extract(&filetype, 'snippet', word)
-      " When failed to extract a snippet.
-      call setline('.', pre . word . suf)
-      call setpos('.', original_curpos)
+    if brownie#exists(&filetype, 'snippet', word)
+      call setline('.', pre . suf)
+      call cursor(line('.'), begin + 1)
+      call brownie#extract(&filetype, 'snippet', word)
+    else
+      call s:echomsg_error('Snippet not found: ' . word)
     endif
     return ''
   endfunction
@@ -1165,7 +1165,7 @@ if s:plugin.exists('vim-brownie')
   endif
 endif
 "}}}
-" mityu/vim-textobj-commentblock
+" mityu/vim-textobj-commentblock{{{
 if s:plugin.exists('vim-textobj-commentblock')
   omap ac <Plug>(textobj-commentblock-a)
   omap ic <Plug>(textobj-commentblock-i)
@@ -1180,6 +1180,7 @@ if s:plugin.exists('vim-textobj-commentblock')
           \ . '()'
   augroup END
 endif
+"}}}
 " mityu/vim-textobj-multitextobj{{{
 if s:plugin.exists('vim-textobj-multitextobj')
   omap am <Plug>(textobj-multitextobj-a)
