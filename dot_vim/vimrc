@@ -1,14 +1,6 @@
 " Author: mityu
-" Last Change: 16-Jul-2019.
+" Last Change: 20-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
-" Naming rules{{{
-"  - Augroup name :
-"   `augroup vimrc_{kind}`
-"  - Mapping prefix :
-"   `<Plug>(<SID>-{kind})`
-"  - Global function :
-"   Use `Vimrc` as its prefix. (But, there're some exceptions to this rule.)
-"}}}
 " Encoding{{{
 if has('vim_starting')
   set encoding=utf-8
