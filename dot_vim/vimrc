@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 20-Jul-2019.
+" Last Change: 21-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -56,6 +56,9 @@ function! s:echomsg_error(msg) abort "{{{
 endfunction "}}}
 function! s:echomsg_warning(msg) abort "{{{
   call s:echomsg_with_color(a:msg, 'WarningMsg')
+endfunction "}}}
+function! s:echo(msg) abort "{{{
+  echo s:get_msg_string(a:msg)
 endfunction "}}}
 function! s:echo_question(question) abort "{{{
   echon s:get_msg_string(a:question) . ' '
@@ -1741,6 +1744,14 @@ function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort "{{{
   return s:otameshi.get_completion(a:arg_lead)
 endfunction "}}}
 "}}}
+" Sessions
+let s:session_dir = s:join_path(s:cache_dir, 'sessions')
+call s:mkdir(s:session_dir)
+command! MkSession call vimrc#session#make()
+command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
+      \ call vimrc#session#delete(1, <f-args>)
+command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
+      \ call vimrc#session#restore(<q-args>)
 " tabpage_cd{{{
 augroup vimrc_tabpage_cd
   autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
