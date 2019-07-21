@@ -107,5 +107,19 @@ function update_components(){
     brew cleanup
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
-    vim --noplugin -c PackUpdate -c quit
+    # vim -e -s -n -i NONE -c "
+    #     function! UpdatePlugins() abort
+    #       PackInit
+    #       redir => g:minpac_messages
+    #       call minpac#update('', {'do': 'call FinishUpdatePlugins()'})
+    #     endfunction
+    #     function! FinishUpdatePlugins() abort
+    #       redir END
+    #       enew
+    #       put =g:minpac_messages
+    #       %print
+    #       qa!
+    #     endfunction
+    #     call UpdatePlugins()
+    #     "
 }
