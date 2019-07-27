@@ -792,6 +792,7 @@ iabbrev note: NOTE:
 " Declarations{{{
 command! -bar CdCurrent cd %:p:h
 command! -bar LcdCurrent lcd %:p:h
+command! -bar TcdCurrent tcd %:p:h
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! CopyToClipboard let @*=@"
 command! ClearMessage execute repeat("echom ''\n", 201)
@@ -1757,10 +1758,12 @@ command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
 command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
 " tabpage_cd{{{
-augroup vimrc_tabpage_cd
-  autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
-  autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
-augroup END
+if !exists(':tcd')
+  augroup vimrc_tabpage_cd
+    autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
+    autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
+  augroup END
+endif
  "}}}
 " statusline{{{
 function! s:statusline_init() abort "{{{
