@@ -37,6 +37,43 @@ function! vimrc#delete_undofiles() abort "{{{
   endfor
   call Echomsg('Deleted.')
 endfunction "}}}
+" Path completion{{{
+let s:path_complete = {
+      \ 'target_path': '',
+      \ 'completions': [],
+      \ 'slash': VimrcFunc('vars')().filesystem.slash,
+      \ 'non_escaped_space': '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s',
+      \ }
+function! vimrc#path_complete(findstart, base) abort "{{{
+  if a:findstart
+    let line = getline('.')[: col('.') - 1]
+    if line ==# ''
+      let s:path_complete.target_path = ''
+    else
+      let s:path_complete.target_path = split(line,
+            \ s:path_complete.non_escaped_space)[-1]
+    endif
+    let completions = VimrcFunc('glob')(s:path_complete.target_path . '*')
+    let dirs = []
+    let files = []
+    for path in completions
+      let completion = fnamemodify(path, ':t')
+      if filereadable(path)
+        call add(files, completion)
+      else
+        call add(dirs, completion . s:path_complete.slash)
+      endif
+    endfor
+    call sort(dirs)
+    call sort(files)
+    let s:path_complete.completions = dirs + files
+
+    return col('.') - strlen(fnamemodify(s:path_complete.target_path, ':t')) - 1
+  endif
+
+  return s:path_complete.completions
+endfunction "}}}
+ "}}}
 
 let &cpoptions = s:cpoptions_save
 unlet s:cpoptions_save
