@@ -1389,14 +1389,7 @@ if s:plugin.exists('vim-ambicmd')
   function! s:setup_ambicmd_for_cmdwin() abort
     inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
     inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
-
-    if s:plugin.exists('asyncomplete.vim')
-      call asyncomplete#enable_for_buffer()
-      inoremap <buffer> <expr> <CR> <SID>ambicmd_expand(
-            \ "\<C-r>=asyncomplete#close_popup()\<CR>\<CR>")
-    else
-      inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
-    endif
+    inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
   endfunction
 
   let g:ambicmd#show_completion_menu = 1
