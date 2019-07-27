@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 21-Jul-2019.
+" Last Change: 27-Jul-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -678,13 +678,13 @@ function! s:cmdwin_incsearch() abort "{{{
   set hlsearch
   redraw!
 endfunction "}}}
-function! s:cmdwin_incsearch_jump() abort
+function! s:cmdwin_incsearch_jump() abort "{{{
   call setpos('.', s:cmdwin_incsearch.curpos)
   try
     normal! n
   catch
   endtry
-endfunction
+endfunction "}}}
 " CmdwinFiltering{{{
 let s:cmdwin_filtering = {'commands': [], 'config': {'default_input': ''}}
 function! s:cmdwin_filtering.prepare() abort "{{{
@@ -1380,13 +1380,24 @@ if s:plugin.exists('vim-ambicmd')
     return (expander ==# a:key ? '' : "\<C-g>u") . expander
   endfunction
   augroup vimrc_ambicmd
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
-    autocmd CmdwinEnter : inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
+    autocmd CmdWinEnter : call s:setup_ambicmd_for_cmdwin()
   augroup END
   cnoremap <expr> <Space> ambicmd#expand("\<Space>")
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
+
+  function! s:setup_ambicmd_for_cmdwin() abort
+    inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
+    inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
+
+    if s:plugin.exists('asyncomplete.vim')
+      call asyncomplete#enable_for_buffer()
+      inoremap <buffer> <expr> <CR> <SID>ambicmd_expand(
+            \ "\<C-r>=asyncomplete#close_popup()\<CR>\<CR>")
+    else
+      inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
+    endif
+  endfunction
 
   let g:ambicmd#show_completion_menu = 1
 
