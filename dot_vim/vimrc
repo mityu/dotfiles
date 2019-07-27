@@ -285,6 +285,7 @@ set wrap
 set smartindent autoindent
 set backspace=eol,start,indent
 set pumheight=10
+set completefunc=vimrc#path_complete
 
 set noequalalways
 set scrolloff=1
