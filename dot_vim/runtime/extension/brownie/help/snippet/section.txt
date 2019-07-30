@@ -1,0 +1,9 @@
+:call brownie#replace('\<PLUGIN\>', expand('%:t:r'))
+:call brownie#highlight('\<SECTION\>')
+:let section = brownie#input('Section?: ')
+:call brownie#replace('\C\<SECTION\>', toupper(section))
+:call brownie#replace('\C\<section\>', tolower(section))
+==============================================================================
+SECTION                                           *PLUGIN-section*
+
+
