@@ -42,7 +42,7 @@ function! vimrc#session#list() abort "{{{
         \ 'fnamemodify(v:val, ":t:r")')
 endfunction "}}}
 function! vimrc#session#restore(session) abort "{{{
-  silent source `=VimrcFunc('get_session_file')(a:session)`
+  silent source `=vimrc#session#get_file(a:session)`
   call vimrc#session#delete(a:session)
 endfunction "}}}
 function! vimrc#session#get_file(session) abort "{{{
