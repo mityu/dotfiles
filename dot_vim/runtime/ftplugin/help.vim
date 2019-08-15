@@ -1,4 +1,4 @@
-" Last Change: 30-Mar-2019.
+" Last Change: 14-Aug-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish
@@ -87,7 +87,7 @@ else
     while search('^\([=-]\)\1\{77}$', 'W')
       let prefix = getline('.') =~# '=' ? '' : '  '
       .+1
-      let caption = matchlist(getline('.'), '^\(\u*\)\s\+\*\(\S*\)\*$')
+      let caption = matchlist(getline('.'), '^\(\%(\u\|-\)*\)\s\+\*\(\S*\)\*$')
       if !empty(caption)
         let [title, tag] = caption[1 : 2]
         let margin = repeat(' ', 30 - strlen(prefix . title))
