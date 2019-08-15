@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 27-Jul-2019.
+" Last Change: 15-Aug-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -239,6 +239,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mityu/vim-brownie')
+  call minpac#add('mityu/vim-gram')
   call minpac#add('mityu/vim-textobj-commentblock')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
@@ -1085,6 +1086,11 @@ if s:plugin.exists('vim-findent')
   augroup END
 endif
 "}}}
+" machakann/vim-Verdin{{{
+if s:plugin.exists('vim-Verdin')
+  let g:Verdin#autoparen = 1
+endif
+"}}}
 " mityu/vim-brownie{{{
 if s:plugin.exists('vim-brownie')
   let g:brownie_template_dirs =
@@ -1171,6 +1177,23 @@ if s:plugin.exists('vim-brownie')
       autocmd CompleteDone * call s:brownie_snip_trigger()
     augroup END
   endif
+endif
+"}}}
+" mityu/vim-gram{{{
+if s:plugin.exists('vim-gram')
+  augroup vimrc_gram_init
+    autocmd User gram-first-start call s:init_gram_map()
+  augroup END
+
+  function! s:init_gram_map() abort
+    call gram#custom#noremap('i', '<C-j>', '<ESC>')
+    call gram#custom#noremap('i', '<CR>', '<ESC>')
+    call gram#custom#noremap('i', '<C-f>', '<Right>')
+    call gram#custom#noremap('i', '<C-b>', '<Left>')
+    call gram#custom#noremap('i', '<C-a>', '<C-o>0')
+    call gram#custom#noremap('i', '<C-e>', '<C-o>$')
+    call gram#custom#noremap('n', 'gg', 'gg')
+  endfunction
 endif
 "}}}
 " mityu/vim-textobj-commentblock{{{
@@ -1515,11 +1538,11 @@ endif
 " ReadingVimrc{{{
 command! -bar ReadingVimrc call s:readingvimrc()
 function! s:readingvimrc() abort
-  try
-    packadd vim-reading-vimrc
-    ReadingVimrc
-  catch
-  endtry
+  " try
+  "   packadd vim-reading-vimrc
+  "   ReadingVimrc
+  " catch
+  " endtry
   " try
   "   packadd vim-readingvimrc-files
   "   let g:readingvimrc_files_listing_window_open_command = 'tabedit'
