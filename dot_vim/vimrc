@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Aug-2019.
+" Last Change: 18-Aug-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -239,7 +239,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mityu/vim-brownie')
-  call minpac#add('mityu/vim-gram')
+  " call minpac#add('mityu/vim-gram')
   call minpac#add('mityu/vim-textobj-commentblock')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
@@ -1186,13 +1186,17 @@ if s:plugin.exists('vim-gram')
   augroup END
 
   function! s:init_gram_map() abort
-    call gram#custom#noremap('i', '<C-j>', '<ESC>')
-    call gram#custom#noremap('i', '<CR>', '<ESC>')
     call gram#custom#noremap('i', '<C-f>', '<Right>')
     call gram#custom#noremap('i', '<C-b>', '<Left>')
     call gram#custom#noremap('i', '<C-a>', '<C-o>0')
     call gram#custom#noremap('i', '<C-e>', '<C-o>$')
     call gram#custom#noremap('n', 'gg', 'gg')
+
+    if !has('gui_running')
+      call gram#custom#noremap('n', '<NL>', '<CR>')
+    endif
+
+    call gram#custom#set_option('enable_nmapclear', 0)
   endfunction
 endif
 "}}}
