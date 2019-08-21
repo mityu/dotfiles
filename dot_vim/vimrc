@@ -209,12 +209,18 @@ endfor | unlet s:_augroup s:_augroups s:_pattern
  "}}}
 " List installed plugins{{{
 let s:plugin = {}
-let s:plugin.plugins_ = map(filter(s:glob(
-      \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
-      \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-function! s:plugin.exists(plugin) abort
-  return s:has(self.plugins_, a:plugin)
-endfunction
+if &loadplugins
+  let s:plugin.plugins_ = map(filter(s:glob(
+        \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
+        \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
+  function! s:plugin.exists(plugin) abort
+    return s:has(self.plugins_, a:plugin)
+  endfunction
+else
+  function! s:plugin.exists(plugin) abort
+    return 0
+  endfunction
+endif
 "}}}
 " Register install plugins {{{
 function! s:pack_register() abort
