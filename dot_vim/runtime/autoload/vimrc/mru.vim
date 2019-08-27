@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 30-Mar-2019.
+"Last Change: 27-Aug-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -54,8 +54,11 @@ function! vimrc#mru#start() abort "{{{
     call vimrc#mru#delete_unexist_file_history()
   endif
   call s:load_history()
-  call s:filterbox.set_items(s:history)
-  call vimrc#gram#launch(s:bearer)
+  call gram#select({
+        \ 'name': 'MRU',
+        \ 'items': s:history,
+        \ 'callback': {item -> execute('edit ' . fnameescape(item.word))},
+        \ })
 endfunction "}}}
 function! vimrc#mru#try_to_enable() abort "{{{
   let s:is_available = s:try_to_enable_impl()
@@ -99,15 +102,6 @@ function! s:save_history() abort "{{{
   endif
   call writefile(s:history,g:mru_history_file)
 endfunction "}}}
-function! s:bearer_filter(user_input) abort "{{{
-  return s:filterbox.filter(a:user_input)
-endfunction "}}}
-function! s:bearer_selected(selected_item) abort "{{{
-  execute 'edit' fnameescape(fnamemodify(a:selected_item, ':~:.'))
-endfunction "}}}
-function! s:filterbox_expression(user_input) abort "{{{
-  return printf('v:val =~? %s', string(vimrc#gram#glob2regpat(a:user_input)))
-endfunction "}}}
 
 " Editing history
 function! vimrc#mru#edit_history_start(...) abort "{{{
@@ -130,14 +124,6 @@ if !exists('s:did_initialize')
   let s:default_auto_delete_unexist_file_history = 0
 
   let s:history = []
-  let s:filterbox = vimrc#class#new('filterbox',
-         \ function('s:filterbox_expression'))
-  let s:bearer = {
-        \ 'name' : 'mru',
-        \ 'filter' : function('s:bearer_filter'),
-        \ 'regpat' : 'vimrc#gram#glob2regpat',
-        \ 'selected' : function('s:bearer_selected')
-        \ }
 
   let s:is_available = 0
   call vimrc#mru#try_to_enable()
