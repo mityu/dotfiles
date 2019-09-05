@@ -1,11 +1,11 @@
-"Last Change: 01-Sep-2019.
+"Last Change: 06-Sep-2019.
 "Author: mityu
 "This colorscheme based on billw
 
 set background=dark
+highlight clear
 if exists('g:syntax_on')
   syntax reset
-  highlight clear
 endif
 
 let s:colors_name = expand('<sfile>:t:r')
@@ -49,19 +49,19 @@ let s:palette = {
       \ 'NONE':              'NONE'
       \ }
 
-let s:gui_running = has('gui_running')
+let s:gui_running = has('gui_running') || &termguicolors
 
-function! s:get_color(name) abort
+function! s:get_color(name) abort "{{{
   return a:name ==# 'NONE' ? 'NONE' : s:get_raw_color(s:palette[a:name])
-endfunction
+endfunction "}}}
 
 if s:gui_running
-  function! s:get_raw_color(code) abort
+  function! s:get_raw_color(code) abort "{{{
     return a:code
-  endfunction
+  endfunction "}}}
 else
   let s:converted_colors = {}
-  function! s:get_raw_color(color_code) abort
+  function! s:get_raw_color(color_code) abort "{{{
     let colorcode = a:color_code[1 :]
     if !has_key(s:converted_colors, colorcode)
       let code = str2nr(colorcode, 16)
@@ -72,7 +72,7 @@ else
       let s:converted_colors[colorcode] = s:color(r, g, b)
     endif
     return s:converted_colors[colorcode]
-  endfunction
+  endfunction "}}}
 
 
   " These functions are from thinca/vim-guicolorscheme. Thank you!
@@ -268,10 +268,18 @@ function! s:hi(group, fg, bg, attr) "{{{
     return
   endif
 
+  let fg = has_fg ? a:fg : 'NONE'
+  let bg = has_bg ? a:bg : 'NONE'
+  let attr = has_attr ? a:attr : 'NONE'
+
   let type = s:gui_running ? 'gui' : 'cterm'
-  let fg = has_fg ? printf('%sfg=%s', type, s:get_color(a:fg)) : ''
-  let bg = has_bg ? printf('%sbg=%s', type, s:get_color(a:bg)) : ''
-  let attr = has_attr ? printf('%s=%s', type, a:attr) : ''
+  let fg = printf('%sfg=%s', type, s:get_color(fg))
+  let bg = printf('%sbg=%s', type, s:get_color(bg))
+
+  if s:gui_running && &termguicolors
+    let type = 'cterm'
+  endif
+  let attr = printf('%s=%s', type, attr)
   execute 'highlight' a:group fg bg attr
 endfunction "}}}
 function! s:echoerr(msg) "{{{
@@ -306,7 +314,7 @@ call s:hi('Type','yellow',0,0)
 call s:hi('StorageClass','violet',0,0)
 call s:hi('Structure','violet',0,0)
 
-call s:hi('Identifier','yellow',0,0)
+call s:hi('Identifier','yellow',0, 0)
 call s:hi('Function','mediumspringgreen',0,0)
 
 call s:hi('ErrorMsg','white','red',0)
@@ -314,7 +322,7 @@ call s:hi('WarningMsg','white','tomato',0)
 
 call s:hi('Cursor',0,'cornsilk',0)
 call s:hi('CursorIM',0,'purple',0)
-call s:hi('CursorLine',0,'black','NONE')
+call s:hi('CursorLine',0,'black', 0)
 call s:hi('CursorColumn',0,'black',0)
 
 call s:hi('LineNr','lightgray',0,0)
@@ -328,13 +336,13 @@ call s:hi('Folded','gray','blackgray',0)
 call s:hi('FoldColumn','lightlightgray','blackgray',0)
 call s:hi('SignColumn',0,'blackgray',0)
 
-call s:hi('StatusLine','orange',0,0)
-call s:hi('StatusLineNC','russet',0,0)
+call s:hi('StatusLine', 'darkgray', 'orange',0)
+call s:hi('StatusLineNC', 'darkgray','russet',0)
 call s:hi('TabLine','black','russet',0)
 call s:hi('TabLineSel','black','orange',0)
 
 call s:hi('Underlined',0,0,'underline')
-" call s:hi('Ignore',0,0,0)
+call s:hi('Ignore','NONE',0,0)
 call s:hi('SpecialKey','gray',0,0)
 
 call s:hi('Directory','cyan',0,0)
