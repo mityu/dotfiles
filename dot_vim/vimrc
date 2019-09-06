@@ -147,9 +147,11 @@ if has('vim_starting')
     endif
   endif
 
-  if &term ==# 'alacritty'
-    set termguicolors  " Alacritty supports true color.
-    let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode
+  if &term =~# '\<256color\>'
+    set termguicolors  " Use true color if possible.
+  endif
+  if expand('$TERM_PROGRAM') ==# 'alactritty'
+    let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode.
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
     let &t_SR = "\<ESC>[3 q"  " Use underline style cursor in Replace-mode.
   endif
@@ -252,7 +254,7 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/vital-Whisky')
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mityu/vim-brownie')
-  " call minpac#add('mityu/vim-gram')
+  call minpac#add('mityu/vim-gram')
   call minpac#add('mityu/vim-textobj-commentblock')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
@@ -1558,7 +1560,7 @@ function! s:working_plugin.load(...) abort "{{{
       continue
     endif
     let plugin_dir = s:join_path(self.workplace, plugin)
-    call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# plugin')
+    call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# "vim-" . plugin')
     call add(rtp, plugin_dir)
     for file_name in extend(
         \ split(glob(s:join_path(plugin_dir, 'plugin', '*.vim')), "\n"),
