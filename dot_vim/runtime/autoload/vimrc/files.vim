@@ -1,6 +1,6 @@
 " Plugin Name: files.vim
 " Author: mityu
-" Last Change: 30-Mar-2019.
+" Last Change: 06-Sep-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -15,29 +15,16 @@ function! vimrc#files#start(...) abort "{{{
   let files = filter(split(glob(s:parent_dir . '*'), "\n"),
         \ 'filereadable(v:val)')
   call map(files, 'fnamemodify(v:val, ":t")')
-  call s:filterbox.set_items(files)
-  call vimrc#gram#launch(s:bearer)
-endfunction "}}}
-function! s:filter(input) abort "{{{
-  return s:filterbox.filter(a:input)
-endfunction "}}}
-function! s:selected(item) abort "{{{
-  execute 'edit' fnameescape(fnamemodify(s:parent_dir . a:item, ':~:.'))
-endfunction "}}}
-function! s:filter_expression(input) abort "{{{
-  return s:filterbox.expression_compare_by_regexp(vimrc#gram#glob2regpat(a:input))
+  let s:gram.items = files
+  call gram#select(s:gram)
 endfunction "}}}
 
 if !exists('s:did_init')
-  let s:filterbox = vimrc#class#new('filterbox',
-        \ function('s:filter_expression'))
-  let s:bearer = {
-        \ 'name': 'files',
-        \ 'filter': function('s:filter'),
-        \ 'regpat': 'vimrc#gram#glob2regpat',
-        \ 'selected': function('s:selected'),
-        \ }
   let s:parent_dir = ''
+  let s:gram = {'name': 'files'}
+  function! s:gram.callback(item) abort "{{{
+    execute 'edit' fnameescape(fnamemodify(s:parent_dir . a:item.word, ':~:.'))
+  endfunction "}}}
 
   let s:did_init = 1
 endif

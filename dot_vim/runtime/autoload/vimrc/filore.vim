@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 06-Jul-2019.
+"Last Change: 06-Sep-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -542,45 +542,16 @@ function! s:history_register(path) abort "{{{
   call insert(s:history, a:path)
 endfunction "}}}
 function! s:history_start_select() abort "{{{
-  let items = s:win_get_reference_of_current_items()
-  let s:select_history_alter_bufnr_save = items.alter_bufnr
-  call s:filterbox.set_items(s:history)
-  call vimrc#gram#launch(s:history_bearer)
+  let s:gram.items = s:history
+  call gram#select(s:gram)
 endfunction "}}}
-function! s:history_bearer_filter(input) abort "{{{
-  return s:filterbox.filter(a:input)
-endfunction "}}}
-function! s:history_bearer_regpat(input) abort "{{{
-  return vimrc#gram#glob2regpat(a:input)
-endfunction "}}}
-function! s:history_bearer_selected(selected_item) abort "{{{
-  let items = s:win_get_reference_of_current_items()
-  let items.current_directory = a:selected_item
-  call s:browse_fresh_display()
-endfunction "}}}
-function! s:history_bearer_exit() abort "{{{
-  let items = s:win_get_reference_of_current_items()
-  let items.alter_bufnr = s:select_history_alter_bufnr_save
-endfunction "}}}
-function! s:history_filterbox_expression(input) abort "{{{
-  return s:filterbox.expression_compare_by_regexp(vimrc#gram#glob2regpat(a:input))
-endfunction "}}}
-
-if !exists('s:history_bearer')
-  let s:history_bearer = {
-        \ 'name': 'filore-history',
-        \ 'filter': function('s:history_bearer_filter'),
-        \ 'regpat': function('s:history_bearer_regpat'),
-        \ 'selected': function('s:history_bearer_selected'),
-        \ 'exit': function('s:history_bearer_exit')
-        \}
-endif
-if !exists('s:select_history')
-  let s:select_history_alter_bufnr_save = s:NULL
-endif
-if !exists('s:filterbox')
-  let s:filterbox = vimrc#class#new('filterbox',
-        \ function('s:history_filterbox_expression'))
+if !exists('s:gram')
+  let s:gram = {'name': 'filore-history'}
+  function! s:gram.callback(selected_item) abort
+    let items = s:win_get_reference_of_current_items()
+    let items.current_directory = a:selected_item.word
+    call s:browse_fresh_display()
+  endfunction
 endif
 if !exists('s:history')
   let s:history = []
