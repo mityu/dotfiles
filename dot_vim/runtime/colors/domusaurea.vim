@@ -320,8 +320,8 @@ call s:hi('Function','mediumspringgreen',0,0)
 call s:hi('ErrorMsg','white','red',0)
 call s:hi('WarningMsg','white','tomato',0)
 
-call s:hi('Cursor',0,'cornsilk',0)
-call s:hi('CursorIM',0,'purple',0)
+call s:hi('Cursor','blackgray','cornsilk',0)
+call s:hi('CursorIM','blackgray','purple',0)
 call s:hi('CursorLine',0,'black', 0)
 call s:hi('CursorColumn',0,'black',0)
 
