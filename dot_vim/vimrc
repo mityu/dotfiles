@@ -150,7 +150,7 @@ if has('vim_starting')
   if &term =~# '\<256color\>'
     set termguicolors  " Use true color if possible.
   endif
-  if expand('$TERM_PROGRAM') ==# 'alactritty'
+  if expand('$TERM_PROGRAM') ==# 'alacritty'
     let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode.
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
     let &t_SR = "\<ESC>[3 q"  " Use underline style cursor in Replace-mode.
@@ -1162,6 +1162,7 @@ if s:plugin.exists('vim-gram')
 
     if !has('gui_running')
       call gram#custom#noremap('n', '<NL>', '<CR>')
+      call gram#custom#noremap('i', '<NL>', '<CR>')
     endif
 
     call gram#custom#set_option('enable_nmapclear', 0)
@@ -1551,7 +1552,7 @@ function! s:working_plugin.list_plugins() abort "{{{
 endfunction "}}}
 function! s:working_plugin.load(...) abort "{{{
   if !(self.available && a:0) | return | endif
-  let rtp = split(&rtp, ', ')
+  let rtp = split(&rtp, ',')
   let plugins = self.list_plugins()
 
   for plugin in a:000
