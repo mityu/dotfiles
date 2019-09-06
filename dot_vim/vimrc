@@ -155,6 +155,9 @@ if has('vim_starting')
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
     let &t_SR = "\<ESC>[3 q"  " Use underline style cursor in Replace-mode.
   endif
+  if &term=~# '\<xterm\>'
+    set mouse=a
+  endif
 
   let s:Windows = has('win32')
   let s:Unix = !s:Windows
