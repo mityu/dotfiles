@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 06-Sep-2019.
+" Last Change: 08-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -190,7 +190,7 @@ if has('vim_starting')
   let g:loaded_vimballPlugin = 1
   let g:loaded_netrwPlugin = 1
 
-  let &runtimepath .= ', ' . escape(s:join_path($DOT_VIM, 'runtime'), ' \')
+  let &runtimepath .= ',' . escape(s:join_path($DOT_VIM, 'runtime'), ' \')
 
   " Set environmental variables on gVim.{{{
   let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
@@ -238,7 +238,6 @@ endif
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  " call minpac#add('itchyny/lightline.vim')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -888,12 +887,6 @@ command! -bar PackClean  call s:pack_clean()
 command! -bar PackStatus call s:pack_status()
 "}}}
 " Installed plugins{{{
-" itchyny/lightline.vim{{{
-" if s:plugin.exists('lightline.vim')
-"   let g:lightline = {}
-"   let g:lightline.enable = {'statusline': 0, 'tabline': 0}
-" endif
-"}}}
 " kana/vim-operator-replace{{{
 if s:plugin.exists('vim-operator-replace')
   map ,r  <Plug>(operator-replace)
@@ -1535,122 +1528,6 @@ endfunction
 "}}}
 "}}}
 " Additional plugins{{{
-" :WorkingPlugin* {{{
-command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
-      \ WorkingPluginLoad call s:working_plugin.load(<f-args>)
-command! -bar -bang -nargs=1 -complete=customlist,VimrcWorkingPluginComplete
-      \ WorkingPluginCd call s:working_plugin.cd(<bang>0, <q-args>)
-command! -bar -nargs=+ WorkingPluginClone call s:working_plugin.clone(<f-args>)
-command! -bar -nargs=+ WorkingPluginNew call s:working_plugin.new(<f-args>)
-command! -bar -nargs=+ -complete=customlist,VimrcWorkingPluginComplete
-      \ WorkingPluginRm call s:working_plugin.rm(<f-args>)
-
-let s:working_plugin = {}
-let s:working_plugin.workplace = s:join_path(expand('$DOT_VIM'), 'workplace')
-let s:working_plugin.available = isdirectory(s:working_plugin.workplace)
-function! s:working_plugin.list_plugins() abort "{{{
-  if !self.available | return [] | endif
-  return map(filter(split(globpath(self.workplace, '*'), "\n"),
-        \ 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-endfunction "}}}
-function! s:working_plugin.load(...) abort "{{{
-  if !(self.available && a:0) | return | endif
-  let rtp = split(&rtp, ',')
-  let plugins = self.list_plugins()
-
-  for plugin in a:000
-    if index(plugins, plugin) == -1
-      call s:echomsg_error('Failed to load: ' . plugin)
-      continue
-    endif
-    let plugin_dir = s:join_path(self.workplace, plugin)
-    call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# "vim-" . plugin')
-    call add(rtp, plugin_dir)
-    for file_name in extend(
-        \ split(glob(s:join_path(plugin_dir, 'plugin', '*.vim')), "\n"),
-        \ split(glob(s:join_path(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
-        \)
-      " TODO: Do this unlet with autocmd?
-      execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
-    endfor
-  endfor
-  let &rtp = join(rtp, ',')
-  runtime! plugin/**/*.vim
-endfunction "}}}
-function! s:working_plugin.cd(has_bang, plugin) abort "{{{
-  if !self.available | return | endif
-  execute (a:has_bang ? 'lcd' : 'cd') s:join_path(self.workplace, a:plugin)
-endfunction "}}}
-function! s:working_plugin.clone(...) abort "{{{
-  if !(self.available && executable('git') && a:0)
-    return
-  endif
-  if !s:has(a:1, '/')
-    call s:echomsg_error(string(a:1) . ' is not a repository.')
-    return
-  endif
-  let repository = printf('https://github.com/%s.git', a:1)
-  let clone_to = ''
-  if a:0 == 1
-    let clone_to = split(a:1, '/')[1]
-  else
-    let clone_to = a:2
-  endif
-  if s:has(self.list_plugins(), clone_to)
-    call s:echomsg_error('Directory already exists: ' . clone_to)
-    return
-  endif
-  let clone_to = s:join_path(self.workplace, clone_to)
-  execute '!git clone' repository clone_to
-endfunction "}}}
-function! s:working_plugin.new(...) abort "{{{
-  if !self.available | return | endif
-  if !exists('*mkdir')
-    call s:echomsg_error('Built-in mkdir() function is not available.')
-    return
-  endif
-  for plugin in a:000
-    let base_dir = s:join_path(self.workplace, plugin)
-    if isdirectory(base_dir)
-      call s:echomsg_error('Plugin already exists: ' . base_dir)
-      continue
-    endif
-    call mkdir(base_dir)
-    call mkdir(s:join_path(base_dir, 'plugin'))
-    call mkdir(s:join_path(base_dir, 'autoload'))
-    call s:echomsg('Created: ' . plugin)
-  endfor
-endfunction "}}}
-function! s:working_plugin.rm(...) abort "{{{
-  if !self.available | return | endif
-
-  let plugin_list = self.list_plugins()
-  for plugin in a:000
-    if !s:has(plugin_list, plugin)
-      call s:echomsg_error('Plugin does not exist: ' . plugin)
-      continue
-    endif
-    call s:echomsg(printf('Delete %s ? [y/n]', plugin))
-    if s:getchar_string() !~? 'y'
-      call s:echomsg('Canceled.')
-      continue
-    endif
-    if delete(s:join_path(self.workplace, plugin), 'rf') != 0
-      call s:echomsg_error('Failed to delete: ' . plugin)
-    else
-      call s:echomsg('Succesfully deleted: ' . plugin)
-    endif
-  endfor
-endfunction "}}}
-function! s:working_plugin.complete(arg_lead, cmd_line, cursor_pos) abort "{{{
-  if !self.available | return [] | endif
-  return map(filter(self.list_plugins(), 'v:val =~? a:arg_lead'),
-        \ 'fnameescape(v:val)')
-endfunction "}}}
-function! VimrcWorkingPluginComplete(arg_lead, cmd_line, cursor_pos) abort "{{{
-  return s:working_plugin.complete(a:arg_lead, a:cmd_line, a:cursor_pos)
-endfunction "}}}
-" }}}
 " Taking notes{{{
 let s:notes = {'save_dir_': ''}
 function! s:notes.instance(path) abort "{{{
@@ -1749,6 +1626,15 @@ function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort "{{{
   return s:otameshi.get_completion(a:arg_lead)
 endfunction "}}}
 "}}}
+" working-plugin
+command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
+      \ WorkingPluginLoad call vimrc#workingplugin#load(<f-args>)
+command! -bar -bang -nargs=1 -complete=customlist,vimrc#workingplugin#complete
+      \ WorkingPluginCd call vimrc#workingplugin#cd(<bang>0, <q-args>)
+command! -bar -nargs=+ WorkingPluginClone call vimrc#workingplugin#clone(<f-args>)
+command! -bar -nargs=+ WorkingPluginNew call vimrc#workingplugin#new(<f-args>)
+command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
+      \ WorkingPluginRm call vimrc#workingplugin#rm(<f-args>)
 " Sessions
 let s:session_dir = s:join_path(s:cache_dir, 'sessions')
 call s:mkdir(s:session_dir)
