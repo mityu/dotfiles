@@ -5,7 +5,7 @@
 #  - `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mityu/dotfiles/master/setup_mac.sh)"`
 
 has_cmd (){
-    which $1 > /dev/null;
+    which $1 &> /dev/null;
 }
 ask (){
     while true; do
@@ -16,6 +16,28 @@ ask (){
             *)          echo "Please answer Yes or No.";;
         esac
     done
+}
+
+# Installing Homebrew (cask) formula implementation.
+# Usage:
+#   - Install Homebrew formula
+#       install_formula {formula-name}
+#   - Install Homebrew cask formula
+#       install_formula {formula-name} cask
+install_formula (){
+    if brew $2 list $1 &>/dev/null; then
+        echo "Formula already installed. Skip: brew $2 install $1"
+    else
+        brew $2 install $1
+    fi
+}
+
+brew_install (){
+    install_formula $1
+}
+
+brew_cask_install (){
+    install_formula $1 cask
 }
 
 # Get the user's passward at first for sudo.
@@ -41,15 +63,16 @@ if ! has_cmd brew ; then
 fi
 
 if ( ! has_cmd git ) || ( ask "Install Homebrew's git?" ); then
-    brew install git
+    brew_install git
 fi
-brew cask install alacritty
-brew install zsh
+brew_cask_install alacritty
+brew_install zsh
 if [ -f "/usr/local/bin/zsh" ]; then # Installing zsh successfully.
     echo $password | \
         sudo -S -- sh -c "echo '/usr/local/bin/zsh' >> /private/etc/shells"
     chsh -s /usr/local/bin/zsh
 fi
+brew_install the_silver_searcher
 
 DOTFILES=$HOME/dotfiles
 if [ ! -d "$DOTFILES" ]; then
