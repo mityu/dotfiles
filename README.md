@@ -1,12 +1,5 @@
 # Dotfiles
-## How to install
-* in *nix :
+## How to setup
+* mac
 
-```
-$ cd /path/to/repository
-$ ./deploy.sh
-```
-
-* in Windows:
-
-Deploy script hasn't been prepared yet.
+`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mityu/dotfiles/master/setup_mac.sh)"`
