@@ -431,7 +431,10 @@ nnoremap <silent> <C-w>q :<C-u>belowright copen<CR>
 nnoremap <silent> <C-w><C-q> :<C-u>belowright copen<CR>
 nnoremap <silent> <C-w>t :<C-u>tabnew<CR>
 nnoremap <silent> <C-w><C-t> :<C-u>tabnew<CR>
-nnoremap <silent> <Space>t :<C-u>terminal ++close<CR>
+nnoremap <silent> <Space>th :<C-u>vertical terminal ++close<CR>
+nnoremap <silent> <Space>tj :<C-u>belowright terminal ++close<CR>
+nnoremap <silent> <Space>tk :<C-u>terminal ++close<CR>
+nnoremap <silent> <Space>tl :<C-u>belowright vertical terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
 nnoremap <Space>q :<C-u>quit<CR>
 nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
