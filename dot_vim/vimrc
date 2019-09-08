@@ -147,7 +147,7 @@ if has('vim_starting')
     endif
   endif
 
-  if &term =~# '\<256color\>'
+  if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_terminal'
     set termguicolors  " Use true color if possible.
   endif
   if expand('$TERM_PROGRAM') ==# 'alacritty'
@@ -343,6 +343,8 @@ set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
 
+set termwinkey=<C-w>
+
 let s:_undodir = s:join_path(s:cache_dir, 'undodir')
 if s:mkdir(s:_undodir, 'p')
   set undofile
@@ -471,10 +473,15 @@ call s:EnhancedOmap('8', '(')
 call s:EnhancedOmap(', ', '<')
 unlet s:Omap s:EnhancedOmap
 
+function! s:terminal_map(cmd, lhs, rhs, ...) abort
+  let mods = get(a:000, 0, '')
+  execute printf('%s %s %s%s %s%s',
+        \ a:cmd, mods, &termwinkey, a:lhs, &termwinkey, a:rhs)
+endfunction
 for [s:lhs, s:rhs] in [[';', ':'], [':', ';'], ['<ESC>', 'N']]
-  execute printf('tnoremap <C-w>%s <C-w>%s', s:lhs, s:rhs)
+  call s:terminal_map('tnoremap', s:lhs, s:rhs)
 endfor | unlet s:lhs s:rhs
-tmap <C-w><C-j> <C-w><ESC>
+call s:terminal_map('tmap', '<C-j>', '<ESC>')
 
 " Loop {{{
 function! s:_loop_define(config) abort "{{{
@@ -485,9 +492,8 @@ function! s:_loop_define(config) abort "{{{
   for key in ['prefix', 'main', 'do']
     let plug_map[key] = printf("%s(%s)", prefix, key)
   endfor
-  " execute printf('%smap <silent><expr> %s nr2char(getchar(0))',
-  "      \mode, plug_map.prefix)
-  execute printf('%smap %s <Nop>', mode, plug_map.prefix)
+
+  execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
   for [lhs, rhs] in a:config.map
     let com = []
     call add(com, [mode . 'noremap <silent>',
@@ -505,6 +511,20 @@ function! s:_loop_define(config) abort "{{{
           \ plug_map.main . lhs])
     execute join(map(com, 'join(v:val, " ")'), "\n")
   endfor
+
+  if mode ==# 'n'
+    let config = deepcopy(a:config)
+    let config.mode = 't'
+    call map(config.map, 's:_loop_define_generate_tmap(v:val)')
+    call s:_loop_define(config)
+  endif
+endfunction "}}}
+function! s:_loop_define_generate_tmap(value) abort "{{{
+  let rhs = a:value[1]
+  let rhs = substitute(rhs, '\c<SID>', s:SIDPrefix(), 'g')
+  let rhs = substitute(rhs, '\zs<\ze.\{-}>', '\\<lt>', 'g')
+  let rhs = &termwinkey . ':<C-u>execute "normal! ' . rhs . '"<CR>'
+  return [a:value[0], rhs]
 endfunction "}}}
 function! s:_simple_loop_define(config) abort "{{{
   let config = deepcopy(a:config)
