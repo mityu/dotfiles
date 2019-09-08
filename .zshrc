@@ -15,8 +15,6 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
     done
 fi
 
-alias mvim=$VIMBINARY
-alias vim='mvim'
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
 
