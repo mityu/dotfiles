@@ -661,7 +661,7 @@ function! s:cmdwin_enter() abort "{{{
   imap <buffer> <C-c> <ESC><C-c>
 
   " Execute an previous command easiler.
-  nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
+  " nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
@@ -727,24 +727,19 @@ function! s:cmdwin_incsearch_jump() abort "{{{
   catch
   endtry
 endfunction "}}}
-function! s:cmdwin_select_history() abort "{{{
-  " FIXME: Cursor goes to command-line when select a history after filtering
-  " histories.
-  let history = split(execute('history'), "\n")[1 :]
-  call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
-  call reverse(history)
-  let item = gram#select({'completefunc': {-> gram#set_items(history)}})
-  redraw
-  if empty(item)
-    return
-  endif
-  if getline('$') ==# ''
-    call setline('$', item.word)
-  else
-    call append('$', item.word)
-  endif
-  normal! G$
-endfunction "}}}
+" function! s:cmdwin_select_history() abort "{{{
+"   quit
+"   let history = split(execute('history'), "\n")[1 :]
+"   call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
+"   call reverse(history)
+"   call gram#select({'items': history,
+"        \ 'callback': function('s:cmdwin_select_history_callback')})
+" endfunction "}}}
+" function! s:cmdwin_select_history_callback(item) abort
+"   normal! q:
+"   call setline('$', a:item.word)
+"   call cursor(line('$'), 1)
+" endfunction
 
 let s:cmdwin_save_options = vimrc#class#new('save_options')
 augroup vimrc_mapping
