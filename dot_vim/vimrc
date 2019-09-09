@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Sep-2019.
+" Last Change: 09-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -519,6 +519,10 @@ function! s:_loop_define(config) abort "{{{
     let config = deepcopy(a:config)
     let config.mode = 't'
     call map(config.map, 's:_loop_define_generate_tmap(v:val)')
+    if config.enter_with !~?
+          \ printf("\\v^%%(%s|\\%s)", &termwinkey, &termwinkey)
+      let config.enter_with = &termwinkey . config.enter_with
+    endif
     call s:_loop_define(config)
   endif
 endfunction "}}}
