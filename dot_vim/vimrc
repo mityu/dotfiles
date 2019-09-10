@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Sep-2019.
+" Last Change: 10-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -435,6 +435,7 @@ nnoremap <silent> <Space>th :<C-u>vertical terminal ++close<CR>
 nnoremap <silent> <Space>tj :<C-u>belowright terminal ++close<CR>
 nnoremap <silent> <Space>tk :<C-u>terminal ++close<CR>
 nnoremap <silent> <Space>tl :<C-u>belowright vertical terminal ++close<CR>
+nnoremap <silent> <Space>tt :<C-u>tab terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
 nnoremap <Space>q :<C-u>quit<CR>
 nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
@@ -476,14 +477,16 @@ call s:EnhancedOmap('8', '(')
 call s:EnhancedOmap(', ', '<')
 unlet s:Omap s:EnhancedOmap
 
-function! s:terminal_map(cmd, lhs, rhs, ...) abort
+function! s:terminal_map(cmd, lhs, rhs, ...) abort "{{{
   let mods = get(a:000, 0, '')
   execute printf('%s %s %s%s %s%s',
         \ a:cmd, mods, &termwinkey, a:lhs, &termwinkey, a:rhs)
-endfunction
-for [s:lhs, s:rhs] in [[';', ':'], [':', ';'], ['<ESC>', 'N']]
-  call s:terminal_map('tnoremap', s:lhs, s:rhs)
-endfor | unlet s:lhs s:rhs
+endfunction "}}}
+call s:terminal_map('tnoremap', ';', ':')
+call s:terminal_map('tnoremap', ':', ';')
+call s:terminal_map('tnoremap', '<ESC>', 'N')
+call s:terminal_map('tnoremap', 'p', '""')
+call s:terminal_map('tnoremap', '<C-r>', '"')
 call s:terminal_map('tmap', '<C-j>', '<ESC>')
 
 " Loop {{{
