@@ -393,16 +393,16 @@ augroup END
 "}}}
 " Mapping{{{
 " builtin, extension{{{
-nnoremap ; q:i
-vnoremap ; q:i
+nnoremap ; q:A
+vnoremap ; q:A
 nnoremap <Space>; q:
 vnoremap <Space>; q:
-nnoremap / q/i
-vnoremap / q/i
+nnoremap / q/A
+vnoremap / q/A
 nnoremap <Space>/ q/
 vnoremap <Space>/ q/
-nnoremap ? q?i
-vnoremap ? q?i
+nnoremap ? q?A
+vnoremap ? q?A
 nnoremap <Space>? q?
 vnoremap <Space>? q?
 nnoremap : ;
