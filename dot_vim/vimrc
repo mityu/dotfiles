@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Sep-2019.
+" Last Change: 12-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -1187,6 +1187,7 @@ if s:plugin.exists('vim-gram')
     endif
 
     call gram#custom#set_option('enable_nmapclear', 0)
+    call gram#custom#set_option('enable_imapclear', 0)
   endfunction
 endif
 "}}}
