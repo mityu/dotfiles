@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 14-Sep-2019.
+" Last Change: 15-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -482,7 +482,7 @@ function! s:terminal_map(cmd, lhs, rhs, ...) abort "{{{
   execute printf('%s %s %s%s %s%s',
         \ a:cmd, mods, &termwinkey, a:lhs, &termwinkey, a:rhs)
 endfunction "}}}
-call s:terminal_map('tnoremap', ';', ':')
+call s:terminal_map('tnoremap', ';', ':<C-f>')
 call s:terminal_map('tnoremap', ':', ';')
 call s:terminal_map('tnoremap', '<ESC>', 'N')
 call s:terminal_map('tnoremap', 'p', '""')
@@ -679,6 +679,7 @@ function! s:cmdwin_enter() abort "{{{
     " TODO: Delete lines only when gram.vim is loaded.
     execute printf('silent! 1,$-%d delete _', &cmdwinheight)
     normal! G
+    call asyncomplete#disable_for_buffer()
   elseif s:has('/?', cmdwin_type)
     " NOTE: :set hlsearch here does not work.
     augroup vimrc_incsearch
@@ -1281,7 +1282,6 @@ if s:plugin.exists('asyncomplete.vim')
   endfunction
 
   let g:asyncomplete_auto_popup = 1
-  let g:asyncomplete_smart_completion = 0
   let g:asyncomplete_force_refresh_on_context_changed = 1
   let g:asyncomplete_smart_completion = 1
   let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
