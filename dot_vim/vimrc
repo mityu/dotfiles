@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Sep-2019.
+" Last Change: 16-Sep-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -1080,7 +1080,7 @@ if s:plugin.exists('gina.vim')
     let cmd = printf('git -C %s --no-pager diff --no-color %s',
           \ gitroot, shellescape(file))
     echom cmd
-    let bufnr = term_start([&shell, &shellcmdflag, cmd], {
+    let bufnr = term_start(cmd , {
           \ 'term_name': '[gina diff] ' . file,
           \ 'norestore': 1,
           \ })
@@ -1998,7 +1998,7 @@ function! s:find_gitroot(...) abort "{{{
   endif
   return fnamemodify(git_dir, ':h')
 endfunction "}}}
-function! s:git_diff_getcmd(target) abort
+function! s:git_diff_getcmd(target) abort "{{{
   let target = resolve(a:target)
   let gitroot = s:find_gitroot(target)
   if gitroot ==# ''
@@ -2006,8 +2006,8 @@ function! s:git_diff_getcmd(target) abort
   endif
   return printf('git -C %s --no-pager diff --no-color %s',
         \ gitroot, shellescape(target))
-endfunction
-function! s:git_diff(target) abort
+endfunction "}}}
+function! s:git_diff(target) abort "{{{
   if a:target !=# '' && getftype(a:target) ==# ''
     call s:echomsg_error('File or directory does not exists: ' . a:target)
     return
@@ -2017,7 +2017,7 @@ function! s:git_diff(target) abort
   if cmd ==# ''
     return
   endif
-  let bufnr = term_start([&shell, &shellcmdflag, cmd], {
+  let bufnr = term_start(cmd, {
         \ 'term_name': '[git diff] ' . fnamemodify(target, ':~:.'),
         \ 'norestore': 1,
         \ })
@@ -2026,7 +2026,7 @@ function! s:git_diff(target) abort
     nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
     call cursor(1, 0)
   endif
-endfunction
+endfunction "}}}
 command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "}}}
 "}}}
