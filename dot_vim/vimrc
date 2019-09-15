@@ -1043,6 +1043,8 @@ if s:plugin.exists('gina.vim')
     call s:gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
     call s:gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
     call s:gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
+    call s:gina_nnoremap('branch', 'N',
+          \ ':<C-u>call gina#action#call("branch:new")<CR>')
     nnoremap <silent> <Space>g :<C-u>Gina status<CR>
 
     " Jump between unadded files with n/p .
@@ -1052,7 +1054,11 @@ if s:plugin.exists('gina.vim')
     call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
     call s:gina_nnoremap('status', 'N', printf(rhs_base, 1))
 
+    call s:gina_nnoremap('status', 'dd',
+         \ printf(':<C-u>call %sgina_diff()<CR>', s:SIDPrefix()))
+
     call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
+    call gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
 
     " Cleanup
     delfunction s:gina_nnoremap
@@ -1064,6 +1070,26 @@ if s:plugin.exists('gina.vim')
       call search('\e[31.\+\e[m', flags)
     endfor
   endfunction "}}}
+  function! s:gina_diff() abort "{{{
+    let file = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
+    let file = matchstr(file, '\%(\_^modified\:\s\+\)\?\zs.\+')
+    if file ==# ''
+      return
+    endif
+    let gitroot = fnamemodify(gina#core#get().repository, ':h')
+    let cmd = printf('git -C %s --no-pager diff --no-color %s',
+          \ gitroot, shellescape(file))
+    echom cmd
+    let bufnr = term_start([&shell, &shellcmdflag, cmd], {
+          \ 'term_name': '[gina diff] ' . file,
+          \ 'norestore': 1,
+          \ })
+    if bufnr
+      setlocal nocursorline nocursorcolumn filetype=diff
+      nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
+      call cursor(1, 0)
+    endif
+  endfunction "}}}
   augroup vimrc_gina
     autocmd User vimrc_initialize call s:gina_mapping()
   augroup END
@@ -1072,7 +1098,7 @@ endif
 " lambdalisue/vim-findent{{{
 if s:plugin.exists('vim-findent')
   augroup vimrc_findent
-    autocmd FileType vim Findent
+    autocmd FileType * Findent
   augroup END
 endif
 "}}}
@@ -1960,6 +1986,48 @@ augroup vimrc_additional_plugins
   autocmd User gramOpen call s:gram_mapping()
   autocmd FileType filore call s:filore_mapping()
 augroup END
+"}}}
+" git{{{
+function! s:find_gitroot(...) abort "{{{
+  let target = exists('a:1') || a:1 ==# '' ? a:1 : expand('%')
+  let target = resolve(target)
+  let git_dir = finddir('.git', target . ';')
+  if git_dir ==# ''
+    call s:echomsg_warning('Not a git repository: ' . target)
+    return ''
+  endif
+  return fnamemodify(git_dir, ':h')
+endfunction "}}}
+function! s:git_diff_getcmd(target) abort
+  let target = resolve(a:target)
+  let gitroot = s:find_gitroot(target)
+  if gitroot ==# ''
+    return ''
+  endif
+  return printf('git -C %s --no-pager diff --no-color %s',
+        \ gitroot, shellescape(target))
+endfunction
+function! s:git_diff(target) abort
+  if a:target !=# '' && getftype(a:target) ==# ''
+    call s:echomsg_error('File or directory does not exists: ' . a:target)
+    return
+  endif
+  let target = resolve(a:target ==# '' ? expand('%') : a:target)
+  let cmd = s:git_diff_getcmd(target)
+  if cmd ==# ''
+    return
+  endif
+  let bufnr = term_start([&shell, &shellcmdflag, cmd], {
+        \ 'term_name': '[git diff] ' . fnamemodify(target, ':~:.'),
+        \ 'norestore': 1,
+        \ })
+  if bufnr
+    setlocal nocursorline nocursorcolumn filetype=diff
+    nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
+    call cursor(1, 0)
+  endif
+endfunction
+command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "}}}
 "}}}
 " lvimrc{{{
