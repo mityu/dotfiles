@@ -44,6 +44,13 @@ bindkey -M viins '^j' vi-cmd-mode
 bindkey -M vicmd '^e' vi-end-of-line
 bindkey -M vicmd '^a' vi-first-non-blank
 
+# Launch Vim here if exists and the terminal isn't Vim's one.
+if [ ! -n "$VIM_TERMINAL" ] && \
+    [ $TERM_PROGRAM = "alacritty" ] && \
+    which vim &>/dev/null; then
+    vim
+fi
+
 # NOTE: $luarocks --lua-dir=/usr/local/opt/lua@5.1 {args}
 # if [ -n "$VIM_TERMINAL" ] && [ -n "$VIM_SERVERNAME" ]; then
 #     function mvim(){
