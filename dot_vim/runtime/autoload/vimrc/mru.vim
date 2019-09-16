@@ -1,6 +1,6 @@
 "Plugin Name: mru.vim
 "Author: mityu
-"Last Change: 27-Aug-2019.
+"Last Change: 16-Sep-2019.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -119,7 +119,7 @@ function! vimrc#mru#edit_history_start(...) abort "{{{
 endfunction "}}}
 
 if !exists('s:did_initialize')
-  let s:default_ignore_pattern = ['\.git']
+  let s:default_ignore_pattern = ['\.git\>']
   let s:default_history_max = 300
   let s:default_auto_delete_unexist_file_history = 0
 
