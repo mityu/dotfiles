@@ -323,7 +323,7 @@ set incsearch ignorecase
 set showmatch matchtime=1
 set laststatus=2
 
-set cmdheight=1 cmdwinheight=10
+set cmdheight=2 cmdwinheight=10
 set wildmenu
 set wildignore& wildignore+=*.DS_STORE,*.jpg,*.png,*.gif
 set history=500
@@ -1031,7 +1031,9 @@ endif
 "}}}
 " lambdalisue/gina.vim{{{
 if s:plugin.exists('gina.vim')
-  function! s:gina_mapping() abort "{{{
+  let g:gina#action#mark_sign_text = '*'
+  let g:gina#core#console#enable_message_history = 1
+  function! s:gina_config() abort "{{{
     function! s:gina_nnoremap(scheme, lhs, rhs) abort "{{{
       call gina#custom#mapping#nmap(
             \ a:scheme, a:lhs, a:rhs,
@@ -1057,14 +1059,14 @@ if s:plugin.exists('gina.vim')
     call s:gina_nnoremap('status', 'dd',
          \ printf(':<C-u>call %sgina_diff()<CR>', s:SIDPrefix()))
 
+    " Cleanup
+    delfunction s:gina_nnoremap
+
     call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
     call gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
 
     call gina#custom#command#option(
           \ '\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
-
-    " Cleanup
-    delfunction s:gina_nnoremap
   endfunction "}}}
   function! s:gina_status_select_another(repeat_count, search_previous) abort "{{{
     let flags = 'w'
@@ -1093,7 +1095,7 @@ if s:plugin.exists('gina.vim')
     endif
   endfunction "}}}
   augroup vimrc_gina
-    autocmd User vimrc_initialize call s:gina_mapping()
+    autocmd User vimrc_initialize call s:gina_config()
   augroup END
 endif
 "}}}
@@ -1954,6 +1956,10 @@ command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 "}}}
 " mru{{{
 let g:mru_history_file = s:join_path(s:cache_dir, 'mru', 'history')
+let g:mru_ignore_pattern = [
+      \ '\.git\>',
+      \ '^\V\%(' . escape(expand('~'), '\') . '\)\@!'
+      \ ]
 "}}}
 " gram, filore{{{
 function! s:gram_mapping() abort "{{{
