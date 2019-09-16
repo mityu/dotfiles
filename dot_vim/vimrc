@@ -1060,6 +1060,9 @@ if s:plugin.exists('gina.vim')
     call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
     call gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
 
+    call gina#custom#command#option(
+          \ '\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
+
     " Cleanup
     delfunction s:gina_nnoremap
   endfunction "}}}
@@ -1077,9 +1080,8 @@ if s:plugin.exists('gina.vim')
       return
     endif
     let gitroot = fnamemodify(gina#core#get().repository, ':h')
-    let cmd = printf('git -C %s --no-pager diff --no-color %s',
-          \ gitroot, shellescape(file))
-    echom cmd
+    let cmd = 'git -C ' . gitroot .
+          \ ' --no-pager diff --no-color ' . file
     let bufnr = term_start(cmd , {
           \ 'term_name': '[gina diff] ' . file,
           \ 'norestore': 1,
@@ -1098,7 +1100,7 @@ endif
 " lambdalisue/vim-findent{{{
 if s:plugin.exists('vim-findent')
   augroup vimrc_findent
-    autocmd FileType * Findent
+    autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
 endif
 "}}}
