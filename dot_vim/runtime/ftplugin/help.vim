@@ -1,11 +1,15 @@
-" Last Change: 14-Aug-2019.
+" Last Change: 06-Sep-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish
 " endif
 " let b:did_ftplugin_after = 1
 
-SetUndoFtplugin delcommand HelpEdit | delcommand HelpView
+SetUndoFtplugin delcommand HelpEdit | delcommand HelpView | set spell<
+
+if &modifiable
+  setlocal spell
+endif
 
 " Thanks to thinca!
 " Global
