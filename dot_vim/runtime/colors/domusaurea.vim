@@ -1,7 +1,8 @@
-"Last Change: 06-Sep-2019.
+"Last Change: 23-Sep-2019.
 "Author: mityu
 "This colorscheme based on billw
 
+" unlet g:colors_name
 set background=dark
 highlight clear
 if exists('g:syntax_on')
@@ -362,11 +363,18 @@ call s:hi('DiffDelete', 'deeplydarkblue', 'deeplydarkblue', 0)
 call s:hi('DiffChange', 0, 'deeplydarkorange', 0)
 call s:hi('DiffText', 0, 'darkorange', 0)
 
+" TODO: Specify good colors.
+call s:hi('SpellBad', 0, 'darkred', 0)
+call s:hi('SpellCap', 0, 'darkred', 0)
+call s:hi('SpellLocal', 0, 'darkred', 0)
+call s:hi('SpellRare', 0, 'darkred', 0)
+
 call s:hi('cStatement','violet',0,0)
 
 hi! link Error ErrorMsg
 hi! link TabLineFill TabLine
 hi! link StatusLineTerm StatusLine
 hi! link StatusLineTermNC StatusLineNC
+hi! link QuickFixLine CursorLine
 
 " vim: set expandtab smarttab
