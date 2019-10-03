@@ -2,6 +2,7 @@ let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
 let s:JoinPath = VimrcFunc('join_path')
+let s:Has = VimrcFunc('has')
 let s:workplace = s:JoinPath(expand('$DOT_VIM'), 'workplace')
 let s:available = isdirectory(s:workplace)
 let s:message = {
@@ -49,7 +50,7 @@ function! vimrc#workingplugin#clone(...) abort
   if !(s:available && executable('git') && a:0)
     return
   endif
-  if !s:has(a:1, '/')
+  if !s:Has(a:1, '/')
     call s:message.echomsg_error(string(a:1) . ' is not a repository.')
     return
   endif
@@ -60,7 +61,7 @@ function! vimrc#workingplugin#clone(...) abort
   else
     let clone_to = a:2
   endif
-  if s:has(s:list_plugins(), clone_to)
+  if s:Has(s:list_plugins(), clone_to)
     call s:message.echomsg_error('Directory already exists: ' . clone_to)
     return
   endif
@@ -93,7 +94,7 @@ function! vimrc#workingplugin#rm(...) abort "{{{
 
   let plugin_list = s:list_plugins()
   for plugin in a:000
-    if !s:has(plugin_list, plugin)
+    if !s:Has(plugin_list, plugin)
       call s:message.echomsg_error('Plugin does not exist: ' . plugin)
       continue
     endif
