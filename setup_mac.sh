@@ -45,8 +45,8 @@ read -sp "Your password: " password;
 
 
 
-if ask "Do xcode-select install?"; then
-    xcode-select install
+if ask "Do 'xcode-select --install?'"; then
+    xcode-select --install
 fi
 
 # Install Homebrew if it doesn't exists.
