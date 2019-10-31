@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Sep-2019.
+" Last Change: 31-Oct-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -147,7 +147,7 @@ if has('vim_starting')
     endif
   endif
 
-  if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_terminal'
+  if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
     set termguicolors  " Use true color if possible.
   endif
   if expand('$TERM_PROGRAM') ==# 'alacritty'
@@ -257,6 +257,7 @@ function! s:pack_register() abort
   call minpac#add('machakann/vim-Verdin')
   call minpac#add('mityu/vim-brownie')
   call minpac#add('mityu/vim-gram')
+  call minpac#add('mityu/vim-gram-sources')
   call minpac#add('mityu/vim-textobj-commentblock')
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
@@ -412,8 +413,6 @@ imap <C-j> <ESC>
 cmap <C-j> <C-c>
 onoremap <C-j> <ESC>
 
-noremap <C-a> ^
-noremap <C-e> $
 noremap - <C-x>
 noremap + <C-a>
 
@@ -767,8 +766,8 @@ let s:_map = []
 call add(s:_map, ['nnoremap', '', 'ev', 'edit $MYVIMRC'])
 call add(s:_map, ['nnoremap', '', 'sv', 'source $MYVIMRC'])
 call add(s:_map, ['nnoremap', '<silent>', 'k', 'call vimrc#mru#start()'])
-call add(s:_map, ['nnoremap', '<silent>', 'j', 'call vimrc#files#start()'])
-call add(s:_map, ['nnoremap', '<silent>', 'b', 'call vimrc#buffers#start()'])
+call add(s:_map, ['nnoremap', '<silent>', 'b', 'call gram#sources#buffers#launch()'])
+call add(s:_map, ['nnoremap', '<silent>', 'j', 'call gram#sources#gitfiles#launch()'])
 call add(s:_map, ['nnoremap', '<silent>', 'f', 'call vimrc#filore#start()'])
 call add(s:_map, ['nnoremap', '<silent>', 'm', 'MemoList'])
 call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
@@ -968,6 +967,7 @@ if s:plugin.exists('vim-operator-user')
     endif
   endfunction "}}}
   function! s:map_define_operator() abort "{{{
+    " ---fold---
     let foldmotions_with_range = 'fF'
     let foldmotions_standalone = 'dDE'
     let sid = s:SIDPrefix()
@@ -993,10 +993,53 @@ if s:plugin.exists('vim-operator-user')
       let keys = 'z' . keys
       execute printf(map_cmd, keys, keys)
     endfor
+
+
+    " --- objedge---
+    " call operator#user#define('vimrc-objedge-head', 'vimrc#objedge_head')
+    " call operator#user#define('vimrc-objedge-tail', 'vimrc#objedge_tail')
   endfunction "}}}
   augroup vimrc_mapping
     autocmd User vimrc_initialize call s:map_define_operator()
   augroup END
+  " nmap <C-p> <Plug>(operator-vimrc-objedge-head)
+  " nmap <C-n> <Plug>(operator-vimrc-objedge-tail)
+  " if s:plugin.exists('vim-textobj-user') &&
+  "      \ s:plugin.exists('vim-textobj-function')
+  "   function! s:map_funcjump(go_tail) abort "{{{
+  "     let jumpcmd = "normal \<Plug>(operator-vimrc-objedge-" .
+  "          \ (a:go_tail ? 'tail' : 'head') . ")\<Plug>(textobj-function-a)"
+  "     let [movekey, limit] = a:go_tail ? ['j', line('$')] : ['k', 1]
+  "
+  "     while 1
+  "       execute jumpcmd
+  "       let [open, close] = [getpos("'["), getpos("']")]
+  "       if open[1] == close[1] && (open[2] + 1) == close[2]
+  "         execute 'normal!' movekey
+  "         continue
+  "       endif
+  "       break
+  "     endwhile
+  "     " execute jumpcmd
+  "     " while curpos == getpos('.')
+  "     "   if line('.') == limit
+  "     "     call setpos('.', origin)
+  "     "     break
+  "     "   endif
+  "     "   execute 'normal!' movekey
+  "     "   let curpos = getpos('.')
+  "     "   execute jumpcmd
+  "     " endwhile
+  "   endfunction "}}}
+  "   " nnoremap [ :<C-u>call <SID>map_funcjump(0)<CR>
+  "   " nnoremap ] :<C-u>call <SID>map_funcjump(1)<CR>
+  "
+  "   augroup vimrc_disable_default_funcjump
+  "     autocmd Filetype vim call execute(
+  "         \ map(['[[', '[]', ']]', '][', '["', ']"'],
+  "         \ '"nunmap <buffer> " . v:val'))
+  "   augroup END
+  " endif
 endif
 "}}}
 " kana/vim-textobj-entire{{{
@@ -1048,6 +1091,7 @@ if s:plugin.exists('gina.vim')
     call s:gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
     call s:gina_nnoremap('branch', 'N',
           \ ':<C-u>call gina#action#call("branch:new")<CR>')
+    call s:gina_nnoremap('/\v%(status|branch|log)', 'q', ':<C-u>close<CR>')
     nnoremap <silent> <Space>g :<C-u>Gina status<CR>
 
     " Jump between unadded files with n/p .
@@ -1207,19 +1251,25 @@ if s:plugin.exists('vim-gram')
   augroup END
 
   function! s:init_gram_map() abort
-    call gram#custom#noremap('i', '<C-f>', '<Right>')
-    call gram#custom#noremap('i', '<C-b>', '<Left>')
-    call gram#custom#noremap('i', '<C-a>', '<C-o>0')
-    call gram#custom#noremap('i', '<C-e>', '<C-o>$')
-    call gram#custom#noremap('n', 'gg', 'gg')
-
-    if !has('gui_running')
-      call gram#custom#noremap('n', '<NL>', '<CR>')
-      call gram#custom#noremap('i', '<NL>', '<CR>')
-    endif
-
-    call gram#custom#set_option('enable_nmapclear', 0)
-    call gram#custom#set_option('enable_imapclear', 0)
+    call gram#custom#map_action('n', '<CR>', 'select-item')
+    call gram#custom#map_action('n', 'q', 'quit')
+    call gram#custom#map_action('n', 'j', 'select-next-item')
+    call gram#custom#map_action('n', 'k', 'select-prev-item')
+    call gram#custom#map_action('n', 'i', 'start-insert')
+    call gram#custom#map_action('n', 'p', 'preview')
+    call gram#custom#map_action('i', '<ESC>', 'stop-insert')
+    call gram#custom#map_action('i', '<CR>', 'stop-insert')
+    call gram#custom#map_action('i', '<C-j>', 'stop-insert')
+    call gram#custom#map_action('i', '<C-h>', 'delete-char')
+    call gram#custom#map_action('i', '<C-w>', 'delete-word')
+    call gram#custom#map_action('i', '<C-b>', 'move-to-right')
+    call gram#custom#map_action('i', '<C-f>', 'move-to-left')
+    call gram#custom#map_action('i', '<C-a>', 'move-to-head')
+    call gram#custom#map_action('i', '<C-e>', 'move-to-tail')
+    call gram#custom#map_action('i', '<C-u>', 'delete-to-head')
+    call gram#custom#map_key('n', '<NL>', '<CR>')
+    call gram#custom#map_key('i', '<Del>', '<C-h>')
+    call gram#custom#map_key('i', '<BS>', '<C-h>')
   endfunction
 endif
 "}}}
@@ -1407,8 +1457,8 @@ if s:plugin.exists('vim-lsp')
 
   nnoremap <Plug>(<SID>-open-folding) zv
   nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
-  nmap <silent> <C-p> <Plug>(lsp-previous-error)
-  nmap <silent> <C-n> <Plug>(lsp-next-error)
+  " nmap <silent> <C-p> <Plug>(lsp-previous-error)
+  " nmap <silent> <C-n> <Plug>(lsp-next-error)
 endif
 "}}}
 " previm/previm{{{
