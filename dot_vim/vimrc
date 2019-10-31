@@ -238,6 +238,7 @@ endif
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
+  call minpac#add('haya14busa/vim-edgemotion')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -913,6 +914,12 @@ command! -bar PackClean  call s:pack_clean()
 command! -bar PackStatus call s:pack_status()
 "}}}
 " Installed plugins{{{
+" haya14busa/vim-edgemotion{{{
+if s:plugin.exists('vim-edgemotion')
+  nmap <C-p> <Plug>(edgemotion-k)
+  nmap <C-n> <Plug>(edgemotion-j)
+endif
+"}}}
 " kana/vim-operator-replace{{{
 if s:plugin.exists('vim-operator-replace')
   map ,r  <Plug>(operator-replace)
@@ -1604,6 +1611,9 @@ if s:plugin.exists('caw.vim')
   " call s:caw_oneline_comment_map('<C-/>')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
+  let g:caw_dollarpos_sp_right = ' '
+  let g:caw_hatpos_sp_blank = ' '
+  let g:caw_zeropos_sp_blank = ' '
 endif
 "}}}
 " vim-jp/autofmt{{{
