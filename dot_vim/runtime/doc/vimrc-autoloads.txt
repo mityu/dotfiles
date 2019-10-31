@@ -1,13 +1,8 @@
-*vimrc.txt*	My vimrc reference.
+*vimrc-autoloads.txt*	My vimrc reference.
 
 ==============================================================================
 CONTENTS					*vimrc-contents*
 
-gram.vim			|gram.vim|
-  FUNCTIONS			  |gram-functions|
-  EVENTS			  |gram-events|
-  MAPPINGS			  |gram-mappings|
-  EXAMPLE			  |gram-example|
 mru.vim				|mru.vim|
   FUNCTIONS			  |mru-functions|
   VARIABLES			  |mru-variables|
@@ -16,125 +11,6 @@ shcmd.vim			|shcmd.vim|
   COMMANDS			  |shcmd-commands|
 
 
-
-==============================================================================
-gram.vim							*gram.vim*
-	gram.vim provides a simple item-filtering interface.
-	The only feature is "No customizable."
-
-	Requirement:
-	 - |CmdlineChanged| autocmd
-	 - Builtin |setbufline()|, |appendbufline()|, and |deletebufline()| function
-	NOTE: These features are added in Vim 8.
-
-------------------------------------------------------------------------------
-FUNCTIONS						*gram-functions*
-vimrc#gram#start({config})		*vimrc#gram#start()* *gram#start()*
-	Start using gram interface.
-	{config} is a |dict| and has following configurations and
-	callback functions.  Callback functions can be |String| or |Funcref|.
-	NOTE: Callback functions are called via |call()|.
-
-	Required:
-	 - 'name' : (|String|)
-	 	 The name of source. |gram.vim| use this in a prompt.
-	 - 'filter' : (callback)			*gram-callback-filter*
-	 	 The argument is user input (|String|).
-		 This function should return filtered candidates. If there
-		aren't any candidates, this function should return [] (an
-		empty list).
-    		 |gram.vim| calls this function when user inputs text in
-		prompt.
-    	 - 'regpat' : (callback)			*gram-callback-regpat*
-	 	 The argument is user input (|String|).
-		 This function should return |regexp| of user input to
-		highlight matches in buffer.
-		 |gram.vim| DEFINITELY call this function after calling 'filter'
-		callback. (See Also |gram-callback-order|.)
-	 - 'selected' : (callback)		*gram-callback-selected*
-	 	 The argument is selected item (|String|).
-		 |gram.vim| don't use return values of this function.
-		 |gram.vim| call this function when user select an item.
-
-	Optional:
-	 - 'exit' : (callback)				*gram-callback-exit*
-	 	 This function takes no arguments.
-		 This function is called when closing |gram.vim|'s window.
-		 For example, you can use this callback to restore another
-		plugin's settings.
-
-	The calling order:				*gram-callback-order*
-	   # When a user inputs in prompt:
-		1. 'filter'
-		2. 'regpat'
-
-	   # When a user selects an item:
-		1. 'selected'
-		2. 'exit'
-
-vimrc#gram#escape_regpat({pat})	*vimrc#gram#escape_regpat()* *gram#escape_regpat()*
-	This function escapes every character which has special meaning under
-	|'magic'| is set on.
-
-vimrc#gram#glob2regpat({glob})	*vimrc#gram#glob2repat()* *gram#glob2regpat()*
-	This function converts a file pattern, as used by |glob()|, into a
-	search pattern like |glob2regpat()|.  However, unlike |glob2regpat()|,
-	this function generates different |regexp| from '*' and '**' .
-
-------------------------------------------------------------------------------
-EVENTS								*gram-events*
-
-|gram.vim| fires some |User| events. Followings are all {pattern} of |User|.
-See |gram-example| to know how to use.
-
-gramOpen							*gramOpen*
-	 After opening the gram window.
-	 You can use this event to set |gram.vim|-global settings.
-	 See Also: |gram-example|
-
-{source-name}Open
-	 After the open gram window like |gramOpen|.
-	 However, unlike |gramOpen|, you can use this event to set
-	 source-local settings.
-
-------------------------------------------------------------------------------
-MAPPINGS						*gram-mappings*
-
-<Plug>(gram-exit)			*<Plug>(gram-exit)*
-	Stop using |gram.vim|.
-
-<Plug>(gram-loop-cursor-down)		*<Plug>(gram-loop-cursor-down)*
-	Move on the next line like |j|, but move to the top of items on a buffer
-	when the cursor reachs the end of items.
-
-<Plug>(gram-loop-cursor-up)		*<Plug>(gram-loop-cursor-up)*
-	Move on the previous like |k|, but move to the end of items on a buffer
-	when the cursor reachs the top of items.
-
-<Plug>(gram-select-item)		*<Plug>(gram-select-item)*
-	Select an item.
-
-<Plug>(gram-start-filtering)		*<Plug>(gram-strat-filtering)*
-	Start to filter items interactively by inputting text on a prompt.
-
-Default Mappings:					*gram-default-mapping*
-	|gram.vim| provide no default mappings.
-
-------------------------------------------------------------------------------
-EXAMPLE							*gram-example*
->
-    function! s:set_gram_mappings()
-	nmap q <Plug>(gram-exit)
-	nmap j <Plug>(gram-loop-cursor-down)
-	nmap k <Plug>(gram-loop-cursor-up)
-	nmap <CR> <Plug>(gram-select-item)
-	nmap i <Plug>(gram-start-filtering)
-    endfunction
-    augroup set-gram-mapping
-	    autocmd!
-	    autocmd User gramOpen call s:set_gram_mappings()
-    augroup END
-<
 
 ==============================================================================
 mru.vim								*mru.vim*
