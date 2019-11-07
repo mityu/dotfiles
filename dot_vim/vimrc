@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 31-Oct-2019.
+" Last Change: 07-Nov-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -916,8 +916,33 @@ command! -bar PackStatus call s:pack_status()
 " Installed plugins{{{
 " haya14busa/vim-edgemotion{{{
 if s:plugin.exists('vim-edgemotion')
-  nmap <C-p> <Plug>(edgemotion-k)
-  nmap <C-n> <Plug>(edgemotion-j)
+  nnoremap <silent> <C-p> :<C-u>call sign_jump(1, 'vimrc-edgenavi', '')<CR>
+  nnoremap <silent> <C-n> :<C-u>call sign_jump(2, 'vimrc-edgenavi', '')<CR>
+
+  call sign_define([{
+        \ 'name': 'vimrc-edgenavi-prev',
+        \ 'text': '^',
+        \ 'texthl': 'String',
+        \ }, {
+        \ 'name': 'vimrc-edgenavi-next',
+        \ 'text': 'v',
+        \ 'texthl': 'String',
+        \ }])
+  function! s:edgenavi() abort
+    call sign_unplace('vimrc-edgenavi')
+    let prev = edgemotion#move(0)
+    let next = edgemotion#move(1)
+    call sign_place(1, 'vimrc-edgenavi', 'vimrc-edgenavi-prev', '',
+          \ {'lnum': line('.') - str2nr(prev[: -2])}
+          \ )
+    call sign_place(2, 'vimrc-edgenavi', 'vimrc-edgenavi-next', '',
+          \ {'lnum': line('.') + str2nr(next[: -2])}
+          \ )
+  endfunction
+  augroup vimrc_edgenavi
+    autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI *
+          \ call s:edgenavi()
+  augroup END
 endif
 "}}}
 " kana/vim-operator-replace{{{
