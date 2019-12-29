@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 07-Nov-2019.
+" Last Change: 29-Dec-2019.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -294,6 +294,7 @@ function! s:pack_register() abort
   " call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
   call minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
   call minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
+  call minpac#add('rbtnn/vim-coloredit', {'type': 'opt'})
 endfunction "}}}
 " Options{{{
 syntax on
@@ -737,18 +738,23 @@ function! s:cmdwin_incsearch_jump() abort "{{{
   endtry
 endfunction "}}}
 " function! s:cmdwin_select_history() abort "{{{
-"   quit
-"   let history = split(execute('history'), "\n")[1 :]
+"   let history = split(execute('history ' . getcmdwintype()), "\n")[1 :]
 "   call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
 "   call reverse(history)
-"   call gram#select({'items': history,
-"        \ 'callback': function('s:cmdwin_select_history_callback')})
+"   call gram#select({
+"        \ 'name': getcmdwintype() . 'history',
+"        \ 'items': history,
+"        \ 'callback': s:SIDPrefix() . 'cmdwin_select_history_callback',
+"        \ })
 " endfunction "}}}
-" function! s:cmdwin_select_history_callback(item) abort
-"   normal! q:
-"   call setline('$', a:item.word)
-"   call cursor(line('$'), 1)
-" endfunction
+" function! s:cmdwin_select_history_callback(item) abort "{{{
+"   if getline('$') ==# ''
+"     call setline('$', a:item.word)
+"   else
+"     call append('$', a:item.word)
+"   endif
+"   execute 'noautocmd normal! G$'
+" endfunction "}}}
 
 let s:cmdwin_save_options = vimrc#class#new('save_options')
 augroup vimrc_mapping
