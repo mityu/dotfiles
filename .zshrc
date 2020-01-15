@@ -110,6 +110,7 @@ fi
 function update_components(){
     brew upgrade
     brew cleanup
+    brew cask upgrade
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
     # vim -e -s -n -i NONE -c "
