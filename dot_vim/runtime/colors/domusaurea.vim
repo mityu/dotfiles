@@ -1,4 +1,4 @@
-"Last Change: 23-Sep-2019.
+"Last Change: 01-Feb-2020.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -55,6 +55,45 @@ let s:gui_running = has('gui_running') || &termguicolors
 function! s:get_color(name) abort "{{{
   return a:name ==# 'NONE' ? 'NONE' : s:get_raw_color(s:palette[a:name])
 endfunction "}}}
+
+if s:gui_running
+  " let g:terminal_ansi_colors = [
+  "      \ '#000000',
+  "      \ '#e00000',
+  "      \ '#00e000',
+  "      \ '#e0e000',
+  "      \ '#2e9ab8',
+  "      \ '#e000e0',
+  "      \ '#00e0e0',
+  "      \ '#e0e0e0',
+  "      \ '#808080',
+  "      \ '#ff4040',
+  "      \ '#ff4040',
+  "      \ '#e6c547',
+  "      \ '#7aa6da',
+  "      \ '#c397d8',
+  "      \ '#70c0ba',
+  "      \ '#ffffff',
+  "      \ ]  " 194 116 212
+  let g:terminal_ansi_colors = [
+        \ '#000000',
+        \ '#d54e53',
+        \ '#b9ca4a',
+        \ '#e6c547',
+        \ '#7aa6da',
+        \ '#c397d8',
+        \ '#70c0ba',
+        \ '#eaeaea',
+        \ '#666666',
+        \ '#ff3334',
+        \ '#9ec400',
+        \ '#e7c547',
+        \ '#7aa6da',
+        \ '#b77ee0',
+        \ '#54ced6',
+        \ '#ffffff',
+        \ ]
+endif
 
 if s:gui_running
   function! s:get_raw_color(code) abort "{{{
