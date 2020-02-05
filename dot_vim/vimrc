@@ -260,7 +260,6 @@ function! s:pack_register() abort
   call minpac#add('mityu/vim-gram')
   call minpac#add('mityu/vim-gram-sources')
   call minpac#add('mityu/vim-textobj-commentblock')
-  call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
   call minpac#add('prabirshrestha/async.vim')
@@ -1326,37 +1325,6 @@ if s:plugin.exists('vim-textobj-commentblock')
           \   'commentstring')
           \ . '()'
   augroup END
-endif
-"}}}
-" mityu/vim-textobj-multitextobj{{{
-if s:plugin.exists('vim-textobj-multitextobj')
-  omap am <Plug>(textobj-multitextobj-a)
-  omap im <Plug>(textobj-multitextobj-i)
-  vmap am <Plug>(textobj-multitextobj-a)
-  vmap im <Plug>(textobj-multitextobj-i)
-  " vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
-  " vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
-  let g:textobj_multitextobj_no_default_key_mappings = 1
-  let g:textobj_multitextobj_textobjects_i = [
-      \ { 'textobj': "i'", 'is_cursor_in': 1},
-      \ { 'textobj': 'i"', 'is_cursor_in': 1},
-      \ 'i(',
-      \ 'i[',
-      \ 'i{',
-      \ 'i<',
-      \ '<Plug>(textobj-indent-i)',
-      \ '<Plug>(textobj-function-i)',
-      \]
-  let g:textobj_multitextobj_textobjects_a = [
-      \ { 'textobj': "a'", 'is_cursor_in': 1},
-      \ { 'textobj': 'a"', 'is_cursor_in': 1},
-      \ 'a(',
-      \ 'a[',
-      \ 'a{',
-      \ 'a<',
-      \ '<Plug>(textobj-indent-a)',
-      \ '<Plug>(textobj-function-a)',
-      \]
 endif
 "}}}
 " osyo-manga/vim-jplus{{{
