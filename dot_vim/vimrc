@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 02-Feb-2020.
+" Last Change: 05-Feb-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -263,7 +263,6 @@ function! s:pack_register() abort
   call minpac#add('mityu/vim-textobj-multitextobj')
   call minpac#add('osyo-manga/vim-jplus')
   call minpac#add('osyo-manga/vim-operator-swap')
-  call minpac#add('osyo-manga/vim-textobj-multiblock')
   call minpac#add('prabirshrestha/async.vim')
   call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
   call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
@@ -1369,21 +1368,6 @@ endif
 if s:plugin.exists('vim-operator-swap')
   map ,sy <Plug>(operator-swap-marking)
   map ,sp <Plug>(operator-swap)
-endif
-"}}}
-" osyo-manga/vim-textobj-multiblock{{{
-if s:plugin.exists('vim-textobj-multiblock')
-  omap ab <Plug>(textobj-multiblock-a)
-  omap ib <Plug>(textobj-multiblock-i)
-  vmap ab <Plug>(textobj-multiblock-a)
-  vmap ib <Plug>(textobj-multiblock-i)
-  let g:textobj_multiblock_no_default_key_mappings = 1
-  let g:textobj_multiblock_blocks = [
-      \['(', ')'],
-      \['[', ']'],
-      \['{', '}'],
-      \['<', '>'],
-      \]
 endif
 "}}}
 " prabirshrestha/ayncomplete.vim{{{
