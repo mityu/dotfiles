@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Dec-2019.
+" Last Change: 02-Feb-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -924,6 +924,8 @@ command! -bar PackStatus call s:pack_status()
 if s:plugin.exists('vim-edgemotion')
   nnoremap <silent> <C-p> :<C-u>call sign_jump(1, 'vimrc-edgenavi', '')<CR>
   nnoremap <silent> <C-n> :<C-u>call sign_jump(2, 'vimrc-edgenavi', '')<CR>
+  vmap <C-p> <Plug>(edgemotion-k)
+  vmap <C-n> <Plug>(edgemotion-j)
 
   call sign_define([{
         \ 'name': 'vimrc-edgenavi-prev',
@@ -1333,8 +1335,8 @@ if s:plugin.exists('vim-textobj-multitextobj')
   omap im <Plug>(textobj-multitextobj-i)
   vmap am <Plug>(textobj-multitextobj-a)
   vmap im <Plug>(textobj-multitextobj-i)
-  vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
-  vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
+  " vmap <C-p> <Plug>(textobj-multitextobj-apply-prev)
+  " vmap <C-n> <Plug>(textobj-multitextobj-apply-next)
   let g:textobj_multitextobj_no_default_key_mappings = 1
   let g:textobj_multitextobj_textobjects_i = [
       \ { 'textobj': "i'", 'is_cursor_in': 1},
