@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 06-Sep-2019.
+"Last Change: 06-Feb-2020.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -594,9 +594,23 @@ function! vimrc#filore#get_current_directory_path() abort "{{{
   return dir
 endfunction "}}}
 function! vimrc#filore#get_file_path_of_under_cursor() abort "{{{
-  " FIXME: In cmdwin, line() returns cursor line on cmdwin, not on filore.
-  if s:is_cmdwin() | return '' | endif
-  return vimrc#filore#get_file_path_of_line(line('.'))
+  if s:is_cmdwin()
+    if getcmdtype() ==# '='
+      let winid = str2nr(win_execute(win_getid(),
+            \ 'echo win_getid(winnr("#"))'))
+    else
+      let winid = win_getid(winnr('#'))
+    endif
+    let lnum = line('.', winid)
+    if lnum < (1 + s:prompt_lines_count) || lnum > line('$', winid)
+      return ''
+    endif
+    return s:win_get_reference_of_items(winbufnr(winid)).file_list[
+          \ s:browse_get_index_from_lnum(lnum)].abs
+  else
+    return vimrc#filore#get_file_path_of_line(line('.'))
+  endif
+  return ''
 endfunction "}}}
 function! vimrc#filore#get_file_path_of_line(lnum) abort "{{{
   if !s:cmdline_is_current_filore()
