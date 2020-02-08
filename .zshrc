@@ -23,16 +23,15 @@ alias winecmd='wine cmd /k "C:\setenv"'
 
 # The file to save history
 export HISTFILE=${HOME}/.zhistory
-# How many does zsh record history to memory.
+# How many zsh records history to memory.
 export HISTSIZE=1000
-# How many does zsh record history to a history file.
+# How many zsh records history to the history file.
 export SAVEHIST=100000
 # Remove history duplicates
 setopt hist_ignore_all_dups
 setopt hist_ignore_dups
-# historyを共有
 setopt share_history
-# Do not record `history`
+# Do not record `history` to command history
 setopt hist_no_store
 # Enable completion
 setopt menu_complete
@@ -45,11 +44,11 @@ bindkey -M vicmd '^e' vi-end-of-line
 bindkey -M vicmd '^a' vi-first-non-blank
 
 # Launch Vim here if exists and the terminal isn't Vim's one.
-if [ ! -n "$VIM_TERMINAL" ] && \
-    [ $TERM_PROGRAM = "alacritty" ] && \
-    which vim &>/dev/null; then
-    vim
-fi
+# if [ ! -n "$VIM_TERMINAL" ] && \
+#     [ $TERM_PROGRAM = "alacritty" ] && \
+#     which vim &>/dev/null; then
+#     vim
+# fi
 
 # NOTE: $luarocks --lua-dir=/usr/local/opt/lua@5.1 {args}
 # if [ -n "$VIM_TERMINAL" ] && [ -n "$VIM_SERVERNAME" ]; then
@@ -68,8 +67,8 @@ fi
 export ZPLUG_HOME=~/.zplug
 source $ZPLUG_HOME/init.zsh
 zplug "b4b4r07/enhancd", use:init.sh
-zplug "b4b4r07/gomi", as:command, from:github
-zplug "junegunn/fzf-bin", from:gh-r, as:command, rename-to:fzf
+zplug "junegunn/fzf-bin", from:gh-r, as:command, rename-to:fzf #, frozen:1
+zplug "b4b4r07/zsh-gomi", as:command, use:bin/gomi, on:junegunn/fzf-bin
 zplug "mafredri/zsh-async", from:github
 zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
 zplug "zplug/zplug", hook-build:"zplug --self-manage"
