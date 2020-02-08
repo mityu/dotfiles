@@ -1,3 +1,4 @@
+" vim9script
 " Author: mityu
 " Last Change: 08-Feb-2020.
 " vim: foldmethod=marker shiftwidth=2
@@ -481,6 +482,11 @@ function! s:terminal_map(cmd, lhs, rhs, ...) abort "{{{
   execute printf('%s %s %s%s %s%s',
         \ a:cmd, mods, &termwinkey, a:lhs, &termwinkey, a:rhs)
 endfunction "}}}
+" Use :execute with variables causes error in vim9script now.
+" def! s:terminal_map(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void "{{{
+"   execute printf('%s %s %s%s %s%s',
+"        \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
+" enddef "}}}
 call s:terminal_map('tnoremap', ';', ':<C-f>')
 call s:terminal_map('tnoremap', ':', ';')
 call s:terminal_map('tnoremap', '<ESC>', 'N')
@@ -1909,41 +1915,41 @@ augroup END
 call s:statusline_init()
 "}}}
 " tabline{{{
-let &tabline=printf('%%!%stabline()', s:SIDPrefix())
-function! s:tabline() abort "{{{
-  let tabline='%#TabLine#'
-  let t=tabpagenr()
+let &tabline = printf('%%!%stabline()', s:SIDPrefix())
+def! s:tabline(): string "{{{
+  let tabline = '%#TabLine#'
+  let t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
-    let tabline .= '%' . n . 'T'
-    let info=' ' . s:generate_tabinfo(n) . ' '
-    if t==n
-      let tabline .= '%#TabLineSel# %999Xx%X' . info . '%#TabLine#'
+    tabline ..= '%' .. n .. 'T'
+    let info = ' ' .. s:generate_tabinfo(n) .. ' '
+    if t == n
+      tabline ..= '%#TabLineSel# %999Xx%X' .. info .. '%#TabLine#'
     else
-      let tabline .= info
+      tabline ..= info
     endif
-    let tabline .= '%T|'
+    tabline ..= '%T|'
   endfor
-  let tabline .= '%>%=[%{pathshorten(getcwd())}]'
+  tabline ..= '%>%=[%{pathshorten(getcwd())}]'
 
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
-endfunction "}}}
-function! s:generate_tabinfo(tabnr) abort "{{{
-  let l:tablist=tabpagebuflist(a:tabnr)
-  let l:info=''
-  let l:info .= len(filter(copy(l:tablist), 'getbufvar(v:val, "&mod")'))? '[+]': ''
-  let l:info .= '[' . tabpagewinnr(a:tabnr, '$') . ']'
-  let l:info .= s:filename_label(tabpagebuflist(a:tabnr)[tabpagewinnr(a:tabnr)-1])
-  return l:info
-endfunction "}}}
+enddef "}}}
+def! s:generate_tabinfo(tabnr: number): string "{{{
+  let tablist = tabpagebuflist(tabnr)
+  let info = ''
+  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
+  info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
+  info ..= s:filename_label(tabpagebuflist(tabnr)[tabpagewinnr(tabnr) - 1])
+  return info
+enddef "}}}
 "}}}
 " :terminal{{{
 augroup vimrc_terminal
   autocmd TerminalOpen * call s:terminal_open()
 augroup END
-function! s:terminal_open() abort
+def! s:terminal_open(): void
   setlocal nonumber norelativenumber
-endfunction
+enddef
 "}}}
 " EmphasisIndent{{{
 hi link VimrcEmphasisIndent CursorLine
@@ -2054,45 +2060,44 @@ augroup vimrc_additional_plugins
 augroup END
 "}}}
 " git{{{
-function! s:find_gitroot(...) abort "{{{
-  let target = exists('a:1') || a:1 ==# '' ? a:1 : expand('%')
-  let target = resolve(target)
-  let git_dir = finddir('.git', target . ';')
+def! s:find_gitroot(arg_target: string = expand('%')): string "{{{
+  let target: string = resolve(arg_target)
+  let git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
-    call s:echomsg_warning('Not a git repository: ' . target)
+    s:echomsg_warning('Not a git repository: ' .. target)
     return ''
   endif
   return fnamemodify(git_dir, ':h')
-endfunction "}}}
-function! s:git_diff_getcmd(target) abort "{{{
-  let target = resolve(a:target)
-  let gitroot = s:find_gitroot(target)
+enddef "}}}
+def! s:git_diff_getcmd(arg_target: string): string "{{{
+  let target: string = resolve(arg_target)
+  let gitroot: string = s:find_gitroot(target)
   if gitroot ==# ''
     return ''
   endif
   return printf('git -C %s --no-pager diff --no-color %s',
         \ gitroot, shellescape(target))
-endfunction "}}}
-function! s:git_diff(target) abort "{{{
-  if a:target !=# '' && getftype(a:target) ==# ''
-    call s:echomsg_error('File or directory does not exists: ' . a:target)
+enddef "}}}
+def! s:git_diff(arg_target: string = expand('%')): void "{{{
+  let target: string = resolve(arg_target)
+  if getftype(target) ==# ''
+    s:echomsg_error('File or directory does not exists: ' .. target)
     return
   endif
-  let target = resolve(a:target ==# '' ? expand('%') : a:target)
-  let cmd = s:git_diff_getcmd(target)
+  let cmd: string = s:git_diff_getcmd(target)
   if cmd ==# ''
     return
   endif
   let bufnr = term_start(cmd, {
-        \ 'term_name': '[git diff] ' . fnamemodify(target, ':~:.'),
+        \ 'term_name': '[git diff] ' .. fnamemodify(target, ':~:.'),
         \ 'norestore': 1,
         \ })
   if bufnr
     setlocal nocursorline nocursorcolumn filetype=diff
     nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
-    call cursor(1, 0)
+    cursor(1, 0)
   endif
-endfunction "}}}
+enddef "}}}
 command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "}}}
 "}}}
