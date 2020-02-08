@@ -1885,24 +1885,25 @@ endfunction "}}}
 function! s:showmode_label() abort "{{{
   return '%#VimrcShowMode# %{<SID>showmode_mode()} %#StatusLine#'
 endfunction "}}}
-function! s:filename_label(bufnr) abort "{{{
-  let buftype = getbufvar(a:bufnr, '&buftype')
-  let bufname = bufname(a:bufnr)
+def! s:filename_label(bufnr: number): string "{{{
+  let buftype = getbufvar(bufnr, '&buftype')
+  let bufname = bufname(bufnr)
   if buftype ==# 'help'
     return fnamemodify(bufname, ':t')
   elseif buftype ==# 'quickfix'
     return '[quickfix]'
-  elseif getbufvar(a:bufnr, '&previewwindow')
+  elseif getbufvar(bufnr, '&previewwindow')
     return '[preview]'
   elseif buftype ==# 'terminal'
-    return 'terminal:' . bufname
+    return 'terminal:' .. bufname
   elseif buftype ==# 'prompt'
     return '[prompt]'
   else
-    return (buftype ==# 'nofile' ? ' *NoFile* ' : '') .
+    return (buftype ==# 'nofile' ? ' *NoFile* ' : '') ..
       \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
-endfunction "}}}
+  return ''
+enddef "}}}
 augroup vimrc_statusline
   autocmd VimEnter * let t:vimrc_showmode_winID = win_getid()
   autocmd ColorScheme * call s:statusline_init()
@@ -1916,6 +1917,16 @@ call s:statusline_init()
 "}}}
 " tabline{{{
 let &tabline = printf('%%!%stabline()', s:SIDPrefix())
+def! s:generate_tabinfo(tabnr: number): string "{{{
+  let tablist = tabpagebuflist(tabnr)
+  let info = ''
+  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
+  info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
+  " info ..= s:filename_label(tabpagebuflist(tabnr)[tabpagewinnr(tabnr) - 1])
+  " FIXME: This line causes "Using a {type} as a Number" error. Sometimes
+  " {type} is float, and sometimes job... Why?
+  return info
+enddef "}}}
 def! s:tabline(): string "{{{
   let tabline = '%#TabLine#'
   let t = tabpagenr()
@@ -1933,14 +1944,6 @@ def! s:tabline(): string "{{{
   tabline ..= '%>%=[%{pathshorten(getcwd())}]'
 
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
-enddef "}}}
-def! s:generate_tabinfo(tabnr: number): string "{{{
-  let tablist = tabpagebuflist(tabnr)
-  let info = ''
-  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
-  info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
-  info ..= s:filename_label(tabpagebuflist(tabnr)[tabpagewinnr(tabnr) - 1])
-  return info
 enddef "}}}
 "}}}
 " :terminal{{{
