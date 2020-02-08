@@ -1765,14 +1765,6 @@ command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
       \ call vimrc#session#delete(1, <f-args>)
 command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
-" tabpage_cd{{{
-if !exists(':tcd')
-  augroup vimrc_tabpage_cd
-    autocmd TabEnter * if exists('t:vimrc_cwd') | execute 'cd' t:vimrc_cwd | endif
-    autocmd TabLeave * let t:vimrc_cwd = getcwd(-1)
-  augroup END
-endif
- "}}}
 " statusline{{{
 function! s:statusline_init() abort "{{{
   let s:statusline = {
