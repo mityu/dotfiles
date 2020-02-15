@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 08-Feb-2020.
+" Last Change: 15-Feb-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -41,49 +41,49 @@ function! s:has(object, to_search) abort "{{{
   endif
   return (call(func, [a:object, a:to_search]) != not_found)
 endfunction "}}}
-function! s:get_msg_string(msg) abort "{{{
-  return '[vimrc] ' . a:msg
-endfunction "}}}
+def! s:get_msg_string(msg: string): string "{{{
+  return '[vimrc] ' .. msg
+enddef "}}}
 function! s:echomsg_with_color(msg, hl_group) abort "{{{
   execute 'echohl' a:hl_group
   echomsg s:get_msg_string(a:msg)
   echohl NONE
 endfunction "}}}
-function! s:echomsg(msg) abort "{{{
-  call s:echomsg_with_color(a:msg, 'NONE')
-endfunction "}}}
-function! s:echomsg_error(msg) abort "{{{
-  call s:echomsg_with_color(a:msg, 'Error')
-endfunction "}}}
-function! s:echomsg_warning(msg) abort "{{{
-  call s:echomsg_with_color(a:msg, 'WarningMsg')
-endfunction "}}}
-function! s:echo(msg) abort "{{{
-  echo s:get_msg_string(a:msg)
-endfunction "}}}
-function! s:echo_question(question) abort "{{{
-  echon s:get_msg_string(a:question) . ' '
+def! s:echomsg(msg: string): void "{{{
+  call s:echomsg_with_color(msg, 'NONE')
+enddef "}}}
+def! s:echomsg_error(msg: string): void "{{{
+  call s:echomsg_with_color(msg, 'Error')
+enddef "}}}
+def! s:echomsg_warning(msg: string): void "{{{
+  call s:echomsg_with_color(msg, 'WarningMsg')
+enddef "}}}
+def! s:echo(msg: string): void "{{{
+  echo s:get_msg_string(msg)
+enddef "}}}
+def! s:echo_question(question: string): void "{{{
+  echon s:get_msg_string(question) .. ' '
   echohl Question
   echon '[Y/N]'
   echohl NONE
   echon "\n"
-endfunction "}}}
-function! s:is_visualmode() abort "{{{
+enddef "}}}
+def! s:is_visualmode(): bool "{{{
   return s:has(['v', 'V', "\<C-v>"], mode())
-endfunction "}}}
-function! s:is_cmdwin() abort "{{{
+enddef "}}}
+def! s:is_cmdwin(): bool "{{{
   return getcmdwintype() !=# ''
-endfunction "}}}
-function! s:glob(expr) abort "{{{
-  return split(glob(a:expr), "\n")
-endfunction "}}}
+enddef "}}}
+def! s:glob(expr: string): list<string> "{{{
+  return split(glob(expr), "\n")
+enddef "}}}
 function! s:getchar_string(...) abort "{{{
   return nr2char(call('getchar', a:000))
 endfunction "}}}
-function! s:ask(question) abort "{{{
-  call s:echo_question(a:question)
+def! s:ask(question: string): bool "{{{
+  call s:echo_question(question)
   return s:has(['y', 'Y'], s:getchar_string())
-endfunction "}}}
+enddef "}}}
 function! s:mkdir(dir, ...) abort "{{{
   " Return 1 when process finished without errors; otherwise, return 0.
   if isdirectory(a:dir) | return 1 | endif
@@ -93,9 +93,10 @@ function! s:mkdir(dir, ...) abort "{{{
   endif
   return call('mkdir', [a:dir] + a:000)
 endfunction "}}}
-function! s:strdivpos(str, pos) abort "{{{
-  return [strpart(a:str, 0, a:pos), a:str[a:pos :]]
-endfunction "}}}
+def! s:strdivpos(str: string, pos: number): list<string> "{{{
+  return [strpart(str, 0, pos),
+        \ strpart(str, pos, strlen(str) - pos)]
+enddef "}}}
 function! s:input(prompt, ...) abort "{{{
   try
     return call('input', [a:prompt] + a:000)
@@ -120,15 +121,15 @@ endfunction "}}}
 function! VimrcFunc(func) abort "{{{
   return function(s:SIDPrefix() . a:func)
 endfunction "}}}
-function! FilePath() abort "{{{
+def! FilePath(): string "{{{
   return s:is_cmdwin() ? expand('#') : expand('%')
-endfunction "}}}
-function! FileName() abort "{{{
+enddef "}}}
+def! FileName(): string "{{{
   return fnamemodify(FilePath(), ':p:t')
-endfunction "}}}
-function! FileParent() abort "{{{
+enddef "}}}
+def! FileParent(): string "{{{
   return fnamemodify(FilePath(), ':p:h')
-endfunction "}}}
+enddef "}}}
 function! SetUndoFtplugin(config) abort "{{{
   let restorer = 'execute ' . string(a:config)
   if exists('b:undo_ftplugin')
@@ -156,7 +157,7 @@ if has('vim_starting')
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
     let &t_SR = "\<ESC>[3 q"  " Use underline style cursor in Replace-mode.
   endif
-  if &term=~# '\<xterm\>'
+  if &term =~# '\<xterm\>'
     set mouse=a
   endif
 
