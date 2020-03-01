@@ -39,11 +39,9 @@ function! vimrc#delete_undofiles() abort "{{{
 endfunction "}}}
 " Path completion{{{
 let s:path_complete = {
-      \ 'target_path': '',
-      \ 'completions': [],
-      \ 'slash': VimrcFunc('vars')().filesystem.slash,
-      \ 'non_escaped_space': '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s',
-      \ }
+     \ 'slash': VimrcFunc('vars')().filesystem.slash,
+     \ 'non_escaped_space': '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s',
+     \ }
 function! vimrc#path_complete(findstart, base) abort "{{{
   if a:findstart
     let line = getline('.')[: col('.') - 1]
@@ -51,7 +49,7 @@ function! vimrc#path_complete(findstart, base) abort "{{{
       let s:path_complete.target_path = ''
     else
       let s:path_complete.target_path = split(line,
-            \ s:path_complete.non_escaped_space)[-1]
+           \ s:path_complete.non_escaped_space)[-1]
     endif
     let completions = VimrcFunc('glob')(s:path_complete.target_path . '*')
     let dirs = []
@@ -59,9 +57,11 @@ function! vimrc#path_complete(findstart, base) abort "{{{
     for path in completions
       let completion = fnamemodify(path, ':t')
       if filereadable(path)
-        call add(files, completion)
+        call add(files, {'word': completion, 'menu': '[file]'})
       else
-        call add(dirs, completion . s:path_complete.slash)
+        call add(dirs, {
+              \ 'word': completion . s:path_complete.slash,
+              \ 'menu': '[dir]'})
       endif
     endfor
     call sort(dirs)
@@ -73,6 +73,30 @@ function! vimrc#path_complete(findstart, base) abort "{{{
 
   return s:path_complete.completions
 endfunction "}}}
+
+" function! vimrc#path_complete(findstart, base) abort
+"   if a:findstart
+"     return col('.') - 1 - strlen(
+"          \ split(getline('.')[: col('.') - 1],
+"          \ s:path_complete.non_escaped_space, 1)[-1])
+"   endif
+"
+"   let completions = VimrcFunc('glob')(a:base . '*')
+"   let dirs = []
+"   let files = []
+"   for path in completions
+"     let abbr = fnamemodify(path, ':t')
+"     let complete_item = {'word': path, 'abbr': path}
+"     if filereadable(path)
+"       call add(files, {'word': path, 'abbr': abbr, 'menu': '[file]'})
+"     else
+"       let path .= s:path_complete.slash
+"       let abbr .= s:path_complete.slash
+"       call add(dirs, {'word': path, 'abbr': abbr, 'menu': '[dir]'})
+"     endif
+"   endfor
+"   return dirs + files
+" endfunction
  "}}}
 
 let &cpoptions = s:cpoptions_save
