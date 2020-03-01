@@ -979,6 +979,11 @@ endif
 if s:plugin.exists('vim-vsnip')
   imap <C-k> <Plug>(vsnip-expand-or-jump)
   smap <C-k> <Plug>(vsnip-expand-or-jump)
+  imap <C-f> <Plug>(vsnip-jump-next)
+  smap <C-f> <Plug>(vsnip-jump-next)
+  imap <C-b> <Plug>(vsnip-jump-prev)
+  smap <C-b> <Plug>(vsnip-jump-prev)
+  let g:vsnip_extra_mapping = 0
 endif
 " }}}
 " hrsh7th/vim-vsnip-integ{{{
