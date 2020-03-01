@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 15-Feb-2020.
+" Last Change: 01-Mar-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -1475,7 +1475,7 @@ if s:plugin.exists('vim-lsp')
   let g:lsp_diagnostics_echo_cursor = 1
 
   nnoremap <Plug>(<SID>-open-folding) zv
-  nmap <silent> gd <Plug>(lsp-definition)<Plug>(<SID>-open-folding)
+  nmap <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
   " nmap <silent> <C-p> <Plug>(lsp-previous-error)
   " nmap <silent> <C-n> <Plug>(lsp-next-error)
 endif
