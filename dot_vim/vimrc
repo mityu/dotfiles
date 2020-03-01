@@ -1773,27 +1773,9 @@ command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
 command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
 " statusline{{{
-function! s:statusline_init() abort "{{{
-  let s:statusline = {
-        \ 'active': s:statusline_generater(1),
-        \ 'inactive': s:statusline_generater(0),
-        \ }
-  if !has('vim_starting')
-    for tabnr in range(1, tabpagenr('$'))
-      for winnr in range(1, tabpagewinnr(tabnr, '$'))
-        call settabwinvar(tabnr, winnr, '&statusline',
-              \ s:statusline.inactive)
-      endfor
-    endfor
-  endif
-  let &l:statusline = s:statusline.active
-  call s:showmode_init()
-endfunction "}}}
-function! s:statusline_generater(active_page) "{{{
+function! s:statusline_generator() "{{{
   let statusline =
-        \ (a:active_page ? '%#StatusLine#' : '') .
         \ '%m' .
-        \ (a:active_page ? s:showmode_label() : '') .
         \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
         \ '[#%{bufnr("%")}]' .
         \ (s:plugin.exists('gina.vim') ?
@@ -1804,34 +1786,29 @@ function! s:statusline_generater(active_page) "{{{
         \ '[%{pathshorten(getcwd(winnr()))}]'
   return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction "}}}
-function! s:statusline_set(kind) abort "{{{
-  call setwinvar(t:vimrc_showmode_winID, '&statusline', s:statusline[a:kind])
-endfunction "}}}
-function! s:statusline_should_showmode(...) "{{{
-  let bufnr = a:0 ? winbufnr(a:1) : bufnr('%')
-  return getbufvar(bufnr, '&modifiable') ||
-        \ getbufvar(bufnr, '&buftype') == 'terminal'
-endfunction "}}}
-function! s:statusline_update(...) abort "{{{
-  let event = exists('a:1') ? tolower(a:1) : ''
-  if event ==# 'cmdwinenter'
-    call s:statusline_set('inactive')
-    let &statusline = s:statusline.active
-  elseif s:has(['cmdwinleave', 'optionset'], event)
-    if s:statusline_should_showmode(t:vimrc_showmode_winID)
-      call s:statusline_set('active')
-    endif
+def! s:filename_label(bufnr: number): string "{{{
+  let buftype = getbufvar(bufnr, '&buftype')
+  let bufname = bufname(bufnr)
+  if buftype ==# 'help'
+    return fnamemodify(bufname, ':t')
+  elseif buftype ==# 'quickfix'
+    return '[quickfix]'
+  elseif getbufvar(bufnr, '&previewwindow')
+    return '[preview]'
+  elseif buftype ==# 'terminal'
+    return 'terminal:' .. bufname
+  elseif buftype ==# 'prompt'
+    return '[prompt]'
+  else
+    return (buftype ==# 'nofile' ? ' *NoFile* ' : '') ..
+      \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
-  if event !=# '' | return | endif
-
-  if exists('t:vimrc_showmode_winID')
-    call s:statusline_set('inactive')
-  endif
-  let t:vimrc_showmode_winID = win_getid()
-  if s:statusline_should_showmode()
-    call s:statusline_set('active')
-  endif
-endfunction "}}}
+  return ''
+enddef "}}}
+let &statusline = printf('%%!%sstatusline_generator()', s:SIDPrefix())
+"}}}
+" tabline{{{
+let &tabline = printf('%%!%stabline()', s:SIDPrefix())
 function! s:showmode_init() abort "{{{
   let colors={
     \ 'normal': [['22', '148'], ['#005f00', '#afdf00']],
@@ -1840,7 +1817,7 @@ function! s:showmode_init() abort "{{{
     \ 'replace': [['231', '160'], ['#ffffff', '#df0000']],
     \ }
   for mode in keys(colors)
-    execute printf('hi VimrcShowMode_%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
+    execute printf('highlight VimrcShowMode%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
           \ mode,
           \ colors[mode][0][0],
           \ colors[mode][0][1],
@@ -1880,56 +1857,21 @@ function! s:showmode_highlight() abort "{{{
     \  "\<C-v>": 'visual',
     \  },
     \ mode(), 'normal')
-  execute 'hi link VimrcShowMode VimrcShowMode_' . type
+  execute 'highlight link VimrcShowMode VimrcShowMode' . type
   return ''
 endfunction "}}}
-function! s:showmode_label() abort "{{{
-  return '%#VimrcShowMode# %{<SID>showmode_mode()} %#StatusLine#'
-endfunction "}}}
-def! s:filename_label(bufnr: number): string "{{{
-  let buftype = getbufvar(bufnr, '&buftype')
-  let bufname = bufname(bufnr)
-  if buftype ==# 'help'
-    return fnamemodify(bufname, ':t')
-  elseif buftype ==# 'quickfix'
-    return '[quickfix]'
-  elseif getbufvar(bufnr, '&previewwindow')
-    return '[preview]'
-  elseif buftype ==# 'terminal'
-    return 'terminal:' .. bufname
-  elseif buftype ==# 'prompt'
-    return '[prompt]'
-  else
-    return (buftype ==# 'nofile' ? ' *NoFile* ' : '') ..
-      \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
-  endif
-  return ''
+def! s:showmode_label(): string "{{{
+  return '%#VimrcShowMode# %{<SID>showmode_mode()} %#TabLine#'
 enddef "}}}
-augroup vimrc_statusline
-  autocmd VimEnter * let t:vimrc_showmode_winID = win_getid()
-  autocmd ColorScheme * call s:statusline_init()
-  autocmd User vimrc_initialize call s:statusline_init()
-  autocmd WinEnter,BufWinEnter * call s:statusline_update()
-  autocmd CmdwinEnter * call s:statusline_update('CmdwinEnter')
-  autocmd CmdwinLeave * call s:statusline_update('CmdwinLeave')
-  autocmd OptionSet modifiable,buftype call s:statusline_update('OptionSet')
-augroup END
-call s:statusline_init()
-"}}}
-" tabline{{{
-let &tabline = printf('%%!%stabline()', s:SIDPrefix())
 def! s:generate_tabinfo(tabnr: number): string "{{{
   let tablist = tabpagebuflist(tabnr)
   let info = ''
   info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
   info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
-  " info ..= s:filename_label(tabpagebuflist(tabnr)[tabpagewinnr(tabnr) - 1])
-  " FIXME: This line causes "Using a {type} as a Number" error. Sometimes
-  " {type} is float, and sometimes job... Why?
   return info
 enddef "}}}
 def! s:tabline(): string "{{{
-  let tabline = '%#TabLine#'
+  let tabline = s:showmode_label() .. '%#TabLine#|'
   let t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
@@ -1946,6 +1888,11 @@ def! s:tabline(): string "{{{
 
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
 enddef "}}}
+set showtabline=2
+augroup vimrc_showmode
+  autocmd ColorScheme * call s:showmode_init()
+  autocmd User vimrc_initialize call s:showmode_init()
+augroup END
 "}}}
 " :terminal{{{
 augroup vimrc_terminal
