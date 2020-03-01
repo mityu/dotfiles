@@ -1430,13 +1430,13 @@ if s:plugin.exists('asyncomplete.vim')
             \ })
     endif
 
-    if s:plugin.exists('vim-brownie')
-      call asyncomplete#register_source({
-           \ 'name': 'brownie',
-           \ 'whitelist': ['*'],
-           \ 'completor': function('s:brownie_snip_completor'),
-           \  })
-    endif
+    " if s:plugin.exists('vim-brownie')
+    "   call asyncomplete#register_source({
+    "       \ 'name': 'brownie',
+    "       \ 'whitelist': ['*'],
+    "       \ 'completor': function('s:brownie_snip_completor'),
+    "       \  })
+    " endif
   endfunction
   augroup vimrc_asyncomplete_sources
     autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
