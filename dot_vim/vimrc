@@ -241,6 +241,8 @@ function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   call minpac#add('haya14busa/vim-edgemotion')
+  call minpac#add('hrsh7th/vim-vsnip')
+  call minpac#add('hrsh7th/vim-vsnip-integ')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -973,6 +975,24 @@ if s:plugin.exists('vim-edgemotion')
   augroup END
 endif
 "}}}
+" hrsh7th/vim-vsnip{{{
+if s:plugin.exists('vim-vsnip')
+  imap <C-k> <Plug>(vsnip-expand-or-jump)
+  smap <C-k> <Plug>(vsnip-expand-or-jump)
+endif
+" }}}
+" hrsh7th/vim-vsnip-integ{{{
+if s:plugin.exists('vim-vsnip-integ')
+  let g:vsnip_integ_config = {
+        \ 'vim_lsp': 1,
+        \ 'vim_lsc': 0,
+        \ 'lamp': 0,
+        \ 'deoplete_lsp': 0,
+        \ 'mucomplete': 0,
+        \ 'deoplete': 0,
+        \ }
+endif
+"}}}
 " kana/vim-operator-replace{{{
 if s:plugin.exists('vim-operator-replace')
   map ,r  <Plug>(operator-replace)
@@ -1236,72 +1256,72 @@ if s:plugin.exists('vim-brownie')
           \ 'stridx(v:val, a:arg) == 0')
   endfunction
 
-  function! s:brownie_extract_on_cursor() abort
-    let curpos = '\%' . (col('.') - (mode() ==# 'i' ? 1 : 0)) . 'c'
-    if matchstr(getline('.'), curpos . '\a') ==# ''
-      call s:echomsg_warning("Any words aren't on the cursor!")
-      return ''
-    endif
-    let original_curpos = getpos('.')
-    let begin = match(getline('.'), '\a*\ze' . curpos)
-    let end = match(getline('.'), curpos . '\a*\zs\ze')
-    let [pre, word] = s:strdivpos(getline('.'), begin)
-    let [word, suf] = s:strdivpos(word, end - begin)
-    if brownie#exists(&filetype, 'snippet', word)
-      call setline('.', pre . suf)
-      call cursor(line('.'), begin + 1)
-      call brownie#extract(&filetype, 'snippet', word)
-    else
-      call s:echomsg_error('Snippet not found: ' . word)
-    endif
-    return ''
-  endfunction
-  nnoremap <silent> <C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
-  inoremap <silent> <C-k> <C-r>=<SID>brownie_extract_on_cursor()<CR>
+  " function! s:brownie_extract_on_cursor() abort
+  "   let curpos = '\%' . (col('.') - (mode() ==# 'i' ? 1 : 0)) . 'c'
+  "   if matchstr(getline('.'), curpos . '\a') ==# ''
+  "     call s:echomsg_warning("Any words aren't on the cursor!")
+  "     return ''
+  "   endif
+  "   let original_curpos = getpos('.')
+  "   let begin = match(getline('.'), '\a*\ze' . curpos)
+  "   let end = match(getline('.'), curpos . '\a*\zs\ze')
+  "   let [pre, word] = s:strdivpos(getline('.'), begin)
+  "   let [word, suf] = s:strdivpos(word, end - begin)
+  "   if brownie#exists(&filetype, 'snippet', word)
+  "     call setline('.', pre . suf)
+  "     call cursor(line('.'), begin + 1)
+  "     call brownie#extract(&filetype, 'snippet', word)
+  "   else
+  "     call s:echomsg_error('Snippet not found: ' . word)
+  "   endif
+  "   return ''
+  " endfunction
+  " nnoremap <silent> <C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
+  " inoremap <silent> <C-k> <C-r>=<SID>brownie_extract_on_cursor()<CR>
 
-  if s:plugin.exists('asyncomplete.vim')
-    if !exists('s:brownie_snip_cache')
-      let s:brownie_snip_cache = {}
-    endif
-    function! s:brownie_snip_completor(options, context) "{{{
-      if !has_key(s:brownie_snip_cache, &filetype)
-        let s:brownie_snip_cache[&filetype] = map(
-              \ brownie#list(&filetype, 'snippet'),
-              \ '{"word": v:val, "menu": "[brownie]"}'
-              \ )
-      endif
-      if empty(s:brownie_snip_cache[&filetype])
-        return
-      endif
-      let target = matchstr(a:context.typed, '^\s*\zs\a\+$')
-      let candidates = deepcopy(s:brownie_snip_cache[&filetype])
-      if target !=# ''
-        " Use ignorecase.
-        let target = tolower(target)
-        let candidates = filter(candidates,
-              \ 'stridx(tolower(v:val.word), target) == 0')
-      endif
-      let startcol = a:context.col - strlen(target)
-      call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
-    endfunction "}}}
-    function! s:brownie_snip_trigger() "{{{
-      if empty(v:completed_item) ||
-            \ v:completed_item.menu !=# '[brownie]' ||
-            \ !brownie#exists(&filetype, 'snippet', v:completed_item.word)
-        return
-      endif
-      let strlen = strlen(v:completed_item.word)
-      let [line, col] = [line('.'), col('.')]
-      let text = getline('.')
-      let text = strpart(text, 0, col - strlen - 1) . text[col - 1 :]
-      call setline(line, text)
-      call cursor(line, col - strlen)
-      call brownie#extract(&filetype, 'snippet', v:completed_item.word)
-    endfunction "}}}
-    augroup brownie_snip_trigger
-      autocmd CompleteDone * call s:brownie_snip_trigger()
-    augroup END
-  endif
+  " if s:plugin.exists('asyncomplete.vim')
+  "   if !exists('s:brownie_snip_cache')
+  "     let s:brownie_snip_cache = {}
+  "   endif
+  "   function! s:brownie_snip_completor(options, context) "{{{
+  "     if !has_key(s:brownie_snip_cache, &filetype)
+  "       let s:brownie_snip_cache[&filetype] = map(
+  "             \ brownie#list(&filetype, 'snippet'),
+  "             \ '{"word": v:val, "menu": "[brownie]"}'
+  "             \ )
+  "     endif
+  "     if empty(s:brownie_snip_cache[&filetype])
+  "       return
+  "     endif
+  "     let target = matchstr(a:context.typed, '^\s*\zs\a\+$')
+  "     let candidates = deepcopy(s:brownie_snip_cache[&filetype])
+  "     if target !=# ''
+  "       " Use ignorecase.
+  "       let target = tolower(target)
+  "       let candidates = filter(candidates,
+  "             \ 'stridx(tolower(v:val.word), target) == 0')
+  "     endif
+  "     let startcol = a:context.col - strlen(target)
+  "     call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
+  "   endfunction "}}}
+  "   function! s:brownie_snip_trigger() "{{{
+  "     if empty(v:completed_item) ||
+  "           \ v:completed_item.menu !=# '[brownie]' ||
+  "           \ !brownie#exists(&filetype, 'snippet', v:completed_item.word)
+  "       return
+  "     endif
+  "     let strlen = strlen(v:completed_item.word)
+  "     let [line, col] = [line('.'), col('.')]
+  "     let text = getline('.')
+  "     let text = strpart(text, 0, col - strlen - 1) . text[col - 1 :]
+  "     call setline(line, text)
+  "     call cursor(line, col - strlen)
+  "     call brownie#extract(&filetype, 'snippet', v:completed_item.word)
+  "   endfunction "}}}
+  "   augroup brownie_snip_trigger
+  "     autocmd CompleteDone * call s:brownie_snip_trigger()
+  "   augroup END
+  " endif
 endif
 "}}}
 " mityu/vim-gram{{{
