@@ -325,6 +325,7 @@ set autoread
 set incsearch ignorecase
 set showmatch matchtime=1
 set laststatus=2
+set showtabline=2
 
 set cmdheight=2 cmdwinheight=10
 set wildmenu
@@ -478,17 +479,11 @@ call s:EnhancedOmap('8', '(')
 call s:EnhancedOmap(', ', '<')
 unlet s:Omap s:EnhancedOmap
 
-function! s:terminal_map(cmd, lhs, rhs, ...) abort "{{{
-  let mods = get(a:000, 0, '')
+def! s:terminal_map(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void "{{{
   execute printf('%s %s %s%s %s%s',
-        \ a:cmd, mods, &termwinkey, a:lhs, &termwinkey, a:rhs)
-endfunction "}}}
-" Use :execute with variables causes error in vim9script now.
-" def! s:terminal_map(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void "{{{
-"   execute printf('%s %s %s%s %s%s',
-"        \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
-" enddef "}}}
-call s:terminal_map('tnoremap', ';', ':<C-f>')
+       \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
+enddef "}}}
+call s:terminal_map('tnoremap', ';', ':<C-f>A')
 call s:terminal_map('tnoremap', ':', ';')
 call s:terminal_map('tnoremap', '<ESC>', 'N')
 call s:terminal_map('tnoremap', 'p', '""')
@@ -1888,7 +1883,6 @@ def! s:tabline(): string "{{{
 
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
 enddef "}}}
-set showtabline=2
 augroup vimrc_showmode
   autocmd ColorScheme * call s:showmode_init()
   autocmd User vimrc_initialize call s:showmode_init()
