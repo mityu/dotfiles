@@ -1,4 +1,4 @@
 class {{_cursor_}}{
-    public:
-    private:
+	public:
+	private:
 };
