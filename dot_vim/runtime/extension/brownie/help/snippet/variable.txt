@@ -1,0 +1,6 @@
+:call brownie#replace('\<PLUGIN\>', expand('%:t:r'))
+:call brownie#replace('__INDENT__', repeat(' ', 52))
+:call brownie#highlight('\C\<VARIABLE\>')
+:call brownie#replace('\C\<VARIABLE\>', brownie#input('variable?: '))
+__INDENT__*g:PLUGIN#VARIABLE*
+g:PLUGIN#VARIABLE{{_cursor_}}
