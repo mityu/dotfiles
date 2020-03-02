@@ -991,6 +991,8 @@ if s:plugin.exists('vim-vsnip')
   imap <C-b> <Plug>(vsnip-jump-prev)
   smap <C-b> <Plug>(vsnip-jump-prev)
   let g:vsnip_extra_mapping = 0
+  let g:vsnip_snippet_dir =
+        \ s:join_path($DOT_VIM, 'runtime', 'extension', 'vsnip')
 endif
 " }}}
 " hrsh7th/vim-vsnip-integ{{{
