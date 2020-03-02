@@ -990,6 +990,7 @@ if s:plugin.exists('vim-vsnip')
   smap <C-f> <Plug>(vsnip-jump-next)
   imap <C-b> <Plug>(vsnip-jump-prev)
   smap <C-b> <Plug>(vsnip-jump-prev)
+  snoremap <C-h> <C-h>i
   let g:vsnip_extra_mapping = 0
   let g:vsnip_snippet_dir =
         \ s:join_path($DOT_VIM, 'runtime', 'extension', 'vsnip')
