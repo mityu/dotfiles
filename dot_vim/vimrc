@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 01-Mar-2020.
+" Last Change: 02-Mar-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -977,7 +977,9 @@ endif
 "}}}
 " hrsh7th/vim-vsnip{{{
 if s:plugin.exists('vim-vsnip')
-  imap <C-k> <Plug>(vsnip-expand-or-jump)
+  imap <expr> <C-k> vsnip#available(1) ?
+        \ '<Plug>(vsnip-expand-or-jump)' :
+        \ pumvisible() ? '<C-y>' : '<C-k>'
   smap <C-k> <Plug>(vsnip-expand-or-jump)
   imap <C-f> <Plug>(vsnip-jump-next)
   smap <C-f> <Plug>(vsnip-jump-next)
