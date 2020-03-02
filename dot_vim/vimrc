@@ -1003,7 +1003,7 @@ endif
 "}}}
 " kana/vim-operator-replace{{{
 if s:plugin.exists('vim-operator-replace')
-  map ,r  <Plug>(operator-replace)
+  map _r  <Plug>(operator-replace)
 endif
 "}}}
 " kana/vim-operator-user{{{
@@ -1384,8 +1384,8 @@ endif
 "}}}
 " osyo-manga/vim-operator-swap{{{
 if s:plugin.exists('vim-operator-swap')
-  map ,sy <Plug>(operator-swap-marking)
-  map ,sp <Plug>(operator-swap)
+  map _sy <Plug>(operator-swap-marking)
+  map _sp <Plug>(operator-swap)
 endif
 "}}}
 " prabirshrestha/ayncomplete.vim{{{
@@ -1476,9 +1476,9 @@ endif
 "}}}
 " rhysd/vim-operator-surround{{{
 if s:plugin.exists('vim-operator-surround')
-  map ,sa <Plug>(operator-surround-append)
-  map ,sd <Plug>(operator-surround-delete)
-  map ,sr <Plug>(operator-surround-replace)
+  map _sa <Plug>(operator-surround-append)
+  map _sd <Plug>(operator-surround-delete)
+  map _sr <Plug>(operator-surround-replace)
 endif
 "}}}
 " thinca/vim-ambicmd{{{
@@ -1606,7 +1606,7 @@ if s:plugin.exists('caw.vim')
     return prefix . key
   endfunction "}}}
 
-  map ,c <Plug>(caw:hatpos:toggle:operator)
+  map _c <Plug>(caw:hatpos:toggle:operator)
   call s:caw_oneline_comment_map('//')
   " call s:caw_oneline_comment_map('<C-/>')
   let g:caw_no_default_keymappings = 1
@@ -1948,10 +1948,10 @@ function! s:warningspace() abort "{{{
 
   " Zenkaku space
   " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
-  let w:twobyte_space_id=matchadd('WarningSpace', '\%d12288')
+  let w:twobyte_space_id = matchadd('WarningSpace', '\%d12288')
 
   " End of line's space
-  let w:end_of_line_space_id=matchadd('WarningSpace', '\s\+$')
+  let w:end_of_line_space_id = matchadd('WarningSpace', '\s\+$')
 endfunction "}}}
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
