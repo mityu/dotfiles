@@ -1,4 +1,4 @@
-"Last Change: 01-Feb-2020.
+"Last Change: 02-Mar-2020.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -47,6 +47,11 @@ let s:palette = {
       \ 'violet':            '#ee82ee',
       \ 'lightsteelblue':    '#b0c4de',
       \ 'russet':            '#8b8b00',
+      \ 'paneldarkorange':   '#493f2f',
+      \ 'panelorange':       '#706656',
+      \ 'panellightorange':  '#baba8d',
+      \ 'sbarorange':        '#82775a',
+      \ 'thumborange':       '#b6b689',
       \ 'NONE':              'NONE'
       \ }
 
@@ -391,10 +396,10 @@ call s:hi('VertSplit','cornsilk','cornsilk',0)
 call s:hi('MatchParen','NONE','purple',0)
 
 call s:hi('WileMenu',0,'yellow',0)
-call s:hi('Pmenu','cornsilk','vividorange',0)
-call s:hi('PmenuSel','cornsilk','orange',0)
-call s:hi('PmenuSbar',0,'white',0)
-call s:hi('PmenuThumb',0,'gray',0)
+call s:hi('Pmenu','panellightorange','paneldarkorange',0)
+call s:hi('PmenuSel','panellightorange','panelorange',0)
+call s:hi('PmenuSbar',0,'sbarorange',0)
+call s:hi('PmenuThumb',0,'thumborange',0)
 
 
 call s:hi('DiffAdd', 0, 'deeplydarkorange', 0)
