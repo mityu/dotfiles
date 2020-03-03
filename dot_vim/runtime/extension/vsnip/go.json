@@ -1,0 +1,30 @@
+{
+    "func": {
+        "prefix": "func",
+        "body": [
+            "func ${1:name}(${2:args}) ${3:ret_T} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "func block"
+    },
+    "func/receive": {
+        "prefix": "func",
+        "body": [
+            "func (${1:structure}) ${2:name}(${3:args}) ${4:ret_T} {",
+            "\t$0",
+            "}"
+        ],
+        "description": "receiver block"
+    },
+    "if/err": {
+        "prefix": "if",
+        "body": [
+            "if ${1:err} != nil {",
+            "\treturn ${2:err}",
+            "}",
+            "$0"
+        ],
+        "description": "error check"
+    }
+}
