@@ -2,7 +2,7 @@
     "After": {
         "prefix": "After",
         "body": [
-            "After ${0}",
+            "After $0",
             "End"
         ],
         "description": "After block"
@@ -10,7 +10,7 @@
     "Before": {
         "prefix": "Before",
         "body": [
-            "Before ${0}",
+            "Before $0",
             "End"
         ],
         "description": "Before block"
@@ -18,7 +18,7 @@
     "Describe": {
         "prefix": "Describe",
         "body": [
-            "Describe ${0}",
+            "Describe $0",
             "End"
         ],
         "description": "Describe block"
@@ -26,7 +26,7 @@
     "It": {
         "prefix": "It",
         "body": [
-            "It ${0}",
+            "It $0",
             "End"
         ],
         "description": "It block"
@@ -34,7 +34,7 @@
     "Context": {
         "prefix": "Context",
         "body": [
-            "Context ${0}",
+            "Context $0",
             "End"
         ],
         "description": "Context block"
