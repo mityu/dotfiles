@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 02-Mar-2020.
+" Last Change: 03-Mar-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -901,8 +901,13 @@ enddef "}}}
 "TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void "{{{
   let winid = win_getid(winnr('#'))
-  " TODO: Check if I can open a file on the window of `winid.`
-  call win_execute(winid, 'edit ' .. fnameescape(file_info.fullpath))
+  let buftype = getwinvar(winid, '&buftype')
+  let open_cmd = 'edit'
+  if !(buftype ==# 'nofile' || buftype ==# '')
+    open_cmd = 'split'
+  endif
+  call win_execute(winid,
+        \ printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
 enddef "}}}
 "}}}
 " minpac{{{
