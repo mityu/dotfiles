@@ -1,4 +1,4 @@
-"Last Change: 02-Mar-2020.
+"Last Change: 03-Mar-2020.
 "Author: mityu
 "This colorscheme based on billw
 
@@ -49,7 +49,7 @@ let s:palette = {
       \ 'russet':            '#8b8b00',
       \ 'paneldarkorange':   '#493f2f',
       \ 'panelorange':       '#706656',
-      \ 'panellightorange':  '#baba8d',
+      \ 'panellightorange':  '#caca9d',
       \ 'sbarorange':        '#82775a',
       \ 'thumborange':       '#b6b689',
       \ 'NONE':              'NONE'
