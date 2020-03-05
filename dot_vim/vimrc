@@ -241,8 +241,6 @@ function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   call minpac#add('haya14busa/vim-edgemotion')
-  call minpac#add('hrsh7th/vim-vsnip')
-  call minpac#add('hrsh7th/vim-vsnip-integ')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -1016,34 +1014,6 @@ if s:plugin.exists('vim-edgemotion')
     autocmd ColorScheme * call s:edgenavi_highlight()
     autocmd User vimrc_initialize call s:edgenavi_highlight()
   augroup END
-endif
-"}}}
-" hrsh7th/vim-vsnip{{{
-if s:plugin.exists('vim-vsnip') && 0
-  imap <expr> <C-k> vsnip#available(1) ?
-        \ '<Plug>(vsnip-expand-or-jump)' :
-        \ pumvisible() ? '<C-y>' : '<C-k>'
-  smap <C-k> <Plug>(vsnip-expand-or-jump)
-  imap <C-f> <Plug>(vsnip-jump-next)
-  smap <C-f> <Plug>(vsnip-jump-next)
-  imap <C-b> <Plug>(vsnip-jump-prev)
-  smap <C-b> <Plug>(vsnip-jump-prev)
-  snoremap <C-h> <C-h>i
-  let g:vsnip_extra_mapping = 0
-  let g:vsnip_snippet_dir =
-        \ s:join_path($DOT_VIM, 'runtime', 'extension', 'vsnip')
-endif
-" }}}
-" hrsh7th/vim-vsnip-integ{{{
-if s:plugin.exists('vim-vsnip-integ')
-  let g:vsnip_integ_config = {
-        \ 'vim_lsp': 0,
-        \ 'vim_lsc': 0,
-        \ 'lamp': 0,
-        \ 'deoplete_lsp': 0,
-        \ 'mucomplete': 0,
-        \ 'deoplete': 0,
-        \ }
 endif
 "}}}
 " kana/vim-operator-replace{{{
