@@ -986,7 +986,7 @@ if s:plugin.exists('vim-edgemotion')
 endif
 "}}}
 " hrsh7th/vim-vsnip{{{
-if s:plugin.exists('vim-vsnip')
+if s:plugin.exists('vim-vsnip') && 0
   imap <expr> <C-k> vsnip#available(1) ?
         \ '<Plug>(vsnip-expand-or-jump)' :
         \ pumvisible() ? '<C-y>' : '<C-k>'
@@ -1004,7 +1004,7 @@ endif
 " hrsh7th/vim-vsnip-integ{{{
 if s:plugin.exists('vim-vsnip-integ')
   let g:vsnip_integ_config = {
-        \ 'vim_lsp': 1,
+        \ 'vim_lsp': 0,
         \ 'vim_lsc': 0,
         \ 'lamp': 0,
         \ 'deoplete_lsp': 0,
