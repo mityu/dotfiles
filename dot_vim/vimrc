@@ -2154,8 +2154,7 @@ function! s:compblock_on_InsertLeave() abort
   let b:compblock_try_to_apply = v:false
 endfunction
 augroup vimrc_compblock
-  autocmd VimEnter * call s:compblock_init_for_buffer()
-  autocmd BufNewFile,BufRead * call s:compblock_init_for_buffer()
+  autocmd BufEnter * call s:compblock_init_for_buffer()
   autocmd CursorMoved,TextChanged * call s:compblock_update_ctx()
   autocmd CursorMovedI * call s:compblock_on_CursorMovedI()
   autocmd TextChangedI * call s:compblock_on_TextChangedI()
