@@ -2058,7 +2058,7 @@ let s:compblock_config = {
      \   '{\s*$': '}',
      \ },
      \ 'vim': {
-     \   '^\s*def[!]\s\+\S\+(.*).*$': 'enddef',
+     \   '^\s*def!\?\s\+\S\+(.*).*$': 'enddef',
      \   '^\s*function!\?\s\+\S\+(.*).*$': 'endfunction',
      \   '^\s*if\s.\+$': 'endif',
      \   '^\s*while\s.\+$': 'endwhile',
