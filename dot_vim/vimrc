@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 03-Mar-2020.
+" Last Change: 05-Mar-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -1303,7 +1303,7 @@ if s:plugin.exists('vim-brownie')
   "   if !exists('s:brownie_snip_cache')
   "     let s:brownie_snip_cache = {}
   "   endif
-  "   function! s:brownie_snip_completor(options, context) "{{{
+  "   function! s:brownie_snip_completor(options, context) abort "{{{
   "     if !has_key(s:brownie_snip_cache, &filetype)
   "       let s:brownie_snip_cache[&filetype] = map(
   "             \ brownie#list(&filetype, 'snippet'),
@@ -1324,7 +1324,7 @@ if s:plugin.exists('vim-brownie')
   "     let startcol = a:context.col - strlen(target)
   "     call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
   "   endfunction "}}}
-  "   function! s:brownie_snip_trigger() "{{{
+  "   function! s:brownie_snip_trigger() abort "{{{
   "     if empty(v:completed_item) ||
   "           \ v:completed_item.menu !=# '[brownie]' ||
   "           \ !brownie#exists(&filetype, 'snippet', v:completed_item.word)
@@ -1495,7 +1495,7 @@ endif
 "}}}
 " thinca/vim-ambicmd{{{
 if s:plugin.exists('vim-ambicmd')
-  function! s:ambicmd_expand(key)
+  function! s:ambicmd_expand(key) abort
     let expander = ambicmd#expand(a:key)
     return (expander ==# a:key ? '' : "\<C-g>u") . expander
   endfunction
@@ -1595,14 +1595,14 @@ if s:plugin.exists('caw.vim')
   imap <Plug>(vimrc:caw:dollarpos:comment)
         \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:dollarpos:comment)
 
-  function! s:caw_oneline_comment_map(key) "{{{
+  function! s:caw_oneline_comment_map(key) abort "{{{
     execute printf(
           \ 'inoremap <silent> <Plug>(vimrc:caw:oneline:do-input)%s %s',
           \ a:key, a:key)
     execute printf('imap <expr> %s <SID>caw_oneline_comment(%s)',
           \ a:key, string(a:key))
   endfunction "}}}
-  function! s:caw_oneline_comment(key) "{{{
+  function! s:caw_oneline_comment(key) abort "{{{
     let do_input = "\<Plug>(vimrc:caw:oneline:do-input)" . a:key
     if !exists('b:caw_oneline_comment')
       return do_input
@@ -1775,7 +1775,7 @@ command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
 command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
 " statusline{{{
-function! s:statusline_generator() "{{{
+function! s:statusline_generator() abort "{{{
   let statusline =
         \ '%m' .
         \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
@@ -2051,6 +2051,117 @@ def! s:git_diff(arg_target: string = expand('%')): void "{{{
   endif
 enddef "}}}
 command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
+"}}}
+" compblock{{{
+let s:compblock_config = {
+     \ '_': {
+     \   '{\s*$': '}',
+     \ },
+     \ 'vim': {
+     \   '^\s*def[!]\s\+\S\+(.*).*$': 'enddef',
+     \   '^\s*function!\?\s\+\S\+(.*).*$': 'endfunction',
+     \   '^\s*if\s.\+$': 'endif',
+     \   '^\s*while\s.\+$': 'endwhile',
+     \   '^\s*for\s.\+$': 'endfor',
+     \   '^\s*echohl\s\+\%(NONE\)\@!\S\+$': 'echohl NONE',
+     \   '^\s*augroup\s\+\%(END\)\@!\S\+$': 'augroup END',
+     \ },
+     \ }
+function! s:compblock_init_for_buffer() abort
+  if !exists('b:compblock_ctx')
+    let b:compblock_ctx = {
+         \ 'line_count': line('$'),
+         \ 'cur_line': line('.'),
+         \ }
+  endif
+  if !exists('b:compblock_try_to_apply')
+    let b:compblock_try_to_apply = v:false
+  endif
+endfunction
+function! s:compblock_need_try() abort
+  return line('$') > b:compblock_ctx.line_count &&
+       \ line('.') > b:compblock_ctx.cur_line
+endfunc
+function! s:compblock_get_one_indent() abort
+  if &l:expandtab
+    return repeat(' ', shiftwidth())
+  else
+    return "\t"
+  endif
+endfunction
+function! s:compblock_get_indent_depth(line) abort
+  return indent(a:line) / shiftwidth()
+endfunction
+function! s:compblock_try_to_apply() abort
+  let b:compblock_try_to_apply = v:false
+  if s:compblock_get_indent_depth(line('.') + 1) >
+       \ s:compblock_get_indent_depth(line('.') - 1)
+    return
+  endif
+  let prev_line = getline(line('.') - 1)
+  let configs = items(get(s:compblock_config, '_', {})) +
+        \ items(get(s:compblock_config, &filetype, {}))
+  for [pattern, block_closer] in configs
+    if prev_line !~# pattern
+      continue
+    endif
+    let indent = repeat(s:compblock_get_one_indent(),
+          \ s:compblock_get_indent_depth(line('.') - 1))
+    let newline = indent . block_closer
+    if getline(line('.') + 1) ==# newline
+      continue
+    endif
+    call append('.', newline)
+  endfor
+  call s:compblock_update_ctx()
+endfunction
+function! s:compblock_update_ctx() abort
+  if s:is_cmdwin()
+    return
+  endif
+  let b:compblock_ctx.line_count = line('$')
+  let b:compblock_ctx.cur_line = line('.')
+endfunction
+function! s:compblock_on_CursorMovedI() abort
+  if s:is_cmdwin()
+    return
+  endif
+  if s:compblock_need_try()
+    let b:compblock_try_to_apply = v:true
+  endif
+  call s:compblock_update_ctx()
+endfunction
+function! s:compblock_on_TextChangedI() abort
+  if s:is_cmdwin()
+    return
+  endif
+  if b:compblock_try_to_apply
+    call s:compblock_try_to_apply()
+  endif
+endfunction
+function! s:compblock_on_InsertEnter() abort
+  if s:is_cmdwin()
+    return
+  endif
+  if s:compblock_need_try()
+    call s:compblock_try_to_apply()
+  endif
+endfunction
+function! s:compblock_on_InsertLeave() abort
+  if s:is_cmdwin()
+    return
+  endif
+  let b:compblock_try_to_apply = v:false
+endfunction
+augroup vimrc_compblock
+  autocmd VimEnter * call s:compblock_init_for_buffer()
+  autocmd BufNewFile,BufRead * call s:compblock_init_for_buffer()
+  autocmd CursorMoved,TextChanged * call s:compblock_update_ctx()
+  autocmd CursorMovedI * call s:compblock_on_CursorMovedI()
+  autocmd TextChangedI * call s:compblock_on_TextChangedI()
+  autocmd InsertEnter * call s:compblock_on_InsertEnter()
+  autocmd InsertLeave * call s:compblock_on_InsertLeave()
+augroup END
 "}}}
 "}}}
 " lvimrc{{{
