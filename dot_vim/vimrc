@@ -2095,6 +2095,9 @@ endfunction
 function! s:compblock_get_indent_depth(line) abort
   return indent(a:line) / shiftwidth()
 endfunction
+function! s:compblock_get_indent_str(depth) abort
+  return repeat(s:compblock_get_one_indent(), a:depth)
+endfunction
 function! s:compblock_try_to_apply() abort
   let b:compblock_try_to_apply = v:false
   if s:compblock_get_indent_depth(line('.') + 1) >
@@ -2102,17 +2105,34 @@ function! s:compblock_try_to_apply() abort
     return
   endif
   let prev_line = getline(line('.') - 1)
-  let configs = items(get(s:compblock_config, '_', {})) +
-        \ items(get(s:compblock_config, &filetype, {}))
-  for [pattern, block_closer] in configs
+  let configs = items(get(s:compblock_config, &filetype, {})) +
+        \ items(get(s:compblock_config, '_', {}))
+  for [pattern, Block_end] in configs
     if prev_line !~# pattern
       continue
     endif
-    let indent = repeat(s:compblock_get_one_indent(),
-          \ s:compblock_get_indent_depth(line('.') - 1))
-    let newline = indent . block_closer
+    " Disable now. I don't need now.
+    " if type(Block_end) == v:t_func
+    "   let Block_end = Block_end(prev_line)
+    " endif
+    " if type(Block_end) == v:t_none
+    "   " Cancel.
+    "   continue
+    " endif
+    let indent_depth = s:compblock_get_indent_depth(line('.') - 1)
+    let indent =  s:compblock_get_indent_str(indent_depth)
+    let newline = indent . Block_end
     if getline(line('.') + 1) ==# newline
       continue
+    endif
+    let after_cursor = s:strdivpos(getline('.'), col('.') - 1)[1]
+    if after_cursor !=# ''
+      if after_cursor !=# Block_end
+        continue
+      else
+        call setline('.', s:compblock_get_indent_str(indent_depth + 1))
+        call cursor(line('.'), strlen(getline('.')) + 1)
+      endif
     endif
     call append('.', newline)
   endfor
@@ -2125,7 +2145,7 @@ function! s:compblock_update_ctx() abort
   let b:compblock_ctx.line_count = line('$')
   let b:compblock_ctx.cur_line = line('.')
 endfunction
-function! s:compblock_on_CursorMovedI() abort
+function! s:compblock_on_CursorMoved() abort
   if s:is_cmdwin()
     return
   endif
@@ -2134,7 +2154,7 @@ function! s:compblock_on_CursorMovedI() abort
   endif
   call s:compblock_update_ctx()
 endfunction
-function! s:compblock_on_TextChangedI() abort
+function! s:compblock_on_TextChanged() abort
   if s:is_cmdwin()
     return
   endif
@@ -2158,9 +2178,8 @@ function! s:compblock_on_InsertLeave() abort
 endfunction
 augroup vimrc_compblock
   autocmd BufEnter * call s:compblock_init_for_buffer()
-  autocmd CursorMoved,TextChanged * call s:compblock_update_ctx()
-  autocmd CursorMovedI * call s:compblock_on_CursorMovedI()
-  autocmd TextChangedI * call s:compblock_on_TextChangedI()
+  autocmd CursorMoved,CursorMovedI * call s:compblock_on_CursorMoved()
+  autocmd TextChanged,TextChangedI * call s:compblock_on_TextChanged()
   autocmd InsertEnter * call s:compblock_on_InsertEnter()
   autocmd InsertLeave * call s:compblock_on_InsertLeave()
 augroup END
