@@ -954,11 +954,25 @@ command! -bar PackStatus call s:pack_status()
 " Installed plugins{{{
 " haya14busa/vim-edgemotion{{{
 if s:plugin.exists('vim-edgemotion')
-  nnoremap <silent> <C-p> :<C-u>call sign_jump(1, 'vimrc-edgenavi', '')<CR>
-  nnoremap <silent> <C-n> :<C-u>call sign_jump(2, 'vimrc-edgenavi', '')<CR>
+  nmap <C-p> <Plug>(edgemotion-k)
+  nmap <C-n> <Plug>(edgemotion-j)
   vmap <C-p> <Plug>(edgemotion-k)
   vmap <C-n> <Plug>(edgemotion-j)
 
+  function! s:edgenavi_highlight() abort
+    " highlight VimrcEdgenavi guibg=#6d6223 ctermbg=58
+    let color = synIDattr(synIDtrans(hlID('PmenuSel')), 'bg')
+    let kind = has('gui_running') || &termguicolors ? 'gui' : 'cterm'
+    let cmd = printf('%sfg=NONE %sbg=%s', kind, kind, color)
+    execute 'highlight VimrcEdgenavi' cmd
+  endfunction
+  call s:edgenavi_highlight()
+  silent! call prop_type_add('vimrc-edgenavi', {
+        \ 'highlight': 'VimrcEdgenavi',
+        \ 'start_incl': 1,
+        \ 'end_incl': 1,
+        \ 'priority': 10
+        \ })
   call sign_define([{
         \ 'name': 'vimrc-edgenavi-prev',
         \ 'text': '^',
@@ -969,19 +983,38 @@ if s:plugin.exists('vim-edgemotion')
         \ 'texthl': 'String',
         \ }])
   function! s:edgenavi() abort
-    call sign_unplace('vimrc-edgenavi')
+    call s:edgenavi_remove()
     let prev = edgemotion#move(0)
     let next = edgemotion#move(1)
-    call sign_place(1, 'vimrc-edgenavi', 'vimrc-edgenavi-prev', '',
-          \ {'lnum': line('.') - str2nr(prev[: -2])}
-          \ )
-    call sign_place(2, 'vimrc-edgenavi', 'vimrc-edgenavi-next', '',
-          \ {'lnum': line('.') + str2nr(next[: -2])}
-          \ )
+    if prev !=# ''
+      let prev = line('.') - str2nr(prev[: -2])
+      call prop_add(prev, 1, {
+            \ 'type': 'vimrc-edgenavi',
+            \ 'length': strlen(getline(prev)),
+            \ })
+      call sign_place(1, 'vimrc-edgenavi', 'vimrc-edgenavi-prev', '',
+            \ {'lnum': prev})
+    endif
+    if next !=# ''
+      let next = line('.') + str2nr(next[: -2])
+      call prop_add(next, 1, {
+            \ 'type': 'vimrc-edgenavi',
+            \ 'length': strlen(getline(next)),
+            \ })
+      call sign_place(2, 'vimrc-edgenavi', 'vimrc-edgenavi-next', '',
+            \ {'lnum': next})
+    endif
+  endfunction
+  function! s:edgenavi_remove() abort
+    call prop_remove({'type': 'vimrc-edgenavi', 'all': 1})
+    call sign_unplace('vimrc-edgenavi')
   endfunction
   augroup vimrc_edgenavi
-    autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI *
+    autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI,WinEnter,BufWinEnter *
           \ call s:edgenavi()
+    autocmd WinLeave,BufWinLeave * call s:edgenavi_remove()
+    autocmd ColorScheme * call s:edgenavi_highlight()
+    autocmd User vimrc_initialize call s:edgenavi_highlight()
   augroup END
 endif
 "}}}
