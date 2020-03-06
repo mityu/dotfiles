@@ -1,6 +1,6 @@
 "Plugin Name: shcmd.vim
 "Author: mityu
-"Last Change: 24-May-2019.
+"Last Change: 06-Mar-2020.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -40,6 +40,7 @@ function! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
   " If `has_bang` is true, I'll create intermediate directory.
   let option_path = a:has_bang ? 'p' : ''
   for dir in a:000
+    let dir = expand(dir)
     if isdirectory(dir)
       call s:warning_msg(printf('Directory %s exists.', dir))
       continue
@@ -54,6 +55,7 @@ function! vimrc#shcmd#mkdir(has_bang,...) abort "{{{
 endfunction "}}}
 function! vimrc#shcmd#touch(...) abort "{{{
   for fname in a:000
+    let fname = expand(fname)
     if getftype(fname) !=# ''
       call s:warning_msg(printf('File %s exists. Overwrite? [y/n]',fname))
       if nr2char(getchar()) !~? 'y'
