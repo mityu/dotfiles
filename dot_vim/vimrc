@@ -881,9 +881,10 @@ def! s:gof(path: string): void "{{{
   if !empty(path)
     gofcmd ..= ' -d ' .. path
   endif
+  let minwidth = min([&columns, 100])
+  let minheight = min([&lines, 40])
   popup_create(term_start(gofcmd, {'hidden': 1, 'term_finish': 'close'}),
-        \ {'minwidth': 100, 'minheight': 40})
-  " TODO: better winsize.
+        \ {'minwidth': minwidth, 'minheight': minheight})
 enddef "}}}
 "TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void "{{{
