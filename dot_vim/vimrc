@@ -768,7 +768,7 @@ call add(s:_map, ['nnoremap', '', 'ev', 'edit $MYVIMRC'])
 call add(s:_map, ['nnoremap', '', 'sv', 'source $MYVIMRC'])
 call add(s:_map, ['nnoremap', '<silent>', 'k', 'call vimrc#mru#start()'])
 call add(s:_map, ['nnoremap', '<silent>', 'b', 'call gram#sources#buffers#launch()'])
-call add(s:_map, ['nnoremap', '<silent>', 'j', 'call gram#sources#gitfiles#launch()'])
+call add(s:_map, ['nnoremap', '<silent>', 'j', 'call <SID>gof_from_mapping()'])
 call add(s:_map, ['nnoremap', '<silent>', 'f', 'call vimrc#filore#start()'])
 call add(s:_map, ['nnoremap', '<silent>', 'm', 'MemoList'])
 call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
@@ -872,6 +872,10 @@ function! s:list_tasks(args) abort "{{{
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunction "}}}
+def! s:gof_from_mapping()
+  let git_root = s:find_gitroot()
+  s:gof(git_root ==# '' ? getcwd(winnr()) : git_root)
+enddef
 def! s:gof(path: string): void "{{{
   if !executable('gof')
     echo '"gof" command not found.'
@@ -1899,7 +1903,11 @@ augroup vimrc_terminal
   autocmd TerminalOpen * call s:terminal_open()
 augroup END
 def! s:terminal_open(): void
-  setlocal nonumber norelativenumber
+  " Ignore terminal in popup-window.
+  " FIXME: Using getbufvar() doesn't work.
+  if bufnr('%') == expand('<abuf>')
+    setlocal nonumber norelativenumber
+  endif
 enddef
 "}}}
 " EmphasisIndent{{{
