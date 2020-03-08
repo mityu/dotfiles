@@ -508,6 +508,8 @@ function! s:_loop_define(config) abort "{{{
 
   execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
   for [lhs, rhs] in a:config.map
+    let [lhs, rhs] =
+          \ map([lhs, rhs], {_, val -> substitute(val, '|', '<bar>', 'g')})
     let com = []
     call add(com, [mode . 'noremap <silent>',
           \ plug_map.do . lhs,
@@ -551,29 +553,16 @@ function! s:_simple_loop_define(config) abort "{{{
 endfunction "}}}
 "Window management
 call s:_simple_loop_define({
-      \ 'id': 'WinChange',
+      \ 'id': 'Window',
       \ 'enter_with': '<C-w>',
-      \ 'follow_key': 'hjkl'
+      \ 'follow_key': 'hjklHJKL<>-+_|'
       \ })
-call s:_simple_loop_define({
-      \ 'id': 'WinMove',
-      \ 'enter_with': '<C-w>',
-      \ 'follow_key': 'HJKL'
-      \ })
-call s:_simple_loop_define({
-      \ 'id': 'WinResize',
-      \ 'enter_with': '<C-w>',
-      \ 'follow_key': '<>-+'
-      \ })
- call s:_loop_define({
-       \ 'id': 'TabChange',
-       \ 'enter_with': 'g',
-       \ 'map': [['h', 'gT'], ['l', 'gt']]
-       \ })
 call s:_loop_define({
-      \ 'id': 'TabMove',
+      \ 'id': 'Tab',
       \ 'enter_with': 'g',
       \ 'map': [
+      \   ['h', 'gT'],
+      \   ['l', 'gt'],
       \   ['T', ':<C-u>call <SID>map_tabmove(-1)<CR>'],
       \   ['t', ':<C-u>call <SID>map_tabmove(1)<CR>']
       \ ]
