@@ -1,6 +1,6 @@
 " vim9script
 " Author: mityu
-" Last Change: 05-Mar-2020.
+" Last Change: 08-Mar-2020.
 " vim: foldmethod=marker shiftwidth=2
 " Encoding{{{
 if has('vim_starting')
@@ -1014,6 +1014,12 @@ if s:plugin.exists('vim-edgemotion')
     autocmd ColorScheme * call s:edgenavi_highlight()
     autocmd User vimrc_initialize call s:edgenavi_highlight()
   augroup END
+endif
+"}}}
+" kana/vim-altr{{{
+if s:plugin.exists('vim-altr')
+  command! -bar AlterForward call altr#forward()
+  command! -bar AlterBack call altr#back()
 endif
 "}}}
 " kana/vim-operator-replace{{{
