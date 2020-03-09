@@ -2023,20 +2023,34 @@ enddef
 command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "
 " compblock
+let s:compblock_config_funcs = {'vim': {}}
+function! s:compblock_config_funcs.vim.endif(prev_line) abort
+  let indent = matchstr(a:prev_line, '^\s*')
+  if getline(line('.') + 1) =~# '\v^' . indent . 'else%[if]'
+    return v:null
+  endif
+  return 'endif'
+endfunction
+" NOTE: Keys are evaluated under very magic.
+" TODO: Add html tags completion?
 let s:compblock_config = {
      \ '_': {
-     \   '{\s*$': '}',
+     \   '\{\s*$': '}',
      \ },
      \ 'vim': {
-     \   '^\s*def!\?\s\+\S\+(.*).*$': 'enddef',
-     \   '^\s*function!\?\s\+\S\+(.*).*$': 'endfunction',
-     \   '^\s*if\s.\+$': 'endif',
-     \   '^\s*while\s.\+$': 'endwhile',
-     \   '^\s*for\s.\+$': 'endfor',
-     \   '^\s*echohl\s\+\%(NONE\)\@!\S\+$': 'echohl NONE',
-     \   '^\s*augroup\s\+\%(END\)\@!\S\+$': 'augroup END',
+     \   '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$': 'enddef',
+     \   '^\s*function!?\s+\S+(.*).*$': 'endfunction',
+     \   '^\s*if>': s:compblock_config_funcs.vim.endif,
+     \   '^\s*while>': 'endwhile',
+     \   '^\s*for>': 'endfor',
+     \   '^\s*echohl\s+%(NONE)@!\S+$': 'echohl NONE',
+     \   '^\s*augroup\s+%(END)@!\S+$': 'augroup END',
+     \ },
+     \ 'vimspec': {
+     \   '^\s*%(Describe|Before|After|Context|It)': 'End',
      \ },
      \ }
+call extend(s:compblock_config.vimspec, s:compblock_config.vim)
 function! s:compblock_init_for_buffer() abort
   if !exists('b:compblock_ctx')
     let b:compblock_ctx = {
@@ -2051,8 +2065,7 @@ endfunction
 function! s:compblock_need_try() abort
   return line('$') > b:compblock_ctx.line_count &&
        \ line('.') > b:compblock_ctx.cur_line
-endfunc
-
+endfunction
 function! s:compblock_get_one_indent() abort
   if &l:expandtab
     return repeat(' ', shiftwidth())
@@ -2076,17 +2089,16 @@ function! s:compblock_try_to_apply() abort
   let configs = items(get(s:compblock_config, &filetype, {})) +
         \ items(get(s:compblock_config, '_', {}))
   for [pattern, Block_end] in configs
-    if prev_line !~# pattern
+    if prev_line !~# '\v' . pattern
       continue
     endif
-    " Disable now. I don't need now.
-    " if type(Block_end) == v:t_func
-    "   let Block_end = Block_end(prev_line)
-    " endif
-    " if type(Block_end) == v:t_none
-    "   " Cancel.
-    "   continue
-    " endif
+    if type(Block_end) == v:t_func
+      let Block_end = Block_end(prev_line)
+    endif
+    if type(Block_end) == v:t_none
+      " Cancel.
+      continue
+    endif
     let indent_depth = s:compblock_get_indent_depth(line('.') - 1)
     let indent =  s:compblock_get_indent_str(indent_depth)
     let newline = indent . Block_end
