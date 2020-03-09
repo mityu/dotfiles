@@ -14,6 +14,7 @@ def! s:fold_is_blockclose(line: string): bool
   return line =~# '\v^end%(func%[tion]|def|if|for|while|try)'
 enddef
 function! FoldExprForVimrc() abort
+  " TODO: Fold with marker
   let line = getline(v:lnum)
   if line =~# '^\s'
     return '='
@@ -140,15 +141,6 @@ endfunction
 function! VimrcFunc(func) abort
   return function(s:SIDPrefix() . a:func)
 endfunction
-def! FilePath(): string
-  return s:is_cmdwin() ? expand('#') : expand('%')
-enddef
-def! FileName(): string
-  return fnamemodify(FilePath(), ':p:t')
-enddef
-def! FileParent(): string
-  return fnamemodify(FilePath(), ':p:h')
-enddef
 function! SetUndoFtplugin(config) abort
   let restorer = 'execute ' . string(a:config)
   if exists('b:undo_ftplugin')
@@ -2169,7 +2161,7 @@ if filereadable(s:join_path(expand('~'), s:_lvimrc))
         \ 'execute ((<q-args> ==# "") ? "edit" : <q-args>)' string(s:_lvimrc)
   execute 'source' s:_lvimrc
 endif | unlet s:_lvimrc
- 
+
 " gvimrc
 if has('gui_running')
   if has('vim_starting')
