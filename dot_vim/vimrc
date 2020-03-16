@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Mar-2020.
+" Last Change: 15-Mar-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -2074,7 +2074,7 @@ function! s:compblock_get_one_indent() abort
   endif
 endfunction
 function! s:compblock_get_indent_depth(line) abort
-  return indent(a:line) / shiftwidth()
+  return indent(a:line) / (&l:expandtab ? shiftwidth() : &l:tabstop)
 endfunction
 function! s:compblock_get_indent_str(depth) abort
   return repeat(s:compblock_get_one_indent(), a:depth)
