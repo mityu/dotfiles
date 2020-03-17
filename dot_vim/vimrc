@@ -2024,9 +2024,9 @@ command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "
 " compblock
 let s:compblock_config_funcs = {'vim': {}}
-function! s:compblock_config_funcs.vim.endif(prev_line) abort
-  let indent = matchstr(a:prev_line, '^\s*')
-  if getline(line('.') + 1) =~# '\v^' . indent . 'else%[if]'
+function! s:compblock_config_funcs.vim.endif(lines) abort
+  let indent = matchstr(a:lines.prev, '^\s*')
+  if a:lines.next =~# '\v^' . indent . 'else%[if]'
     return v:null
   endif
   return 'endif'
@@ -2081,7 +2081,8 @@ function! s:compblock_get_indent_str(depth) abort
 endfunction
 function! s:compblock_try_to_apply() abort
   let b:compblock_try_to_apply = v:false
-  if s:compblock_get_indent_depth(line('.') + 1) >
+  let nextlinenr = nextnonblank(line('.') + 1)
+  if s:compblock_get_indent_depth(nextlinenr) >
        \ s:compblock_get_indent_depth(line('.') - 1)
     return
   endif
@@ -2093,7 +2094,8 @@ function! s:compblock_try_to_apply() abort
       continue
     endif
     if type(Block_end) == v:t_func
-      let Block_end = Block_end(prev_line)
+      let Block_end = Block_end({'prev': prev_line, 'current': getline('.'),
+            \ 'next': getline(nextlinenr)})
     endif
     if type(Block_end) == v:t_none
       " Cancel.
@@ -2102,7 +2104,7 @@ function! s:compblock_try_to_apply() abort
     let indent_depth = s:compblock_get_indent_depth(line('.') - 1)
     let indent =  s:compblock_get_indent_str(indent_depth)
     let newline = indent . Block_end
-    if getline(line('.') + 1) ==# newline
+    if getline(nextlinenr) ==# newline
       continue
     endif
     let after_cursor = s:strdivpos(getline('.'), col('.') - 1)[1]
