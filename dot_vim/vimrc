@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Mar-2020.
+" Last Change: 17-Mar-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -2106,7 +2106,7 @@ function! s:compblock_try_to_apply() abort
       continue
     endif
     let after_cursor = s:strdivpos(getline('.'), col('.') - 1)[1]
-    if after_cursor !=# ''
+    if mode() =~# '^i' && after_cursor !=# ''
       if after_cursor !=# Block_end
         continue
       else
