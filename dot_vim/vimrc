@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-Mar-2020.
+" Last Change: 18-Mar-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -361,7 +361,6 @@ set completefunc=vimrc#path_complete
 set noequalalways
 set scrolloff=1
 set colorcolumn=78
-set cursorline cursorcolumn
 set tabstop=4
 set shiftwidth=4
 set expandtab
@@ -458,10 +457,8 @@ nnoremap <Space>? q?
 vnoremap <Space>? q?
 nnoremap : ;
 vnoremap : ;
-map <C-j> <ESC>
-imap <C-j> <ESC>
-cmap <C-j> <C-c>
-onoremap <C-j> <ESC>
+nnoremap <Space>: :
+vnoremap <Space>: :
 
 noremap - <C-x>
 noremap + <C-a>
@@ -471,13 +468,12 @@ nnoremap k gk
 nnoremap <CR> o<ESC>
 nnoremap <S-CR> O<ESC>
 nnoremap Y y$
-nnoremap <C-h> :<C-u>nohls<CR>
+nnoremap <C-h> :<C-u>nohlsearch<CR>
 nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w><C-s> :<C-u>belowright wincmd s<CR>
 nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
 nnoremap <silent> <C-w><C-v> :<C-u>belowright wincmd v<CR>
-nnoremap <silent> <C-w>q :<C-u>belowright copen<CR>
-nnoremap <silent> <C-w><C-q> :<C-u>belowright copen<CR>
+nnoremap <silent> <C-w>c :<C-u>belowright copen<CR>
 nnoremap <silent> <C-w>t :<C-u>tabnew<CR>
 nnoremap <silent> <C-w><C-t> :<C-u>tabnew<CR>
 nnoremap <silent> <Space>th :<C-u>vertical terminal ++close<CR>
@@ -487,23 +483,25 @@ nnoremap <silent> <Space>tl :<C-u>belowright vertical terminal ++close<CR>
 nnoremap <silent> <Space>tt :<C-u>tab terminal ++close<CR>
 nnoremap <Space>w :<C-u>update<CR>
 nnoremap <Space>q :<C-u>quit<CR>
-nnoremap <expr> @q (reg_recording()==#''?'qa':'q')
-nnoremap <expr> @@ (reg_recording()==#''?'@a':'q')
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <expr> n 'Nn'[v:searchforward] . 'zzzv'
 nnoremap <expr> N 'nN'[v:searchforward] . 'zzzv'
-" Avoid to regester a command, calling textobj function to the
-" command-history when use textobj via dot.
+nnoremap <expr> <C-u> (winheight(0) / 2) . 'k'
+nnoremap <expr> <C-d> (winheight(0) / 2) . 'j'
+nnoremap <C-k> 7k
+nnoremap <C-j> 7j
+" Avoid to regester calling textobj function commands to the command-history
+" when use textobj via dot.
 nnoremap <silent> . .
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
+inoremap <C-j> <C-g>u<C-j>
 inoremap <C-@> <C-x>
 
-vnoremap <C-e> $
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
 
@@ -513,6 +511,7 @@ cnoremap <C-p> <Up>
 cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
+cnoremap <C-[> <C-c>
 
 let s:Omap = {range, lhs, rhs ->
       \[execute(printf('onoremap %s%s %s%s', range, lhs, range, rhs)),
@@ -597,7 +596,7 @@ endfunction
 call s:_simple_loop_define({
       \ 'id': 'Window',
       \ 'enter_with': '<C-w>',
-      \ 'follow_key': 'hjklHJKL<>-+_|'
+      \ 'follow_key': 'hjklHJKLq<>-+_|='
       \ })
 call s:_loop_define({
       \ 'id': 'Tab',
@@ -853,6 +852,9 @@ command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call s:gof(<q-args>)
+command! Col setlocal cursorcolumn|call popup_create([], {
+      \ 'moved': 'any', 'mask': [[1, 1, 1, 1]],
+      \ 'callback': {-> execute('setlocal nocursorcolumn')}})
 
 " Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
@@ -953,70 +955,47 @@ def! Tapi_gof(bufnum: number, file_info: dict<string>): void
 enddef
 
 " Installed plugins
-if s:plugin.exists('vim-edgemotion')
-  nmap <C-p> <Plug>(edgemotion-k)
-  nmap <C-n> <Plug>(edgemotion-j)
-  vmap <C-p> <Plug>(edgemotion-k)
-  vmap <C-n> <Plug>(edgemotion-j)
-
-  function! s:edgenavi_highlight() abort
-    " highlight VimrcEdgenavi guibg=#6d6223 ctermbg=58
-    let color = synIDattr(synIDtrans(hlID('PmenuSel')), 'bg')
-    let kind = has('gui_running') || &termguicolors ? 'gui' : 'cterm'
-    let cmd = printf('%sfg=NONE %sbg=%s', kind, kind, color)
-    execute 'highlight VimrcEdgenavi' cmd
-  endfunction
-  call s:edgenavi_highlight()
-  silent! call prop_type_add('vimrc-edgenavi', {
-        \ 'highlight': 'VimrcEdgenavi',
-        \ 'start_incl': 1,
-        \ 'end_incl': 1,
-        \ 'priority': 10
-        \ })
-  call sign_define([{
-        \ 'name': 'vimrc-edgenavi-prev',
-        \ 'text': '^',
-        \ 'texthl': 'String',
-        \ }, {
-        \ 'name': 'vimrc-edgenavi-next',
-        \ 'text': 'v',
-        \ 'texthl': 'String',
-        \ }])
-  function! s:edgenavi() abort
-    call s:edgenavi_remove()
-    let prev = edgemotion#move(0)
-    let next = edgemotion#move(1)
-    if prev !=# ''
-      let prev = line('.') - str2nr(prev[: -2])
-      call prop_add(prev, 1, {
-            \ 'type': 'vimrc-edgenavi',
-            \ 'length': strlen(getline(prev)),
-            \ })
-      call sign_place(1, 'vimrc-edgenavi', 'vimrc-edgenavi-prev', '',
-            \ {'lnum': prev})
-    endif
-    if next !=# ''
-      let next = line('.') + str2nr(next[: -2])
-      call prop_add(next, 1, {
-            \ 'type': 'vimrc-edgenavi',
-            \ 'length': strlen(getline(next)),
-            \ })
-      call sign_place(2, 'vimrc-edgenavi', 'vimrc-edgenavi-next', '',
-            \ {'lnum': next})
-    endif
-  endfunction
-  function! s:edgenavi_remove() abort
-    call prop_remove({'type': 'vimrc-edgenavi', 'all': 1})
-    call sign_unplace('vimrc-edgenavi')
-  endfunction
-  augroup vimrc_edgenavi
-    autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI,WinEnter,BufWinEnter *
-          \ call s:edgenavi()
-    autocmd WinLeave,BufWinLeave * call s:edgenavi_remove()
-    autocmd ColorScheme * call s:edgenavi_highlight()
-    autocmd User vimrc_initialize call s:edgenavi_highlight()
-  augroup END
-endif
+" if s:plugin.exists('vim-edgemotion')
+"   nmap <C-p> <Plug>(edgemotion-k)
+"   nmap <C-n> <Plug>(edgemotion-j)
+"   vmap <C-p> <Plug>(edgemotion-k)
+"   vmap <C-n> <Plug>(edgemotion-j)
+"
+"   silent! call prop_type_add('vimrc-edgenavi', {
+"        \ 'highlight': 'TODO',
+"        \ 'start_incl': 1,
+"        \ 'end_incl': 1,
+"        \ 'priority': 10
+"        \ })
+"   function! s:edgenavi() abort
+"     if s:is_cmdwin()
+"       return
+"     endif
+"     call s:edgenavi_remove()
+"     let prev = edgemotion#move(0)
+"     let next = edgemotion#move(1)
+"     for target in [prev, next]
+"       if target ==# ''
+"         continue
+"       endif
+"       let target = line('.') - str2nr(target[: -2])
+"       let line_len = strlen(getline(target))
+"       if line_len == 0
+"         continue
+"       endif
+"       call prop_add(target, max([min([col('.') - 1, line_len - 2]), 1]),
+"            \ {'type': 'vimrc-edgenavi', 'length': min([3, line_len])})
+"     endfor
+"   endfunction
+"   function! s:edgenavi_remove() abort
+"     call prop_remove({'type': 'vimrc-edgenavi', 'all': 1})
+"   endfunction
+"   augroup vimrc_edgenavi
+"     autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI,WinEnter,BufWinEnter *
+"          \ call s:edgenavi()
+"     autocmd WinLeave,BufWinLeave * call s:edgenavi_remove()
+"   augroup END
+" endif
 if s:plugin.exists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
