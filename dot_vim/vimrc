@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Mar-2020.
+" Last Change: 22-Mar-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -166,7 +166,7 @@ if has('vim_starting')
   if expand('$TERM_PROGRAM') ==# 'alacritty'
     let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode.
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
-    let &t_SR = "\<ESC>[3 q"  " Use underline style cursor in Replace-mode.
+    let &t_SR = "\<ESC>[4 q"  " Use underline style cursor in Replace-mode.
   endif
   if &term =~# '\<xterm\>'
     set mouse=a
@@ -2010,18 +2010,31 @@ function! s:compblock_config_funcs.vim.endif(lines) abort
   endif
   return 'endif'
 endfunction
+function! s:compblock_config_funcs.vim.endtry(lines) abort
+  let indent = matchstr(a:lines.prev, '^\s*')
+  if a:lines.next =~# '\v^' . indent . '%(catch|finally)'
+    return v:null
+  endif
+  return 'endtry'
+endfunction
 " NOTE: Keys are evaluated under very magic.
 " TODO: Add html tags completion?
 let s:compblock_config = {
      \ '_': {
      \   '\{\s*$': '}',
      \ },
+     \ 'sh': {
+     \   '%(^|\|)\s*<do>': 'done',
+     \   '^\s*if>': 'fi',
+     \ },
+     \ 'zsh': {},
      \ 'vim': {
      \   '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$': 'enddef',
      \   '^\s*function!?\s+\S+(.*).*$': 'endfunction',
      \   '^\s*if>': s:compblock_config_funcs.vim.endif,
      \   '^\s*while>': 'endwhile',
      \   '^\s*for>': 'endfor',
+     \   '^\s*try>': s:compblock_config_funcs.vim.endtry,
      \   '^\s*echohl\s+%(NONE)@!\S+$': 'echohl NONE',
      \   '^\s*augroup\s+%(END)@!\S+$': 'augroup END',
      \ },
@@ -2030,6 +2043,7 @@ let s:compblock_config = {
      \ },
      \ }
 call extend(s:compblock_config.vimspec, s:compblock_config.vim)
+call extend(s:compblock_config.zsh, s:compblock_config.sh)
 function! s:compblock_init_for_buffer() abort
   if !exists('b:compblock_ctx')
     let b:compblock_ctx = {
