@@ -43,23 +43,6 @@ bindkey -M viins '^j' vi-cmd-mode
 bindkey -M vicmd '^e' vi-end-of-line
 bindkey -M vicmd '^a' vi-first-non-blank
 
-# Launch Vim here if exists and the terminal isn't Vim's one.
-# if [ ! -n "$VIM_TERMINAL" ] && \
-#     [ $TERM_PROGRAM = "alacritty" ] && \
-#     which vim &>/dev/null; then
-#     vim
-# fi
-
-# NOTE: $luarocks --lua-dir=/usr/local/opt/lua@5.1 {args}
-# if [ -n "$VIM_TERMINAL" ] && [ -n "$VIM_SERVERNAME" ]; then
-#     function mvim(){
-#         $VIMBINARY --servername $VIM_SERVERNAME --remote-tab-wait $@
-#     }
-# else
-#     function mvim(){
-#         $VIMBINARY $@
-#     }
-# fi
 
 # Plugins for zsh
 # NOTE: To install zplug (A plugin manager for zsh):
@@ -96,11 +79,18 @@ if zplug check junegunn/fzf-bin; then
     export FZF_DEFAULT_OPTS="--reverse"
 
     function select-history(){
+        local bufsave
+        bufsave=$BUFFER
         BUFFER=$(history -n 1 | fzf --tac +m)
+        if ! [ -n "$BUFFER" ]; then
+            BUFFER=$bufsave
+        fi
         CURSOR=$#BUFFER
+        zle redisplay
     }
     zle -N select-history
     bindkey '^r' select-history
+
 fi
 # if zplug check b4b4r07/enhancd; then
 #     export ENHANCD_FILTER=peco:fzf
@@ -112,19 +102,4 @@ function update_components(){
     brew cask upgrade
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
-    # vim -e -s -n -i NONE -c "
-    #     function! UpdatePlugins() abort
-    #       PackInit
-    #       redir => g:minpac_messages
-    #       call minpac#update('', {'do': 'call FinishUpdatePlugins()'})
-    #     endfunction
-    #     function! FinishUpdatePlugins() abort
-    #       redir END
-    #       enew
-    #       put =g:minpac_messages
-    #       %print
-    #       qa!
-    #     endfunction
-    #     call UpdatePlugins()
-    #     "
 }
