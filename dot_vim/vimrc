@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 22-Mar-2020.
+" Last Change: 30-Mar-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -393,6 +393,7 @@ set lazyredraw
 set previewpopup=highlight:Normal
 set termwinkey=<C-w>
 set modelineexpr
+set noesckeys
 
 let s:_undodir = s:join_path(s:cache_dir, 'undodir')
 if s:mkdir(s:_undodir, 'p')
