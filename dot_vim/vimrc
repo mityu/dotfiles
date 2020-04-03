@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 30-Mar-2020.
+" Last Change: 03-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -2003,7 +2003,7 @@ enddef
 command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 "
 " compblock
-let s:compblock_config_funcs = {'vim': {}}
+let s:compblock_config_funcs = {'vim': {}, 'sh': {}}
 function! s:compblock_config_funcs.vim.endif(lines) abort
   let indent = matchstr(a:lines.prev, '^\s*')
   if a:lines.next =~# '\v^' . indent . 'else%[if]'
@@ -2018,6 +2018,13 @@ function! s:compblock_config_funcs.vim.endtry(lines) abort
   endif
   return 'endtry'
 endfunction
+function! s:compblock_config_funcs.sh.fi(lines) abort
+  let indent = matchstr(a:lines.prev, '^\s*')
+  if a:lines.next =~# '\v^' . indent . '%(elif|else)'
+    return v:null
+  endif
+  return 'fi'
+endfunction
 " NOTE: Keys are evaluated under very magic.
 " TODO: Add html tags completion?
 let s:compblock_config = {
@@ -2026,7 +2033,7 @@ let s:compblock_config = {
      \ },
      \ 'sh': {
      \   '%(^|\|)\s*<do>': 'done',
-     \   '^\s*if>': 'fi',
+     \   '^\s*if>': s:compblock_config_funcs.sh.fi,
      \ },
      \ 'zsh': {},
      \ 'vim': {
@@ -2160,7 +2167,13 @@ augroup vimrc_compblock
   autocmd InsertLeave * call s:compblock_on_InsertLeave()
 augroup END
 
-"
+" zsh
+" function! Tapi_edit_line(bufnr, args) abort
+"   let buffer = a:args[0]
+"   let curpos = a:args[1]
+"   echom $KEYMAP
+" endfunction
+
 " lvimrc
 let s:_lvimrc = s:rc('lvimrc')
 if filereadable(s:join_path(expand('~'), s:_lvimrc))
