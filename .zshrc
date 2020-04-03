@@ -36,12 +36,54 @@ setopt hist_no_store
 # Enable completion
 setopt menu_complete
 
+
 # Use vi like keybinds
 bindkey -d # Reset keybinds
 bindkey -v
-bindkey -M viins '^j' vi-cmd-mode
-bindkey -M vicmd '^e' vi-end-of-line
-bindkey -M vicmd '^a' vi-first-non-blank
+
+# textobjects
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+    for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+        bindkey -M $m $c select-bracketed
+    done
+done
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+    for c in {a,i}{\',\",\`}; do
+        bindkey -M $m $c select-quoted
+    done
+done
+
+# operator-surround
+autoload -Uz surround
+zle -N delete-surround surround
+zle -N change-surround surround
+zle -N add-surround surround
+bindkey -M vicmd '_sr' change-surround
+bindkey -M vicmd '_sd' delete-surround
+bindkey -M vicmd '_sa' add-surround
+bindkey -M visual '_sr' change-surround
+bindkey -M visual '_sd' delete-surround
+bindkey -M visual '_sa' add-surround
+
+# if [ -n "$VIM_TERMINAL" ]; then
+#     function edit-line-in-vim(){
+#         printf '\e]51;["call", "Tapi_edit_line", ["%s", "%s"]]\x07' \
+#             "$BUFFER" "$CURSOR"
+#     }
+# elif [ which vim &> /dev/null ]; then
+#     function edit-line-in-vim(){
+#     }
+# else
+#     function edit-line-in-vim(){
+#         # Do nothing.
+#     }
+# fi
+# zle -N edit-line-in-vim
+# bindkey -M vicmd '^o' edit-line-in-vim
 
 
 # Plugins for zsh
