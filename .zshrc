@@ -37,9 +37,11 @@ setopt hist_no_store
 setopt menu_complete
 
 
-# Use vi like keybinds
 bindkey -d # Reset keybinds
-bindkey -v
+bindkey -v # Use vi like keybinds
+
+bindkey -M vicmd ";" execute-named-cmd
+bindkey -M vicmd ":" vi-repeat-find
 
 # textobjects
 autoload -U select-bracketed
