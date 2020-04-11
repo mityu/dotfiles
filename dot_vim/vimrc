@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Apr-2020.
+" Last Change: 11-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -2034,7 +2034,7 @@ let s:compblock_config = {
      \   '\{\s*$': '}',
      \ },
      \ 'sh': {
-     \   '%(^|\|)\s*<do>': 'done',
+     \   '%(^|;)\s*<do>': 'done',
      \   '^\s*if>': s:compblock_config_funcs.sh.fi,
      \ },
      \ 'zsh': {},
