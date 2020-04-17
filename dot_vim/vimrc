@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 11-Apr-2020.
+" Last Change: 17-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -493,8 +493,8 @@ nnoremap <expr> n 'Nn'[v:searchforward] . 'zzzv'
 nnoremap <expr> N 'nN'[v:searchforward] . 'zzzv'
 nnoremap <expr> <C-u> (winheight(0) / 2) . 'k'
 nnoremap <expr> <C-d> (winheight(0) / 2) . 'j'
-nnoremap <C-k> 7k
-nnoremap <C-j> 7j
+nnoremap <C-k> 7gk
+nnoremap <C-j> 7gj
 " Avoid to regester calling textobj function commands to the command-history
 " when use textobj via dot.
 nnoremap <silent> . .
