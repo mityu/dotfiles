@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-Apr-2020.
+" Last Change: 18-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -1963,7 +1963,7 @@ augroup vimrc_additional_plugins
 augroup END
 "
 " git
-def! s:find_gitroot(arg_target: string = expand('%')): string
+def! s:find_gitroot(arg_target: string = bufname('%')): string
   let target: string = resolve(arg_target)
   let git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
@@ -1981,7 +1981,7 @@ def! s:git_diff_getcmd(arg_target: string): string
   return printf('git -C %s --no-pager diff --no-color %s',
         \ gitroot, shellescape(target))
 enddef
-def! s:git_diff(arg_target: string = expand('%')): void
+def! s:git_diff(arg_target: string = bufname('%')): void
   let target: string = resolve(arg_target)
   if getftype(target) ==# ''
     s:echomsg_error('File or directory does not exists: ' .. target)
