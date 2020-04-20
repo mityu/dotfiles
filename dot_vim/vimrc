@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Apr-2020.
+" Last Change: 20-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -1574,8 +1574,8 @@ if s:plugin.exists('caw.vim')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
   let g:caw_dollarpos_sp_right = ' '
-  let g:caw_hatpos_sp_blank = ' '
-  let g:caw_zeropos_sp_blank = ' '
+  let g:caw_hatpos_sp = ' '
+  let g:caw_zeropos_sp = ' '
 endif
 if s:plugin.exists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
@@ -2077,7 +2077,9 @@ function! s:compblock_get_one_indent() abort
   endif
 endfunction
 function! s:compblock_get_indent_depth(line) abort
-  return indent(a:line) / (&l:expandtab ? shiftwidth() : &l:tabstop)
+  let indent = getline(a:line)->matchstr('^\s*')
+        \ ->substitute('\t', repeat(' ', shiftwidth()),'g')->strlen()
+  return indent / shiftwidth()
 endfunction
 function! s:compblock_get_indent_str(depth) abort
   return repeat(s:compblock_get_one_indent(), a:depth)
