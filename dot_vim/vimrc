@@ -506,6 +506,8 @@ inoremap <C-l> <C-x>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
+vnoremap <C-k> 7gk
+vnoremap <C-j> 7gj
 
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
