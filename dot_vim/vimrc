@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 20-Apr-2020.
+" Last Change: 21-Apr-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -2054,36 +2054,37 @@ let s:compblock_config = {
      \ }
 call extend(s:compblock_config.vimspec, s:compblock_config.vim)
 call extend(s:compblock_config.zsh, s:compblock_config.sh)
-function! s:compblock_init_for_buffer() abort
+def! s:compblock_init_for_buffer(): void
   if !exists('b:compblock_ctx')
-    let b:compblock_ctx = {
+    b:compblock_ctx = {
          \ 'line_count': line('$'),
          \ 'cur_line': line('.'),
          \ }
   endif
   if !exists('b:compblock_try_to_apply')
-    let b:compblock_try_to_apply = v:false
+    b:compblock_try_to_apply = v:false
   endif
-endfunction
-function! s:compblock_need_try() abort
+enddef
+def! s:compblock_need_try(): bool
   return line('$') > b:compblock_ctx.line_count &&
        \ line('.') > b:compblock_ctx.cur_line
-endfunction
-function! s:compblock_get_one_indent() abort
+enddef
+def! s:compblock_get_one_indent(): string
   if &l:expandtab
     return repeat(' ', shiftwidth())
   else
     return "\t"
   endif
-endfunction
+  return ''  # Cannot reach here.
+enddef
 function! s:compblock_get_indent_depth(line) abort
   let indent = getline(a:line)->matchstr('^\s*')
-        \ ->substitute('\t', repeat(' ', shiftwidth()),'g')->strlen()
+        \->substitute('\t', repeat(' ', shiftwidth()),'g')->strlen()
   return indent / shiftwidth()
 endfunction
-function! s:compblock_get_indent_str(depth) abort
-  return repeat(s:compblock_get_one_indent(), a:depth)
-endfunction
+def! s:compblock_get_indent_str(depth: number): string
+  return repeat(s:compblock_get_one_indent(), depth)
+enddef
 function! s:compblock_try_to_apply() abort
   let b:compblock_try_to_apply = v:false
   let nextlinenr = nextnonblank(line('.') + 1)
@@ -2132,37 +2133,37 @@ function! s:compblock_update_ctx() abort
   let b:compblock_ctx.line_count = line('$')
   let b:compblock_ctx.cur_line = line('.')
 endfunction
-function! s:compblock_on_CursorMoved() abort
+def! s:compblock_on_CursorMoved(): void
   if s:is_cmdwin()
     return
   endif
   if s:compblock_need_try()
-    let b:compblock_try_to_apply = v:true
+    b:compblock_try_to_apply = v:true
   endif
-  call s:compblock_update_ctx()
-endfunction
-function! s:compblock_on_TextChanged() abort
+  s:compblock_update_ctx()
+enddef
+def! s:compblock_on_TextChanged(): void
   if s:is_cmdwin()
     return
   endif
   if b:compblock_try_to_apply
-    call s:compblock_try_to_apply()
+    s:compblock_try_to_apply()
   endif
-endfunction
-function! s:compblock_on_InsertEnter() abort
+enddef
+def! s:compblock_on_InsertEnter(): void
   if s:is_cmdwin()
     return
   endif
   if s:compblock_need_try()
-    call s:compblock_try_to_apply()
+    s:compblock_try_to_apply()
   endif
-endfunction
-function! s:compblock_on_InsertLeave() abort
+enddef
+def! s:compblock_on_InsertLeave(): void
   if s:is_cmdwin()
     return
   endif
-  let b:compblock_try_to_apply = v:false
-endfunction
+  b:compblock_try_to_apply = v:false
+enddef
 augroup vimrc_compblock
   autocmd BufEnter * call s:compblock_init_for_buffer()
   autocmd CursorMoved,CursorMovedI * call s:compblock_on_CursorMoved()
