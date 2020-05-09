@@ -248,7 +248,6 @@ function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   call minpac#add('itchyny/vim-cursorword')
-  call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
   call minpac#add('kana/vim-gf-user')
   call minpac#add('kana/vim-operator-replace')
