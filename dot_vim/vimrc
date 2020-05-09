@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 03-May-2020.
+" Last Change: 09-May-2020.
 " vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
 " vim9script
 " Encoding
@@ -247,7 +247,6 @@ endif
 function! s:pack_register() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  call minpac#add('haya14busa/vim-edgemotion')
   call minpac#add('itchyny/vim-cursorword')
   call minpac#add('junegunn/vim-easy-align')
   call minpac#add('kana/vim-altr')
@@ -263,8 +262,6 @@ function! s:pack_register() abort
   call minpac#add('lambdalisue/gina.vim')
   call minpac#add('lambdalisue/vim-findent')
   call minpac#add('lambdalisue/vim-gista')
-  call minpac#add('lambdalisue/vital-Whisky')
-  call minpac#add('machakann/vim-Verdin')
   call minpac#add('mattn/vim-lsp-settings')
   call minpac#add('mityu/vim-brownie')
   call minpac#add('mityu/vim-gram')
@@ -957,47 +954,6 @@ def! Tapi_gof(bufnum: number, file_info: dict<string>): void
 enddef
 
 " Installed plugins
-" if s:plugin.exists('vim-edgemotion')
-"   nmap <C-p> <Plug>(edgemotion-k)
-"   nmap <C-n> <Plug>(edgemotion-j)
-"   vmap <C-p> <Plug>(edgemotion-k)
-"   vmap <C-n> <Plug>(edgemotion-j)
-"
-"   silent! call prop_type_add('vimrc-edgenavi', {
-"        \ 'highlight': 'TODO',
-"        \ 'start_incl': 1,
-"        \ 'end_incl': 1,
-"        \ 'priority': 10
-"        \ })
-"   function! s:edgenavi() abort
-"     if s:is_cmdwin()
-"       return
-"     endif
-"     call s:edgenavi_remove()
-"     let prev = edgemotion#move(0)
-"     let next = edgemotion#move(1)
-"     for target in [prev, next]
-"       if target ==# ''
-"         continue
-"       endif
-"       let target = line('.') - str2nr(target[: -2])
-"       let line_len = strlen(getline(target))
-"       if line_len == 0
-"         continue
-"       endif
-"       call prop_add(target, max([min([col('.') - 1, line_len - 2]), 1]),
-"            \ {'type': 'vimrc-edgenavi', 'length': min([3, line_len])})
-"     endfor
-"   endfunction
-"   function! s:edgenavi_remove() abort
-"     call prop_remove({'type': 'vimrc-edgenavi', 'all': 1})
-"   endfunction
-"   augroup vimrc_edgenavi
-"     autocmd TextChanged,TextchangedI,CursorMoved,CursorMovedI,WinEnter,BufWinEnter *
-"          \ call s:edgenavi()
-"     autocmd WinLeave,BufWinLeave * call s:edgenavi_remove()
-"   augroup END
-" endif
 if s:plugin.exists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
@@ -1079,53 +1035,10 @@ if s:plugin.exists('vim-operator-user')
       let keys = 'z' . keys
       execute printf(map_cmd, keys, keys)
     endfor
-
-
-    " --- objedge---
-    " call operator#user#define('vimrc-objedge-head', 'vimrc#objedge_head')
-    " call operator#user#define('vimrc-objedge-tail', 'vimrc#objedge_tail')
   endfunction
   augroup vimrc_mapping
     autocmd User vimrc_initialize call s:map_define_operator()
   augroup END
-  " nmap <C-p> <Plug>(operator-vimrc-objedge-head)
-  " nmap <C-n> <Plug>(operator-vimrc-objedge-tail)
-  " if s:plugin.exists('vim-textobj-user') &&
-  "      \ s:plugin.exists('vim-textobj-function')
-  "   function! s:map_funcjump(go_tail) abort
-  "     let jumpcmd = "normal \<Plug>(operator-vimrc-objedge-" .
-  "          \ (a:go_tail ? 'tail' : 'head') . ")\<Plug>(textobj-function-a)"
-  "     let [movekey, limit] = a:go_tail ? ['j', line('$')] : ['k', 1]
-  "
-  "     while 1
-  "       execute jumpcmd
-  "       let [open, close] = [getpos("'["), getpos("']")]
-  "       if open[1] == close[1] && (open[2] + 1) == close[2]
-  "         execute 'normal!' movekey
-  "         continue
-  "       endif
-  "       break
-  "     endwhile
-  "     " execute jumpcmd
-  "     " while curpos == getpos('.')
-  "     "   if line('.') == limit
-  "     "     call setpos('.', origin)
-  "     "     break
-  "     "   endif
-  "     "   execute 'normal!' movekey
-  "     "   let curpos = getpos('.')
-  "     "   execute jumpcmd
-  "     " endwhile
-  "   endfunction
-  "   " nnoremap [ :<C-u>call <SID>map_funcjump(0)<CR>
-  "   " nnoremap ] :<C-u>call <SID>map_funcjump(1)<CR>
-  "
-  "   augroup vimrc_disable_default_funcjump
-  "     autocmd Filetype vim call execute(
-  "         \ map(['[[', '[]', ']]', '][', '["', ']"'],
-  "         \ '"nunmap <buffer> " . v:val'))
-  "   augroup END
-  " endif
 endif
 if s:plugin.exists('vim-textobj-entire')
   omap aa <Plug>(textobj-entire-a)
@@ -1247,73 +1160,6 @@ if s:plugin.exists('vim-brownie')
     return filter(brownie#list(s:brownie_ft(), 'template'),
           \ 'stridx(v:val, a:arg) == 0')
   endfunction
-
-  " function! s:brownie_extract_on_cursor() abort
-  "   let curpos = '\%' . (col('.') - (mode() ==# 'i' ? 1 : 0)) . 'c'
-  "   if matchstr(getline('.'), curpos . '\a') ==# ''
-  "     call s:echomsg_warning("Any words aren't on the cursor!")
-  "     return ''
-  "   endif
-  "   let original_curpos = getpos('.')
-  "   let begin = match(getline('.'), '\a*\ze' . curpos)
-  "   let end = match(getline('.'), curpos . '\a*\zs\ze')
-  "   let [pre, word] = s:strdivpos(getline('.'), begin)
-  "   let [word, suf] = s:strdivpos(word, end - begin)
-  "   if brownie#exists(&filetype, 'snippet', word)
-  "     call setline('.', pre . suf)
-  "     call cursor(line('.'), begin + 1)
-  "     call brownie#extract(&filetype, 'snippet', word)
-  "   else
-  "     call s:echomsg_error('Snippet not found: ' . word)
-  "   endif
-  "   return ''
-  " endfunction
-  " nnoremap <silent> <C-k> :<C-u>call <SID>brownie_extract_on_cursor()<CR>
-  " inoremap <silent> <C-k> <C-r>=<SID>brownie_extract_on_cursor()<CR>
-
-  " if s:plugin.exists('asyncomplete.vim')
-  "   if !exists('s:brownie_snip_cache')
-  "     let s:brownie_snip_cache = {}
-  "   endif
-  "   function! s:brownie_snip_completor(options, context) abort
-  "     if !has_key(s:brownie_snip_cache, &filetype)
-  "       let s:brownie_snip_cache[&filetype] = map(
-  "             \ brownie#list(&filetype, 'snippet'),
-  "             \ '{"word": v:val, "menu": "[brownie]"}'
-  "             \ )
-  "     endif
-  "     if empty(s:brownie_snip_cache[&filetype])
-  "       return
-  "     endif
-  "     let target = matchstr(a:context.typed, '^\s*\zs\a\+$')
-  "     let candidates = deepcopy(s:brownie_snip_cache[&filetype])
-  "     if target !=# ''
-  "       " Use ignorecase.
-  "       let target = tolower(target)
-  "       let candidates = filter(candidates,
-  "             \ 'stridx(tolower(v:val.word), target) == 0')
-  "     endif
-  "     let startcol = a:context.col - strlen(target)
-  "     call asyncomplete#complete(a:options.name, a:context, startcol, candidates)
-  "   endfunction
-  "   function! s:brownie_snip_trigger() abort
-  "     if empty(v:completed_item) ||
-  "           \ v:completed_item.menu !=# '[brownie]' ||
-  "           \ !brownie#exists(&filetype, 'snippet', v:completed_item.word)
-  "       return
-  "     endif
-  "     let strlen = strlen(v:completed_item.word)
-  "     let [line, col] = [line('.'), col('.')]
-  "     let text = getline('.')
-  "     let text = strpart(text, 0, col - strlen - 1) . text[col - 1 :]
-  "     call setline(line, text)
-  "     call cursor(line, col - strlen)
-  "     call brownie#extract(&filetype, 'snippet', v:completed_item.word)
-  "   endfunction
-  "   augroup brownie_snip_trigger
-  "     autocmd CompleteDone * call s:brownie_snip_trigger()
-  "   augroup END
-  " endif
 endif
 if s:plugin.exists('vim-gram')
   augroup vimrc_gram_init
@@ -1395,14 +1241,6 @@ if s:plugin.exists('asyncomplete.vim')
           \ asyncomplete#sources#{options.name}#get_source_options(
           \ options))
           \ }
-    " if s:plugin.exists('vim-Verdin')
-    "   call Register({
-    "        \ 'name': 'Verdin',
-    "        \ 'whitelist': ['vim', 'vimspec'],
-    "        \ 'completor':
-    "        \   function('asyncomplete#sources#Verdin#completor'),
-    "        \ })
-    " endif
     if s:plugin.exists('asyncomplete-buffer.vim')
       call Register({
             \ 'name': 'buffer',
@@ -1411,14 +1249,6 @@ if s:plugin.exists('asyncomplete.vim')
             \   function('asyncomplete#sources#buffer#completor'),
             \ })
     endif
-
-    " if s:plugin.exists('vim-brownie')
-    "   call asyncomplete#register_source({
-    "       \ 'name': 'brownie',
-    "       \ 'whitelist': ['*'],
-    "       \ 'completor': function('s:brownie_snip_completor'),
-    "       \  })
-    " endif
   endfunction
   augroup vimrc_asyncomplete_sources
     autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
