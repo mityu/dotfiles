@@ -43,7 +43,7 @@ endfunction
 
 function! vimrc#workingplugin#cd(has_bang, plugin) abort
   if !s:available | return | endif
-  execute (a:has_bang ? 'lcd' : 'cd') s:JoinPath(s:workplace, a:plugin)
+  execute (a:has_bang ? 'lcd' : 'tcd') s:JoinPath(s:workplace, a:plugin)
 endfunction
 
 function! vimrc#workingplugin#clone(...) abort
