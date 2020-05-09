@@ -154,7 +154,8 @@ command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
 " Startup config
-if has('vim_starting')
+" FIXME: Error occurs without executing inner this if statement.
+if has('vim_starting') || 1
   if has('multi_lang')
     if has('menu')
       set langmenu=ja.utf-8
