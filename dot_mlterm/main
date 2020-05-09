@@ -1,0 +1,6 @@
+geometry=182x53
+fontsize=12
+use_anti_alias=true
+bg_color=#1f1f1f
+fg_color=#eaeaea
+scrollbar_mode=autohide

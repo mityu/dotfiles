@@ -17,11 +17,19 @@ echo "Deploying .zshrc"
 ln -sn ${SCRIPT_DIR}/.zshrc ~/.zshrc
 
 
-echo "Deploying .vim"
+echo "Deploying .vim/"
 auto_mkdir $HOME/.vim
 for file in ${SCRIPT_DIR}/dot_vim/*
 do
 	ln -snfv $file ${HOME}/.vim
+done
+
+
+echo "Deploying .mlterm/"
+auto_mkdir $HOME/.mlterm
+for file in ${SCRIPT_DIR}/dot_mlterm/*
+do
+    ln -snfv $file ${HOME}/.mlterm
 done
 
 
