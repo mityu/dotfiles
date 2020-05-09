@@ -6,6 +6,7 @@
 if has('vim_starting')
   set encoding=utf-8
   scriptencoding utf-8
+  let $MYVIMRC = resolve(expand('<sfile>'))
 endif
 def! s:fold_is_blockopen(line: string): bool
   return line =~# '\v^%(fu%[nction]|%(export\s+)?def|if|for|while|try)'
