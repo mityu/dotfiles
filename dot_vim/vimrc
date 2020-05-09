@@ -1,6 +1,6 @@
 " Author: mityu
 " Last Change: 09-May-2020.
-" vim: foldmethod=expr foldexpr=FoldExprForVimrc() shiftwidth=2
+" vim: shiftwidth=2
 " vim9script
 " Encoding
 if has('vim_starting')
@@ -152,7 +152,7 @@ function! SetUndoFtplugin(config) abort
 endfunction
 command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
-"
+
 " Startup config
 if has('vim_starting')
   if has('multi_lang')
@@ -390,7 +390,6 @@ set noimdisable
 set lazyredraw
 set previewpopup=highlight:Normal
 set termwinkey=<C-w>
-set modelineexpr
 set noesckeys
 
 let s:_undodir = s:join_path(s:cache_dir, 'undodir')
@@ -433,6 +432,10 @@ augroup vimrc_filetype
   autocmd FileType c,cpp setlocal foldmethod=indent
   autocmd BufRead .envrc set filetype=sh
   autocmd FileType makefile setlocal noexpandtab nosmarttab
+
+  " Cannot set foldexpr in modeline without modelineexpr, so use autocmd.
+  execute 'autocmd BufRead ' .. $MYVIMRC .. ' setlocal foldmethod=expr ' ..
+        \ 'foldexpr=FoldExprForVimrc()'
 augroup END
 augroup vimrc_mru
   autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
