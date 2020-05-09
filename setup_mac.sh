@@ -80,3 +80,12 @@ if [ ! -d "$DOTFILES" ]; then
     git clone --recursive https://github.com/mityu/dotfiles.git $DOTFILES
 fi
 $DOTFILES/deploy.sh
+
+DOTFILES=$HOME/dotfiles
+VIM_NIGHTLY_BUILD_DIR=$HOME/.vim_nightly_build
+if [ ! -d "$VIM_NIGHTLY_BUILD_DIR" ]; then
+    git clone --recursive --depth 1 \
+        https://github.com/vim/vim.git $VIM_NIGHTLY_BUILD_DIR
+    make
+    make install
+fi
