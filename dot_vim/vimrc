@@ -353,6 +353,7 @@ colorscheme domusaurea
 set relativenumber number
 set wrap
 set smartindent autoindent
+set cinoptions=:0,g0,N-s,E-s
 set backspace=eol,start,indent
 set pumheight=10
 set completefunc=vimrc#path_complete
