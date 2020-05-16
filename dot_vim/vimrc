@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-May-2020.
+" Last Change: 16-May-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1557,14 +1557,14 @@ command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
 " statusline
 function! s:statusline_generator() abort
   let statusline =
-        \ '%m' .
-        \ '[%{&ft ==# "" ? "No ft" : &ft}]' .
-        \ '[#%{bufnr("%")}]' .
+        \ '%m' ..
+        \ '[%{&ft ==# "" ? "No ft" : &ft}]' ..
+        \ '[#%{bufnr("%")}]' ..
         \ (s:plugin.exists('gina.vim') ?
         \   '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
-        \   '') .
-        \ '%{<SID>filename_label(bufnr("%"))}' .
-        \ '%<%=' .
+        \   '') ..
+        \ '%{<SID>filename_label(bufnr("%"))}' ..
+        \ '%<%=' ..
         \ '[%{pathshorten(getcwd(winnr()))}]'
   return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction
@@ -1760,7 +1760,7 @@ command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 let g:mru_history_file = s:join_path(s:cache_dir, 'mru', 'history')
 let g:mru_ignore_pattern = [
       \ '\.git\>',
-      \ '^\V\%(' . escape(expand('~'), '\') . '\)\@!'
+      \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
       \ ]
 "
 " gram, filore
@@ -1773,7 +1773,7 @@ function! s:gram_mapping() abort
         \ ['q', 'exit'],
         \]
   call map(map, {key, val ->
-        \ 'nmap <buffer> ' . val[0] . ' <Plug>(gram-' . val[1] . ')'})
+        \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(gram-' .. val[1] .. ')'})
   execute join(map, "\n")
 endfunction
 function! s:filore_mapping() abort
