@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 16-May-2020.
+" Last Change: 17-May-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -928,9 +928,14 @@ function! s:list_tasks(args) abort
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunction
-def! s:gof_from_mapping()
-  let git_root = s:find_gitroot()
-  s:gof(git_root ==# '' ? getcwd(winnr()) : git_root)
+def! s:find_gitroot(arg_target: string = bufname('%')): string
+  let target: string = resolve(arg_target)
+  let git_dir: string = finddir('.git', target .. ';')
+  if git_dir ==# ''
+    s:echomsg_warning('Not a git repository: ' .. target)
+    return ''
+  endif
+  return fnamemodify(git_dir, ':h')
 enddef
 def! s:gof(path: string): void
   if !executable('gof')
@@ -945,6 +950,10 @@ def! s:gof(path: string): void
   let minheight = min([&lines, 40])
   popup_create(term_start(gofcmd, {'hidden': 1, 'term_finish': 'close'}),
         \ {'minwidth': minwidth, 'minheight': minheight})
+enddef
+def! s:gof_from_mapping()
+  let git_root = s:find_gitroot()
+  s:gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 "TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void
@@ -1798,15 +1807,6 @@ augroup vimrc_additional_plugins
 augroup END
 "
 " git
-def! s:find_gitroot(arg_target: string = bufname('%')): string
-  let target: string = resolve(arg_target)
-  let git_dir: string = finddir('.git', target .. ';')
-  if git_dir ==# ''
-    s:echomsg_warning('Not a git repository: ' .. target)
-    return ''
-  endif
-  return fnamemodify(git_dir, ':h')
-enddef
 def! s:git_diff_getcmd(arg_target: string): string
   let target: string = resolve(arg_target)
   let gitroot: string = s:find_gitroot(target)
