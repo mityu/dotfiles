@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-May-2020.
+" Last Change: 20-May-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -440,7 +440,7 @@ augroup vimrc_filetype
         \ 'foldexpr=FoldExprForVimrc()'
 augroup END
 augroup vimrc_mru
-  autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
+  autocmd BufWritePost * call vimrc#mru#onReadFile()  " TODO: Change func name
 augroup END
 augroup vimrc_checktime
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
