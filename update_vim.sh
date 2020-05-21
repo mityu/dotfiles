@@ -4,5 +4,5 @@ if [ -n "$(git diff)" ]; then
     exit 0
 fi
 git merge FETCH_HEAD
-make
+make CONF_OPT_NLS=--disable-nls
 make install
