@@ -678,29 +678,6 @@ if has('vim_starting')
   EnableShiftTenKey
 endif
 
-function! s:toggle_zooming_window() abort
-  if winnr('$') == 1
-    return
-  endif
-  if !exists('t:vimrc_zooming_window')
-    let t:vimrc_zooming_window = {
-          \ 'zoomed_winnr': 0,
-          \ 'winrestcmd': '',
-          \ }
-  endif
-  if t:vimrc_zooming_window.zoomed_winnr
-    execute t:vimrc_zooming_window.winrestcmd
-  endif
-  if t:vimrc_zooming_window.zoomed_winnr == winnr()
-    let t:vimrc_zooming_window.zoomed_winnr = 0
-    let t:vimrc_zooming_window.winrestcmd = ''
-  else
-    let t:vimrc_zooming_window.zoomed_winnr = winnr()
-    let t:vimrc_zooming_window.winrestcmd = winrestcmd()
-    wincmd _
-    wincmd |
-  endif
-endfunction
 function! s:cmdwin_enter() abort
   call s:cmdwin_save_options.clear()
 
