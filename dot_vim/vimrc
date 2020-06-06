@@ -1356,44 +1356,28 @@ if s:plugin.exists('vim-textobj-between')
   let g:textobj_between_no_default_key_mappings = 1
 endif
 if s:plugin.exists('caw.vim')
-  inoremap <Plug>(vimrc:caw:builtin:ESC) <ESC>
-  inoremap <Plug>(vimrc:caw:separate-undo) <C-g>u
-  inoremap <silent> <Plug>(vimrc:caw:oneline:comment)
-        \ <C-r>=b:caw_oneline_comment .. g:caw_dollarpos_sp_right<CR>
-  imap <Plug>(vimrc:caw:hatpos:comment)
-        \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:hatpos:comment)
-  imap <Plug>(vimrc:caw:dollarpos:comment)
-        \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:dollarpos:comment)
+  inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
+  inoremap <silent> <Plug>(vimrc:caw:comment:here)
+        \ <C-r>=b:caw_oneline_comment<CR>
 
-  function! s:caw_oneline_comment_map(key) abort
-    execute printf(
-          \ 'inoremap <silent> <Plug>(vimrc:caw:oneline:do-input)%s %s',
-          \ a:key, a:key)
-    execute printf('imap <expr> %s <SID>caw_oneline_comment(%s)',
-          \ a:key, string(a:key))
-  endfunction
-  function! s:caw_oneline_comment(key) abort
-    let do_input = "\<Plug>(vimrc:caw:oneline:do-input)" .. a:key
-    if !exists('b:caw_oneline_comment')
-      return do_input
-    endif
-
-    let prefix = do_input .. "\<Plug>(vimrc:caw:separate-undo)" ..
-          \ repeat("\<C-h>", strlen(a:key))
-    if getline('.') =~# '\m^\s*$'
-      let key = "\<Plug>(vimrc:caw:hatpos:comment)"
+  def! s:CawMap(): string
+    let kind = ''
+    if col('.') == 1
+      kind = 'zeropos'
     elseif col('.') == col('$')
-      let key = "\<Plug>(vimrc:caw:dollarpos:comment)"
+      kind = 'dollarpos'
+    elseif getline('.') =~# '^\s\+$'
+      kind = 'hatpos'
     else
-      let key = "\<Plug>(vimrc:caw:oneline:comment)"
+      return "\<Plug>(vimrc:caw:comment:here)"
     endif
-    return prefix .. key
-  endfunction
+    return "\<Plug>(vimrc:caw:prefix)\<Plug>(caw:" .. kind .. ":comment)"
+  enddef
 
   map _c <Plug>(caw:hatpos:toggle:operator)
-  call s:caw_oneline_comment_map('<C-l>/')
+  imap <expr> <C-l><C-l> <SID>CawMap()
   let g:caw_no_default_keymappings = 1
-  let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
+  let g:caw_dollarpos_sp_left = ' '
   let g:caw_dollarpos_sp_right = ' '
   let g:caw_hatpos_sp = ' '
   let g:caw_zeropos_sp = ' '
