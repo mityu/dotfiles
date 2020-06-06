@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 24-May-2020.
+" Last Change: 06-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -39,7 +39,7 @@ function! s:SNR() abort
   return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
 endfunction
 function! s:rc(fname) abort
-  return s:filesystem.rcfile_prefix . a:fname
+  return s:filesystem.rcfile_prefix .. a:fname
 endfunction
 function! s:join_path(...) abort
   return join(a:000, s:filesystem.slash)
@@ -140,12 +140,12 @@ function! VimrcSIDPrefix() abort
   return s:SIDPrefix()
 endfunction
 function! VimrcFunc(func) abort
-  return function(s:SIDPrefix() . a:func)
+  return function(s:SIDPrefix() .. a:func)
 endfunction
 function! SetUndoFtplugin(config) abort
-  let restorer = 'execute ' . string(a:config)
+  let restorer = 'execute ' .. string(a:config)
   if exists('b:undo_ftplugin')
-    let b:undo_ftplugin = restorer . '|' . b:undo_ftplugin
+    let b:undo_ftplugin = restorer .. '|' .. b:undo_ftplugin
   else
     let b:undo_ftplugin = restorer
   endif
@@ -205,7 +205,7 @@ if has('vim_starting') || 1
   let g:loaded_vimballPlugin = 1
   let g:loaded_netrwPlugin = 1
 
-  let &runtimepath .= ',' . escape(s:join_path($DOT_VIM, 'runtime'), ' \')
+  let &runtimepath .= ',' .. escape(s:join_path($DOT_VIM, 'runtime'), ' \')
 
   " Set environmental variables on gVim.
   let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
@@ -309,7 +309,7 @@ function! s:pack_init() abort
     "Download minpac...
     let minpac_path = s:join_path($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
     call s:echomsg('Downloading minpac...')
-    call system('git clone https://github.com/k-takata/minpac.git ' .
+    call system('git clone https://github.com/k-takata/minpac.git ' ..
           \ minpac_path)
     try
       packadd minpac
@@ -492,8 +492,8 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
-nnoremap <expr> n 'Nn'[v:searchforward] . 'zzzv'
-nnoremap <expr> N 'nN'[v:searchforward] . 'zzzv'
+nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
+nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
 " Avoid to regester calling textobj function commands to the command-history
@@ -557,19 +557,19 @@ function! s:_loop_define(config) abort
     let [lhs, rhs] =
           \ map([lhs, rhs], {_, val -> substitute(val, '|', '<bar>', 'g')})
     let com = []
-    call add(com, [mode . 'noremap <silent>',
-          \ plug_map.do . lhs,
+    call add(com, [mode .. 'noremap <silent>',
+          \ plug_map.do .. lhs,
           \ rhs])
-    call add(com, [mode . 'map',
-          \ enter_with . lhs,
-          \ plug_map.main . lhs])
-    call add(com, [mode . 'map',
-          \ plug_map.main . lhs,
-          \ plug_map.do . lhs . plug_map.prefix
+    call add(com, [mode .. 'map',
+          \ enter_with .. lhs,
+          \ plug_map.main .. lhs])
+    call add(com, [mode .. 'map',
+          \ plug_map.main .. lhs,
+          \ plug_map.do .. lhs .. plug_map.prefix
           \])
-    call add(com, [mode . 'map',
-          \ plug_map.prefix . lhs,
-          \ plug_map.main . lhs])
+    call add(com, [mode .. 'map',
+          \ plug_map.prefix .. lhs,
+          \ plug_map.main .. lhs])
     execute join(map(com, 'join(v:val, " ")'), "\n")
   endfor
 
@@ -579,7 +579,7 @@ function! s:_loop_define(config) abort
     call map(config.map, 's:_loop_define_generate_tmap(v:val)')
     if config.enter_with !~?
           \ printf("\\v^%%(%s|\\%s)", &termwinkey, &termwinkey)
-      let config.enter_with = &termwinkey . config.enter_with
+      let config.enter_with = &termwinkey .. config.enter_with
     endif
     call s:_loop_define(config)
   endif
@@ -588,13 +588,13 @@ function! s:_loop_define_generate_tmap(value) abort
   let rhs = a:value[1]
   let rhs = substitute(rhs, '\c<SID>', s:SIDPrefix(), 'g')
   let rhs = substitute(rhs, '\zs<\ze.\{-}>', '\\<lt>', 'g')
-  let rhs = &termwinkey . ':<C-u>execute "normal! ' . rhs . '"<CR>'
+  let rhs = &termwinkey .. ':<C-u>execute "normal! ' .. rhs .. '"<CR>'
   return [a:value[0], rhs]
 endfunction
 function! s:_simple_loop_define(config) abort
   let config = deepcopy(a:config)
   let config.map = map(split(config.follow_key, '\zs'),
-        \ '[v:val, config.enter_with . v:val]')
+        \ '[v:val, config.enter_with .. v:val]')
   call s:_loop_define(config)
 endfunction
 "Window management
@@ -633,7 +633,7 @@ function! s:map_tabmove(delta) abort
   if movement < 0
     let command .= string(movement)
   else
-    let command .= '+' . movement
+    let command .= '+' .. movement
   endif
   execute command
 endfunction
@@ -782,13 +782,13 @@ function! s:cmdwin_incsearch_jump() abort
   endtry
 endfunction
 " function! s:cmdwin_select_history() abort
-"   let history = split(execute('history ' . getcmdwintype()), "\n")[1 :]
+"   let history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
 "   call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
 "   call reverse(history)
 "   call gram#select({
-"        \ 'name': getcmdwintype() . 'history',
+"        \ 'name': getcmdwintype() .. 'history',
 "        \ 'items': history,
-"        \ 'callback': s:SIDPrefix() . 'cmdwin_select_history_callback',
+"        \ 'callback': s:SIDPrefix() .. 'cmdwin_select_history_callback',
 "        \ })
 " endfunction
 " function! s:cmdwin_select_history_callback(item) abort
@@ -827,7 +827,7 @@ call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
 execute join(map(s:_map, {->join([
       \  v:val[0],
       \  v:val[1],
-      \  '<Space>' . v:val[2],
+      \  '<Space>' .. v:val[2],
       \  printf(':<C-u>%s<CR>', v:val[3])
       \ ], ' ')}), "\n")
 unlet s:_map
@@ -905,7 +905,7 @@ function! s:scratch(opener) abort
   if name ==# ''
     let identifier = 1
     let name = 'nameless/buffer-'
-    while bufexists(prefix . name . identifier)
+    while bufexists(prefix .. name .. identifier)
       let identifier += 1
     endwhile
     let name .= identifier
@@ -913,17 +913,17 @@ function! s:scratch(opener) abort
   if opener ==# ''
     let opener = 'split'
   endif
-  execute opener prefix . name
+  execute opener prefix .. name
   call s:draft()
 endfunction
 function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort
-  let pat = '^' . a:arg_lead
+  let pat = '^' .. a:arg_lead
   return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
 endfunction
 function! s:list_tasks(args) abort
   let target = '%'
   if a:args =~# 'rf'
-    let target = '**/*.' . expand('%:e')
+    let target = '**/*.' .. expand('%:e')
   elseif a:args !=# ''
     let target = a:args
   endif
@@ -994,7 +994,7 @@ if s:plugin.exists('vim-operator-user')
     endif
     let save_options = vimrc#class#new('save_options')
     call save_options.store(['commentstring'])
-    let &l:commentstring = ' ' . &l:commentstring
+    let &l:commentstring = ' ' .. &l:commentstring
     try
       execute 'normal!' a:keys
     catch " Usaully this :catch gets E490, 'Folding not found.'
@@ -1028,8 +1028,8 @@ if s:plugin.exists('vim-operator-user')
     let foldmotions_with_range = 'fF'
     let foldmotions_standalone = 'dDE'
     let sid = s:SIDPrefix()
-    for keys in split(foldmotions_with_range . foldmotions_standalone, '\zs')
-      let keys = 'z' . keys
+    for keys in split(foldmotions_with_range .. foldmotions_standalone, '\zs')
+      let keys = 'z' .. keys
       let func = [
             \ printf('function! %smap_fold_%s(motion_wise) abort', sid, keys),
             \ printf('  call s:map_range_fold_cmd(a:motion_wise, "%s")', keys),
@@ -1037,8 +1037,8 @@ if s:plugin.exists('vim-operator-user')
             \]
       execute join(func, "\n")
       call operator#user#define(
-            \ 'vimrc-fold-' . keys,
-            \ sid . 'map_fold_' . keys)
+            \ 'vimrc-fold-' .. keys,
+            \ sid .. 'map_fold_' .. keys)
     endfor
 
     " Override for normal mode; Any ranges aren't need for following commands.
@@ -1047,7 +1047,7 @@ if s:plugin.exists('vim-operator-user')
           \ '<Plug>(operator-vimrc-fold-%s)',
           \ ':<C-u>call <SID>map_fold_cmd("%s")<CR>'], ' ')
     for keys in split(foldmotions_standalone, '\zs')
-      let keys = 'z' . keys
+      let keys = 'z' .. keys
       execute printf(map_cmd, keys, keys)
     endfor
   endfunction
@@ -1100,7 +1100,7 @@ if s:plugin.exists('gina.vim')
     call s:gina_nnoremap('/\v%(status|branch|log)', 'q', ':<C-u>close<CR>')
     nnoremap <silent> <Space>g :<C-u>Gina status<CR>
 
-    " Jump between unadded files with n/p .
+    " Jump between unadded files with n/p ..
     let rhs_base = printf(
           \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
           \ s:SIDPrefix())
@@ -1133,10 +1133,10 @@ if s:plugin.exists('gina.vim')
       return
     endif
     let gitroot = fnamemodify(gina#core#get().repository, ':h')
-    let cmd = 'git -C ' . gitroot .
-          \ ' --no-pager diff --no-color ' . file
+    let cmd = 'git -C ' .. gitroot ..
+          \ ' --no-pager diff --no-color ' .. file
     let bufnr = term_start(cmd , {
-          \ 'term_name': '[gina diff] ' . file,
+          \ 'term_name': '[gina diff] ' .. file,
           \ 'norestore': 1,
           \ })
     if bufnr
@@ -1211,10 +1211,10 @@ if s:plugin.exists('vim-textobj-commentblock')
   let g:textobj_commentblock_no_default_key_mapings = 1
 
   augroup vimrc_textobj_commentblock
-    execute 'autocmd Filetype * call textobj#commentblock#pick#' .
+    execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
           \   (s:plugin.exists('caw.vim') ? 'caw' :
           \   'commentstring')
-          \ . '()'
+          \ .. '()'
   augroup END
 endif
 if s:plugin.exists('vim-jplus')
@@ -1245,9 +1245,9 @@ if s:plugin.exists('asyncomplete.vim')
   let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
 
   inoremap <expr> <C-n>
-        \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() . "\<C-x>\<C-n>"
+        \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-x>\<C-n>"
   inoremap <expr> <C-p>
-        \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() . "\<C-x>\<C-p>"
+        \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-x>\<C-p>"
   inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
 
   function! s:register_asyncomplete_sources() abort
@@ -1296,7 +1296,7 @@ endif
 if s:plugin.exists('vim-ambicmd')
   function! s:ambicmd_expand(key) abort
     let expander = ambicmd#expand(a:key)
-    return (expander ==# a:key ? '' : "\<C-g>u") . expander
+    return (expander ==# a:key ? '' : "\<C-g>u") .. expander
   endfunction
   augroup vimrc_ambicmd
     autocmd CmdWinEnter : call s:setup_ambicmd_for_cmdwin()
@@ -1315,21 +1315,21 @@ if s:plugin.exists('vim-ambicmd')
 
   function! s:ambicmd_build_rule(cmd) abort
     let rule = []
-    let rule += ['\c^' . a:cmd . '$']
-    let rule += ['\c^' . a:cmd]
+    let rule += ['\c^' .. a:cmd .. '$']
+    let rule += ['\c^' .. a:cmd]
 
     for len in range(1, strlen(a:cmd))
       let [prefix, suffix] = [strpart(a:cmd, 0, len), a:cmd[len :]]
       let prefix = substitute(toupper(prefix), '.\zs', '\\l*', 'g')
-      let matcher ='\C^' . prefix . suffix
-      let rule += [matcher . '$', matcher]
+      let matcher ='\C^' .. prefix .. suffix
+      let rule += [matcher .. '$', matcher]
     endfor
 
-    let rule += ['\c' . a:cmd]
-    let rule += ['.*' . substitute(a:cmd, '.\zs', '.*', 'g')]
+    let rule += ['\c' .. a:cmd]
+    let rule += ['.*' .. substitute(a:cmd, '.\zs', '.*', 'g')]
     return rule
   endfunction
-  let g:ambicmd#build_rule = s:SIDPrefix() . 'ambicmd_build_rule'
+  let g:ambicmd#build_rule = s:SIDPrefix() .. 'ambicmd_build_rule'
 endif
 if s:plugin.exists('vim-quickrun')
   let g:quickrun_config = {}
@@ -1382,7 +1382,7 @@ if s:plugin.exists('caw.vim')
   inoremap <Plug>(vimrc:caw:builtin:ESC) <ESC>
   inoremap <Plug>(vimrc:caw:separate-undo) <C-g>u
   inoremap <silent> <Plug>(vimrc:caw:oneline:comment)
-        \ <C-r>=b:caw_oneline_comment . g:caw_dollarpos_sp_right<CR>
+        \ <C-r>=b:caw_oneline_comment .. g:caw_dollarpos_sp_right<CR>
   imap <Plug>(vimrc:caw:hatpos:comment)
         \ <Plug>(vimrc:caw:builtin:ESC)<Plug>(caw:hatpos:comment)
   imap <Plug>(vimrc:caw:dollarpos:comment)
@@ -1396,12 +1396,12 @@ if s:plugin.exists('caw.vim')
           \ a:key, string(a:key))
   endfunction
   function! s:caw_oneline_comment(key) abort
-    let do_input = "\<Plug>(vimrc:caw:oneline:do-input)" . a:key
+    let do_input = "\<Plug>(vimrc:caw:oneline:do-input)" .. a:key
     if !exists('b:caw_oneline_comment')
       return do_input
     endif
 
-    let prefix = do_input . "\<Plug>(vimrc:caw:separate-undo)" .
+    let prefix = do_input .. "\<Plug>(vimrc:caw:separate-undo)" ..
           \ repeat("\<C-h>", strlen(a:key))
     if getline('.') =~# '\m^\s*$'
       let key = "\<Plug>(vimrc:caw:hatpos:comment)"
@@ -1410,12 +1410,11 @@ if s:plugin.exists('caw.vim')
     else
       let key = "\<Plug>(vimrc:caw:oneline:comment)"
     endif
-    return prefix . key
+    return prefix .. key
   endfunction
 
   map _c <Plug>(caw:hatpos:toggle:operator)
-  call s:caw_oneline_comment_map('//')
-  " call s:caw_oneline_comment_map('<C-/>')
+  call s:caw_oneline_comment_map('<C-l>/')
   let g:caw_no_default_keymappings = 1
   let g:caw_dollarpos_sp_left = repeat("\<Space>", 2)
   let g:caw_dollarpos_sp_right = ' '
@@ -1478,7 +1477,7 @@ function! s:notes.delete(...) abort
   let files = self.list_files()
   for target in a:000
     if !s:has(files, target)
-      call s:echomsg_error('File does not exists: ' . target)
+      call s:echomsg_error('File does not exists: ' .. target)
       continue
     endif
     call s:echomsg(printf('Delete %s ? [y/n]', target))
@@ -1508,7 +1507,7 @@ for s:type_ in ['memo', 'otameshi']
     call mkdir(s:{s:type_}.get_save_dir(), 'p')
   endif
   if isdirectory(s:{s:type_}.get_save_dir())
-    let s:com_prefix_ = toupper(s:type_[0]) . s:type_[1:]
+    let s:com_prefix_ = toupper(s:type_[0]) .. s:type_[1:]
     execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
           \ s:com_prefix_, s:type_)
     execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
@@ -1525,7 +1524,7 @@ function! s:memo.expand_filename(name) abort
     " Add .md extension only when use didn't specificate extension.
     let name .= '.md'
   endif
-  let name = strftime('%Y-%m-%d %H:%M ') . name
+  let name = strftime('%Y-%m-%d %H:%M ') .. name
   return name
 endfunction
 function! s:otameshi.expand_filename(name) abort
@@ -1536,7 +1535,7 @@ function! s:otameshi.expand_filename(name) abort
   if extension ==# ''
     return a:name
   else
-    return a:name . '.' . extension
+    return a:name .. '.' .. extension
   endif
 endfunction
 function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort
@@ -1649,7 +1648,7 @@ function! s:showmode_highlight() abort
     \  "\<C-v>": 'visual',
     \  },
     \ mode(), 'normal')
-  execute 'highlight link VimrcShowMode VimrcShowMode' . type
+  execute 'highlight link VimrcShowMode VimrcShowMode' .. type
   return ''
 endfunction
 def! s:showmode_label(): string
@@ -1799,7 +1798,7 @@ function! s:filore_mapping() abort
         \ ['H', 'start-history'],
         \]
   call map(map, {key, val ->
-        \ 'nmap <buffer> ' . val[0] . ' <Plug>(filore-' . val[1] . ')'})
+        \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'})
   execute join(map, "\n")
 endfunction
 augroup vimrc_additional_plugins
@@ -1871,21 +1870,21 @@ function! s:compblock_config_funcs.c.brace(lines) abort
 endfunction
 function! s:compblock_config_funcs.vim.endif(lines) abort
   let indent = s:compblock_config_funcs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' . indent . 'else%[if]'
+  if a:lines.next =~# '\v^' .. indent .. 'else%[if]'
     return v:null
   endif
   return 'endif'
 endfunction
 function! s:compblock_config_funcs.vim.endtry(lines) abort
   let indent = s:compblock_config_funcs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' . indent . '%(catch|finally)'
+  if a:lines.next =~# '\v^' .. indent .. '%(catch|finally)'
     return v:null
   endif
   return 'endtry'
 endfunction
 function! s:compblock_config_funcs.sh.fi(lines) abort
   let indent = s:compblock_config_funcs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' . indent . '%(elif|else)'
+  if a:lines.next =~# '\v^' .. indent .. '%(elif|else)'
     return v:null
   endif
   return 'fi'
@@ -1972,7 +1971,7 @@ function! s:compblock_try_to_apply() abort
   let prev_line = getline(line('.') - 1)
   let configs = s:compblock_get_config()
   for [pattern, Block_end] in configs
-    if prev_line !~# '\v' . pattern
+    if prev_line !~# '\v' .. pattern
       continue
     endif
     if type(Block_end) == v:t_func
@@ -1985,7 +1984,7 @@ function! s:compblock_try_to_apply() abort
     endif
     let indent_depth = s:compblock_get_indent_depth(line('.') - 1)
     let indent =  s:compblock_get_indent_str(indent_depth)
-    let newline = indent . Block_end
+    let newline = indent .. Block_end
     if getline(nextlinenr) ==# newline
       continue
     endif
@@ -2059,7 +2058,7 @@ augroup END
 let s:_lvimrc = s:rc('lvimrc')
 if filereadable(s:join_path(expand('~'), s:_lvimrc))
   let s:_lvimrc = s:join_path('~', s:_lvimrc)
-  execute 'command! -bar -nargs=* LVimrc ' .
+  execute 'command! -bar -nargs=* LVimrc ' ..
         \ 'execute ((<q-args> ==# "") ? "edit" : <q-args>)' string(s:_lvimrc)
   execute 'source' s:_lvimrc
 endif | unlet s:_lvimrc
