@@ -205,7 +205,7 @@ if has('vim_starting') || 1
   let g:loaded_vimballPlugin = 1
   let g:loaded_netrwPlugin = 1
 
-  let &runtimepath .= ',' .. escape(s:join_path($DOT_VIM, 'runtime'), ' \')
+  let &runtimepath ..= ',' .. escape(s:join_path($DOT_VIM, 'runtime'), ' \')
 
   " Set environmental variables on gVim.
   let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
@@ -631,9 +631,9 @@ function! s:map_tabmove(delta) abort
   let movement = move_to - current
   let command = 'tabmove '
   if movement < 0
-    let command .= string(movement)
+    let command ..= string(movement)
   else
-    let command .= '+' .. movement
+    let command ..= '+' .. movement
   endif
   execute command
 endfunction
@@ -885,7 +885,7 @@ function! s:scratch(opener) abort
     while bufexists(prefix .. name .. identifier)
       let identifier += 1
     endwhile
-    let name .= identifier
+    let name ..= identifier
   endif
   if opener ==# ''
     let opener = 'split'
@@ -1098,7 +1098,7 @@ if s:plugin.exists('gina.vim')
   endfunction
   function! s:gina_status_select_another(repeat_count, search_previous) abort
     let flags = 'w'
-    let flags .= a:search_previous ? 'b' : ''
+    let flags ..= a:search_previous ? 'b' : ''
     for i in range(1, a:repeat_count)
       call search('\e[31.\+\e[m', flags)
     endfor
@@ -1483,7 +1483,7 @@ function! s:memo.expand_filename(name) abort
   let name = a:name
   if !s:has(name, '.')
     " Add .md extension only when use didn't specificate extension.
-    let name .= '.md'
+    let name ..= '.md'
   endif
   let name = strftime('%Y-%m-%d %H:%M ') .. name
   return name
