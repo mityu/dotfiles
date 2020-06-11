@@ -1,6 +1,6 @@
-"Last Change: 03-Mar-2020.
-"Author: mityu
-"This colorscheme based on billw
+" Last Change: 11-Jun-2020.
+" Author: mityu
+" This colorscheme is based on billw
 
 " unlet g:colors_name
 set background=dark
@@ -334,6 +334,7 @@ function! s:echoerr(msg) "{{{
 endfunction "}}}
 
 
+" highlight statements
 call s:hi('Normal','cornsilk','blackgray',0)
 call s:hi('Comment','gold',0,0)
 call s:hi('Constant','mediumspringgreen',0,0)
@@ -415,10 +416,22 @@ call s:hi('SpellRare', 0, 'darkred', 0)
 
 call s:hi('cStatement','violet',0,0)
 
-hi! link Error ErrorMsg
-hi! link TabLineFill TabLine
-hi! link StatusLineTerm StatusLine
-hi! link StatusLineTermNC StatusLineNC
-hi! link QuickFixLine CursorLine
+
+highlight StatuslineNC guibg=#a79000
+highlight CursorLineNr guibg=#393939 guifg=#ffff00
+highlight Tabline guibg=#a0933d guifg=#333333
+highlight TablineSel guibg=#ffa000 guifg=#1f1f1f
+
+highlight! link Error ErrorMsg
+highlight! link TabLineFill TabLine
+highlight! link StatusLineTerm StatusLine
+highlight! link StatusLineTermNC StatusLineNC
+highlight! link QuickFixLine CursorLine
+
+augroup domusaurea
+  autocmd!
+  execute 'autocmd OptionSet termguicolors ++nested colorscheme' s:colors_name
+  autocmd ColorSchemePre * ++once autocmd! domusaurea OptionSet
+augroup END
 
 " vim: set expandtab smarttab
