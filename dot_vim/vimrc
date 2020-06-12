@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 06-Jun-2020.
+" Last Change: 13-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -674,9 +674,6 @@ function! s:shift_ten_key(enablize) abort
 endfunction
 command! -bar EnableShiftTenKey call s:shift_ten_key(1)
 command! -bar DisableShiftTenKey call s:shift_ten_key(0)
-if has('vim_starting')
-  EnableShiftTenKey
-endif
 
 function! s:cmdwin_enter() abort
   call s:cmdwin_save_options.clear()
