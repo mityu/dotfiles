@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 13-Jun-2020.
+" Last Change: 18-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -448,22 +448,20 @@ augroup vimrc_checktime
 augroup END
 "
 " Mapping
-nnoremap ; q:A
-vnoremap ; q:A
-nnoremap <Space>; q:
-vnoremap <Space>; q:
+nnoremap : q:A
+vnoremap : q:A
+nnoremap <Space>: q:k
+vnoremap <Space>: q:k
 nnoremap / q/A
 vnoremap / q/A
-nnoremap <Space>/ q/
-vnoremap <Space>/ q/
+nnoremap <Space>/ q/k
+vnoremap <Space>/ q/k
 nnoremap ? q?A
 vnoremap ? q?A
-nnoremap <Space>? q?
-vnoremap <Space>? q?
-nnoremap : ;
-vnoremap : ;
-nnoremap <Space>: :
-vnoremap <Space>: :
+nnoremap <Space>? q?k
+vnoremap <Space>? q?k
+nnoremap <Space>; :
+vnoremap <Space>; :
 
 noremap - <C-x>
 noremap + <C-a>
@@ -499,6 +497,7 @@ nnoremap <C-j> 7gj
 " Avoid to regester calling textobj function commands to the command-history
 " when use textobj via dot.
 nnoremap <silent> . .
+nnoremap * *N
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -534,8 +533,8 @@ def! s:terminal_map(mapcmd: string, lhs: string, rhs: string, mods: string = '')
   execute printf('%s %s %s%s %s%s',
        \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
 enddef
-call s:terminal_map('tnoremap', ';', ':<C-f>A')
-call s:terminal_map('tnoremap', ':', ';')
+call s:terminal_map('tnoremap', ':', ':<C-f>A')
+call s:terminal_map('tnoremap', '<Space>:', ':<C-f>k')
 call s:terminal_map('tnoremap', '<ESC>', 'N')
 call s:terminal_map('tnoremap', 'p', '""')
 call s:terminal_map('tnoremap', '<C-r>', '"')
@@ -686,6 +685,9 @@ function! s:cmdwin_enter() abort
   nnoremap <buffer> <C-c> <C-c><C-c>
   nmap <buffer> q <C-c>
   imap <buffer> <C-c> <ESC><C-c>
+
+  inoremap <buffer> <C-l><C-n> <C-x><C-n>
+  inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   " Execute an previous command easiler.
   " nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
@@ -1217,12 +1219,16 @@ if s:plugin.exists('asyncomplete.vim')
   let g:asyncomplete_force_refresh_on_context_changed = 1
   let g:asyncomplete_smart_completion = 1
   let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
+  let g:asyncomplete_auto_completeopt = 0
+  set completeopt=menuone,noselect
 
   inoremap <expr> <C-n>
         \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-x>\<C-n>"
   inoremap <expr> <C-p>
         \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-x>\<C-p>"
   inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
+  inoremap <C-l><C-n> <C-x><C-n><C-n>
+  inoremap <C-l><C-p> <C-x><C-p><C-p>
 
   function! s:register_asyncomplete_sources() abort
     let Register = {options ->
