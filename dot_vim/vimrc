@@ -1202,7 +1202,7 @@ if s:plugin.exists('vim-operator-swap')
 endif
 if s:plugin.exists('asyncomplete.vim')
   " Ignorecase.
-  function! s:asyncomplete_preprocessor(context, matches) abort
+  function! s:AsyncompletePreprocessor(context, matches) abort
     let completions = []
     let base = tolower(a:context.base)
     for [source, matches] in items(a:matches)
@@ -1218,7 +1218,7 @@ if s:plugin.exists('asyncomplete.vim')
   let g:asyncomplete_auto_popup = 1
   let g:asyncomplete_force_refresh_on_context_changed = 1
   let g:asyncomplete_smart_completion = 1
-  let g:asyncomplete_preprocessor = [function('s:asyncomplete_preprocessor')]
+  let g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
   let g:asyncomplete_auto_completeopt = 0
   set completeopt=menuone,noselect
 
@@ -1230,23 +1230,19 @@ if s:plugin.exists('asyncomplete.vim')
   inoremap <C-l><C-n> <C-x><C-n><C-n>
   inoremap <C-l><C-p> <C-x><C-p><C-p>
 
-  function! s:register_asyncomplete_sources() abort
-    let Register = {options ->
-          \ asyncomplete#register_source(
-          \ asyncomplete#sources#{options.name}#get_source_options(
-          \ options))
-          \ }
+  function! s:RegisterAsyncompleteSources() abort
     if s:plugin.exists('asyncomplete-buffer.vim')
-      call Register({
-            \ 'name': 'buffer',
-            \ 'whitelist': ['*'],
-            \ 'completor':
-            \   function('asyncomplete#sources#buffer#completor'),
-            \ })
+      call asyncomplete#register_source(
+            \ asyncomplete#sources#buffer#get_source_options(#{
+            \  name: 'buffer',
+            \  whitelist: ['*'],
+            \  completor:
+            \    function('asyncomplete#sources#buffer#completor'),
+            \ }))
     endif
   endfunction
   augroup vimrc_asyncomplete_sources
-    autocmd User asyncomplete_setup call s:register_asyncomplete_sources()
+    autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
   augroup END
 endif
 if s:plugin.exists('vim-lsp')
