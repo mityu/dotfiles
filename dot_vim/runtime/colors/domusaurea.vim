@@ -1,4 +1,4 @@
-" Last Change: 11-Jun-2020.
+" Last Change: 18-Jun-2020.
 " Author: mityu
 " This colorscheme is based on billw
 
@@ -428,5 +428,10 @@ augroup domusaurea
   execute 'autocmd OptionSet termguicolors ++nested colorscheme' s:colors_name
   autocmd ColorSchemePre * ++once autocmd! domusaurea OptionSet
 augroup END
+
+" Plugins
+let g:cursorword_highlight = 0
+highlight CursorWord0 term=underline cterm=underline gui=underline
+highlight CursorWord1 term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
 
 " vim: set expandtab smarttab
