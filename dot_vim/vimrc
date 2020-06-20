@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Jun-2020.
+" Last Change: 20-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1554,7 +1554,6 @@ def! s:filename_label(bufnr: number): string
     return (buftype ==# 'nofile' ? ' *NoFile* ' : '') ..
       \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
-  return ''
 enddef
 let &statusline = printf('%%!%sstatusline_generator()', s:SIDPrefix())
 
