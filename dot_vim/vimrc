@@ -1898,7 +1898,7 @@ def! s:compblock_need_try(): bool
        \ line('.') > b:compblock_ctx.cur_line
 enddef
 def! s:compblock_get_one_indent(): string
-  if &l:expandtab
+  if &l:expandtab || strdisplaywidth("\t") != shiftwidth()
     return repeat(' ', shiftwidth())
   else
     return "\t"
