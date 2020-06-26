@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 20-Jun-2020.
+" Last Change: 26-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1903,7 +1903,6 @@ def! s:compblock_get_one_indent(): string
   else
     return "\t"
   endif
-  return ''  # Cannot reach here.
 enddef
 function! s:compblock_get_indent_depth(line) abort
   let indent = getline(a:line)->matchstr('^\s*')
