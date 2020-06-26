@@ -1894,8 +1894,8 @@ def! s:compblock_init_for_buffer(): void
   endif
 enddef
 def! s:compblock_need_try(): bool
-  return line('$') > b:compblock_ctx.line_count &&
-       \ line('.') > b:compblock_ctx.cur_line
+  " TODO: This is experimental.
+  return line('$') > b:compblock_ctx.line_count
 enddef
 def! s:compblock_get_one_indent(): string
   if &l:expandtab || strdisplaywidth("\t") != shiftwidth()
