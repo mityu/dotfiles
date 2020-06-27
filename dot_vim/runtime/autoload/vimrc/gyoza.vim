@@ -46,32 +46,46 @@ def GetConfig(): list<any> " TODO: Don't use any
 
   return items(ft_configs) + items(global_configs)
 enddef
+def GetLineData(linenr: number): dict<any>
+  let text: string = linenr ? getline(linenr) : ''
+  let indentstr: string = matchstr(text, '^\s*')
+  let indentdepth: number = strdisplaywidth(indentstr) / shiftwidth()
+  return #{
+    nr: linenr,
+    text: text,
+    indent_str: indentstr,
+    indent_depth: indentdepth,
+  }
+enddef
 def TryToApply()
   tryToApply = v:false
-  let nextlinenr = nextnonblank(line('.') + 1)
-  if GetIndentDepth(nextlinenr) > GetIndentDepth(line('.') - 1)
+
+  # The following type specifier is necessary; vim9script cannot handle type
+  # correctly yet.
+  let nextline: dict<any> = GetLineData(nextnonblank(line('.') + 1))
+  let prevline: dict<any> = GetLineData(prevnonblank(line('.') - 1))
+
+  if nextline.indent_depth > prevline.indent_depth
     return
   endif
-  let prevlinenr = prevnonblank(line('.') - 1)
-  let prev_line = prevlinenr ? getline(prevlinenr) : ''
-  let next_line = nextlinenr ? getline(nextlinenr) : ''
-  let configs = GetConfig()
 
+  let configs = GetConfig()
   for config in configs
     let pattern = config[0]
     let BlockPair: any = config[1].pair
     let interruption: list<string> = config[1].interruption
 
-    if prev_line !~# '\v' .. pattern
+    if prevline.text !~# '\v' .. pattern
       continue
-    elseif GetIndentDepth(nextlinenr) == GetIndentDepth(prevlinenr)
-      if index(interruption, trim(next_line)) >= 0
+    elseif nextline.indent_depth == prevline.indent_depth
+      let text = trim(nextline.text)
+      if index(interruption, text) >= 0
         continue
       endif
 
       # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
       for interrupt in interruption
-        if interrupt =~# next_line
+        if interrupt =~# nextline.text
           continue
         endif
       endfor
@@ -79,18 +93,18 @@ def TryToApply()
 
     if type(BlockPair) == v:t_func
       # TODO: Change argument?
-      BlockPair = call(BlockPair, [{'prev': prev_line, 'current': getline('.'),
-           \ 'next': getline(nextlinenr)}])
+      BlockPair = call(BlockPair, [{'prev': prevline.text, 'current': getline('.'),
+           \ 'next': nextline.text}])
     endif
     if type(BlockPair) == v:t_none
       " Cancel.
       continue
     endif
 
-    let indent_depth = GetIndentDepth(prevlinenr)
-    let indent =  GetIndentStr(indent_depth)
+    let indent_depth = prevline.indent_depth
+    let indent = prevline.indent_str
     let newline = indent .. BlockPair
-    if next_line ==# newline
+    if nextline.text ==# newline
       continue
     endif
     let after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
