@@ -46,9 +46,6 @@ def GetConfig(): list<any> " TODO: Don't use any
 
   return items(ft_configs) + items(global_configs)
 enddef
-export def vimrc#gyoza#getConfig(): list<any>
-  return GetConfig()
-enddef
 def TryToApply()
   tryToApply = v:false
   let nextlinenr = nextnonblank(line('.') + 1)
