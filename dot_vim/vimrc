@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 26-Jun-2020.
+" Last Change: 27-Jun-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1802,7 +1802,6 @@ command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
 augroup vimrc_gyoza
   autocmd User vimrc_initialize call vimrc#gyoza#enable()
 augroup END
-nnoremap <Space><Space> :<C-u>call vimrc#gyoza#disable()<CR>
 
 " zsh
 " function! Tapi_edit_line(bufnr, args) abort

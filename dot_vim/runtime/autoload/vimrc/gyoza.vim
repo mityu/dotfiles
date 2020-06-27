@@ -1,94 +1,14 @@
 vim9script
 
-" gyoza
-" TODO: Fix configFuncs
-let configFuncs: dict<dict<any>> = {'c': {}, 'vim': {}, 'sh': {}}
-function configFuncs.get_indent(line) abort
-  return matchstr(a:line, '^\s*')
-endfunction
-function configFuncs.c.brace(lines) abort
-  let indent = configFuncs.get_indent(a:lines.prev)
-
-  if a:lines.next =~# '\v^' .. indent .. '}.*;'
-    return v:null
-  endif
-
-  if a:lines.prev =~# '\v<%(struct|class|enum|union)>'
-    if a:lines.next =~# '\v<%(public|protected|private)>:'
-      return v:null
-    endif
-    return '};'
-  elseif a:lines.prev =~# '\v^\s*if>'
-    if a:lines.next =~# '\v^' .. indent .. '%(}\s*)?<else>'
-      return v:null
-    endif
-  elseif a:lines.prev =~# '\v^\s*switch>'
-    if a:lines.next =~# '\v^\s*\S+:'
-      return v:null
-    endif
-  endif
-
-  return '}'
-endfunction
-function configFuncs.vim.endif(lines) abort
-  let indent = configFuncs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' .. indent .. 'else%[if]'
-    return v:null
-  endif
-  return 'endif'
-endfunction
-function configFuncs.vim.endtry(lines) abort
-  let indent = configFuncs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' .. indent .. '%(catch|finally)'
-    return v:null
-  endif
-  return 'endtry'
-endfunction
-function configFuncs.sh.fi(lines) abort
-  let indent = configFuncs.get_indent(a:lines.prev)
-  if a:lines.next =~# '\v^' .. indent .. '%(elif|else)'
-    return v:null
-  endif
-  return 'fi'
-endfunction
-
-" NOTE: Keys are evaluated under very magic.
-let config = {
-     \ '_': {
-     \   '\{\s*$': '}',
-     \ },
-     \ 'c': {
-     \   '\{\s*$': configFuncs.c.brace,
-     \ },
-     \ 'cpp': {},
-     \ 'sh': {
-     \   '%(^|;)\s*<do>': 'done',
-     \   '^\s*if>': configFuncs.sh.fi,
-     \ },
-     \ 'zsh': {},
-     \ 'vim': {
-     \   '\{\s*$': v:null,
-     \   '^\s*\{\s*$': '}',
-     \   '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$': 'enddef',
-     \   '^\s*function!?\s+\S+(.*).*$': 'endfunction',
-     \   '^\s*if>': configFuncs.vim.endif,
-     \   '^\s*while>': 'endwhile',
-     \   '^\s*for>': 'endfor',
-     \   '^\s*try>': configFuncs.vim.endtry,
-     \   '^\s*echohl\s+%(NONE)@!\S+$': 'echohl NONE',
-     \   '^\s*augroup\s+%(END)@!\S+$': 'augroup END',
-     \ },
-     \ 'vimspec': {
-     \   '^\s*%(Describe|Before|After|Context|It)': 'End',
-     \ },
-     \ }
-extend(config.cpp, config.c)
-extend(config.vimspec, config.vim)
-extend(config.zsh, config.sh)
-
+let config: dict<dict<any>> = {}
 let linesCount: number
 let tryToApply: bool
 
+" Workaround: vim9script cannnot handle script variables properly yet.
+def GetConfigRef(): dict<dict<any>>
+  let ref: dict<dict<any>> = config
+  return ref
+enddef
 def IsCmdwin(): bool
   return getcmdwintype() !=# ''
 enddef
@@ -119,8 +39,9 @@ def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
 def GetConfig(): list<any> " TODO: Don't use any
-  let ft_configs = get(config, &filetype, {})
-  let global_configs = get(config, '_', {})->
+  let ref = GetConfigRef() # Workaround
+  let ft_configs = get(ref, &filetype, {})
+  let global_configs = get(ref, '_', {})->
         \filter({key, val -> !has_key(ft_configs, key)})
 
   return items(ft_configs) + items(global_configs)
@@ -136,25 +57,33 @@ def TryToApply()
     return
   endif
   let prev_line = getline(line('.') - 1)
+  let next_line = getline(nextlinenr)
   let configs = GetConfig()
+
   for config in configs
     let pattern = config[0]
-    let Block_end: any = config[1]
-    if prev_line !~# '\v' .. pattern
+    let Block_end: any = config[1].pair
+    let interruption: list<string> = config[1].interruption
+
+    if prev_line !~# '\v' .. pattern ||
+          \ index(interruption, trim(next_line)) >= 0 ||
+          \ !filter(copy(interruption), {_, val -> next_line =~# val})->empty()
       continue
     endif
+
     if type(Block_end) == v:t_func
       Block_end = call(Block_end, [{'prev': prev_line, 'current': getline('.'),
-           \ 'next': getline(nextlinenr)}])
+           \ 'next': getline(nextlinenr)}]) # TODO: Change argument?
     endif
     if type(Block_end) == v:t_none
       " Cancel.
       continue
     endif
+
     let indent_depth = GetIndentDepth(line('.') - 1)
     let indent =  GetIndentStr(indent_depth)
     let newline = indent .. Block_end
-    if getline(nextlinenr) ==# newline
+    if next_line ==# newline
       continue
     endif
     let after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
@@ -224,3 +153,48 @@ export def vimrc#gyoza#disable()
     autocmd!
   augroup END
 enddef
+
+def NewFiletypeRule(filetype: string)
+  if !has_key(config, filetype)
+    let ref = GetConfigRef() # Workaround
+    ref[filetype] = {}
+  endif
+enddef
+def AddRule(
+    filetype: string,
+    pattern: string, # NOTE: This pattern is evaluated under very magic
+    pair: any,
+    interruption: list<string>)
+  NewFiletypeRule(filetype)
+
+  let ref = GetConfigRef()[filetype] # Workaround
+  ref[pattern] = #{
+    pair: pair,
+    interruption: copy(interruption)->filter('v:val != ""')
+  }
+enddef
+
+def MergeRule(from: string, to: string)
+  NewFiletypeRule(to)
+  let ref = GetConfigRef() # Workaround
+  extend(ref[to], get(ref, from, {}), 'keep')
+enddef
+
+" Register rules
+AddRule('_', '\{\s*$', '}', ['^\s*}'])
+AddRule('vim', '\{\s*$', v:null, [])
+AddRule('vim', '^\s*\{\s*$', '}', [])
+AddRule('vim', '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef', [])
+AddRule('vim', '^\s*function!?\s+\S+(.*).*$', 'endfunction', [])
+AddRule('vim', '^\s*if>', 'endif', ['else', 'elseif'])
+AddRule('vim', '^\s*while>', 'endwhile', [])
+AddRule('vim', '^\s*for>', 'endfor', [])
+AddRule('vim', '^\s*try>', 'endtry', ['^\s*\<catch\>', 'finally'])
+AddRule('vim', '^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE', [])
+AddRule('vim', '^\s*augroup\s+%(END)@!\S+$', 'augroup END', [])
+AddRule('vimspec', '^\s*%(Describe|Before|After|Context|It)', 'End', [])
+AddRule('sh', '%(^|;)\s*<do>', 'done', [])
+AddRule('sh', '^\s*if>', 'fi', ['^\s*elif\>', 'else'])
+MergeRule('c', 'cpp')
+MergeRule('vim', 'vimspec')
+MergeRule('sh', 'zsh')
