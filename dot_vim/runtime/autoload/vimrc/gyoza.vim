@@ -52,44 +52,53 @@ enddef
 def TryToApply()
   tryToApply = v:false
   let nextlinenr = nextnonblank(line('.') + 1)
-  if GetIndentDepth(nextlinenr) >
-       \ GetIndentDepth(line('.') - 1)
+  if GetIndentDepth(nextlinenr) > GetIndentDepth(line('.') - 1)
     return
   endif
-  let prev_line = getline(line('.') - 1)
-  let next_line = getline(nextlinenr)
+  let prevlinenr = prevnonblank(line('.') - 1)
+  let prev_line = prevlinenr ? getline(prevlinenr) : ''
+  let next_line = nextlinenr ? getline(nextlinenr) : ''
   let configs = GetConfig()
 
   for config in configs
     let pattern = config[0]
-    let Block_end: any = config[1].pair
+    let BlockPair: any = config[1].pair
     let interruption: list<string> = config[1].interruption
 
-    if prev_line !~# '\v' .. pattern ||
-          \ index(interruption, trim(next_line)) >= 0 ||
-          \ !filter(copy(interruption), {_, val -> next_line =~# val})->empty()
+    if prev_line !~# '\v' .. pattern
       continue
+    elseif GetIndentDepth(nextlinenr) == GetIndentDepth(prevlinenr)
+      if index(interruption, trim(next_line)) >= 0
+        continue
+      endif
+
+      # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
+      for interrupt in interruption
+        if interrupt =~# next_line
+          continue
+        endif
+      endfor
     endif
 
-    if type(Block_end) == v:t_func
+    if type(BlockPair) == v:t_func
       # TODO: Change argument?
-      Block_end = call(Block_end, [{'prev': prev_line, 'current': getline('.'),
+      BlockPair = call(BlockPair, [{'prev': prev_line, 'current': getline('.'),
            \ 'next': getline(nextlinenr)}])
     endif
-    if type(Block_end) == v:t_none
+    if type(BlockPair) == v:t_none
       " Cancel.
       continue
     endif
 
-    let indent_depth = GetIndentDepth(line('.') - 1)
+    let indent_depth = GetIndentDepth(prevlinenr)
     let indent =  GetIndentStr(indent_depth)
-    let newline = indent .. Block_end
+    let newline = indent .. BlockPair
     if next_line ==# newline
       continue
     endif
     let after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
     if mode() =~# '^i' && after_cursor !=# ''
-      if after_cursor !=# Block_end
+      if after_cursor !=# BlockPair
         continue
       else
         setline('.', GetIndentStr(indent_depth + 1))
