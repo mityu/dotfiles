@@ -72,8 +72,9 @@ def TryToApply()
     endif
 
     if type(Block_end) == v:t_func
+      # TODO: Change argument?
       Block_end = call(Block_end, [{'prev': prev_line, 'current': getline('.'),
-           \ 'next': getline(nextlinenr)}]) # TODO: Change argument?
+           \ 'next': getline(nextlinenr)}])
     endif
     if type(Block_end) == v:t_none
       " Cancel.
