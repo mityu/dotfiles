@@ -79,16 +79,28 @@ def TryToApply()
       continue
     elseif nextline.indent_depth == prevline.indent_depth
       let text = trim(nextline.text)
-      if index(interruption, text) >= 0
-        continue
-      endif
+      let need_continue = v:false
 
       # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
       for interrupt in interruption
-        if interrupt =~# nextline.text
-          continue
+        if interrupt =~# '^\\='
+          # Check by regexp
+          if text =~# '\v' .. strpart(interrupt, 2)
+            need_continue = v:true
+            break
+          endif
+        else
+          # Check by literal
+          if text ==# interrupt
+            need_continue = v:true
+            break
+          endif
         endif
       endfor
+
+      if need_continue
+        continue
+      endif
     endif
 
     if type(BlockPair) == v:t_func
@@ -202,19 +214,18 @@ def MergeRule(from: string, to: string)
 enddef
 
 " Register rules
-AddRule('_', '\{\s*$', '}', ['^\s*}'])
-AddRule('vim', '\{\s*$', v:null, [])
-AddRule('vim', '^\s*\{\s*$', '}', [])
+AddRule('_', '\{\s*$', '}', ['\=^}'])
+AddRule('vim', '\{\s*$', '}', ['\=^\\\s*}'])
 AddRule('vim', '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef', [])
 AddRule('vim', '^\s*function!?\s+\S+(.*).*$', 'endfunction', [])
 AddRule('vim', '^\s*if>', 'endif', ['else', 'elseif'])
 AddRule('vim', '^\s*while>', 'endwhile', [])
 AddRule('vim', '^\s*for>', 'endfor', [])
-AddRule('vim', '^\s*try>', 'endtry', ['^\s*\<catch\>', 'finally'])
+AddRule('vim', '^\s*try>', 'endtry', ['\=^catch>', 'finally'])
 AddRule('vim', '^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE', [])
 AddRule('vim', '^\s*augroup\s+%(END)@!\S+$', 'augroup END', [])
 AddRule('vimspec', '^\s*%(Describe|Before|After|Context|It)', 'End', [])
 AddRule('sh', '%(^|;)\s*<do>', 'done', [])
-AddRule('sh', '^\s*if>', 'fi', ['^\s*elif\>', 'else'])
+AddRule('sh', '^\s*if>', 'fi', ['\=^elif>', 'else'])
 MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
