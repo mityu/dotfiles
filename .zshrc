@@ -40,9 +40,6 @@ setopt menu_complete
 bindkey -d # Reset keybinds
 bindkey -v # Use vi like keybinds
 
-bindkey -M vicmd ";" execute-named-cmd
-bindkey -M vicmd ":" vi-repeat-find
-
 # textobjects
 autoload -U select-bracketed
 zle -N select-bracketed
