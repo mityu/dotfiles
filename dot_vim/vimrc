@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 06-Jul-2020.
+" Last Change: 08-Jul-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1666,8 +1666,8 @@ augroup vimrc_terminal
   autocmd TerminalOpen * call s:terminal_open()
 augroup END
 def! s:terminal_open(): void
-  " Ignore terminal in popup-window.
-  " FIXME: Using getbufvar() doesn't work.
+  # Ignore terminal in popup-window.
+  # FIXME: Using getbufvar() doesn't work.
   if bufnr('%') == expand('<abuf>')
     setlocal nonumber norelativenumber
   endif

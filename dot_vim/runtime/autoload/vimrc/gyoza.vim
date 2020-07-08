@@ -4,7 +4,7 @@ let config: dict<dict<any>> = {}
 let linesCount: number
 let tryToApply: bool
 
-" Workaround: vim9script cannnot handle script variables properly yet.
+# Workaround: vim9script cannnot handle script variables properly yet.
 def GetConfigRef(): dict<dict<any>>
   let ref: dict<dict<any>> = config
   return ref
@@ -21,7 +21,7 @@ def InitForBuffer(): void
   tryToApply = v:false
 enddef
 def NeedTry(): bool
-  " TODO: This is experimental.
+  # TODO: This is experimental.
   return line('$') > linesCount
 enddef
 def GetOneIndent(): string
@@ -38,7 +38,7 @@ enddef
 def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
-def GetConfig(): list<any> " TODO: Don't use any
+def GetConfig(): list<any> # TODO: Don't use any
   let ref = GetConfigRef() # Workaround
   let ft_configs = get(ref, &filetype, {})
   let global_configs = get(ref, '_', {})->
@@ -109,7 +109,7 @@ def TryToApply()
            \ 'next': nextline.text}])
     endif
     if type(BlockPair) == v:t_none
-      " Cancel.
+      # Cancel.
       continue
     endif
 
@@ -213,7 +213,7 @@ def MergeRule(from: string, to: string)
   extend(ref[to], get(ref, from, {}), 'keep')
 enddef
 
-" Register rules
+# Register rules
 AddRule('_', '\{\s*$', '}', ['\=^}'])
 AddRule('vim', '\{\s*$', '}', ['\=^\\\s*}'])
 AddRule('vim', '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef', [])
