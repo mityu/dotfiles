@@ -197,7 +197,7 @@ def AddRule(
     filetype: string,
     pattern: string, # NOTE: This pattern is evaluated under very magic
     pair: any,
-    interruption: list<string>)
+    interruption: list<string> = [])
   NewFiletypeRule(filetype)
 
   let ref = GetConfigRef()[filetype] # Workaround
