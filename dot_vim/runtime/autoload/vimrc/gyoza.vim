@@ -18,7 +18,7 @@ def StrDivPos(str: string, pos: number): list<string>
 enddef
 def InitForBuffer(): void
   linesCount = line('$')
-  tryToApply = v:false
+  tryToApply = false
 enddef
 def NeedTry(): bool
   # TODO: This is experimental.
@@ -58,7 +58,7 @@ def GetLineData(linenr: number): dict<any>
   }
 enddef
 def TryToApply()
-  tryToApply = v:false
+  tryToApply = false
 
   # The following type specifier is necessary; vim9script cannot handle type
   # correctly yet.
@@ -79,20 +79,20 @@ def TryToApply()
       continue
     elseif nextline.indent_depth == prevline.indent_depth
       let text = trim(nextline.text)
-      let need_continue = v:false
+      let need_continue = false
 
       # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
       for interrupt in interruption
         if interrupt =~# '^\\='
           # Check by regexp
           if text =~# '\v' .. strpart(interrupt, 2)
-            need_continue = v:true
+            need_continue = true
             break
           endif
         else
           # Check by literal
           if text ==# interrupt
-            need_continue = v:true
+            need_continue = true
             break
           endif
         endif
@@ -143,7 +143,7 @@ def OnCursorMoved(): void
     return
   endif
   if NeedTry()
-    tryToApply = v:true
+    tryToApply = true
   endif
   UpdateContext()
 enddef
@@ -167,7 +167,7 @@ def OnInsertLeave(): void
   if IsCmdwin()
     return
   endif
-  tryToApply = v:false
+  tryToApply = false
 enddef
 
 export def vimrc#gyoza#enable()
