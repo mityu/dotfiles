@@ -16,7 +16,6 @@ def InitForBuffer(): void
   tryToApply = false
 enddef
 def NeedTry(): bool
-  # TODO: This is experimental.
   return line('$') > linesCount
 enddef
 def GetOneIndent(): string
@@ -33,7 +32,7 @@ enddef
 def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
-def GetConfig(): list<any> # TODO: Don't use any
+def GetConfig(): list<string>
   let ft_configs = get(config, &filetype, {})
   let global_configs = get(config, '_', {})->
         \filter({key, val -> !has_key(ft_configs, key)})
@@ -181,23 +180,25 @@ export def vimrc#gyoza#disable()
   augroup END
 enddef
 
-def NewFiletypeRule(filetype: string)
+def NewFiletypeRule(filetype: string): dict<any>
   if !has_key(config, filetype)
     config[filetype] = {}
   endif
+  return config[filetype]
 enddef
 def AddRule(
-    filetype: string,
+    ft_config: dict<any>,
     pattern: string, # NOTE: This pattern is evaluated under very magic
     pair: any,
-    interruption: list<string> = [])
-  NewFiletypeRule(filetype)
+    interruption: list<string> = []): dict<any>
 
-  let ref = config[filetype] # Workaround
+  let ref = ft_config
   ref[pattern] = #{
     pair: pair,
     interruption: copy(interruption)->filter('v:val != ""')
   }
+
+  return ft_config
 enddef
 
 def MergeRule(from: string, to: string)
@@ -206,18 +207,22 @@ def MergeRule(from: string, to: string)
 enddef
 
 # Register rules
-AddRule('_', '\{\s*$', '}', ['\=^}'])
-AddRule('vim', '\{\s*$', '}', ['\=^\\\s*}'])
-AddRule('vim', '^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
-AddRule('vim', '^\s*function!?\s+\S+(.*).*$', 'endfunction')
-AddRule('vim', '^\s*if>', 'endif', ['else', 'elseif'])
-AddRule('vim', '^\s*while>', 'endwhile')
-AddRule('vim', '^\s*for>', 'endfor')
-AddRule('vim', '^\s*try>', 'endtry', ['\=^catch>', 'finally'])
-AddRule('vim', '^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE')
-AddRule('vim', '^\s*augroup\s+%(END)@!\S+$', 'augroup END')
-AddRule('vimspec', '^\s*%(Describe|Before|After|Context|It)', 'End')
-AddRule('sh', '%(^|;)\s*<do>', 'done')
-AddRule('sh', '^\s*if>', 'fi', ['\=^elif>', 'else'])
+NewFiletypeRule('_')
+  ->AddRule('\{\s*$', '}', ['\=^}'])
+NewFiletypeRule('vim')
+  ->AddRule('\{\s*$', '}', ['\=^\\\s*}'])
+  ->AddRule('^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
+  ->AddRule('^\s*function!?\s+\S+(.*).*$', 'endfunction')
+  ->AddRule('^\s*if>', 'endif', ['else', 'elseif'])
+  ->AddRule('^\s*while>', 'endwhile')
+  ->AddRule('^\s*for>', 'endfor')
+  ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
+  ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE')
+  ->AddRule('^\s*augroup\s+%(END)@!\S+$', 'augroup END')
+NewFiletypeRule('vimspec')
+  ->AddRule('^\s*%(Describe|Before|After|Context|It)', 'End')
+NewFiletypeRule('sh')
+  ->AddRule('%(^|;)\s*<do>', 'done')
+  ->AddRule('^\s*if>', 'fi', ['\=^elif>', 'else'])
 MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
