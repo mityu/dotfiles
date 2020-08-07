@@ -1,6 +1,6 @@
 vim9script
 
-let config: dict<dict<any>> = #{_: {}} # Add dummy entry
+let config: dict<dict<any>> = #{}
 let linesCount: number
 let tryToApply: bool
 
@@ -181,11 +181,6 @@ export def vimrc#gyoza#disable()
   augroup END
 enddef
 
-# Workaround: vim9script cannnot handle script variables properly yet.
-def GetConfigRef(): dict<dict<any>>
-  let ref: dict<dict<any>> = config
-  return ref
-enddef
 def NewFiletypeRule(filetype: string)
   if !has_key(config, filetype)
     config[filetype] = {}
@@ -198,7 +193,7 @@ def AddRule(
     interruption: list<string> = [])
   NewFiletypeRule(filetype)
 
-  let ref = GetConfigRef()[filetype] # Workaround
+  let ref = config[filetype] # Workaround
   ref[pattern] = #{
     pair: pair,
     interruption: copy(interruption)->filter('v:val != ""')
