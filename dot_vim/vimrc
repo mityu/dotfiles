@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Jul-2020.
+" Last Change: 10-Aug-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1576,7 +1576,7 @@ enddef
 let &statusline = printf('%%!%sstatusline_generator()', s:SIDPrefix())
 
 " tabline
-let &tabline = printf('%%!%stabline()', s:SIDPrefix())
+let &tabline = printf('%%!%sTabline()', s:SIDPrefix())
 function! s:showmode_init() abort
   let colors={
     \ 'normal': [['22', '148'], ['#005f00', '#afdf00']],
@@ -1638,7 +1638,7 @@ def! s:generate_tabinfo(tabnr: number): string
   info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
   return info
 enddef
-def! s:tabline(): string
+def! s:Tabline(): string
   let tabline = s:showmode_label() .. '%#TabLine#|'
   let t = tabpagenr()
 
