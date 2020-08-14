@@ -32,7 +32,7 @@ enddef
 def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
-def GetConfig(): list<string>
+def GetConfig(): list<any>
   let ft_configs = get(config, &filetype, {})
   let global_configs = get(config, '_', {})->
         \filter({key, val -> !has_key(ft_configs, key)})
