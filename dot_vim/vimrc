@@ -161,12 +161,10 @@ if has('vim_starting') || 1
   if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
     set termguicolors  " Use true color if possible.
   endif
-  if expand('$TERM_PROGRAM') ==# 'alacritty'
+  if &term =~# '\<xterm\>'
     let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode.
     let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
     let &t_SR = "\<ESC>[4 q"  " Use underline style cursor in Replace-mode.
-  endif
-  if &term =~# '\<xterm\>'
     set mouse=a
   endif
 
