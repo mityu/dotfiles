@@ -1,7 +1,7 @@
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-let s:JoinPath = VimrcFunc('join_path')
+let s:JoinPath = VimrcFunc('JoinPath')
 let s:Has = VimrcFunc('has')
 let s:workplace = s:JoinPath(expand('$DOT_VIM'), 'workplace')
 let s:available = isdirectory(s:workplace)
@@ -99,7 +99,7 @@ function! vimrc#workingplugin#rm(...) abort "{{{
       continue
     endif
     call s:message.echomsg(printf('Delete %s ? [y/n]', plugin))
-    if s:getchar_string() !~? 'y'
+    if VimrcFunc('GetcharString')() !~? 'y'
       call s:message.echomsg('Canceled.')
       continue
     endif

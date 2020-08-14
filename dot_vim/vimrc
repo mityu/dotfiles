@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Aug-2020.
+" Last Change: 14-Aug-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -8,10 +8,10 @@ if has('vim_starting')
   scriptencoding utf-8
   let $MYVIMRC = resolve(expand('<sfile>'))
 endif
-def! s:fold_is_blockopen(line: string): bool
+def! s:FoldIsBlockOpen(line: string): bool
   return line =~# '\v^%(fu%[nction]|%(export\s+)?def|if|for|while|try)'
 enddef
-def! s:fold_is_blockclose(line: string): bool
+def! s:FoldIsBlockClose(line: string): bool
   return line =~# '\v^end%(func%[tion]|def|if|for|while|try)'
 enddef
 function! FoldExprForVimrc() abort
@@ -19,9 +19,9 @@ function! FoldExprForVimrc() abort
   let line = getline(v:lnum)
   if line =~# '^\s'
     return '='
-  elseif s:fold_is_blockopen(line)
+  elseif s:FoldIsBlockOpen(line)
     return '>1'
-  elseif v:lnum == 1 || s:fold_is_blockclose(getline(v:lnum - 1))
+  elseif v:lnum == 1 || s:FoldIsBlockClose(getline(v:lnum - 1))
     return 0
   endif
   return '='
@@ -41,7 +41,7 @@ endfunction
 function! s:rc(fname) abort
   return s:filesystem.rcfile_prefix .. a:fname
 endfunction
-function! s:join_path(...) abort
+function! s:JoinPath(...) abort
   return join(a:000, s:filesystem.slash)
 endfunction
 function! s:has(object, to_search) abort
@@ -60,50 +60,50 @@ function! s:has(object, to_search) abort
   endif
   return (call(func, [a:object, a:to_search]) != not_found)
 endfunction
-def! s:get_msg_string(msg: string): string
+def! s:GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
-function! s:echomsg_with_color(msg, hl_group) abort
-  execute 'echohl' a:hl_group
-  echomsg s:get_msg_string(a:msg)
+def! s:EchomsgWithColor(msg: string, hl_group: string): void
+  execute 'echohl' hl_group
+  echomsg s:GetMsgString(msg)
   echohl NONE
-endfunction
+enddef
 def! s:echomsg(msg: string): void
-  call s:echomsg_with_color(msg, 'NONE')
+  call s:EchomsgWithColor(msg, 'NONE')
 enddef
 def! s:echomsg_error(msg: string): void
-  call s:echomsg_with_color(msg, 'Error')
+  call s:EchomsgWithColor(msg, 'Error')
 enddef
-def! s:echomsg_warning(msg: string): void
-  call s:echomsg_with_color(msg, 'WarningMsg')
+def! s:EchomsgWarning(msg: string): void
+  call s:EchomsgWithColor(msg, 'WarningMsg')
 enddef
 def! s:echo(msg: string): void
-  echo s:get_msg_string(msg)
+  echo s:GetMsgString(msg)
 enddef
-def! s:echo_question(question: string): void
-  echon s:get_msg_string(question) .. ' '
+def! s:EchoQuestion(question: string): void
+  echon s:GetMsgString(question) .. ' '
   echohl Question
   echon '[Y/N]'
   echohl NONE
   echon "\n"
 enddef
-def! s:is_visualmode(): bool
+def! s:IsVisualmode(): bool
   return s:has(['v', 'V', "\<C-v>"], mode())
 enddef
-def! s:is_cmdwin(): bool
+def! s:IsCmdwin(): bool
   return getcmdwintype() !=# ''
 enddef
 def! s:glob(expr: string): list<string>
   return split(glob(expr), "\n")
 enddef
-function! s:getchar_string(...) abort
+function! s:GetcharString(...) abort
   return nr2char(call('getchar', a:000))
 endfunction
 def! s:ask(question: string): bool
-  call s:echo_question(question)
+  call s:EchoQuestion(question)
   return s:has(['y', 'Y'], s:getchar_string())
 enddef
-function! s:mkdir(dir, ...) abort
+function! s:Mkdir(dir, ...) abort
   " Return 1 when process finished without errors; otherwise, return 0.
   if isdirectory(a:dir)
     return 1
@@ -114,10 +114,6 @@ function! s:mkdir(dir, ...) abort
   endif
   return call('mkdir', [a:dir] + a:000)
 endfunction
-def! s:strdivpos(str: string, pos: number): list<string>
-  return [strpart(str, 0, pos),
-        \ strpart(str, pos, strlen(str) - pos)]
-enddef
 function! s:input(prompt, ...) abort
   try
     return call('input', [a:prompt] + a:000)
@@ -125,7 +121,7 @@ function! s:input(prompt, ...) abort
     return ''
   endtry
 endfunction
-function! s:win_execute(id, command, ...) abort
+function! s:WinExecute(id, command, ...) abort
   let eventignore_save = &eventignore
   set eventignore=all
   try
@@ -193,8 +189,8 @@ if has('vim_starting') || 1
     let s:filesystem.rcfile_prefix = '.'
   endif
 
-  let s:cache_dir = s:join_path(expand('~'), '.cache', 'vimrc')
-  call s:mkdir(s:cache_dir, 'p')
+  let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
+  call s:Mkdir(s:cache_dir, 'p')
 
   " disable default plugins
   let g:loaded_2html_plugin = 1
@@ -205,10 +201,10 @@ if has('vim_starting') || 1
   let g:loaded_vimballPlugin = 1
   let g:loaded_netrwPlugin = 1
 
-  let &runtimepath ..= ',' .. escape(s:join_path($DOT_VIM, 'runtime'), ' \')
+  let &runtimepath ..= ',' .. escape(s:JoinPath($DOT_VIM, 'runtime'), ' \')
 
   " Set environmental variables on gVim.
-  let s:_envrc = s:join_path(expand('~'), s:rc('envrc'))
+  let s:_envrc = s:JoinPath(expand('~'), s:rc('envrc'))
   if has('gui_running') && filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
     call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
@@ -236,7 +232,7 @@ endfor | unlet s:_augroup s:_augroups s:_pattern
 let s:plugin = {}
 if &loadplugins
   let s:plugin.plugins_ = map(filter(s:glob(
-        \ s:join_path($DOT_VIM, 'pack', 'minpac', 'start', '*')
+        \ s:JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*')
         \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
   function! s:plugin.exists(plugin) abort
     return s:has(self.plugins_, a:plugin)
@@ -246,7 +242,7 @@ else
     return 0
   endfunction
 endif
-function! s:pack_register() abort
+function! s:PackRegister() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   call minpac#add('itchyny/vim-cursorword')
@@ -302,12 +298,12 @@ function! s:pack_register() abort
   call minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
   call minpac#add('rbtnn/vim-coloredit', {'type': 'opt'})
 endfunction
-function! s:pack_init() abort
+function! s:PackInit() abort
   try
     packadd minpac
   catch /^Vim\%((\a\+)\)\=:E919/
     "Download minpac...
-    let minpac_path = s:join_path($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
+    let minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
     call s:echomsg('Downloading minpac...')
     call system('git clone https://github.com/k-takata/minpac.git ' ..
           \ minpac_path)
@@ -320,31 +316,31 @@ function! s:pack_init() abort
   endtry
 
   call minpac#init()
-  call s:pack_register()
+  call s:PackRegister()
 
   return 1
 endfunction
-function! s:pack_update() abort
-  if s:pack_init()
+function! s:PackUpdate() abort
+  if s:PackInit()
     call minpac#update()
   endif
 endfunction
-function! s:pack_clean() abort
-  if s:pack_init()
+function! s:PackClean() abort
+  if s:PackInit()
     call minpac#clean()
   endif
 endfunction
-function! s:pack_status() abort
+function! s:PackStatus() abort
   if exists('*minpac#status')
     call minpac#status()
   else
     call s:echomsg_error('minpac isn''t loaded yet.')
   endif
 endfunction
-command! -bar PackInit   call s:pack_init()
-command! -bar PackUpdate call s:pack_update()
-command! -bar PackClean  call s:pack_clean()
-command! -bar PackStatus call s:pack_status()
+command! -bar PackInit   call s:PackInit()
+command! -bar PackUpdate call s:PackUpdate()
+command! -bar PackClean  call s:PackClean()
+command! -bar PackStatus call s:PackStatus()
 
 " Options
 syntax on
@@ -395,8 +391,8 @@ set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
 
-let s:_undodir = s:join_path(s:cache_dir, 'undodir')
-if s:mkdir(s:_undodir, 'p')
+let s:_undodir = s:JoinPath(s:cache_dir, 'undodir')
+if s:Mkdir(s:_undodir, 'p')
   set undofile
   let &undodir = s:_undodir
 else
@@ -404,10 +400,10 @@ else
 endif
 unlet s:_undodir
 
-let s:_directory = s:join_path(s:cache_dir, 'swapfile')
-if s:mkdir(s:_directory, 'p')
+let s:_directory = s:JoinPath(s:cache_dir, 'swapfile')
+if s:Mkdir(s:_directory, 'p')
   set swapfile
-  let &directory = s:join_path(fnamemodify(s:_directory, ':p'), '')
+  let &directory = s:JoinPath(fnamemodify(s:_directory, ':p'), '')
 else
   set noswapfile
 endif
@@ -529,16 +525,16 @@ call s:EnhancedOmap('8', '(')
 call s:EnhancedOmap(', ', '<')
 unlet s:Omap s:EnhancedOmap
 
-def! s:terminal_map(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void
+def! s:TerminalMap(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void
   execute printf('%s %s %s%s %s%s',
        \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
 enddef
-call s:terminal_map('tnoremap', ':', ':<C-f>A')
-call s:terminal_map('tnoremap', '<Space>:', ':<C-f>k')
-call s:terminal_map('tnoremap', '<ESC>', 'N')
-call s:terminal_map('tnoremap', 'p', '""')
-call s:terminal_map('tnoremap', '<C-r>', '"')
-" call s:terminal_map('tmap', '<C-j>', '<ESC>')
+call s:TerminalMap('tnoremap', ':', ':<C-f>A')
+call s:TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
+call s:TerminalMap('tnoremap', '<ESC>', 'N')
+call s:TerminalMap('tnoremap', 'p', '""')
+call s:TerminalMap('tnoremap', '<C-r>', '"')
+" call s:TerminalMap('tmap', '<C-j>', '<ESC>')
 tnoremap <C-j> <ESC>
 
 " Loop
@@ -608,11 +604,11 @@ call s:_loop_define({
       \ 'map': [
       \   ['h', 'gT'],
       \   ['l', 'gt'],
-      \   ['T', ':<C-u>call <SID>map_tabmove(-1)<CR>'],
-      \   ['t', ':<C-u>call <SID>map_tabmove(1)<CR>']
+      \   ['T', ':<C-u>call <SID>MapTabmove(-1)<CR>'],
+      \   ['t', ':<C-u>call <SID>MapTabmove(1)<CR>']
       \ ]
       \ })
-function! s:map_tabmove(delta) abort
+function! s:MapTabmove(delta) abort
   let tab_count = tabpagenr('$')
   if tab_count == 1
     return
@@ -731,7 +727,7 @@ function! s:cmdwin_enter() abort
     if exists('*win_execute')
       let s:cmdwin_incsearch.current_winid = win_getid(winnr('#'))
       function! s:cmdwin_incsearch.win_execute(command) abort
-        return s:win_execute(self.current_winid, a:command)
+        return s:WinExecute(self.current_winid, a:command)
       endfunction
       call s:cmdwin_incsearch.win_execute(
             \ 'let s:cmdwin_incsearch.curpos = getpos(".")')
@@ -927,7 +923,7 @@ def! s:find_gitroot(arg_target: string = bufname('%')): string
   let target: string = resolve(arg_target)
   let git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
-    s:echomsg_warning('Not a git repository: ' .. target)
+    s:EchomsgWarning('Not a git repository: ' .. target)
     return ''
   endif
   return fnamemodify(git_dir, ':h')
@@ -1096,13 +1092,13 @@ if s:plugin.exists('gina.vim')
 
     " Jump between unadded files with n/p ..
     let rhs_base = printf(
-          \ ':<C-u>call %sgina_status_select_another(v:count1, %%d)<CR>',
+          \ ':<C-u>call %sGinaStatusSelectAnother(v:count1, %%d)<CR>',
           \ s:SIDPrefix())
     call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
     call s:gina_nnoremap('status', 'N', printf(rhs_base, 1))
 
     call s:gina_nnoremap('status', 'dd',
-         \ printf(':<C-u>call %sgina_diff()<CR>', s:SIDPrefix()))
+         \ printf(':<C-u>call %sGinaDiff()<CR>', s:SIDPrefix()))
 
     " Cleanup
     delfunction s:gina_nnoremap
@@ -1113,14 +1109,14 @@ if s:plugin.exists('gina.vim')
     call gina#custom#command#option(
           \ '\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
   endfunction
-  function! s:gina_status_select_another(repeat_count, search_previous) abort
+  function! s:GinaStatusSelectAnother(repeat_count, search_previous) abort
     let flags = 'w'
     let flags ..= a:search_previous ? 'b' : ''
     for i in range(1, a:repeat_count)
       call search('\e[31.\+\e[m', flags)
     endfor
   endfunction
-  function! s:gina_diff() abort
+  function! s:GinaDiff() abort
     let file = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
     let file = matchstr(file, '\%(\_^modified\:\s\+\)\?\zs.\+')
     if file ==# ''
@@ -1153,7 +1149,7 @@ if s:plugin.exists('vim-Verdin')
 endif
 if s:plugin.exists('vim-brownie')
   let g:brownie_template_dirs =
-        \ [s:join_path(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
+        \ [s:JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
   let g:brownie_extra_imports = {
         \ 'cpp' : ['c'],
         \ 'vimspec': ['vim'],
@@ -1288,26 +1284,26 @@ if s:plugin.exists('vim-operator-surround')
   map _sr <Plug>(operator-surround-replace)
 endif
 if s:plugin.exists('vim-ambicmd')
-  function! s:ambicmd_expand(key) abort
+  function! s:AmbicmdExpand(key) abort
     let expander = ambicmd#expand(a:key)
     return (expander ==# a:key ? '' : "\<C-g>u") .. expander
   endfunction
   augroup vimrc_ambicmd
-    autocmd CmdWinEnter : call s:setup_ambicmd_for_cmdwin()
+    autocmd CmdWinEnter : call s:SetupAmbicmdForCmdwin()
   augroup END
   cnoremap <expr> <Space> ambicmd#expand("\<Space>")
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
 
-  function! s:setup_ambicmd_for_cmdwin() abort
-    inoremap <buffer> <expr> <Space> <SID>ambicmd_expand("\<Space>")
-    inoremap <buffer> <expr> <bar> <SID>ambicmd_expand("\<bar>")
-    inoremap <buffer> <expr> <CR> <SID>ambicmd_expand("\<CR>")
+  function! s:SetupAmbicmdForCmdwin() abort
+    inoremap <buffer> <expr> <Space> <SID>AmbicmdExpand("\<Space>")
+    inoremap <buffer> <expr> <bar> <SID>AmbicmdExpand("\<bar>")
+    inoremap <buffer> <expr> <CR> <SID>AmbicmdExpand("\<CR>")
   endfunction
 
   let g:ambicmd#show_completion_menu = 1
 
-  function! s:ambicmd_build_rule(cmd) abort
+  function! s:AmbicmdBuildRule(cmd) abort
     let rule = []
     let rule += ['\c^' .. a:cmd .. '$']
     let rule += ['\c^' .. a:cmd]
@@ -1323,7 +1319,7 @@ if s:plugin.exists('vim-ambicmd')
     let rule += ['.*' .. substitute(a:cmd, '.\zs', '.*', 'g')]
     return rule
   endfunction
-  let g:ambicmd#build_rule = s:SIDPrefix() .. 'ambicmd_build_rule'
+  let g:ambicmd#build_rule = s:SIDPrefix() .. 'AmbicmdBuildRule'
 endif
 if s:plugin.exists('vim-quickrun')
   let g:quickrun_config = {}
@@ -1433,7 +1429,7 @@ function! s:notes.instance(path) abort
   return new_obj
 endfunction
 function! s:notes.list_files() abort
-  return map(s:glob(s:join_path(self.save_dir_, '*.*')),
+  return map(s:glob(s:JoinPath(self.save_dir_, '*.*')),
         \ 'fnamemodify(v:val, ":p:t")')
 endfunction
 function! s:notes.new(opener) abort
@@ -1445,7 +1441,7 @@ function! s:notes.new(opener) abort
   if s:has(self, 'expand_filename')
     let name = self.expand_filename(name)
   endif
-  let filepath = s:join_path(self.save_dir_, name)
+  let filepath = s:JoinPath(self.save_dir_, name)
   execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
 endfunction
 function! s:notes.list() abort
@@ -1459,11 +1455,11 @@ function! s:notes.delete(...) abort
       continue
     endif
     call s:echomsg(printf('Delete %s ? [y/n]', target))
-    if s:getchar_string() !~? 'y'
+    if s:GetcharString() !~? 'y'
       call s:echomsg('Canceled.')
       continue
     endif
-    if delete(s:join_path(self.save_dir_, target)) == 0
+    if delete(s:JoinPath(self.save_dir_, target)) == 0
       call s:echomsg('Successfully deleted: ' .target)
     else
       call s:echomsg('Failed to delete: ' .target)
@@ -1479,7 +1475,7 @@ function! s:notes.get_completion(arg_lead) abort
 endfunction
 " Define :Memo* :Otameshi*
 for s:type_ in ['memo', 'otameshi']
-  let s:{s:type_} = s:notes.instance(s:join_path(
+  let s:{s:type_} = s:notes.instance(s:JoinPath(
       \ s:cache_dir, s:type_))
   if !isdirectory(s:{s:type_}.get_save_dir())
     call mkdir(s:{s:type_}.get_save_dir(), 'p')
@@ -1533,8 +1529,8 @@ command! -bar -nargs=+ WorkingPluginNew call vimrc#workingplugin#new(<f-args>)
 command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
       \ WorkingPluginRm call vimrc#workingplugin#rm(<f-args>)
 " Sessions
-let s:session_dir = s:join_path(s:cache_dir, 'sessions')
-call s:mkdir(s:session_dir)
+let s:session_dir = s:JoinPath(s:cache_dir, 'sessions')
+call s:Mkdir(s:session_dir)
 command! MkSession call vimrc#session#make()
 command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
       \ call vimrc#session#delete(1, <f-args>)
@@ -1542,7 +1538,7 @@ command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
 
 " statusline
-function! s:statusline_generator() abort
+function! s:StatuslineGenerator() abort
   let statusline =
         \ '%m' ..
         \ '[%{&ft ==# "" ? "No ft" : &ft}]' ..
@@ -1573,11 +1569,11 @@ def! s:filename_label(bufnr: number): string
       \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
 enddef
-let &statusline = printf('%%!%sstatusline_generator()', s:SIDPrefix())
+let &statusline = printf('%%!%sStatuslineGenerator()', s:SIDPrefix())
 
 " tabline
 let &tabline = printf('%%!%sTabline()', s:SIDPrefix())
-function! s:showmode_init() abort
+function! s:ShowmodeInit() abort
   let colors={
     \ 'normal': [['22', '148'], ['#005f00', '#afdf00']],
     \ 'insert': [['23', '117'], ['#005f5f', '#87dfff']],
@@ -1657,15 +1653,15 @@ def! s:Tabline(): string
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
 enddef
 augroup vimrc_showmode
-  autocmd ColorScheme * call s:showmode_init()
-  autocmd User vimrc_initialize call s:showmode_init()
+  autocmd ColorScheme * call s:ShowmodeInit()
+  autocmd User vimrc_initialize call s:ShowmodeInit()
 augroup END
 
 " :terminal
 augroup vimrc_terminal
-  autocmd TerminalOpen * call s:terminal_open()
+  autocmd TerminalOpen * call s:TerminalOpen()
 augroup END
-def! s:terminal_open(): void
+def! s:TerminalOpen(): void
   # Ignore terminal in popup-window.
   # FIXME: Using getbufvar() doesn't work.
   if bufnr('%') == expand('<abuf>')
@@ -1676,11 +1672,11 @@ enddef
 " EmphasisIndent
 hi link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
-  autocmd WinEnter * call s:emphasize_indent()
-  autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:emphasize_indent()
-  autocmd User vimrc_initialize call s:emphasize_indent()
+  autocmd WinEnter * call s:EmphasizeIndent()
+  autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:EmphasizeIndent()
+  autocmd User vimrc_initialize call s:EmphasizeIndent()
 augroup END
-function! s:emphasize_indent() abort
+function! s:EmphasizeIndent() abort
   if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
     return
   endif
@@ -1694,21 +1690,21 @@ function! s:emphasize_indent() abort
   else
     let pat = printf(pat, '\t\t', '\t')
   endif
-  let w:emphasis_indent_id=matchadd('VimrcEmphasisIndent', pat)
+  let w:emphasis_indent_id = matchadd('VimrcEmphasisIndent', pat)
 endfunction
-function! s:emphasis_indent_enable() abort
+function! s:EmphasisIndentEnable() abort
   let w:disable_emphasis_indent = 0
-  call s:emphasize_indent()
+  call s:EmphasizeIndent()
 endfunction
-function! s:emphasis_indent_disable() abort
+function! s:EmphasisIndentDisable() abort
   let w:disable_emphasis_indent = 1
   if exists('w:emphasis_indent_id')
     call matchdelete(w:emphasis_indent_id)
     unlet w:emphasis_indent_id
   endif
 endfunction
-command! EmphasisIndentDisable call s:emphasis_indent_disable()
-command! EmphasisIndentEnable call s:emphasis_indent_enable()
+command! EmphasisIndentDisable call s:EmphasisIndentDisable()
+command! EmphasisIndentEnable call s:EmphasisIndentEnable()
 "
 " WarningSpace
 hi link WarningSpace Error
@@ -1741,16 +1737,16 @@ function! s:warningspace() abort
 endfunction
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
-"
+
 " mru
-let g:mru_history_file = s:join_path(s:cache_dir, 'mru', 'history')
+let g:mru_history_file = s:JoinPath(s:cache_dir, 'mru', 'history')
 let g:mru_ignore_pattern = [
       \ '\.git\>',
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
       \ ]
-"
+
 " gram, filore
-function! s:gram_mapping() abort
+function! s:GramMapping() abort
   let map = [
         \ ['k', 'loop-cursor-up'],
         \ ['j', 'loop-cursor-down'],
@@ -1762,7 +1758,7 @@ function! s:gram_mapping() abort
         \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(gram-' .. val[1] .. ')'})
   execute join(map, "\n")
 endfunction
-function! s:filore_mapping() abort
+function! s:FiloreMapping() abort
   let map = [
         \ ['q', 'exit'],
         \ ['o', 'toggle-directory-folding'],
@@ -1779,12 +1775,12 @@ function! s:filore_mapping() abort
   execute join(map, "\n")
 endfunction
 augroup vimrc_additional_plugins
-  autocmd User gramOpen call s:gram_mapping()
-  autocmd FileType filore call s:filore_mapping()
+  autocmd User gramOpen call s:GramMapping()
+  autocmd FileType filore call s:FiloreMapping()
 augroup END
-"
+
 " git
-def! s:git_diff_getcmd(arg_target: string): string
+def! s:GitDiffGetcmd(arg_target: string): string
   let target: string = resolve(arg_target)
   let gitroot: string = s:find_gitroot(target)
   if gitroot ==# ''
@@ -1793,13 +1789,13 @@ def! s:git_diff_getcmd(arg_target: string): string
   return printf('git -C %s --no-pager diff --no-color %s',
         \ gitroot, shellescape(target))
 enddef
-def! s:git_diff(arg_target: string = bufname('%')): void
+def! s:GitDiff(arg_target: string = bufname('%')): void
   let target: string = resolve(arg_target)
   if getftype(target) ==# ''
     s:echomsg_error('File or directory does not exists: ' .. target)
     return
   endif
-  let cmd: string = s:git_diff_getcmd(target)
+  let cmd: string = s:GitDiffGetcmd(target)
   if cmd ==# ''
     return
   endif
@@ -1814,7 +1810,7 @@ def! s:git_diff(arg_target: string = bufname('%')): void
   endif
   return
 enddef
-command! -nargs=? -complete=file GitDiff call s:git_diff(<q-args>)
+command! -nargs=? -complete=file GitDiff call s:GitDiff(<q-args>)
 
 " gyoza
 augroup vimrc_gyoza
@@ -1830,8 +1826,8 @@ augroup END
 
 " lvimrc
 let s:_lvimrc = s:rc('lvimrc')
-if filereadable(s:join_path(expand('~'), s:_lvimrc))
-  let s:_lvimrc = s:join_path('~', s:_lvimrc)
+if filereadable(s:JoinPath(expand('~'), s:_lvimrc))
+  let s:_lvimrc = s:JoinPath('~', s:_lvimrc)
   execute 'command! -bar -nargs=* LVimrc ' ..
         \ 'execute ((<q-args> ==# "") ? "edit" : <q-args>)' string(s:_lvimrc)
   execute 'source' s:_lvimrc

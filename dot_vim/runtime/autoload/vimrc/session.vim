@@ -38,7 +38,7 @@ function! vimrc#session#delete(need_ask, ...) abort "{{{
 endfunction "}}}
 function! vimrc#session#list() abort "{{{
   return map(
-        \ VimrcFunc('glob')(VimrcFunc('join_path')(s:session_dir, '*.vim')),
+        \ VimrcFunc('glob')(VimrcFunc('JoinPath')(s:session_dir, '*.vim')),
         \ 'fnamemodify(v:val, ":t:r")')
 endfunction "}}}
 function! vimrc#session#restore(session) abort "{{{
@@ -46,7 +46,7 @@ function! vimrc#session#restore(session) abort "{{{
   call vimrc#session#delete(a:session)
 endfunction "}}}
 function! vimrc#session#get_file(session) abort "{{{
-  return VimrcFunc('join_path')(s:session_dir, a:session . ".vim")
+  return VimrcFunc('JoinPath')(s:session_dir, a:session . ".vim")
 endfunction "}}}
 function! vimrc#session#complete(A, L, P) abort "{{{
   return join(vimrc#session#list(), "\n")
