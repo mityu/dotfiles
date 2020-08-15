@@ -84,7 +84,7 @@ $DOTFILES/deploy.sh
 DOTFILES=$HOME/dotfiles
 VIM_NIGHTLY_BUILD_DIR=$HOME/.vim_nightly_build
 if [ ! -d "$VIM_NIGHTLY_BUILD_DIR" ]; then
-    git clone --recursive --depth 1 \
+    git clone --recursive --depth 1 --single-branch \
         https://github.com/vim/vim.git $VIM_NIGHTLY_BUILD_DIR
     make
     make install

@@ -350,6 +350,7 @@ command! -bar PackStatus call s:PackStatus()
 syntax on
 filetype plugin indent on
 colorscheme domusaurea
+language C
 set relativenumber number
 set wrap
 set smartindent autoindent
