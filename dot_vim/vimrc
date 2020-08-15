@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 14-Aug-2020.
+" Last Change: 15-Aug-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -214,17 +214,23 @@ if has('vim_starting') || 1
   endif | unlet s:_envrc
 endif
 " Initialize autocmd
-let s:_augroups = readfile(expand('<sfile>'))
-let s:_pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
-call filter(s:_augroups, 'stridx(v:val, "aug") != -1')
-call filter(s:_augroups, 'v:val =~# s:_pattern')
-call map(s:_augroups, 'matchstr(v:val, s:_pattern)')
-call uniq(sort(filter(s:_augroups, 'v:val !=? "END"')))
-for s:_augroup in s:_augroups
-  execute 'augroup' s:_augroup
-    autocmd!
-  execute 'augroup END'
-endfor | unlet s:_augroup s:_augroups s:_pattern
+def! s:InitializeAutocmd(filename: string)
+  let pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
+  let augroups = readfile(filename)
+                    ->filter({_, line -> stridx(line, 'aug') != -1})
+                    ->filter({_, line -> line =~# pattern})
+                    ->map({_, line -> matchstr(line, pattern)})
+                    ->filter({_, augroup -> augroup !=? 'END'})
+                    ->sort()
+                    ->uniq()
+  for augroup in augroups
+    execute 'augroup ' .. augroup
+      autocmd!
+    execute 'augroup END'
+  endfor
+enddef
+call s:InitializeAutocmd(expand('<sfile>'))
+delfunction s:InitializeAutocmd
 
 " minpac
 let s:plugin = {}
