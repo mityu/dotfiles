@@ -5,4 +5,5 @@ if [ -n "$(git diff)" ]; then
 fi
 git merge FETCH_HEAD
 make app
+rm -r /Applications/Alacritty.app
 mv ./target/release/osx/Alacritty.app /Applications/Alacritty.app
