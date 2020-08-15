@@ -33,7 +33,7 @@ function! s:vars() abort
 endfunction
 function! s:SIDPrefix() abort
   " Returns "<SNR>{script-ID}_"
-  return matchstr(expand('<sfile>'), '\zs<SNR>\d\+_\zeSIDPrefix$')
+  return expand('<SID>')
 endfunction
 function! s:SNR() abort
   return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
