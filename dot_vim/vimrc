@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Aug-2020.
+" Last Change: 16-Aug-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -71,7 +71,7 @@ enddef
 def! s:echomsg(msg: string): void
   call s:EchomsgWithColor(msg, 'NONE')
 enddef
-def! s:echomsg_error(msg: string): void
+def! s:EchomsgError(msg: string): void
   call s:EchomsgWithColor(msg, 'Error')
 enddef
 def! s:EchomsgWarning(msg: string): void
@@ -109,7 +109,7 @@ function! s:Mkdir(dir, ...) abort
     return 1
   endif
   if !exists('*mkdir')
-    call s:echomsg_error('built-in mkdir() not found.')
+    call s:EchomsgError('built-in mkdir() not found.')
     return 0
   endif
   return call('mkdir', [a:dir] + a:000)
@@ -150,8 +150,7 @@ command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
 " Startup config
-" FIXME: Error occurs without executing inner this if statement.
-if has('vim_starting') || 1
+if has('vim_starting')
   if has('multi_lang')
     if has('menu')
       set langmenu=ja.utf-8
@@ -338,7 +337,7 @@ function! s:PackStatus() abort
   if exists('*minpac#status')
     call minpac#status()
   else
-    call s:echomsg_error('minpac isn''t loaded yet.')
+    call s:EchomsgError('minpac isn''t loaded yet.')
   endif
 endfunction
 command! -bar PackInit   call s:PackInit()
@@ -491,8 +490,8 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
 nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
-nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
-nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
+" nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
+" nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
 " Avoid to regester calling textobj function commands to the command-history
@@ -659,7 +658,7 @@ for s:pair in s:ten_key_pair
   endfor
   unlet s:key
 endfor|unlet s:pair
-function! s:shift_ten_key(enablize) abort
+function! s:ShiftTenKey(enablize) abort
   if a:enablize
     for [key1, key2] in s:ten_key_pair
       execute 'imap' key1 printf(s:ten_key_mapbase, key2)
@@ -672,8 +671,8 @@ function! s:shift_ten_key(enablize) abort
     endfor
   endif
 endfunction
-command! -bar EnableShiftTenKey call s:shift_ten_key(1)
-command! -bar DisableShiftTenKey call s:shift_ten_key(0)
+command! -bar EnableShiftTenKey call s:ShiftTenKey(1)
+command! -bar DisableShiftTenKey call s:ShiftTenKey(0)
 
 
 " Use :execute here to avoid creepy highlight.
@@ -694,7 +693,6 @@ digraphs .. 12290
 digraphs -- 12540
 
 function! s:cmdwin_enter() abort
-  call s:cmdwin_save_options.clear()
 
   " Type <CR> to execute current line in command-line window.
   nnoremap <buffer> <CR> <CR>
@@ -715,7 +713,7 @@ function! s:cmdwin_enter() abort
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
     inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
-    call s:cmdwin_save_options.store('completeopt')
+    let s:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
     setlocal completeopt=menu,preview
     " TODO: Delete lines only when gram.vim is loaded.
     execute printf('silent! 1,$-%d delete _', &cmdwinheight)
@@ -741,7 +739,7 @@ function! s:cmdwin_enter() abort
 endfunction
 function! s:cmdwin_leave() abort
   if exists('s:cmdwin_save_options')
-    call s:cmdwin_save_options.restore_all()
+    call s:cmdwin_save_options.restore()
   endif
   if s:has('/?', expand('<afile>'))
     let @/ = s:cmdwin_incsearch.pattern_save
@@ -795,14 +793,13 @@ endfunction
 "   execute 'noautocmd normal! G$'
 " endfunction
 
-let s:cmdwin_save_options = vimrc#class#new('save_options')
 augroup vimrc_mapping
   autocmd CmdWinEnter * call s:cmdwin_enter()
   autocmd CmdWinLeave * call s:cmdwin_leave()
 augroup END
 
 if has('mac')
-  let mapleader='_'
+  let mapleader = '_'
 endif
 if has('win32')
   inoremap \ _
@@ -815,7 +812,7 @@ call add(s:_map, ['nnoremap', '', 'ev', 'edit $MYVIMRC'])
 call add(s:_map, ['nnoremap', '', 'sv', 'source $MYVIMRC'])
 call add(s:_map, ['nnoremap', '<silent>', 'k', 'call vimrc#mru#start()'])
 call add(s:_map, ['nnoremap', '<silent>', 'b', 'call gram#sources#buffers#launch()'])
-call add(s:_map, ['nnoremap', '<silent>', 'j', 'call <SID>gof_from_mapping()'])
+call add(s:_map, ['nnoremap', '<silent>', 'j', 'call <SID>GofForMapping()'])
 call add(s:_map, ['nnoremap', '<silent>', 'f', 'call vimrc#filore#start()'])
 call add(s:_map, ['nnoremap', '<silent>', 'm', 'MemoList'])
 call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
@@ -826,8 +823,8 @@ execute join(map(s:_map, {->join([
       \  printf(':<C-u>%s<CR>', v:val[3])
       \ ], ' ')}), "\n")
 unlet s:_map
-"
-"
+
+
 " Abbreviates
 iabbrev todo: TODO:
 iabbrev fixme: FIXME:
@@ -844,14 +841,14 @@ command! CopyToClipboard let @*=@"
 command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0, <f-args>)
-command! -bar Draft call s:draft()
-command! -bar UnDraft call s:undraft()
+command! -bar Draft call s:Draft()
+command! -bar UnDraft call s:Undraft()
 command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
-      \ Scratch call s:scratch(<q-args>)
+      \ Scratch call s:Scratch(<q-args>)
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
-command! -bar -nargs=* -complete=file ListTasks call s:list_tasks(<q-args>)
+command! -bar -nargs=* -complete=file ListTasks call s:ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
-command! -nargs=? -complete=dir Gof call s:gof(<q-args>)
+command! -nargs=? -complete=dir Gof call s:Gof(<q-args>)
 command! Col setlocal cursorcolumn|call popup_create([], {
       \ 'moved': 'any', 'mask': [[1, 1, 1, 1]],
       \ 'callback': {-> execute('setlocal nocursorcolumn')}})
@@ -865,35 +862,29 @@ command! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0,
 command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
 command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
-"
-function! Execute_list(com) abort
-  return split(execute(a:com), "\n")
-endfunction
-function! Filter(pat, com) abort
-  let output = Execute_list(a:com)
-  call filter(output, 'v:val=~?a:pat')
-  return output
-endfunction
-function! s:filter(bang, pat, ...) abort
-  let output = join(Filter(a:pat, join(a:000, ' ')), "\n")
-  if a:bang
-    echom output
+
+def! Filter(pat: string, com: string): list<string>
+  return execute(com)->split("\n")->filter({_, val -> val =~? pat})
+enddef
+def! s:filter(bang: number, pat: string, ...cmd: list<string>): void
+  let output = Filter(pat, join(cmd, ' '))->join("\n")
+  if bang
+    echomsg output
   else
     echo output
   endif
-endfunction
-function! s:draft() abort
-  let b:vimrc_draft_save_options = vimrc#class#new('save_options')
-  call b:vimrc_draft_save_options.store(['buftype', 'swapfile'])
+enddef
+function! s:Draft() abort
+  let b:vimrc_draft_save_options = vital#vital#import('Vim.Guard').store(['&l:buftype', '&l:swapfile'])
   setlocal buftype=nofile noswapfile
 endfunction
-function! s:undraft() abort
-  if !exists('b:vimrc_draft_savedata')
+function! s:Undraft() abort
+  if !exists('b:vimrc_draft_save_options')
     return
   endif
-  call b:vimrc_draft_savedata.restore_all()
+  call b:vimrc_draft_save_options.restore()
 endfunction
-function! s:scratch(opener) abort
+function! s:Scratch(opener) abort
   let opener = a:opener
   let prefix = 'scratch://'
   let name = s:input('Scratch buffer name? ')
@@ -909,13 +900,13 @@ function! s:scratch(opener) abort
     let opener = 'split'
   endif
   execute opener prefix .. name
-  call s:draft()
+  call s:Draft()
 endfunction
 function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort
   let pat = '^' .. a:arg_lead
   return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
 endfunction
-function! s:list_tasks(args) abort
+function! s:ListTasks(args) abort
   let target = '%'
   if a:args =~# 'rf'
     let target = '**/*.' .. expand('%:e')
@@ -924,7 +915,7 @@ function! s:list_tasks(args) abort
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunction
-def! s:find_gitroot(arg_target: string = bufname('%')): string
+def! s:FindGitroot(arg_target: string = bufname('%')): string
   let target: string = resolve(arg_target)
   let git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
@@ -933,7 +924,7 @@ def! s:find_gitroot(arg_target: string = bufname('%')): string
   endif
   return fnamemodify(git_dir, ':h')
 enddef
-def! s:gof(path: string): void
+def! s:Gof(path: string): void
   if !executable('gof')
     echo '"gof" command not found.'
     return
@@ -947,8 +938,8 @@ def! s:gof(path: string): void
   popup_create(term_start(gofcmd, {'hidden': 1, 'term_finish': 'close'}),
         \ {'minwidth': minwidth, 'minheight': minheight})
 enddef
-def! s:gof_from_mapping()
-  let git_root = s:find_gitroot()
+def! s:GofForMapping()
+  let git_root = s:FindGitroot()
   s:gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 "TODO: Add export when I add :vim9script on the top of this file.
@@ -987,15 +978,14 @@ if s:plugin.exists('vim-operator-user')
     if !s:has(['marker', 'manual'], &l:foldmethod)
       return
     endif
-    let save_options = vimrc#class#new('save_options')
-    call save_options.store(['commentstring'])
+    let save_options = vital#vital#new('Vim.Guard').store(['&l:commentstring'])
     let &l:commentstring = ' ' .. &l:commentstring
     try
       execute 'normal!' a:keys
     catch " Usaully this :catch gets E490, 'Folding not found.'
-      call s:echomsg_error(v:exception)
+      call s:EchomsgError(v:exception)
     finally
-      call save_options.restore_all()
+      call save_options.restore()
     endtry
   endfunction
   function! s:map_range_fold_cmd(motion_wizeness, keys) abort
@@ -1173,10 +1163,10 @@ if s:plugin.exists('vim-brownie')
 endif
 if s:plugin.exists('vim-gram')
   augroup vimrc_gram_init
-    autocmd User gram-first-start call s:init_gram_map()
+    autocmd User gram-first-start call s:InitGramMapping()
   augroup END
 
-  function! s:init_gram_map() abort
+  function! s:InitGramMapping() abort
     call gram#custom#map_action('n', '<CR>', 'select-item')
     call gram#custom#map_action('n', 'q', 'quit')
     call gram#custom#map_action('n', 'j', 'select-next-item')
@@ -1404,26 +1394,15 @@ if s:plugin.exists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
 endif
 " ReadingVimrc
-command! -bar ReadingVimrc call s:readingvimrc()
-function! s:readingvimrc() abort
-  " try
-  "   packadd vim-reading-vimrc
-  "   ReadingVimrc
-  " catch
-  " endtry
-  " try
-  "   packadd vim-readingvimrc-files
-  "   let g:readingvimrc_files_listing_window_open_command = 'tabedit'
-  "   ReadingVimrcFiles
-  "   unlet g:readingvimrc_files_listing_window_open_command
-  " catch
-  " endtry
+command! -bar ReadingVimrc call s:ReadingVimrc()
+def! s:ReadingVimrc()
   try
     packadd vim-reading-vimrc
     ReadingVimrcNext
   catch
+    s:EchomsgError(v:throwpoint .. v:exception)
   endtry
-endfunction
+enddef
 
 " Additional plugins
 " Taking notes
@@ -1456,7 +1435,7 @@ function! s:notes.delete(...) abort
   let files = self.list_files()
   for target in a:000
     if !s:has(files, target)
-      call s:echomsg_error('File does not exists: ' .. target)
+      call s:EchomsgError('File does not exists: ' .. target)
       continue
     endif
     call s:echomsg(printf('Delete %s ? [y/n]', target))
@@ -1551,12 +1530,12 @@ function! s:StatuslineGenerator() abort
         \ (s:plugin.exists('gina.vim') ?
         \   '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
         \   '') ..
-        \ '%{<SID>filename_label(bufnr("%"))}' ..
+        \ '%{<SID>FilenameLabel(bufnr("%"))}' ..
         \ '%<%=' ..
         \ '[%{pathshorten(getcwd(winnr()))}]'
   return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction
-def! s:filename_label(bufnr: number): string
+def! s:FilenameLabel(bufnr: number): string
   let buftype = getbufvar(bufnr, '&buftype')
   let bufname = bufname(bufnr)
   if buftype ==# 'help'
@@ -1594,8 +1573,8 @@ function! s:ShowmodeInit() abort
           \ colors[mode][1][1])
   endfor
 endfunction
-function! s:showmode_mode() abort
-  call s:showmode_highlight()
+function! s:ShowmodeMode() abort
+  call s:ShowmodeHighlight()
   let map = {
     \ 'n': 'NORMAL',
     \ 'i': 'INSERT',
@@ -1616,7 +1595,7 @@ function! s:showmode_mode() abort
     \ }
   return get(map, mode(), 'UNKNOWN')
 endfunction
-function! s:showmode_highlight() abort
+function! s:ShowmodeHighlight() abort
   let type = get({
     \  'i': 'insert',
     \  't': 'insert',
@@ -1629,10 +1608,10 @@ function! s:showmode_highlight() abort
   execute 'highlight link VimrcShowMode VimrcShowMode' .. type
   return ''
 endfunction
-def! s:showmode_label(): string
-  return '%#VimrcShowMode# %{<SID>showmode_mode()} %#TabLine#'
+def! s:ShowmodeLabel(): string
+  return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#TabLine#'
 enddef
-def! s:generate_tabinfo(tabnr: number): string
+def! s:GenerateTabinfo(tabnr: number): string
   let tablist = tabpagebuflist(tabnr)
   let info = ''
   info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
@@ -1640,12 +1619,12 @@ def! s:generate_tabinfo(tabnr: number): string
   return info
 enddef
 def! s:Tabline(): string
-  let tabline = s:showmode_label() .. '%#TabLine#|'
+  let tabline = s:ShowmodeLabel() .. '%#TabLine#|'
   let t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
     tabline ..= '%' .. n .. 'T'
-    let info = ' ' .. s:generate_tabinfo(n) .. ' '
+    let info = ' ' .. s:GenerateTabinfo(n) .. ' '
     if t == n
       tabline ..= '%#TabLineSel# %999Xx%X' .. info .. '%#TabLine#'
     else
@@ -1714,11 +1693,11 @@ command! EmphasisIndentEnable call s:EmphasisIndentEnable()
 " WarningSpace
 hi link WarningSpace Error
 augroup vimrc_warningspace
-  autocmd WinEnter * call s:warningspace()
-  autocmd OptionSet * call s:warningspace()
-  autocmd User vimrc_initialize call s:warningspace()
+  autocmd WinEnter * call s:WarningSpace()
+  autocmd OptionSet * call s:WarningSpace()
+  autocmd User vimrc_initialize call s:WarningSpace()
 augroup END
-function! s:warningspace() abort
+function! s:WarningSpace() abort
   " Clean up.
   if exists('w:twobyte_space_id')
     call matchdelete(w:twobyte_space_id)
@@ -1737,7 +1716,7 @@ function! s:warningspace() abort
   " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
   let w:twobyte_space_id = matchadd('WarningSpace', '\%d12288')
 
-  " End of line's space
+  " White spaces in the end of line
   let w:end_of_line_space_id = matchadd('WarningSpace', '\s\+$')
 endfunction
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
@@ -1751,7 +1730,7 @@ let g:mru_ignore_pattern = [
       \ ]
 
 " gram, filore
-function! s:GramMapping() abort
+def! s:GramMapping()
   let map = [
         \ ['k', 'loop-cursor-up'],
         \ ['j', 'loop-cursor-down'],
@@ -1759,11 +1738,11 @@ function! s:GramMapping() abort
         \ ['i', 'start-filtering'],
         \ ['q', 'exit'],
         \]
-  call map(map, {key, val ->
+  map(map, {key, val ->
         \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(gram-' .. val[1] .. ')'})
   execute join(map, "\n")
-endfunction
-function! s:FiloreMapping() abort
+enddef
+def! s:FiloreMapping()
   let map = [
         \ ['q', 'exit'],
         \ ['o', 'toggle-directory-folding'],
@@ -1775,10 +1754,10 @@ function! s:FiloreMapping() abort
         \ ['<CR>', 'open-file'],
         \ ['H', 'start-history'],
         \]
-  call map(map, {key, val ->
+  map(map, {key, val ->
         \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'})
   execute join(map, "\n")
-endfunction
+enddef
 augroup vimrc_additional_plugins
   autocmd User gramOpen call s:GramMapping()
   autocmd FileType filore call s:FiloreMapping()
@@ -1787,7 +1766,7 @@ augroup END
 " git
 def! s:GitDiffGetcmd(arg_target: string): string
   let target: string = resolve(arg_target)
-  let gitroot: string = s:find_gitroot(target)
+  let gitroot: string = s:FindGitroot(target)
   if gitroot ==# ''
     return ''
   endif
@@ -1797,7 +1776,7 @@ enddef
 def! s:GitDiff(arg_target: string = bufname('%')): void
   let target: string = resolve(arg_target)
   if getftype(target) ==# ''
-    s:echomsg_error('File or directory does not exists: ' .. target)
+    s:EchomsgError('File or directory does not exists: ' .. target)
     return
   endif
   let cmd: string = s:GitDiffGetcmd(target)

@@ -30,7 +30,7 @@ function! vimrc#session#delete(need_ask, ...) abort "{{{
   let sessions = map(copy(a:000), 'vimrc#session#get_file(v:val)')
   for session in sessions
     if !filereadable(session)
-      call VimrcFunc('echomsg_error')('Session file does not exist: ' . session)
+      call VimrcFunc('EchomsgError')('Session file does not exist: ' . session)
       continue
     endif
     call delete(session)

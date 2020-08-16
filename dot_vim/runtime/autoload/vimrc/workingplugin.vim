@@ -7,7 +7,7 @@ let s:workplace = s:JoinPath(expand('$DOT_VIM'), 'workplace')
 let s:available = isdirectory(s:workplace)
 let s:message = {
       \ 'echomsg': VimrcFunc('echomsg'),
-      \ 'echomsg_error': VimrcFunc('echomsg_error'),
+      \ 'EchomsgError': VimrcFunc('EchomsgError'),
       \ }
 
 function! s:list_plugins() abort
@@ -23,7 +23,7 @@ function! vimrc#workingplugin#load(...) abort
 
   for plugin in a:000
     if index(plugins, plugin) == -1
-      call s:message.echomsg_error('Failed to load: ' . plugin)
+      call s:message.EchomsgError('Failed to load: ' . plugin)
       continue
     endif
     let plugin_dir = s:JoinPath(s:workplace, plugin)
@@ -51,7 +51,7 @@ function! vimrc#workingplugin#clone(...) abort
     return
   endif
   if !s:Has(a:1, '/')
-    call s:message.echomsg_error(string(a:1) . ' is not a repository.')
+    call s:message.EchomsgError(string(a:1) . ' is not a repository.')
     return
   endif
   let repository = printf('https://github.com/%s.git', a:1)
@@ -62,7 +62,7 @@ function! vimrc#workingplugin#clone(...) abort
     let clone_to = a:2
   endif
   if s:Has(s:list_plugins(), clone_to)
-    call s:message.echomsg_error('Directory already exists: ' . clone_to)
+    call s:message.EchomsgError('Directory already exists: ' . clone_to)
     return
   endif
   let clone_to = s:JoinPath(s:workplace, clone_to)
@@ -72,14 +72,14 @@ endfunction
 function! vimrc#workingplugin#new(...) abort
   if !s:available | return | endif
   if !exists('*mkdir')
-    call s:message.echomsg_error(
+    call s:message.EchomsgError(
           \ 'Built-in mkdir() function is not available.')
     return
   endif
   for plugin in a:000
     let base_dir = s:JoinPath(s:workplace, plugin)
     if isdirectory(base_dir)
-      call s:message.echomsg_error('Plugin already exists: ' . base_dir)
+      call s:message.EchomsgError('Plugin already exists: ' . base_dir)
       continue
     endif
     call mkdir(base_dir)
@@ -95,7 +95,7 @@ function! vimrc#workingplugin#rm(...) abort "{{{
   let plugin_list = s:list_plugins()
   for plugin in a:000
     if !s:Has(plugin_list, plugin)
-      call s:message.echomsg_error('Plugin does not exist: ' . plugin)
+      call s:message.EchomsgError('Plugin does not exist: ' . plugin)
       continue
     endif
     call s:message.echomsg(printf('Delete %s ? [y/n]', plugin))
@@ -104,7 +104,7 @@ function! vimrc#workingplugin#rm(...) abort "{{{
       continue
     endif
     if delete(s:JoinPath(s:workplace, plugin), 'rf') != 0
-      call s:message.echomsg_error('Failed to delete: ' . plugin)
+      call s:message.EchomsgError('Failed to delete: ' . plugin)
     else
       call s:message.echomsg('Succesfully deleted: ' . plugin)
     endif
