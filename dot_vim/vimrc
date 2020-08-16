@@ -1395,14 +1395,14 @@ if s:plugin.exists('autofmt')
 endif
 " ReadingVimrc
 command! -bar ReadingVimrc call s:ReadingVimrc()
-def! s:ReadingVimrc()
+function! s:ReadingVimrc()
   try
     packadd vim-reading-vimrc
     ReadingVimrcNext
   catch
-    s:EchomsgError(v:throwpoint .. v:exception)
+    call s:EchomsgError(v:throwpoint .. v:exception)
   endtry
-enddef
+endfunction
 
 " Additional plugins
 " Taking notes
