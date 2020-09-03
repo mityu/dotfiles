@@ -38,9 +38,9 @@ endfunction
 function! s:rc(fname) abort
   return s:filesystem.rcfile_prefix .. a:fname
 endfunction
-function! s:JoinPath(...) abort
-  return join(a:000, s:filesystem.slash)
-endfunction
+def! s:JoinPath(...arg: list<any>): string
+  return join(arg, s:filesystem.slash)
+enddef
 function! s:has(object, to_search) abort
   let object_type = type(a:object)
   if object_type == v:t_string
@@ -93,24 +93,23 @@ enddef
 def! s:glob(expr: string): list<string>
   return split(glob(expr), "\n")
 enddef
-function! s:GetcharString(...) abort
-  return nr2char(call('getchar', a:000))
-endfunction
+def! s:GetcharString(...expr: list<number>): any
+  return nr2char(call('getchar', expr))
+enddef
 def! s:ask(question: string): bool
   call s:EchoQuestion(question)
   return s:has(['y', 'Y'], s:getchar_string())
 enddef
-function! s:Mkdir(dir, ...) abort
-  " Return 1 when process finished without errors; otherwise, return 0.
-  if isdirectory(a:dir)
-    return 1
+def! s:Mkdir(dir: string, ...opt: list<any>): bool
+  if isdirectory(dir)
+    return true
   endif
   if !exists('*mkdir')
-    call s:EchomsgError('built-in mkdir() not found.')
-    return 0
+    s:EchomsgError('built-in mkdir() not found.')
+    return false
   endif
-  return call('mkdir', [a:dir] + a:000)
-endfunction
+  return call('mkdir', [dir] + opt) ? true : false
+enddef
 function! s:input(prompt, ...) abort
   try
     return call('input', [a:prompt] + a:000)
@@ -827,7 +826,7 @@ iabbrev todo: TODO:
 iabbrev fixme: FIXME:
 iabbrev xxx: XXX:
 iabbrev note: NOTE:
-"
+
 " Commands
 " Declarations
 command! -bar CdCurrent cd %:p:h
