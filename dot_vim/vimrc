@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 16-Aug-2020.
+" Last Change: 03-Sep-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -28,9 +28,6 @@ function! FoldExprForVimrc() abort
 endfunction
 
 " Local utility functions
-function! s:vars() abort
-  return s:
-endfunction
 function! s:SIDPrefix() abort
   " Returns "<SNR>{script-ID}_"
   return expand('<SID>')
@@ -245,101 +242,101 @@ else
     return 0
   endfunction
 endif
-function! s:PackRegister() abort
-  call minpac#add('k-takata/minpac', {'type': 'opt'})
+def! s:PackRegister(): void
+  minpac#add('k-takata/minpac', {'type': 'opt'})
 
-  call minpac#add('itchyny/vim-cursorword')
-  call minpac#add('kana/vim-altr')
-  call minpac#add('kana/vim-gf-user')
-  call minpac#add('kana/vim-operator-replace')
-  call minpac#add('kana/vim-operator-user')
-  call minpac#add('kana/vim-textobj-entire')
-  call minpac#add('kana/vim-textobj-function')
-  call minpac#add('kana/vim-textobj-indent')
-  call minpac#add('kana/vim-textobj-line')
-  call minpac#add('kana/vim-textobj-user')
-  " call minpac#add('lambdalisue/fila.vim')
-  call minpac#add('lambdalisue/gina.vim')
-  call minpac#add('lambdalisue/vim-findent')
-  call minpac#add('lambdalisue/vim-gista')
-  call minpac#add('mattn/vim-lsp-settings')
-  call minpac#add('mityu/vim-brownie')
-  call minpac#add('mityu/vim-gram')
-  call minpac#add('mityu/vim-gram-sources')
-  call minpac#add('mityu/vim-textobj-commentblock')
-  call minpac#add('osyo-manga/vim-jplus')
-  call minpac#add('osyo-manga/vim-operator-swap')
-  call minpac#add('prabirshrestha/async.vim')
-  call minpac#add('prabirshrestha/asyncomplete-buffer.vim')
-  call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-  call minpac#add('prabirshrestha/asyncomplete.vim')
-  call minpac#add('prabirshrestha/vim-lsp')
-  call minpac#add('previm/previm')
-  call minpac#add('rhysd/vim-operator-surround')
-  call minpac#add('sgur/vim-gf-autoload')
-  call minpac#add('sgur/vim-operator-openbrowser')
-  call minpac#add('thinca/vim-ambicmd')
-  call minpac#add('thinca/vim-ft-help_fold')
-  " call minpac#add('thinca/vim-operator-sequence')
-  call minpac#add('thinca/vim-partedit')
-  call minpac#add('thinca/vim-prettyprint')
-  call minpac#add('thinca/vim-quickrun')
-  call minpac#add('thinca/vim-textobj-between')
-  call minpac#add('thinca/vim-themis')
-  call minpac#add('tyru/capture.vim')
-  call minpac#add('tyru/caw.vim')
-  call minpac#add('tyru/open-browser.vim')
-  call minpac#add('vim-jp/autofmt')
-  call minpac#add('vim-jp/syntax-vim-ex')
-  call minpac#add('vim-jp/vimdoc-ja')
-  call minpac#add('vim-jp/vital.vim')
-  call minpac#add('vim-scripts/autodate.vim')
+  minpac#add('itchyny/vim-cursorword')
+  minpac#add('kana/vim-altr')
+  minpac#add('kana/vim-gf-user')
+  minpac#add('kana/vim-operator-replace')
+  minpac#add('kana/vim-operator-user')
+  minpac#add('kana/vim-textobj-entire')
+  minpac#add('kana/vim-textobj-function')
+  minpac#add('kana/vim-textobj-indent')
+  minpac#add('kana/vim-textobj-line')
+  minpac#add('kana/vim-textobj-user')
+  # minpac#add('lambdalisue/fila.vim')
+  minpac#add('lambdalisue/gina.vim')
+  minpac#add('lambdalisue/vim-findent')
+  minpac#add('lambdalisue/vim-gista')
+  minpac#add('mattn/vim-lsp-settings')
+  minpac#add('mityu/vim-brownie')
+  minpac#add('mityu/vim-gram')
+  minpac#add('mityu/vim-gram-sources')
+  minpac#add('mityu/vim-textobj-commentblock')
+  minpac#add('osyo-manga/vim-jplus')
+  minpac#add('osyo-manga/vim-operator-swap')
+  minpac#add('prabirshrestha/async.vim')
+  minpac#add('prabirshrestha/asyncomplete-buffer.vim')
+  minpac#add('prabirshrestha/asyncomplete-lsp.vim')
+  minpac#add('prabirshrestha/asyncomplete.vim')
+  minpac#add('prabirshrestha/vim-lsp')
+  minpac#add('previm/previm')
+  minpac#add('rhysd/vim-operator-surround')
+  minpac#add('sgur/vim-gf-autoload')
+  minpac#add('sgur/vim-operator-openbrowser')
+  minpac#add('thinca/vim-ambicmd')
+  minpac#add('thinca/vim-ft-help_fold')
+  # minpac#add('thinca/vim-operator-sequence')
+  minpac#add('thinca/vim-partedit')
+  minpac#add('thinca/vim-prettyprint')
+  minpac#add('thinca/vim-quickrun')
+  minpac#add('thinca/vim-textobj-between')
+  minpac#add('thinca/vim-themis')
+  minpac#add('tyru/capture.vim')
+  minpac#add('tyru/caw.vim')
+  minpac#add('tyru/open-browser.vim')
+  minpac#add('vim-jp/autofmt')
+  minpac#add('vim-jp/syntax-vim-ex')
+  minpac#add('vim-jp/vimdoc-ja')
+  minpac#add('vim-jp/vital.vim')
+  minpac#add('vim-scripts/autodate.vim')
 
-  call minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
-  " call minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
-  call minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
-  call minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
-  call minpac#add('rbtnn/vim-coloredit', {'type': 'opt'})
-endfunction
-function! s:PackInit() abort
+  minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
+  # minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
+  minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
+  minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
+  minpac#add('rbtnn/vim-coloredit', {'type': 'opt'})
+enddef
+def! s:PackInit(): bool
   try
     packadd minpac
   catch /^Vim\%((\a\+)\)\=:E919/
     "Download minpac...
     let minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
-    call s:echomsg('Downloading minpac...')
-    call system('git clone https://github.com/k-takata/minpac.git ' ..
+    s:echomsg('Downloading minpac...')
+    system('git clone https://github.com/k-takata/minpac.git ' ..
           \ minpac_path)
     try
       packadd minpac
     catch
       echoerr v:exception
-      return 0
+      return false
     endtry
   endtry
 
-  call minpac#init()
-  call s:PackRegister()
+  minpac#init()
+  s:PackRegister()
 
-  return 1
-endfunction
-function! s:PackUpdate() abort
+  return true
+enddef
+def! s:PackUpdate(): void
   if s:PackInit()
-    call minpac#update()
+    minpac#update()
   endif
-endfunction
-function! s:PackClean() abort
+enddef
+def! s:PackClean(): void
   if s:PackInit()
-    call minpac#clean()
+    minpac#clean()
   endif
-endfunction
-function! s:PackStatus() abort
+enddef
+def! s:PackStatus()
   if exists('*minpac#status')
-    call minpac#status()
+    minpac#status()
   else
-    call s:EchomsgError('minpac isn''t loaded yet.')
+    s:EchomsgError('minpac isn''t loaded yet.')
   endif
-endfunction
+enddef
 command! -bar PackInit   call s:PackInit()
 command! -bar PackUpdate call s:PackUpdate()
 command! -bar PackClean  call s:PackClean()
@@ -940,7 +937,7 @@ def! s:Gof(path: string): void
 enddef
 def! s:GofForMapping()
   let git_root = s:FindGitroot()
-  s:gof(git_root ==# '' ? getcwd(winnr()) : git_root)
+  s:Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 "TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void
@@ -1648,7 +1645,7 @@ augroup END
 def! s:TerminalOpen(): void
   # Ignore terminal in popup-window.
   # FIXME: Using getbufvar() doesn't work.
-  if bufnr('%') == expand('<abuf>')
+  if bufnr('%') == expand('<abuf>')->str2nr()
     setlocal nonumber norelativenumber
   endif
 enddef
