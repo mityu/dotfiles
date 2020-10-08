@@ -1,7 +1,9 @@
 " Author: mityu
-" Last Change: 03-Sep-2020.
+" Last Change: 08-Oct-2020.
 " vim: shiftwidth=2
 " vim9script
+" TODO: Remove this
+let v:disallow_let = 0
 " Encoding
 if has('vim_starting')
   set encoding=utf-8
@@ -35,12 +37,27 @@ endfunction
 function! s:SNR() abort
   return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
 endfunction
-function! s:rc(fname) abort
-  return s:filesystem.rcfile_prefix .. a:fname
-endfunction
-def! s:JoinPath(...arg: list<any>): string
-  return join(arg, s:filesystem.slash)
-enddef
+" function! s:Rc(fname) abort
+"   return s:filesystem.rcfile_prefix .. a:fname
+" endfunction
+" def! s:JoinPath(...arg: list<any>): string
+"   return join(arg, s:filesystem.slash)
+" enddef
+if has('win32')
+  def! s:Rc(fname: string): string
+    return '_' .. fname
+  enddef
+  def! s:JoinPath(...arg: list<any>): string
+    return join(arg, '\')
+  enddef
+else
+  def! s:Rc(fname: string): string
+    return '.' .. fname
+  enddef
+  def! s:JoinPath(...arg: list<any>): string
+    return join(arg, '/')
+  enddef
+endif
 function! s:has(object, to_search) abort
   let object_type = type(a:object)
   if object_type == v:t_string
@@ -146,6 +163,8 @@ command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
 " Startup config
+const s:Windows = has('win32')
+const s:Unix = !s:Windows
 if has('vim_starting')
   if has('multi_lang')
     if has('menu')
@@ -163,23 +182,17 @@ if has('vim_starting')
     set mouse=a
   endif
 
-  let s:Windows = has('win32')
-  let s:Unix = !s:Windows
-  lockvar s:Windows
-  lockvar s:Unix
-
-
   let s:filesystem = {}
   if s:Windows
     let $DOT_VIM = expand('~\vimfiles')
-    let s:filesystem.slash = '\'
-    let s:filesystem.path_separator = ';'
-    let s:filesystem.rcfile_prefix = '_'
+    " let s:filesystem.slash = '\'
+    " let s:filesystem.path_separator = ';'
+    " let s:filesystem.rcfile_prefix = '_'
   else
     let $DOT_VIM = expand('~/.vim')
-    let s:filesystem.slash = '/'
-    let s:filesystem.path_separator = ':'
-    let s:filesystem.rcfile_prefix = '.'
+    " let s:filesystem.slash = '/'
+    " let s:filesystem.path_separator = ':'
+    " let s:filesystem.rcfile_prefix = '.'
   endif
 
   let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
@@ -197,7 +210,7 @@ if has('vim_starting')
   let &runtimepath ..= ',' .. escape(s:JoinPath($DOT_VIM, 'runtime'), ' \')
 
   " Set environmental variables on gVim.
-  let s:_envrc = s:JoinPath(expand('~'), s:rc('envrc'))
+  let s:_envrc = s:JoinPath(expand('~'), s:Rc('envrc'))
   if has('gui_running') && filereadable(s:_envrc)
     let s:contents = readfile(s:_envrc)
     call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
@@ -228,16 +241,15 @@ call s:InitializeAutocmd(expand('<sfile>'))
 delfunction s:InitializeAutocmd
 
 " minpac
-let s:plugin = {}
 if &loadplugins
-  let s:plugin.plugins_ = map(filter(s:glob(
+  let s:plugin_list = map(filter(s:glob(
         \ s:JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*')
         \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-  function! s:plugin.exists(plugin) abort
-    return s:has(self.plugins_, a:plugin)
+  function! s:PluginExists(plugin) abort
+    return s:has(s:plugin_list, a:plugin)
   endfunction
 else
-  function! s:plugin.exists(plugin) abort
+  function! s:PluginExists(plugin) abort
     return 0
   endfunction
 endif
@@ -301,7 +313,7 @@ def! s:PackInit(): bool
   try
     packadd minpac
   catch /^Vim\%((\a\+)\)\=:E919/
-    "Download minpac...
+    # Download minpac...
     let minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
     s:echomsg('Downloading minpac...')
     system('git clone https://github.com/k-takata/minpac.git ' ..
@@ -703,7 +715,7 @@ function! s:cmdwin_enter() abort
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   " Execute an previous command easiler.
-  " nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
+  nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
@@ -770,24 +782,24 @@ function! s:cmdwin_incsearch_jump() abort
   catch
   endtry
 endfunction
-" function! s:cmdwin_select_history() abort
-"   let history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-"   call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
-"   call reverse(history)
-"   call gram#select({
-"        \ 'name': getcmdwintype() .. 'history',
-"        \ 'items': history,
-"        \ 'callback': s:SIDPrefix() .. 'cmdwin_select_history_callback',
-"        \ })
-" endfunction
-" function! s:cmdwin_select_history_callback(item) abort
-"   if getline('$') ==# ''
-"     call setline('$', a:item.word)
-"   else
-"     call append('$', a:item.word)
-"   endif
-"   execute 'noautocmd normal! G$'
-" endfunction
+function! s:cmdwin_select_history() abort
+  let history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
+  call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
+  call reverse(history)
+  call gram#select({
+       \ 'name': getcmdwintype() .. 'history',
+       \ 'items': history,
+       \ 'callback': s:SIDPrefix() .. 'cmdwin_select_history_callback',
+       \ })
+endfunction
+function! s:cmdwin_select_history_callback(item) abort
+  if getline('$') ==# ''
+    call setline('$', a:item.word)
+  else
+    call append('$', a:item.word)
+  endif
+  execute 'noautocmd normal! G$'
+endfunction
 
 augroup vimrc_mapping
   autocmd CmdWinEnter * call s:cmdwin_enter()
@@ -863,7 +875,7 @@ def! Filter(pat: string, com: string): list<string>
   return execute(com)->split("\n")->filter({_, val -> val =~? pat})
 enddef
 def! s:filter(bang: number, pat: string, ...cmd: list<string>): void
-  let output = Filter(pat, join(cmd, ' '))->join("\n")
+  var output = Filter(pat, join(cmd, ' '))->join("\n")
   if bang
     echomsg output
   else
@@ -912,8 +924,8 @@ function! s:ListTasks(args) abort
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 endfunction
 def! s:FindGitroot(arg_target: string = bufname('%')): string
-  let target: string = resolve(arg_target)
-  let git_dir: string = finddir('.git', target .. ';')
+  var target: string = resolve(arg_target)
+  var git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
     s:EchomsgWarning('Not a git repository: ' .. target)
     return ''
@@ -925,24 +937,24 @@ def! s:Gof(path: string): void
     echo '"gof" command not found.'
     return
   endif
-  let gofcmd = 'gof -f -tf "Tapi_gof"'
+  var gofcmd = 'gof -f -tf "Tapi_gof"'
   if !empty(path)
     gofcmd ..= ' -d ' .. path
   endif
-  let minwidth = min([&columns, 100])
-  let minheight = min([&lines, 40])
+  var minwidth = min([&columns, 100])
+  var minheight = min([&lines, 40])
   popup_create(term_start(gofcmd, {'hidden': 1, 'term_finish': 'close'}),
         \ {'minwidth': minwidth, 'minheight': minheight})
 enddef
 def! s:GofForMapping()
-  let git_root = s:FindGitroot()
+  var git_root = s:FindGitroot()
   s:Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 "TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void
-  let winid = win_getid(winnr('#'))
-  let buftype = getwinvar(winid, '&buftype')
-  let open_cmd = 'edit'
+  var winid = win_getid(winnr('#'))
+  var buftype = getwinvar(winid, '&buftype')
+  var open_cmd = 'edit'
   if !(buftype ==# 'nofile' || buftype ==# '')
     open_cmd = 'split'
   endif
@@ -951,14 +963,14 @@ def! Tapi_gof(bufnum: number, file_info: dict<string>): void
 enddef
 
 " Installed plugins
-if s:plugin.exists('vim-altr')
+if s:PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
-if s:plugin.exists('vim-operator-replace')
+if s:PluginExists('vim-operator-replace')
   map _r  <Plug>(operator-replace)
 endif
-if s:plugin.exists('vim-operator-user')
+if s:PluginExists('vim-operator-user')
   nmap zf <Plug>(operator-vimrc-fold-zf)
   nmap zF <Plug>(operator-vimrc-fold-zF)
   nmap zd <Plug>(operator-vimrc-fold-zd)
@@ -1036,21 +1048,21 @@ if s:plugin.exists('vim-operator-user')
     autocmd User vimrc_initialize call s:map_define_operator()
   augroup END
 endif
-if s:plugin.exists('vim-textobj-entire')
+if s:PluginExists('vim-textobj-entire')
   omap aa <Plug>(textobj-entire-a)
   omap ia <Plug>(textobj-entire-i)
   vmap aa <Plug>(textobj-entire-a)
   vmap ia <Plug>(textobj-entire-i)
   let g:textobj_entire_no_default_key_mappings = 1
 endif
-if s:plugin.exists('vim-textobj-function')
+if s:PluginExists('vim-textobj-function')
   omap if <Plug>(textobj-function-i)
   omap af <Plug>(textobj-function-a)
   vmap if <Plug>(textobj-function-i)
   vmap af <Plug>(textobj-function-a)
   let g:textobj_function_no_default_key_mappings = 1
 endif
-if s:plugin.exists('vim-textobj-indent')
+if s:PluginExists('vim-textobj-indent')
   omap ii <Plug>(textobj-indent-i)
   omap iI <Plug>(textobj-indent-same-i)
   omap ai <Plug>(textobj-indent-a)
@@ -1061,7 +1073,7 @@ if s:plugin.exists('vim-textobj-indent')
   vmap aI <Plug>(textobj-indent-same-a)
   let g:textobj_indent_no_default_key_mappings = 1
 endif
-if s:plugin.exists('gina.vim')
+if s:PluginExists('gina.vim')
   let g:gina#action#mark_sign_text = '*'
   let g:gina#core#console#enable_message_history = 1
   function! s:gina_config() abort
@@ -1130,15 +1142,15 @@ if s:plugin.exists('gina.vim')
     autocmd User vimrc_initialize call s:gina_config()
   augroup END
 endif
-if s:plugin.exists('vim-findent')
+if s:PluginExists('vim-findent')
   augroup vimrc_findent
     autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
 endif
-if s:plugin.exists('vim-Verdin')
+if s:PluginExists('vim-Verdin')
   let g:Verdin#autoparen = 1
 endif
-if s:plugin.exists('vim-brownie')
+if s:PluginExists('vim-brownie')
   let g:brownie_template_dirs =
         \ [s:JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
   let g:brownie_extra_imports = {
@@ -1157,7 +1169,7 @@ if s:plugin.exists('vim-brownie')
           \ 'stridx(v:val, a:arg) == 0')
   endfunction
 endif
-if s:plugin.exists('vim-gram')
+if s:PluginExists('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-first-start call s:InitGramMapping()
   augroup END
@@ -1184,7 +1196,7 @@ if s:plugin.exists('vim-gram')
     call gram#custom#map_key('i', '<BS>', '<C-h>')
   endfunction
 endif
-if s:plugin.exists('vim-textobj-commentblock')
+if s:PluginExists('vim-textobj-commentblock')
   omap ac <Plug>(textobj-commentblock-a)
   omap ic <Plug>(textobj-commentblock-i)
   vmap ac <Plug>(textobj-commentblock-a)
@@ -1193,19 +1205,19 @@ if s:plugin.exists('vim-textobj-commentblock')
 
   augroup vimrc_textobj_commentblock
     execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
-          \   (s:plugin.exists('caw.vim') ? 'caw' :
+          \   (s:PluginExists('caw.vim') ? 'caw' :
           \   'commentstring')
           \ .. '()'
   augroup END
 endif
-if s:plugin.exists('vim-jplus')
+if s:PluginExists('vim-jplus')
   map J <Plug>(jplus)
 endif
-if s:plugin.exists('vim-operator-swap')
+if s:PluginExists('vim-operator-swap')
   map _sy <Plug>(operator-swap-marking)
   map _sp <Plug>(operator-swap)
 endif
-if s:plugin.exists('asyncomplete.vim')
+if s:PluginExists('asyncomplete.vim')
   " Ignorecase.
   function! s:AsyncompletePreprocessor(context, matches) abort
     let completions = []
@@ -1236,7 +1248,7 @@ if s:plugin.exists('asyncomplete.vim')
   inoremap <C-l><C-p> <C-x><C-p><C-p>
 
   function! s:RegisterAsyncompleteSources() abort
-    if s:plugin.exists('asyncomplete-buffer.vim')
+    if s:PluginExists('asyncomplete-buffer.vim')
       call asyncomplete#register_source(
             \ asyncomplete#sources#buffer#get_source_options(#{
             \  name: 'buffer',
@@ -1250,7 +1262,7 @@ if s:plugin.exists('asyncomplete.vim')
     autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
   augroup END
 endif
-if s:plugin.exists('vim-lsp')
+if s:PluginExists('vim-lsp')
   let g:lsp_signs_enabled = 1
   let g:lsp_signs_error = {'text': '>>'}
   let g:lsp_signs_warning = {'text': '--'}
@@ -1265,16 +1277,16 @@ if s:plugin.exists('vim-lsp')
   " nmap <silent> <C-p> <Plug>(lsp-previous-error)
   " nmap <silent> <C-n> <Plug>(lsp-next-error)
 endif
-if s:plugin.exists('previm')
+if s:PluginExists('previm')
   let g:previm_show_header = 0
   let g:previm_enable_realtime = 1
 endif
-if s:plugin.exists('vim-operator-surround')
+if s:PluginExists('vim-operator-surround')
   map _sa <Plug>(operator-surround-append)
   map _sd <Plug>(operator-surround-delete)
   map _sr <Plug>(operator-surround-replace)
 endif
-if s:plugin.exists('vim-ambicmd')
+if s:PluginExists('vim-ambicmd')
   function! s:AmbicmdExpand(key) abort
     let expander = ambicmd#expand(a:key)
     return (expander ==# a:key ? '' : "\<C-g>u") .. expander
@@ -1312,7 +1324,7 @@ if s:plugin.exists('vim-ambicmd')
   endfunction
   let g:ambicmd#build_rule = s:SIDPrefix() .. 'AmbicmdBuildRule'
 endif
-if s:plugin.exists('vim-quickrun')
+if s:PluginExists('vim-quickrun')
   let g:quickrun_config = {}
   let g:quickrun_config._ = {
     \  'outputter/message': 1,
@@ -1352,20 +1364,20 @@ if s:plugin.exists('vim-quickrun')
     autocmd FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
   augroup END
 endif
-if s:plugin.exists('vim-textobj-between')
+if s:PluginExists('vim-textobj-between')
   omap ad <Plug>(textobj-between-a)
   omap id <Plug>(textobj-between-i)
   vmap ad <Plug>(textobj-between-a)
   vmap id <Plug>(textobj-between-i)
   let g:textobj_between_no_default_key_mappings = 1
 endif
-if s:plugin.exists('caw.vim')
+if s:PluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
         \ <C-r>=b:caw_oneline_comment<CR>
 
   def! s:CawMap(): string
-    let kind = ''
+    var kind = ''
     if col('.') == 1
       kind = 'zeropos'
     elseif col('.') == col('$')
@@ -1386,7 +1398,7 @@ if s:plugin.exists('caw.vim')
   let g:caw_hatpos_sp = ' '
   let g:caw_zeropos_sp = ' '
 endif
-if s:plugin.exists('autofmt')
+if s:PluginExists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
 endif
 " ReadingVimrc
@@ -1523,7 +1535,7 @@ function! s:StatuslineGenerator() abort
         \ '%m' ..
         \ '[%{&ft ==# "" ? "No ft" : &ft}]' ..
         \ '[#%{bufnr("%")}]' ..
-        \ (s:plugin.exists('gina.vim') ?
+        \ (s:PluginExists('gina.vim') ?
         \   '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
         \   '') ..
         \ '%{<SID>FilenameLabel(bufnr("%"))}' ..
@@ -1532,8 +1544,8 @@ function! s:StatuslineGenerator() abort
   return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
 endfunction
 def! s:FilenameLabel(bufnr: number): string
-  let buftype = getbufvar(bufnr, '&buftype')
-  let bufname = bufname(bufnr)
+  var buftype = getbufvar(bufnr, '&buftype')
+  var bufname = bufname(bufnr)
   if buftype ==# 'help'
     return fnamemodify(bufname, ':t')
   elseif buftype ==# 'quickfix'
@@ -1608,19 +1620,19 @@ def! s:ShowmodeLabel(): string
   return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#TabLine#'
 enddef
 def! s:GenerateTabinfo(tabnr: number): string
-  let tablist = tabpagebuflist(tabnr)
-  let info = ''
+  var tablist = tabpagebuflist(tabnr)
+  var info = ''
   info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
   info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
   return info
 enddef
 def! s:Tabline(): string
-  let tabline = s:ShowmodeLabel() .. '%#TabLine#|'
-  let t = tabpagenr()
+  var tabline = s:ShowmodeLabel() .. '%#TabLine#|'
+  var t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
     tabline ..= '%' .. n .. 'T'
-    let info = ' ' .. s:GenerateTabinfo(n) .. ' '
+    var info = ' ' .. s:GenerateTabinfo(n) .. ' '
     if t == n
       tabline ..= '%#TabLineSel# %999Xx%X' .. info .. '%#TabLine#'
     else
@@ -1727,7 +1739,7 @@ let g:mru_ignore_pattern = [
 
 " gram, filore
 def! s:GramMapping()
-  let map = [
+  var map = [
         \ ['k', 'loop-cursor-up'],
         \ ['j', 'loop-cursor-down'],
         \ ['<CR>', 'select-item'],
@@ -1739,7 +1751,7 @@ def! s:GramMapping()
   execute join(map, "\n")
 enddef
 def! s:FiloreMapping()
-  let map = [
+  var map = [
         \ ['q', 'exit'],
         \ ['o', 'toggle-directory-folding'],
         \ ['l', 'enter-directory'],
@@ -1761,8 +1773,8 @@ augroup END
 
 " git
 def! s:GitDiffGetcmd(arg_target: string): string
-  let target: string = resolve(arg_target)
-  let gitroot: string = s:FindGitroot(target)
+  var target: string = resolve(arg_target)
+  var gitroot: string = s:FindGitroot(target)
   if gitroot ==# ''
     return ''
   endif
@@ -1770,16 +1782,16 @@ def! s:GitDiffGetcmd(arg_target: string): string
         \ gitroot, shellescape(target))
 enddef
 def! s:GitDiff(arg_target: string = bufname('%')): void
-  let target: string = resolve(arg_target)
+  var target: string = resolve(arg_target)
   if getftype(target) ==# ''
     s:EchomsgError('File or directory does not exists: ' .. target)
     return
   endif
-  let cmd: string = s:GitDiffGetcmd(target)
+  var cmd: string = s:GitDiffGetcmd(target)
   if cmd ==# ''
     return
   endif
-  let bufnr = term_start(cmd, {
+  var bufnr = term_start(cmd, {
         \ 'term_name': '[git diff] ' .. fnamemodify(target, ':~:.'),
         \ 'norestore': 1,
         \ })
@@ -1805,7 +1817,7 @@ augroup END
 " endfunction
 
 " lvimrc
-let s:_lvimrc = s:rc('lvimrc')
+let s:_lvimrc = s:Rc('lvimrc')
 if filereadable(s:JoinPath(expand('~'), s:_lvimrc))
   let s:_lvimrc = s:JoinPath('~', s:_lvimrc)
   execute 'command! -bar -nargs=* LVimrc ' ..
