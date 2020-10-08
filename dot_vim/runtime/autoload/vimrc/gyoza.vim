@@ -1,8 +1,8 @@
 vim9script
 
-let config: dict<dict<any>> = #{}
-let linesCount: number
-let tryToApply: bool
+var config: dict<dict<any>> = #{}
+var linesCount: number
+var tryToApply: bool
 
 def IsCmdwin(): bool
   return getcmdwintype() !=# ''
@@ -26,23 +26,23 @@ def GetOneIndent(): string
   endif
 enddef
 def GetIndentDepth(line: number): number
-  let indent = getline(line)->matchstr('^\s*')->strdisplaywidth()
+  var indent = getline(line)->matchstr('^\s*')->strdisplaywidth()
   return indent / shiftwidth()
 enddef
 def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
 def GetConfig(): list<any>
-  let ft_configs = get(config, &filetype, {})
-  let global_configs = get(config, '_', {})->
+  var ft_configs = get(config, &filetype, {})
+  var global_configs = get(config, '_', {})->
         \filter({key, val -> !has_key(ft_configs, key)})
 
   return items(ft_configs) + items(global_configs)
 enddef
 def GetLineData(linenr: number): dict<any>
-  let text: string = linenr ? getline(linenr) : ''
-  let indentstr: string = matchstr(text, '^\s*')
-  let indentdepth: number = strdisplaywidth(indentstr) / shiftwidth()
+  var text: string = linenr ? getline(linenr) : ''
+  var indentstr: string = matchstr(text, '^\s*')
+  var indentdepth: number = strdisplaywidth(indentstr) / shiftwidth()
   return #{
     nr: linenr,
     text: text,
@@ -55,24 +55,24 @@ def TryToApply()
 
   # The following type specifier is necessary; vim9script cannot handle type
   # correctly yet.
-  let nextline: dict<any> = GetLineData(nextnonblank(line('.') + 1))
-  let prevline: dict<any> = GetLineData(prevnonblank(line('.') - 1))
+  var nextline: dict<any> = GetLineData(nextnonblank(line('.') + 1))
+  var prevline: dict<any> = GetLineData(prevnonblank(line('.') - 1))
 
   if nextline.indent_depth > prevline.indent_depth
     return
   endif
 
-  let configs = GetConfig()
+  var configs = GetConfig()
   for config in configs
-    let pattern = config[0]
-    let BlockPair: any = config[1].pair
-    let interruption: list<string> = config[1].interruption
+    var pattern = config[0]
+    var BlockPair: any = config[1].pair
+    var interruption: list<string> = config[1].interruption
 
     if prevline.text !~# '\v' .. pattern
       continue
     elseif nextline.indent_depth == prevline.indent_depth
-      let text = trim(nextline.text)
-      let need_continue = false
+      var text = trim(nextline.text)
+      var need_continue = false
 
       # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
       for interrupt in interruption
@@ -106,13 +106,13 @@ def TryToApply()
       continue
     endif
 
-    let indent_depth = prevline.indent_depth
-    let indent = prevline.indent_str
-    let newline = indent .. BlockPair
+    var indent_depth = prevline.indent_depth
+    var indent = prevline.indent_str
+    var newline = indent .. BlockPair
     if nextline.text ==# newline
       continue
     endif
-    let after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
+    var after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
     if mode() =~# '^i' && after_cursor !=# ''
       if after_cursor !=# BlockPair
         continue
@@ -192,7 +192,7 @@ def AddRule(
     pair: any,
     interruption: list<string> = []): dict<any>
 
-  let ref = ft_config
+  var ref = ft_config
   ref[pattern] = #{
     pair: pair,
     interruption: copy(interruption)->filter('v:val != ""')
