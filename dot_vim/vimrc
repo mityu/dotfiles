@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Oct-2020.
+" Last Change: 15-Oct-2020.
 " vim: shiftwidth=2
 " vim9script
 " TODO: Remove this
@@ -1622,7 +1622,7 @@ enddef
 def! s:GenerateTabinfo(tabnr: number): string
   var tablist = tabpagebuflist(tabnr)
   var info = ''
-  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) ? '[+]' : ''
+  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) > 0 ? '[+]' : ''
   info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
   return info
 enddef

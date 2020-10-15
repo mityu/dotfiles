@@ -40,7 +40,7 @@ def GetConfig(): list<any>
   return items(ft_configs) + items(global_configs)
 enddef
 def GetLineData(linenr: number): dict<any>
-  var text: string = linenr ? getline(linenr) : ''
+  var text: string = linenr != 0 ? getline(linenr) : ''
   var indentstr: string = matchstr(text, '^\s*')
   var indentdepth: number = strdisplaywidth(indentstr) / shiftwidth()
   return #{
