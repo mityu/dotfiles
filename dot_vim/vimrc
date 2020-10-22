@@ -1,9 +1,8 @@
 " Author: mityu
-" Last Change: 15-Oct-2020.
+" Last Change: 22-Oct-2020.
 " vim: shiftwidth=2
 " vim9script
 " TODO: Remove this
-let v:disallow_let = 0
 " Encoding
 if has('vim_starting')
   set encoding=utf-8
@@ -223,8 +222,8 @@ if has('vim_starting')
 endif
 " Initialize autocmd
 def! s:InitializeAutocmd(filename: string)
-  let pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
-  let augroups = readfile(filename)
+  var pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
+  var augroups = readfile(filename)
                     ->filter({_, line -> stridx(line, 'aug') != -1})
                     ->filter({_, line -> line =~# pattern})
                     ->map({_, line -> matchstr(line, pattern)})
