@@ -1661,11 +1661,12 @@ def! s:TerminalOpen(): void
 enddef
 "
 " EmphasisIndent
-hi link VimrcEmphasisIndent CursorLine
+highlight link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
   autocmd WinEnter * call s:EmphasizeIndent()
   autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:EmphasizeIndent()
   autocmd User vimrc_initialize call s:EmphasizeIndent()
+  autocmd Syntax * highlight link VimrcEmphasisIndent CursorLine
 augroup END
 function! s:EmphasizeIndent() abort
   if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
@@ -1698,11 +1699,12 @@ command! EmphasisIndentDisable call s:EmphasisIndentDisable()
 command! EmphasisIndentEnable call s:EmphasisIndentEnable()
 "
 " WarningSpace
-hi link WarningSpace Error
+highlight link WarningSpace Error
 augroup vimrc_warningspace
   autocmd WinEnter * call s:WarningSpace()
   autocmd OptionSet * call s:WarningSpace()
   autocmd User vimrc_initialize call s:WarningSpace()
+  autocmd Syntax * highlight link WarningSpace Error
 augroup END
 function! s:WarningSpace() abort
   " Clean up.
