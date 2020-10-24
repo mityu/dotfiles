@@ -619,30 +619,30 @@ call s:_loop_define({
       \   ['t', ':<C-u>call <SID>MapTabmove(1)<CR>']
       \ ]
       \ })
-function! s:MapTabmove(delta) abort
-  let tab_count = tabpagenr('$')
+def! s:MapTabmove(delta: number)
+  var tab_count = tabpagenr('$')
   if tab_count == 1
     return
   endif
-  let current = tabpagenr() - 1
-  let move_to = current + a:delta
+  var current = tabpagenr() - 1
+  var move_to = current + delta
   if move_to < 0
     while move_to < 0
-      let move_to += tab_count
+      move_to += tab_count
     endwhile
   endif
   if move_to >= tab_count
-    let move_to = move_to % tab_count
+    move_to = move_to % tab_count
   endif
-  let movement = move_to - current
-  let command = 'tabmove '
+  var movement = move_to - current
+  var movecmd = 'tabmove '
   if movement < 0
-    let command ..= string(movement)
+    movecmd ..= string(movement)
   else
-    let command ..= '+' .. movement
+    movecmd ..= '+' .. string(movement)
   endif
-  execute command
-endfunction
+  execute movecmd
+enddef
 delfunc s:_loop_define
 delfunc s:_simple_loop_define
 "
@@ -714,7 +714,7 @@ function! s:cmdwin_enter() abort
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   " Execute an previous command easiler.
-  nnoremap <silent> <buffer> / :<C-u>call <SID>cmdwin_select_history()<CR>
+  nnoremap <silent> <buffer> / :<C-u>call <SID>CmdwinSelectHistory()<CR>
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
@@ -781,24 +781,24 @@ function! s:cmdwin_incsearch_jump() abort
   catch
   endtry
 endfunction
-function! s:cmdwin_select_history() abort
-  let history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-  call map(history, {-> matchstr(v:val, '^>\?\s*\d\+\s\+\zs.\+$')})
-  call reverse(history)
-  call gram#select({
-       \ 'name': getcmdwintype() .. 'history',
-       \ 'items': history,
-       \ 'callback': s:SIDPrefix() .. 'cmdwin_select_history_callback',
-       \ })
-endfunction
-function! s:cmdwin_select_history_callback(item) abort
+def! s:CmdwinSelectHistory()
+  var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
+  map(history, {_, val -> matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$')})
+  reverse(history)
+  gram#select(#{
+         name: getcmdwintype() .. 'history',
+         items: history,
+         callback: s:SIDPrefix() .. 'CmdwinSelectHistoryCallback',
+       })
+enddef
+def! s:CmdwinSelectHistoryCallback(item: dict<string>)
   if getline('$') ==# ''
-    call setline('$', a:item.word)
+    setline('$', item.word)
   else
-    call append('$', a:item.word)
+    append('$', item.word)
   endif
   execute 'noautocmd normal! G$'
-endfunction
+enddef
 
 augroup vimrc_mapping
   autocmd CmdWinEnter * call s:cmdwin_enter()
@@ -856,9 +856,6 @@ command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call s:ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call s:Gof(<q-args>)
-command! Col setlocal cursorcolumn|call popup_create([], {
-      \ 'moved': 'any', 'mask': [[1, 1, 1, 1]],
-      \ 'callback': {-> execute('setlocal nocursorcolumn')}})
 
 " Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
@@ -885,43 +882,43 @@ function! s:Draft() abort
   let b:vimrc_draft_save_options = vital#vital#import('Vim.Guard').store(['&l:buftype', '&l:swapfile'])
   setlocal buftype=nofile noswapfile
 endfunction
-function! s:Undraft() abort
+def! s:Undraft()
   if !exists('b:vimrc_draft_save_options')
     return
   endif
   call b:vimrc_draft_save_options.restore()
-endfunction
-function! s:Scratch(opener) abort
-  let opener = a:opener
-  let prefix = 'scratch://'
-  let name = s:input('Scratch buffer name? ')
+enddef
+def! s:Scratch(opener_arg: string)
+  var opener = opener_arg
+  var prefix = 'scratch://'
+  var name = s:input('Scratch buffer name? ')
   if name ==# ''
-    let identifier = 1
-    let name = 'nameless/buffer-'
-    while bufexists(prefix .. name .. identifier)
-      let identifier += 1
+    var identifier = 1
+    name = 'nameless/buffer-'
+    while bufexists(prefix .. name .. string(identifier))
+      identifier += 1
     endwhile
-    let name ..= identifier
+    name ..= string(identifier)
   endif
   if opener ==# ''
-    let opener = 'split'
+    opener = 'split'
   endif
   execute opener prefix .. name
-  call s:Draft()
-endfunction
-function! VimrcScratchComplete(arg_lead, cmd_line, cur_pos) abort
-  let pat = '^' .. a:arg_lead
-  return filter(['split', 'vsplit', 'tabedit', 'edit'], 'v:val =~? pat')
-endfunction
-function! s:ListTasks(args) abort
-  let target = '%'
-  if a:args =~# 'rf'
-    let target = '**/*.' .. expand('%:e')
-  elseif a:args !=# ''
-    let target = a:args
+  s:Draft()
+enddef
+def! VimrcScratchComplete(lead: string, line: string, pos: number): list<string>
+  var pat = '^' .. lead
+  return filter(['split', 'vsplit', 'tabedit', 'edit'], {_, val -> val =~? pat})
+enddef
+def! s:ListTasks(args: string)
+  var target = '%'
+  if args =~# 'rf'
+    target = '**/*.' .. expand('%:e')
+  elseif args !=# ''
+    target = args
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
-endfunction
+enddef
 def! s:FindGitroot(arg_target: string = bufname('%')): string
   var target: string = resolve(arg_target)
   var git_dir: string = finddir('.git', target .. ';')
@@ -958,7 +955,7 @@ def! Tapi_gof(bufnum: number, file_info: dict<string>): void
     open_cmd = 'split'
   endif
   call win_execute(winid,
-        \ printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
+         printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
 enddef
 
 " Installed plugins
@@ -1075,68 +1072,62 @@ endif
 if s:PluginExists('gina.vim')
   let g:gina#action#mark_sign_text = '*'
   let g:gina#core#console#enable_message_history = 1
-  function! s:gina_config() abort
-    function! s:gina_nnoremap(scheme, lhs, rhs) abort
-      call gina#custom#mapping#nmap(
-            \ a:scheme, a:lhs, a:rhs,
-            \ {'noremap': 1, 'silent' : 1})
-    endfunction
 
-    " <C-]> is expeimental.
-    call s:gina_nnoremap('status', '<C-]>', ':<C-u>Gina commit<CR>')
-    call s:gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
-    call s:gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
-    call s:gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
-    call s:gina_nnoremap('branch', 'N',
-          \ ':<C-u>call gina#action#call("branch:new")<CR>')
-    call s:gina_nnoremap('/\v%(status|branch|log)', 'q', ':<C-u>close<CR>')
+  def! s:gina_config()
+    def Gina_nnoremap(scheme: string, lhs: string, rhs: string)
+      gina#custom#mapping#nmap(scheme, lhs, rhs, #{noremap: 1, silent: 1})
+    enddef
+
+    Gina_nnoremap('status', '<C-]>', ':<C-u>Gina commit<CR>')
+    Gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
+    Gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
+    Gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
+    Gina_nnoremap('branch', 'N',
+            ':<C-u>call gina#action#call("branch:new")<CR>')
+    Gina_nnoremap('/\v%(status|branch|log)', 'q', ':<C-u>close<CR>')
     nnoremap <silent> <Space>g :<C-u>Gina status<CR>
 
-    " Jump between unadded files with n/p ..
-    let rhs_base = printf(
-          \ ':<C-u>call %sGinaStatusSelectAnother(v:count1, %%d)<CR>',
-          \ s:SIDPrefix())
-    call s:gina_nnoremap('status', 'n', printf(rhs_base, 0))
-    call s:gina_nnoremap('status', 'N', printf(rhs_base, 1))
+    # Jump between unadded files with n/p ..
+    var rhs_base = printf(
+            ':<C-u>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
+            s:SIDPrefix())
+    Gina_nnoremap('status', 'n', printf(rhs_base, v:false))
+    Gina_nnoremap('status', 'N', printf(rhs_base, v:true))
 
-    call s:gina_nnoremap('status', 'dd',
-         \ printf(':<C-u>call %sGinaDiff()<CR>', s:SIDPrefix()))
+    Gina_nnoremap('status', 'dd',
+           printf(':<C-u>call %sGinaDiff()<CR>', s:SIDPrefix()))
 
-    " Cleanup
-    delfunction s:gina_nnoremap
+    gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
+    gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
 
-    call gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
-    call gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
-
-    call gina#custom#command#option(
-          \ '\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
-  endfunction
-  function! s:GinaStatusSelectAnother(repeat_count, search_previous) abort
-    let flags = 'w'
-    let flags ..= a:search_previous ? 'b' : ''
-    for i in range(1, a:repeat_count)
-      call search('\e[31.\+\e[m', flags)
+    gina#custom#command#option('\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
+  enddef
+  def! s:GinaStatusSelectAnother(repeat_count: number, search_previous: bool)
+    var flags = 'w'
+    flags ..= search_previous ? 'b' : ''
+    for i in range(1, repeat_count)
+      search('\e[31.\+\e[m', flags)
     endfor
-  endfunction
-  function! s:GinaDiff() abort
-    let file = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
-    let file = matchstr(file, '\%(\_^modified\:\s\+\)\?\zs.\+')
-    if file ==# ''
+  enddef
+  def! s:GinaDiff()
+    var filename = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
+    filename = matchstr(filename, '\%(\_^modified\:\s\+\)\?\zs.\+')
+    if filename ==# ''
       return
     endif
-    let gitroot = fnamemodify(gina#core#get().repository, ':h')
-    let cmd = 'git -C ' .. gitroot ..
-          \ ' --no-pager diff --no-color ' .. file
-    let bufnr = term_start(cmd , {
-          \ 'term_name': '[gina diff] ' .. file,
-          \ 'norestore': 1,
-          \ })
-    if bufnr
+    var gitroot = fnamemodify(gina#core#get().repository, ':h')
+    var cmd = 'git -C ' .. gitroot ..
+            ' --no-pager diff --no-color ' .. filename
+    var bufnr = term_start(cmd, #{
+            term_name: '[gina diff] ' .. filename,
+            norestore: 1,
+            })
+    if bufnr != 0
       setlocal nocursorline nocursorcolumn filetype=diff
       nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
-      call cursor(1, 0)
+      cursor(1, 0)
     endif
-  endfunction
+  enddef
   augroup vimrc_gina
     autocmd User vimrc_initialize call s:gina_config()
   augroup END
@@ -1157,43 +1148,43 @@ if s:PluginExists('vim-brownie')
         \ 'vimspec': ['vim'],
         \ }
 
-  function! s:brownie_ft() abort
-    return getbufvar(brownie#get_current_bufnr(), '&ft')
-  endfunction
+  def! s:BrownieFiletype(): string
+    return getbufvar(brownie#get_current_bufnr(), '&filetype')
+  enddef
+  def! VimrcTemplateComplete(arg: string, line: string, pos: number): list<string>
+    return filter(brownie#list(s:BrownieFiletype(), 'template'),
+                {_, val -> stridx(val, arg) == 0})
+  enddef
 
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
-        \ call brownie#extract(s:brownie_ft(), 'template', <q-args>)
-  function! VimrcTemplateComplete(arg, line, pos) abort
-    return filter(brownie#list(s:brownie_ft(), 'template'),
-          \ 'stridx(v:val, a:arg) == 0')
-  endfunction
+        \ call brownie#extract(s:BrownieFiletype(), 'template', <q-args>)
 endif
 if s:PluginExists('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-first-start call s:InitGramMapping()
   augroup END
 
-  function! s:InitGramMapping() abort
-    call gram#custom#map_action('n', '<CR>', 'select-item')
-    call gram#custom#map_action('n', 'q', 'quit')
-    call gram#custom#map_action('n', 'j', 'select-next-item')
-    call gram#custom#map_action('n', 'k', 'select-prev-item')
-    call gram#custom#map_action('n', 'i', 'start-insert')
-    call gram#custom#map_action('n', 'p', 'preview')
-    call gram#custom#map_action('i', '<ESC>', 'stop-insert')
-    call gram#custom#map_action('i', '<CR>', 'stop-insert')
-    call gram#custom#map_action('i', '<C-j>', 'stop-insert')
-    call gram#custom#map_action('i', '<C-h>', 'delete-char')
-    call gram#custom#map_action('i', '<C-w>', 'delete-word')
-    call gram#custom#map_action('i', '<C-b>', 'move-to-right')
-    call gram#custom#map_action('i', '<C-f>', 'move-to-left')
-    call gram#custom#map_action('i', '<C-a>', 'move-to-head')
-    call gram#custom#map_action('i', '<C-e>', 'move-to-tail')
-    call gram#custom#map_action('i', '<C-u>', 'delete-to-head')
-    call gram#custom#map_key('n', '<NL>', '<CR>')
-    call gram#custom#map_key('i', '<Del>', '<C-h>')
-    call gram#custom#map_key('i', '<BS>', '<C-h>')
-  endfunction
+  def! s:InitGramMapping()
+    gram#custom#map_action('n', '<CR>', 'select-item')
+    gram#custom#map_action('n', 'q', 'quit')
+    gram#custom#map_action('n', 'j', 'select-next-item')
+    gram#custom#map_action('n', 'k', 'select-prev-item')
+    gram#custom#map_action('n', 'i', 'start-insert')
+    gram#custom#map_action('n', 'p', 'preview')
+    gram#custom#map_action('i', '<ESC>', 'stop-insert')
+    gram#custom#map_action('i', '<CR>', 'stop-insert')
+    gram#custom#map_action('i', '<C-j>', 'stop-insert')
+    gram#custom#map_action('i', '<C-h>', 'delete-char')
+    gram#custom#map_action('i', '<C-w>', 'delete-word')
+    gram#custom#map_action('i', '<C-b>', 'move-to-right')
+    gram#custom#map_action('i', '<C-f>', 'move-to-left')
+    gram#custom#map_action('i', '<C-a>', 'move-to-head')
+    gram#custom#map_action('i', '<C-e>', 'move-to-tail')
+    gram#custom#map_action('i', '<C-u>', 'delete-to-head')
+    gram#custom#map_key('n', '<NL>', '<CR>')
+    gram#custom#map_key('i', '<Del>', '<C-h>')
+    gram#custom#map_key('i', '<BS>', '<C-h>')
+  enddef
 endif
 if s:PluginExists('vim-textobj-commentblock')
   omap ac <Plug>(textobj-commentblock-a)
@@ -1246,17 +1237,16 @@ if s:PluginExists('asyncomplete.vim')
   inoremap <C-l><C-n> <C-x><C-n><C-n>
   inoremap <C-l><C-p> <C-x><C-p><C-p>
 
-  function! s:RegisterAsyncompleteSources() abort
+  def! s:RegisterAsyncompleteSources()
     if s:PluginExists('asyncomplete-buffer.vim')
-      call asyncomplete#register_source(
-            \ asyncomplete#sources#buffer#get_source_options(#{
-            \  name: 'buffer',
-            \  whitelist: ['*'],
-            \  completor:
-            \    function('asyncomplete#sources#buffer#completor'),
-            \ }))
+      asyncomplete#register_source(
+          asyncomplete#sources#buffer#get_source_options(#{
+            name: 'buffer',
+            whitelist: ['*'],
+            completor: function('asyncomplete#sources#buffer#completor'),
+          }))
     endif
-  endfunction
+  enddef
   augroup vimrc_asyncomplete_sources
     autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
   augroup END
@@ -1286,10 +1276,10 @@ if s:PluginExists('vim-operator-surround')
   map _sr <Plug>(operator-surround-replace)
 endif
 if s:PluginExists('vim-ambicmd')
-  function! s:AmbicmdExpand(key) abort
-    let expander = ambicmd#expand(a:key)
-    return (expander ==# a:key ? '' : "\<C-g>u") .. expander
-  endfunction
+  def! s:AmbicmdExpand(key: string): string
+    var expander = ambicmd#expand(key)
+    return (expander ==# key ? '' : "\<C-g>u") .. expander
+  enddef
   augroup vimrc_ambicmd
     autocmd CmdWinEnter : call s:SetupAmbicmdForCmdwin()
   augroup END
@@ -1297,30 +1287,31 @@ if s:PluginExists('vim-ambicmd')
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
 
-  function! s:SetupAmbicmdForCmdwin() abort
+  def! s:SetupAmbicmdForCmdwin()
     inoremap <buffer> <expr> <Space> <SID>AmbicmdExpand("\<Space>")
     inoremap <buffer> <expr> <bar> <SID>AmbicmdExpand("\<bar>")
     inoremap <buffer> <expr> <CR> <SID>AmbicmdExpand("\<CR>")
-  endfunction
+  enddef
 
   let g:ambicmd#show_completion_menu = 1
 
-  function! s:AmbicmdBuildRule(cmd) abort
-    let rule = []
-    let rule += ['\c^' .. a:cmd .. '$']
-    let rule += ['\c^' .. a:cmd]
+  def! s:AmbicmdBuildRule(cmd: string): list<string>
+    var rule = []
+    rule += ['\c^' .. cmd .. '$']
+    rule += ['\c^' .. cmd]
 
-    for len in range(1, strlen(a:cmd))
-      let [prefix, suffix] = [strpart(a:cmd, 0, len), a:cmd[len :]]
-      let prefix = substitute(toupper(prefix), '.\zs', '\\l*', 'g')
-      let matcher ='\C^' .. prefix .. suffix
-      let rule += [matcher .. '$', matcher]
+    for len in range(1, strlen(cmd))
+      var prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '\\l*', 'g')
+      var suffix = cmd[len :]
+      # prefix = substitute(toupper(prefix), '.\zs', '\\l*', 'g')
+      var matcher = '\C^' .. prefix .. suffix
+      rule += [matcher .. '$', matcher]
     endfor
 
-    let rule += ['\c' .. a:cmd]
-    let rule += ['.*' .. substitute(a:cmd, '.\zs', '.*', 'g')]
+    rule += ['\c' .. cmd]
+    rule += ['.*' .. substitute(cmd, '.\zs', '.*', 'g')]
     return rule
-  endfunction
+  enddef
   let g:ambicmd#build_rule = s:SIDPrefix() .. 'AmbicmdBuildRule'
 endif
 if s:PluginExists('vim-quickrun')
@@ -1557,7 +1548,7 @@ def! s:FilenameLabel(bufnr: number): string
     return '[prompt]'
   else
     return (buftype ==# 'nofile' ? ' *NoFile* ' : '') ..
-      \ (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
+      (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
 enddef
 let &statusline = printf('%%!%sStatuslineGenerator()', s:SIDPrefix())
@@ -1738,37 +1729,24 @@ let g:mru_ignore_pattern = [
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
       \ ]
 
-" gram, filore
-def! s:GramMapping()
-  var map = [
-        \ ['k', 'loop-cursor-up'],
-        \ ['j', 'loop-cursor-down'],
-        \ ['<CR>', 'select-item'],
-        \ ['i', 'start-filtering'],
-        \ ['q', 'exit'],
-        \]
-  map(map, {key, val ->
-        \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(gram-' .. val[1] .. ')'})
-  execute join(map, "\n")
-enddef
+" filore
 def! s:FiloreMapping()
-  var map = [
-        \ ['q', 'exit'],
-        \ ['o', 'toggle-directory-folding'],
-        \ ['l', 'enter-directory'],
-        \ ['h', 'leave-directory'],
-        \ ['.', 'toggle-show-hidden-files'],
-        \ ['k', 'loop-cursor-up'],
-        \ ['j', 'loop-cursor-down'],
-        \ ['<CR>', 'open-file'],
-        \ ['H', 'start-history'],
-        \]
-  map(map, {key, val ->
-        \ 'nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'})
-  execute join(map, "\n")
+  var mapping = [
+         ['q', 'exit'],
+         ['o', 'toggle-directory-folding'],
+         ['l', 'enter-directory'],
+         ['h', 'leave-directory'],
+         ['.', 'toggle-show-hidden-files'],
+         ['k', 'loop-cursor-up'],
+         ['j', 'loop-cursor-down'],
+         ['<CR>', 'open-file'],
+         ['<C-h>', 'start-history'],
+        ]
+  map(mapping, {key, val ->
+         'nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'})
+  execute join(mapping, "\n")
 enddef
 augroup vimrc_additional_plugins
-  autocmd User gramOpen call s:GramMapping()
   autocmd FileType filore call s:FiloreMapping()
 augroup END
 
@@ -1780,7 +1758,7 @@ def! s:GitDiffGetcmd(arg_target: string): string
     return ''
   endif
   return printf('git -C %s --no-pager diff --no-color %s',
-        \ gitroot, shellescape(target))
+          gitroot, shellescape(target))
 enddef
 def! s:GitDiff(arg_target: string = bufname('%')): void
   var target: string = resolve(arg_target)
@@ -1792,10 +1770,10 @@ def! s:GitDiff(arg_target: string = bufname('%')): void
   if cmd ==# ''
     return
   endif
-  var bufnr = term_start(cmd, {
-        \ 'term_name': '[git diff] ' .. fnamemodify(target, ':~:.'),
-        \ 'norestore': 1,
-        \ })
+  var bufnr = term_start(cmd, #{
+          term_name: '[git diff] ' .. fnamemodify(target, ':~:.'),
+          norestore: 1,
+        })
   if bufnr
     setlocal nocursorline nocursorcolumn filetype=diff
     nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
