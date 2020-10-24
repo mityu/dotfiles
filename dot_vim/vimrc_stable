@@ -1,0 +1,45 @@
+"  vim: filetype=vim
+
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+
+try
+  colorscheme domusaurea
+catch
+  colorscheme default
+endtry
+
+language C
+set noesckeys
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smarttab
+set softtabstop=4
+set wildmenu
+set pumheight=10
+set incsearch ignorecase
+set showmatch matchtime=1
+set noimdisable
+set nowrapscan
+set lazyredraw
+set laststatus=2
+let &statusline = '%m%y[#%n] %<%t'
+
+nnoremap Y y$
+nnoremap gl gt
+nnoremap gh gT
+nnoremap ZZ <Nop>
+nnoremap ZQ <Nop>
+inoremap <C-l> <C-x>
+cnoremap <C-l> <C-f>
+cnoremap <C-f> <Right>
+cnoremap <C-p> <Up>
+cnoremap <C-n> <Down>
+cnoremap <C-b> <Left>
+cnoremap <C-a> <C-b>
+cnoremap <C-[> <C-c>
+iabbrev todo: TODO:
+iabbrev fixme: FIXME:
+iabbrev xxx: XXX:
+iabbrev note: NOTE:
