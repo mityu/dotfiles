@@ -1659,7 +1659,7 @@ def! s:TerminalOpen(): void
     setlocal nonumber norelativenumber
   endif
 enddef
-"
+
 " EmphasisIndent
 highlight link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
@@ -1668,36 +1668,36 @@ augroup vimrc_emphasize_indent
   autocmd User vimrc_initialize call s:EmphasizeIndent()
   autocmd Syntax * highlight link VimrcEmphasisIndent CursorLine
 augroup END
-function! s:EmphasizeIndent() abort
-  if exists('w:disable_emphasis_indent') && w:disable_emphasis_indent
+def! s:EmphasizeIndent()
+  if exists('w:disable_emphasis_indent') && <bool>w:disable_emphasis_indent
     return
   endif
   if exists('w:emphasis_indent_id')
-    call matchdelete(w:emphasis_indent_id)
+    matchdelete(w:emphasis_indent_id)
   endif
 
-  let pat = '\v%%(^%%(%s)*)@<=%s'
+  var pat = '\v%%(^%%(%s)*)@<=%s'
   if &l:expandtab || &l:smarttab
-    let pat = printf(pat, repeat('\s', shiftwidth()), '\s')
+    pat = printf(pat, repeat('\s', shiftwidth()), '\s')
   else
-    let pat = printf(pat, '\t\t', '\t')
+    pat = printf(pat, '\t\t', '\t')
   endif
-  let w:emphasis_indent_id = matchadd('VimrcEmphasisIndent', pat)
-endfunction
-function! s:EmphasisIndentEnable() abort
-  let w:disable_emphasis_indent = 0
-  call s:EmphasizeIndent()
-endfunction
-function! s:EmphasisIndentDisable() abort
-  let w:disable_emphasis_indent = 1
+  w:emphasis_indent_id = matchadd('VimrcEmphasisIndent', pat)
+enddef
+def! s:EmphasisIndentEnable()
+  w:disable_emphasis_indent = 0
+  s:EmphasizeIndent()
+enddef
+def! s:EmphasisIndentDisable()
+  w:disable_emphasis_indent = 0
   if exists('w:emphasis_indent_id')
-    call matchdelete(w:emphasis_indent_id)
+    matchdelete(w:emphasis_indent_id)
     unlet w:emphasis_indent_id
   endif
-endfunction
+enddef
 command! EmphasisIndentDisable call s:EmphasisIndentDisable()
 command! EmphasisIndentEnable call s:EmphasisIndentEnable()
-"
+
 " WarningSpace
 highlight link WarningSpace Error
 augroup vimrc_warningspace
@@ -1706,28 +1706,28 @@ augroup vimrc_warningspace
   autocmd User vimrc_initialize call s:WarningSpace()
   autocmd Syntax * highlight link WarningSpace Error
 augroup END
-function! s:WarningSpace() abort
-  " Clean up.
+def! s:WarningSpace()
+  # Clean up.
   if exists('w:twobyte_space_id')
-    call matchdelete(w:twobyte_space_id)
+    matchdelete(w:twobyte_space_id)
     unlet w:twobyte_space_id
   endif
   if exists('w:end_of_line_space_id')
-    call matchdelete(w:end_of_line_space_id)
+    matchdelete(w:end_of_line_space_id)
     unlet w:end_of_line_space_id
   endif
 
-  if &buftype!=#'' || !(&ma)
+  if &buftype !=# '' || !&modifiable
     return
   endif
 
-  " Zenkaku space
-  " NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
-  let w:twobyte_space_id = matchadd('WarningSpace', '\%d12288')
+  # Zenkaku space
+  # NOTE: '\%d12288' means one zenkaku space. HINT: nr2char(12288)
+  w:twobyte_space_id = matchadd('WarningSpace', '\%d12288')
 
-  " White spaces in the end of line
-  let w:end_of_line_space_id = matchadd('WarningSpace', '\s\+$')
-endfunction
+  # White spaces in the end of line
+  w:end_of_line_space_id = matchadd('WarningSpace', '\s\+$')
+enddef
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 
