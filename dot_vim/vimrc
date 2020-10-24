@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 22-Oct-2020.
+" Last Change: 24-Oct-2020.
 " vim: shiftwidth=2
 " vim9script
 " TODO: Remove this
@@ -313,7 +313,7 @@ def! s:PackInit(): bool
     packadd minpac
   catch /^Vim\%((\a\+)\)\=:E919/
     # Download minpac...
-    let minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
+    var minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
     s:echomsg('Downloading minpac...')
     system('git clone https://github.com/k-takata/minpac.git ' ..
           \ minpac_path)
