@@ -39,7 +39,7 @@ function! vimrc#delete_undofiles() abort "{{{
 endfunction "}}}
 " Path completion{{{
 let s:path_complete = {
-     \ 'slash': VimrcFunc('vars')().filesystem.slash,
+     \ 'slash': fnamemodify(getcwd(), ':p')[-1 :],
      \ 'non_escaped_space': '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s',
      \ }
 function! vimrc#path_complete(findstart, base) abort "{{{
