@@ -1,103 +1,67 @@
-let s:cpoptions_save = &cpoptions
-set cpoptions&vim
+vim9script
 
-function! vimrc#delete_undofiles() abort "{{{
-  let Echomsg = VimrcFunc('echomsg')
-  let undodir_save = &undodir
+final SLASH = fnamemodify(getcwd(), ':p')[-1 :]
+final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
+
+export def vimrc#delete_undofiles()
+  final Echomsg = VimrcFunc('echomsg')
+  var undodir_save = &undodir
   try
     noautocmd set undodir-=.
-    let undofiles = globpath(&undodir, '*', v:true, v:true)
+    var undofiles = globpath(&undodir, '*', true, true)
   finally
-    noautocmd let &undodir = undodir_save
+    &undodir = undodir_save
   endtry
 
-  " Remove unreadable undofiles.
-  call filter(undofiles, 'filereadable(v:val)')
+  # Remove unreadable undofiles and them whose original files are still exists
+  undofiles->filter({_, val -> filereadable(val)})
+    ->filter({_, val -> !fnamemodify(val, ':t')->tr('%', SLASH)->filereadable()})
 
-  " List undofiles whose files haven't already existed.
-  let slash = VimrcFunc('vars')().filesystem.slash
-  call filter(undofiles,
-        \ '!filereadable(tr(fnamemodify(v:val, ":t"), "%", slash))')
-
-  if empty(undofiles)
-    call Echomsg('All undofiles are used. It''s already clean.')
-    return
-  endif
-
-  echo join(undofiles, "\n") . "\n"
-  if !VimrcFunc('ask')('Delete the above unused undofiles?')
-    call Echomsg('Canceled.')
-    return
-  endif
-
-  for file in undofiles
-    if delete(file)
-      call Echomsg('Failed to delete: ' . file)
+    if empty(undofiles)
+      Echomsg('All undofiles are used. It''s already clean.')
+      return
     endif
-  endfor
-  call Echomsg('Deleted.')
-endfunction "}}}
-" Path completion{{{
-let s:path_complete = {
-     \ 'slash': fnamemodify(getcwd(), ':p')[-1 :],
-     \ 'non_escaped_space': '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s',
-     \ }
-function! vimrc#path_complete(findstart, base) abort "{{{
-  if a:findstart
-    let line = getline('.')[: col('.') - 1]
-    if line ==# ''
-      let s:path_complete.target_path = ''
-    else
-      let s:path_complete.target_path = split(line,
-           \ s:path_complete.non_escaped_space)[-1]
+
+    echo join(undofiles, "\n") .. "\n"
+    if !VimrcFunc('ask')('Delete the above unused undofiles?')
+      Echomsg('Canceled.')
+      return
     endif
-    let completions = VimrcFunc('glob')(s:path_complete.target_path . '*')
-    let dirs = []
-    let files = []
-    for path in completions
-      let completion = fnamemodify(path, ':t')
-      if filereadable(path)
-        call add(files, {'word': completion, 'menu': '[file]'})
-      else
-        call add(dirs, {
-              \ 'word': completion . s:path_complete.slash,
-              \ 'menu': '[dir]'})
+
+    for file in undofiles
+      if delete(file)
+        Echomsg('Failed to delete: ' .. file)
       endif
     endfor
-    call sort(dirs)
-    call sort(files)
-    let s:path_complete.completions = dirs + files
+    Echomsg('Deleted.')
+enddef
 
-    return col('.') - strlen(fnamemodify(s:path_complete.target_path, ':t')) - 1
+var PathComplete: dict<any> = #{target_path: '', completions: []}
+export def vimrc#path_complete(findstart: bool, base: string): any
+  if findstart
+    var line = getline('.')[: col('.') - 1]
+    if line ==# ''
+      PathComplete['target_path'] = ''
+    else
+      PathComplete['target_path'] = split(line, NON_ESCAPED_SPACE)[-1]
+    endif
+    var completions = VimrcFunc('glob')(PathComplete.target_path .. '*')
+    var files: list<dict<string>> = []
+    var dirs: list<dict<string>> = []
+    for path in completions
+      var completion = fnamemodify(path, ':t')
+      if filereadable(path)
+        add(files, #{word: completion, menu: '[file]'})
+      else
+        add(dirs, #{word: completion .. SLASH, menu: '[dir]'})
+      endif
+    endfor
+    sort(dirs)
+    sort(files)
+    PathComplete['completions'] = dirs + files
+
+    return col('.') - fnamemodify(PathComplete.target_path, ':t')->strlen() - 1
   endif
 
-  return s:path_complete.completions
-endfunction "}}}
-
-" function! vimrc#path_complete(findstart, base) abort
-"   if a:findstart
-"     return col('.') - 1 - strlen(
-"          \ split(getline('.')[: col('.') - 1],
-"          \ s:path_complete.non_escaped_space, 1)[-1])
-"   endif
-"
-"   let completions = VimrcFunc('glob')(a:base . '*')
-"   let dirs = []
-"   let files = []
-"   for path in completions
-"     let abbr = fnamemodify(path, ':t')
-"     let complete_item = {'word': path, 'abbr': path}
-"     if filereadable(path)
-"       call add(files, {'word': path, 'abbr': abbr, 'menu': '[file]'})
-"     else
-"       let path .= s:path_complete.slash
-"       let abbr .= s:path_complete.slash
-"       call add(dirs, {'word': path, 'abbr': abbr, 'menu': '[dir]'})
-"     endif
-"   endfor
-"   return dirs + files
-" endfunction
- "}}}
-
-let &cpoptions = s:cpoptions_save
-unlet s:cpoptions_save
+  return PathComplete.completions
+enddef
