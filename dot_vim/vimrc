@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 24-Oct-2020.
+" Last Change: 30-Oct-2020.
 " vim: shiftwidth=2
 " vim9script
 " TODO: Remove this
@@ -193,9 +193,6 @@ if has('vim_starting')
     " let s:filesystem.path_separator = ':'
     " let s:filesystem.rcfile_prefix = '.'
   endif
-
-  let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
-  call s:Mkdir(s:cache_dir, 'p')
 
   " disable default plugins
   let g:loaded_2html_plugin = 1
@@ -402,6 +399,9 @@ set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
 
+
+let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
+call s:Mkdir(s:cache_dir, 'p')
 let s:_undodir = s:JoinPath(s:cache_dir, 'undodir')
 if s:Mkdir(s:_undodir, 'p')
   set undofile
