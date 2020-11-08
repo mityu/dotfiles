@@ -37,7 +37,7 @@ export def vimrc#delete_undofiles()
 enddef
 
 var PathComplete: dict<any> = #{target_path: '', completions: []}
-export def vimrc#path_complete(findstart: bool, base: string): any
+export def vimrc#pathComplete(findstart: bool, base: string): any
   if findstart
     var line = getline('.')[: col('.') - 1]
     if line ==# ''

@@ -1,8 +1,7 @@
 " Author: mityu
-" Last Change: 30-Oct-2020.
+" Last Change: 08-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
-" TODO: Remove this
 " Encoding
 if has('vim_starting')
   set encoding=utf-8
@@ -360,7 +359,7 @@ set smartindent autoindent
 set cinoptions=:0,g0,N-s,E-s
 set backspace=eol,start,indent
 set pumheight=10
-set completefunc=vimrc#path_complete
+set completefunc=vimrc#pathComplete
 set noequalalways
 set scrolloff=1
 set colorcolumn=78
@@ -510,6 +509,7 @@ inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
+inoremap <C-y> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
@@ -700,7 +700,6 @@ digraphs .. 12290
 digraphs -- 12540
 
 function! s:cmdwin_enter() abort
-
   " Type <CR> to execute current line in command-line window.
   nnoremap <buffer> <CR> <CR>
 
@@ -715,6 +714,8 @@ function! s:cmdwin_enter() abort
 
   " Execute an previous command easiler.
   nnoremap <silent> <buffer> / :<C-u>call <SID>CmdwinSelectHistory()<CR>
+
+  set completefunc=vimrc#pathComplete
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
