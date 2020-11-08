@@ -509,7 +509,7 @@ inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
-inoremap <C-y> <C-r>=vimrc#pinsnip#expand()<CR>
+inoremap <silent> <C-y> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
