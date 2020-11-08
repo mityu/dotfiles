@@ -203,7 +203,8 @@ enddef
 
 def MergeRule(from: string, to: string)
   NewFiletypeRule(to)
-  extend(config[to], get(config, from, {}), 'keep')
+  var additional: dict<any> = get(config, from, {})  # Workaround
+  extend(config[to], additional, 'keep')
 enddef
 
 # Register rules
@@ -213,7 +214,7 @@ NewFiletypeRule('vim')
   ->AddRule('\{\s*$', '}', ['\=^\\\s*}'])
   ->AddRule('^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
   ->AddRule('^\s*function!?\s+\S+(.*).*$', 'endfunction')
-  ->AddRule('^\s*if>', 'endif', ['else', 'elseif'])
+  ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
   ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
