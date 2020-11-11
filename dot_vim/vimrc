@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Nov-2020.
+" Last Change: 10-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -545,8 +545,6 @@ call s:TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
 call s:TerminalMap('tnoremap', '<ESC>', 'N')
 call s:TerminalMap('tnoremap', 'p', '""')
 call s:TerminalMap('tnoremap', '<C-r>', '"')
-" call s:TerminalMap('tmap', '<C-j>', '<ESC>')
-tnoremap <C-j> <ESC>
 
 " Loop
 function! s:_loop_define(config) abort
@@ -1642,14 +1640,10 @@ augroup END
 
 " :terminal
 augroup vimrc_terminal
-  autocmd TerminalOpen * call s:TerminalOpen()
+  autocmd TerminalWinOpen * call s:TerminalWinOpen()
 augroup END
-def! s:TerminalOpen(): void
-  # Ignore terminal in popup-window.
-  # FIXME: Using getbufvar() doesn't work.
-  if bufnr('%') == expand('<abuf>')->str2nr()
-    setlocal nonumber norelativenumber
-  endif
+def! s:TerminalWinOpen()
+  setlocal nonumber norelativenumber
 enddef
 
 " EmphasisIndent
