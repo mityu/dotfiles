@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Nov-2020.
+" Last Change: 13-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -477,25 +477,25 @@ nnoremap k gk
 nnoremap <CR> o<ESC>
 nnoremap <S-CR> O<ESC>
 nnoremap Y y$
-nnoremap <C-h> :<C-u>nohlsearch<CR>
-nnoremap <silent> <C-w>s :<C-u>belowright wincmd s<CR>
-nnoremap <silent> <C-w><C-s> :<C-u>belowright wincmd s<CR>
-nnoremap <silent> <C-w>v :<C-u>belowright wincmd v<CR>
-nnoremap <silent> <C-w><C-v> :<C-u>belowright wincmd v<CR>
-nnoremap <silent> <C-w>c :<C-u>belowright copen<CR>
-nnoremap <silent> <C-w>t :<C-u>tabnew<CR>
-nnoremap <silent> <C-w><C-t> :<C-u>tabnew<CR>
-nnoremap <silent> <Space>th :<C-u>vertical terminal ++close<CR>
-nnoremap <silent> <Space>tj :<C-u>belowright terminal ++close<CR>
-nnoremap <silent> <Space>tk :<C-u>terminal ++close<CR>
-nnoremap <silent> <Space>tl :<C-u>belowright vertical terminal ++close<CR>
-nnoremap <silent> <Space>tt :<C-u>tab terminal ++close<CR>
-nnoremap <Space>w :<C-u>update<CR>
-nnoremap <Space>q :<C-u>quit<CR>
+nnoremap <C-h> <Cmd>nohlsearch<CR>
+nnoremap <silent> <C-w>s <Cmd>belowright wincmd s<CR>
+nnoremap <silent> <C-w><C-s> <Cmd>belowright wincmd s<CR>
+nnoremap <silent> <C-w>v <Cmd>belowright wincmd v<CR>
+nnoremap <silent> <C-w><C-v> <Cmd>belowright wincmd v<CR>
+nnoremap <silent> <C-w>c <Cmd>belowright copen<CR>
+nnoremap <silent> <C-w>t <Cmd>tabnew<CR>
+nnoremap <silent> <C-w><C-t> <Cmd>tabnew<CR>
+nnoremap <silent> <Space>th <Cmd>vertical terminal ++close<CR>
+nnoremap <silent> <Space>tj <Cmd>belowright terminal ++close<CR>
+nnoremap <silent> <Space>tk <Cmd>terminal ++close<CR>
+nnoremap <silent> <Space>tl <Cmd>belowright vertical terminal ++close<CR>
+nnoremap <silent> <Space>tt <Cmd>tab terminal ++close<CR>
+nnoremap <Space>w <Cmd>update<CR>
+nnoremap <Space>q <Cmd>quit<CR>
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap <silent> <nowait> Z :<C-u>call <SID>toggle_zooming_window()<CR>
-nnoremap <silent> <C-w>z :<C-u>call <SID>toggle_zooming_window()<CR>
+nnoremap <silent> <nowait> Z <Cmd>call <SID>toggle_zooming_window()<CR>
+nnoremap <silent> <C-w>z <Cmd>call <SID>toggle_zooming_window()<CR>
 " nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
 " nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
 nnoremap <C-k> 7gk
@@ -592,7 +592,7 @@ function! s:_loop_define_generate_tmap(value) abort
   let rhs = a:value[1]
   let rhs = substitute(rhs, '\c<SID>', s:SIDPrefix(), 'g')
   let rhs = substitute(rhs, '\zs<\ze.\{-}>', '\\<lt>', 'g')
-  let rhs = &termwinkey .. ':<C-u>execute "normal! ' .. rhs .. '"<CR>'
+  let rhs = &termwinkey .. '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
   return [a:value[0], rhs]
 endfunction
 function! s:_simple_loop_define(config) abort
@@ -613,8 +613,8 @@ call s:_loop_define({
       \ 'map': [
       \   ['h', 'gT'],
       \   ['l', 'gt'],
-      \   ['T', ':<C-u>call <SID>MapTabmove(-1)<CR>'],
-      \   ['t', ':<C-u>call <SID>MapTabmove(1)<CR>']
+      \   ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
+      \   ['t', '<Cmd>call <SID>MapTabmove(1)<CR>']
       \ ]
       \ })
 def! s:MapTabmove(delta: number)
@@ -711,7 +711,7 @@ function! s:cmdwin_enter() abort
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   " Execute an previous command easiler.
-  nnoremap <silent> <buffer> / :<C-u>call <SID>CmdwinSelectHistory()<CR>
+  nnoremap <silent> <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
 
   set completefunc=vimrc#pathComplete
 
@@ -826,7 +826,7 @@ execute join(map(s:_map, {->join([
       \  v:val[0],
       \  v:val[1],
       \  '<Space>' .. v:val[2],
-      \  printf(':<C-u>%s<CR>', v:val[3])
+      \  printf('<Cmd>%s<CR>', v:val[3])
       \ ], ' ')}), "\n")
 unlet s:_map
 
@@ -1033,7 +1033,7 @@ if s:PluginExists('vim-operator-user')
     let map_cmd = join(['nnoremap',
           \ '<silent>',
           \ '<Plug>(operator-vimrc-fold-%s)',
-          \ ':<C-u>call <SID>map_fold_cmd("%s")<CR>'], ' ')
+          \ '<Cmd>call <SID>map_fold_cmd("%s")<CR>'], ' ')
     for keys in split(foldmotions_standalone, '\zs')
       let keys = 'z' .. keys
       execute printf(map_cmd, keys, keys)
@@ -1077,24 +1077,24 @@ if s:PluginExists('gina.vim')
       gina#custom#mapping#nmap(scheme, lhs, rhs, #{noremap: 1, silent: 1})
     enddef
 
-    Gina_nnoremap('status', '<C-]>', ':<C-u>Gina commit<CR>')
-    Gina_nnoremap('commit', '<C-]>', ':<C-u>Gina status<CR>')
-    Gina_nnoremap('status', '<Space>g', ':<C-u>Gina commit<CR>')
-    Gina_nnoremap('commit', '<Space>g', ':<C-u>Gina status<CR>')
+    Gina_nnoremap('status', '<C-]>', '<Cmd>Gina commit<CR>')
+    Gina_nnoremap('commit', '<C-]>', '<Cmd>Gina status<CR>')
+    Gina_nnoremap('status', '<Space>g', '<Cmd>Gina commit<CR>')
+    Gina_nnoremap('commit', '<Space>g', '<Cmd>Gina status<CR>')
     Gina_nnoremap('branch', 'N',
-            ':<C-u>call gina#action#call("branch:new")<CR>')
-    Gina_nnoremap('/\v%(status|branch|log)', 'q', ':<C-u>close<CR>')
-    nnoremap <silent> <Space>g :<C-u>Gina status<CR>
+            '<Cmd>call gina#action#call("branch:new")<CR>')
+    Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
+    nnoremap <silent> <Space>g <Cmd>Gina status<CR>
 
     # Jump between unadded files with n/p ..
     var rhs_base = printf(
-            ':<C-u>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
+            '<Cmd>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
             s:SIDPrefix())
     Gina_nnoremap('status', 'n', printf(rhs_base, v:false))
     Gina_nnoremap('status', 'N', printf(rhs_base, v:true))
 
     Gina_nnoremap('status', 'dd',
-           printf(':<C-u>call %sGinaDiff()<CR>', s:SIDPrefix()))
+           printf('<Cmd>call %sGinaDiff()<CR>', s:SIDPrefix()))
 
     gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
     gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
@@ -1123,7 +1123,7 @@ if s:PluginExists('gina.vim')
             })
     if bufnr != 0
       setlocal nocursorline nocursorcolumn filetype=diff
-      nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
+      nnoremap <silent> <buffer> <nowait> q <Cmd>quit<CR>
       cursor(1, 0)
     endif
   enddef
@@ -1345,12 +1345,12 @@ if s:PluginExists('vim-quickrun')
     \  'tempfile' : '%{tempname()}.swift',
     \}
   nnoremap <expr> <C-c> quickrun#is_running() ?
-        \ ':<C-u>call quickrun#sweep_sessions()<CR>' :
+        \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
         \ '<C-c>'
   nmap <Space>r <Plug>(quickrun)
   vmap <Space>r <Plug>(quickrun)
   augroup vimrc_filetype
-    autocmd FileType quickrun nnoremap <silent> <buffer> q :<C-u>q<CR>
+    autocmd FileType quickrun nnoremap <silent> <buffer> q <Cmd>q<CR>
   augroup END
 endif
 if s:PluginExists('vim-textobj-between')
@@ -1771,7 +1771,7 @@ def! s:GitDiff(arg_target: string = bufname('%')): void
         })
   if bufnr
     setlocal nocursorline nocursorcolumn filetype=diff
-    nnoremap <silent> <buffer> <nowait> q :<C-u>quit<CR>
+    nnoremap <silent> <buffer> <nowait> q <Cmd>quit<CR>
     cursor(1, 0)
   endif
   return
