@@ -3,6 +3,7 @@ vim9script
 var config: dict<dict<any>> = #{}
 var linesCount: number
 var tryToApply: bool
+var justAfterApplying: bool
 
 def IsCmdwin(): bool
   return getcmdwintype() !=# ''
@@ -107,6 +108,7 @@ def TryToApply()
       cursor(line('.'), strlen(getline('.')) + 1)
     endif
     append('.', newline)
+    justAfterApplying = true
     break
   endfor
   UpdateContext()
@@ -121,6 +123,7 @@ def OnCursorMoved(): void
   if IsCmdwin()
     return
   endif
+  justAfterApplying = false
   if NeedTry()
     tryToApply = true
   endif
@@ -146,6 +149,10 @@ def OnInsertLeave(): void
   if IsCmdwin()
     return
   endif
+  if justAfterApplying && trim(getline('.')) ==# ''
+    delete _
+  endif
+  justAfterApplying = false
   tryToApply = false
 enddef
 
