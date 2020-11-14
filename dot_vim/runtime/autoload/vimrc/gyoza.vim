@@ -46,9 +46,23 @@ def GetLineData(linenr: number): dict<any>
   return #{
     nr: linenr,
     text: text,
+    trimed: trim(text),
     indent_str: indentstr,
     indent_depth: indentdepth,
   }
+enddef
+def CheckInterruption(line: string, interruption: dict<list<string>>): bool # Better name
+  for comparison in interruption.literal
+    if line ==# comparison
+      return v:true
+    endif
+  endfor
+  for pattern in interruption.regexp
+    if line =~# pattern
+      return v:true
+    endif
+  endfor
+  return v:false
 enddef
 def TryToApply()
   tryToApply = false
@@ -66,40 +80,16 @@ def TryToApply()
   for config in configs
     var pattern = config[0]
     var BlockPair: any = config[1].pair
-    var interruption: list<string> = config[1].interruption
 
-    if prevline.text !~# '\v' .. pattern
+    if prevline.trimed !~# '\v' .. pattern
       continue
-    elseif nextline.indent_depth == prevline.indent_depth
-      var text = trim(nextline.text)
-      var need_continue = false
-
-      # NOTE: Can't use filter() here because multiple closure isn't supoprted yet.
-      for interrupt in interruption
-        if interrupt =~# '^\\='
-          # Check by regexp
-          if text =~# '\v' .. strpart(interrupt, 2)
-            need_continue = true
-            break
-          endif
-        else
-          # Check by literal
-          if text ==# interrupt
-            need_continue = true
-            break
-          endif
-        endif
-      endfor
-
-      if need_continue
-        continue
-      endif
+    elseif nextline.indent_depth == prevline.indent_depth &&
+            CheckInterruption(nextline.trimed, config[1].interruption)
+      continue
     endif
 
     if type(BlockPair) == v:t_func
-      # TODO: Change argument?
-      BlockPair = call(BlockPair, [{'prev': prevline.text, 'current': getline('.'),
-           \ 'next': nextline.text}])
+      BlockPair = call(BlockPair, [prevline.trimed])
     endif
     if type(BlockPair) == v:t_none
       # Cancel.
@@ -122,6 +112,7 @@ def TryToApply()
       endif
     endif
     append('.', newline)
+    break
   endfor
   UpdateContext()
 enddef
@@ -192,10 +183,22 @@ def AddRule(
     pair: any,
     interruption: list<string> = []): dict<any>
 
+  var literal: list<string>
+  var regexp: list<string>
+  for interrupt in interruption
+    if interrupt ==# ''
+      continue
+    elseif stridx(interrupt, '\=') == 0
+      add(regexp, '\v' .. strpart(interrupt, 2))
+    else
+      add(literal, interrupt)
+    endif
+  endfor
+
   var ref = ft_config
   ref[pattern] = #{
     pair: pair,
-    interruption: copy(interruption)->filter('v:val != ""')
+    interruption: #{literal: literal, regexp: regexp}
   }
 
   return ft_config
@@ -209,9 +212,14 @@ enddef
 
 # Register rules
 NewFiletypeRule('_')
-  ->AddRule('\{\s*$', '}', ['\=^}'])
+  ->AddRule('\{$', '}', ['\=^}'])
+NewFiletypeRule('c')
+  ->AddRule('^%(typedef>\s+)?struct\s*\{\s*$', '};', ['\=^};'])
+NewFiletypeRule('cpp')
+  ->AddRule('^class>\s+\w+\s*\{$', '};', ['\=^};', '\=^%(public|private|protected)>\:'])
 NewFiletypeRule('vim')
   ->AddRule('\{\s*$', '}', ['\=^\\\s*}'])
+  ->AddRule('\[\s*$', ']', ['\=^\\\s*]'])
   ->AddRule('^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
   ->AddRule('^\s*function!?\s+\S+(.*).*$', 'endfunction')
   ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
@@ -220,10 +228,12 @@ NewFiletypeRule('vim')
   ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
   ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE')
   ->AddRule('^\s*augroup\s+%(END)@!\S+$', 'augroup END')
+  ->AddRule('^\s*%(let|var)\s+\w+\s*\=\<\<\s*%(trim\s+)?\s*\w+$', {line -> matchstr(line, '\w\+$')})
 NewFiletypeRule('vimspec')
   ->AddRule('^\s*%(Describe|Before|After|Context|It)', 'End')
 NewFiletypeRule('sh')
   ->AddRule('%(^|;)\s*<do>', 'done')
   ->AddRule('^\s*if>', 'fi', ['\=^elif>', 'else'])
+MergeRule('c', 'cpp')
 MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
