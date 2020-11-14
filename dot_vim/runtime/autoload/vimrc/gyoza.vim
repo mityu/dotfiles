@@ -96,20 +96,15 @@ def TryToApply()
       continue
     endif
 
-    var indent_depth = prevline.indent_depth
-    var indent = prevline.indent_str
-    var newline = indent .. BlockPair
+    var newline = prevline.indent_str .. BlockPair
     if nextline.text ==# newline
       continue
     endif
-    var after_cursor = StrDivPos(getline('.'), col('.') - 1)[1]
-    if mode() =~# '^i' && after_cursor !=# ''
-      if after_cursor !=# BlockPair
-        continue
-      else
-        setline('.', GetIndentStr(indent_depth + 1))
-        cursor(line('.'), strlen(getline('.')) + 1)
-      endif
+    if StrDivPos(getline('.'), col('.') - 1)[1] ==# BlockPair
+      # If there is the `BlockPair` after the cursor, remove it to make it on
+      # the new line.
+      setline('.', GetIndentStr(prevline.indent_depth + 1))
+      cursor(line('.'), strlen(getline('.')) + 1)
     endif
     append('.', newline)
     break
@@ -159,7 +154,7 @@ export def vimrc#gyoza#enable()
     autocmd!
     autocmd BufEnter * call InitForBuffer()
     autocmd CursorMoved,CursorMovedI * call OnCursorMoved()
-    autocmd TextChanged,TextChangedI * call OnTextChanged()
+    autocmd TextChangedI * call OnTextChanged()
     autocmd InsertEnter * call OnInsertEnter()
     autocmd InsertLeave * call OnInsertLeave()
   augroup END
