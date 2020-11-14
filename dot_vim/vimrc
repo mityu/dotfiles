@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 13-Nov-2020.
+" Last Change: 14-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -478,24 +478,24 @@ nnoremap <CR> o<ESC>
 nnoremap <S-CR> O<ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
-nnoremap <silent> <C-w>s <Cmd>belowright wincmd s<CR>
-nnoremap <silent> <C-w><C-s> <Cmd>belowright wincmd s<CR>
-nnoremap <silent> <C-w>v <Cmd>belowright wincmd v<CR>
-nnoremap <silent> <C-w><C-v> <Cmd>belowright wincmd v<CR>
-nnoremap <silent> <C-w>c <Cmd>belowright copen<CR>
-nnoremap <silent> <C-w>t <Cmd>tabnew<CR>
-nnoremap <silent> <C-w><C-t> <Cmd>tabnew<CR>
-nnoremap <silent> <Space>th <Cmd>vertical terminal ++close<CR>
-nnoremap <silent> <Space>tj <Cmd>belowright terminal ++close<CR>
-nnoremap <silent> <Space>tk <Cmd>terminal ++close<CR>
-nnoremap <silent> <Space>tl <Cmd>belowright vertical terminal ++close<CR>
-nnoremap <silent> <Space>tt <Cmd>tab terminal ++close<CR>
+nnoremap <C-w>s <Cmd>belowright wincmd s<CR>
+nnoremap <C-w><C-s> <Cmd>belowright wincmd s<CR>
+nnoremap <C-w>v <Cmd>belowright wincmd v<CR>
+nnoremap <C-w><C-v> <Cmd>belowright wincmd v<CR>
+nnoremap <C-w>c <Cmd>belowright copen<CR>
+nnoremap <C-w>t <Cmd>tabnew<CR>
+nnoremap <C-w><C-t> <Cmd>tabnew<CR>
+nnoremap <Space>th <Cmd>vertical terminal ++close<CR>
+nnoremap <Space>tj <Cmd>belowright terminal ++close<CR>
+nnoremap <Space>tk <Cmd>terminal ++close<CR>
+nnoremap <Space>tl <Cmd>belowright vertical terminal ++close<CR>
+nnoremap <Space>tt <Cmd>tab terminal ++close<CR>
 nnoremap <Space>w <Cmd>update<CR>
 nnoremap <Space>q <Cmd>quit<CR>
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap <silent> <nowait> Z <Cmd>call <SID>toggle_zooming_window()<CR>
-nnoremap <silent> <C-w>z <Cmd>call <SID>toggle_zooming_window()<CR>
+nnoremap <nowait> Z <Cmd>call <SID>toggle_zooming_window()<CR>
+nnoremap <C-w>z <Cmd>call <SID>toggle_zooming_window()<CR>
 " nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
 " nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
 nnoremap <C-k> 7gk
@@ -509,7 +509,7 @@ inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
-inoremap <silent> <C-y> <C-r>=vimrc#pinsnip#expand()<CR>
+inoremap <silent> <expr> <C-y> pumvisible() ? '<C-y>' : '<C-r>=vimrc#pinsnip#expand()<CR>'
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
@@ -561,7 +561,7 @@ function! s:_loop_define(config) abort
     let [lhs, rhs] =
           \ map([lhs, rhs], {_, val -> substitute(val, '|', '<bar>', 'g')})
     let com = []
-    call add(com, [mode .. 'noremap <silent>',
+    call add(com, [mode .. 'noremap',
           \ plug_map.do .. lhs,
           \ rhs])
     call add(com, [mode .. 'map',
@@ -711,7 +711,7 @@ function! s:cmdwin_enter() abort
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   " Execute an previous command easiler.
-  nnoremap <silent> <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+  nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
 
   set completefunc=vimrc#pathComplete
 
@@ -814,19 +814,18 @@ endif
 
 " Command
 let s:_map = []
-call add(s:_map, ['nnoremap', '', 'ev', 'edit $MYVIMRC'])
-call add(s:_map, ['nnoremap', '', 'sv', 'source $MYVIMRC'])
-call add(s:_map, ['nnoremap', '<silent>', 'k', 'call vimrc#mru#start()'])
-call add(s:_map, ['nnoremap', '<silent>', 'b', 'call gram#sources#buffers#launch()'])
-call add(s:_map, ['nnoremap', '<silent>', 'j', 'call <SID>GofForMapping()'])
-call add(s:_map, ['nnoremap', '<silent>', 'f', 'call vimrc#filore#start()'])
-call add(s:_map, ['nnoremap', '<silent>', 'm', 'MemoList'])
-call add(s:_map, ['nnoremap', '<silent>', 'o', 'OtameshiList'])
+call add(s:_map, ['nnoremap', 'ev', 'edit $MYVIMRC'])
+call add(s:_map, ['nnoremap', 'sv', 'source $MYVIMRC'])
+call add(s:_map, ['nnoremap', 'k', 'call vimrc#mru#start()'])
+call add(s:_map, ['nnoremap', 'b', 'call gram#sources#buffers#launch()'])
+call add(s:_map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
+call add(s:_map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
+call add(s:_map, ['nnoremap', 'm', 'MemoList'])
+call add(s:_map, ['nnoremap', 'o', 'OtameshiList'])
 execute join(map(s:_map, {->join([
       \  v:val[0],
-      \  v:val[1],
-      \  '<Space>' .. v:val[2],
-      \  printf('<Cmd>%s<CR>', v:val[3])
+      \  '<Space>' .. v:val[1],
+      \  printf('<Cmd>%s<CR>', v:val[2])
       \ ], ' ')}), "\n")
 unlet s:_map
 
@@ -1084,7 +1083,7 @@ if s:PluginExists('gina.vim')
     Gina_nnoremap('branch', 'N',
             '<Cmd>call gina#action#call("branch:new")<CR>')
     Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
-    nnoremap <silent> <Space>g <Cmd>Gina status<CR>
+    nnoremap <Space>g <Cmd>Gina status<CR>
 
     # Jump between unadded files with n/p ..
     var rhs_base = printf(
@@ -1123,7 +1122,7 @@ if s:PluginExists('gina.vim')
             })
     if bufnr != 0
       setlocal nocursorline nocursorcolumn filetype=diff
-      nnoremap <silent> <buffer> <nowait> q <Cmd>quit<CR>
+      nnoremap <buffer> <nowait> q <Cmd>quit<CR>
       cursor(1, 0)
     endif
   enddef
@@ -1290,6 +1289,7 @@ if s:PluginExists('vim-ambicmd')
     inoremap <buffer> <expr> <Space> <SID>AmbicmdExpand("\<Space>")
     inoremap <buffer> <expr> <bar> <SID>AmbicmdExpand("\<bar>")
     inoremap <buffer> <expr> <CR> <SID>AmbicmdExpand("\<CR>")
+    inoremap <buffer> <expr> <C-y> <SID>AmbicmdExpand('')
   enddef
 
   let g:ambicmd#show_completion_menu = 1
@@ -1350,7 +1350,7 @@ if s:PluginExists('vim-quickrun')
   nmap <Space>r <Plug>(quickrun)
   vmap <Space>r <Plug>(quickrun)
   augroup vimrc_filetype
-    autocmd FileType quickrun nnoremap <silent> <buffer> q <Cmd>q<CR>
+    autocmd FileType quickrun nnoremap <buffer> q <Cmd>q<CR>
   augroup END
 endif
 if s:PluginExists('vim-textobj-between')
@@ -1771,7 +1771,7 @@ def! s:GitDiff(arg_target: string = bufname('%')): void
         })
   if bufnr
     setlocal nocursorline nocursorcolumn filetype=diff
-    nnoremap <silent> <buffer> <nowait> q <Cmd>quit<CR>
+    nnoremap <buffer> <nowait> q <Cmd>quit<CR>
     cursor(1, 0)
   endif
   return
