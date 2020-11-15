@@ -124,9 +124,7 @@ def OnCursorMoved(): void
     return
   endif
   justAfterApplying = false
-  if NeedTry()
-    tryToApply = true
-  endif
+  tryToApply = NeedTry() || tryToApply
   UpdateContext()
 enddef
 def OnTextChanged(): void
@@ -216,6 +214,7 @@ enddef
 NewFiletypeRule('_')
   ->AddRule('\{$', '}', ['\=^}'])
 NewFiletypeRule('c')
+  ->AddRule('\{$', '}', ['\=^}',  '\=^%(public|private|protected)>\:'])
   ->AddRule('^%(typedef>\s+)?struct\s*\{\s*$', '};', ['\=^};'])
 NewFiletypeRule('cpp')
   ->AddRule('^class>\s+\w+\s*\{$', '};', ['\=^};', '\=^%(public|private|protected)>\:'])
