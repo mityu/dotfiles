@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 14-Nov-2020.
+" Last Change: 15-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -581,10 +581,6 @@ function! s:_loop_define(config) abort
     let config = deepcopy(a:config)
     let config.mode = 't'
     call map(config.map, 's:_loop_define_generate_tmap(v:val)')
-    if config.enter_with !~?
-          \ printf("\\v^%%(%s|\\%s)", &termwinkey, &termwinkey)
-      let config.enter_with = &termwinkey .. config.enter_with
-    endif
     call s:_loop_define(config)
   endif
 endfunction
@@ -592,7 +588,7 @@ function! s:_loop_define_generate_tmap(value) abort
   let rhs = a:value[1]
   let rhs = substitute(rhs, '\c<SID>', s:SIDPrefix(), 'g')
   let rhs = substitute(rhs, '\zs<\ze.\{-}>', '\\<lt>', 'g')
-  let rhs = &termwinkey .. '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
+  let rhs = '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
   return [a:value[0], rhs]
 endfunction
 function! s:_simple_loop_define(config) abort
