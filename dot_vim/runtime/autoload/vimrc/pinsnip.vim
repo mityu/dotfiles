@@ -155,3 +155,13 @@ SnipFiletype('cpp')
   ->AddSnip('std::cout', ['std::cout << "<+CURSOR+>" << std::endl;'])
   ->AddSnip('std::cerr', ['std::cerr << "<+CURSOR+>" << std::endl;'])
   ->AddSnip('template', ['template <typename T>'])
+SnipFiletype('vim')
+  ->AddSnip('cpoptions', [
+      'let s:cpoptions_save = &cpoptions',
+      'set cpoptions&vim',
+      '',
+      '<+CURSOR+>',
+      '',
+      'let &cpoptions = s:cpoptions_save',
+      'unlet s:cpoptions_save'
+      ])
