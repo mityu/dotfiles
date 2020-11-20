@@ -140,7 +140,7 @@ fi
 function update_components(){
     brew upgrade
     brew cleanup
-    brew cask upgrade
+    brew upgrade --cask
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
 }
