@@ -36,14 +36,14 @@ export def vimrc#delete_undofiles()
     Echomsg('Deleted.')
 enddef
 
-var PathComplete: dict<any> = #{target_path: '', completions: []}
+var PathComplete: dict<any> = {target_path: '', completions: []}
 export def vimrc#pathComplete(findstart: bool, base: string): any
   if findstart
     var line = getline('.')[: col('.') - 1]
     if line ==# ''
-      PathComplete['target_path'] = ''
+      PathComplete.target_path = ''
     else
-      PathComplete['target_path'] = split(line, NON_ESCAPED_SPACE)[-1]
+      PathComplete.target_path = split(line, NON_ESCAPED_SPACE)[-1]
     endif
     var completions = VimrcFunc('glob')(PathComplete.target_path .. '*')
     var files: list<dict<string>> = []
@@ -58,7 +58,8 @@ export def vimrc#pathComplete(findstart: bool, base: string): any
     endfor
     sort(dirs)
     sort(files)
-    PathComplete['completions'] = dirs + files
+    PathComplete->remove('completions') # To avoid E1121 error in the next line.
+    PathComplete.completions = dirs + files
 
     return col('.') - fnamemodify(PathComplete.target_path, ':t')->strlen() - 1
   endif
