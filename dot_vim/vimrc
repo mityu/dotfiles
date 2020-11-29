@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Nov-2020.
+" Last Change: 29-Nov-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1514,20 +1514,79 @@ command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
 command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
       \ call vimrc#session#restore(<q-args>)
 
+" Showmode
+def! s:ShowmodeInit()
+  var colors = {
+    normal: [['22', '148'], ['#005f00', '#afdf00']],
+    insert: [['23', '117'], ['#005f5f', '#87dfff']],
+    visual: [['88', '208'], ['#870000', '#ff8700']],
+    replace: [['231', '160'], ['#ffffff', '#df0000']],
+  }
+  for [mode, color] in items(colors)
+    execute printf(
+      'highlight VimrcShowMode%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
+      mode, color[0][0], color[0][1], color[1][0], color[1][1])
+  endfor
+enddef
+def! s:ShowmodeMode(): string
+  s:ShowmodeHighlight()
+  var map = {
+    n: 'NORMAL',
+    i: 'INSERT',
+    R: 'REPLACE',
+    v: 'VISUAL',
+    V: 'V-LINE',
+    "\<C-v>": 'V-BLOCK',
+    c: 'COMMAND',
+    ce: 'EX-COM',
+    s: 'SELECT',
+    S: 'S-LINE',
+    "\<C-s>": 'S-BLOCK',
+    t: 'T-INSERT',
+    no: 'OPERATOR',
+    niI: 'N-INSERT',
+    niR: 'N-REPLACE',
+    niV: 'N-V-REPLACE',
+  }
+  return get(map, mode(), 'UNKNOWN')
+enddef
+def! s:ShowmodeHighlight()
+  var type = get({
+     i: 'insert',
+     t: 'insert',
+     R: 'replace',
+     v: 'visual',
+     V: 'visual',
+     "\<C-v>": 'visual',
+   }, mode(), 'normal')
+  execute 'highlight link VimrcShowMode VimrcShowMode' .. type
+enddef
+def! s:ShowmodeLabel(): string
+  if win_getid() == g:statusline_winid
+    return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
+  endif
+  return ''
+enddef
+augroup vimrc_showmode
+  autocmd ColorScheme,Syntax * call s:ShowmodeInit()
+  autocmd User vimrc_initialize call s:ShowmodeInit()
+augroup END
+
 " statusline
-function! s:StatuslineGenerator() abort
-  let statusline =
-        \ '%m' ..
-        \ '[%{&ft ==# "" ? "No ft" : &ft}]' ..
-        \ '[#%{bufnr("%")}]' ..
-        \ (s:PluginExists('gina.vim') ?
-        \   '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
-        \   '') ..
-        \ '%{<SID>FilenameLabel(bufnr("%"))}' ..
-        \ '%<%=' ..
-        \ '[%{pathshorten(getcwd(winnr()))}]'
+def! s:StatuslineGenerator(): string
+  var gina = s:PluginExists('gina.vim') ?
+      '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
+      ''
+  var statusline = s:ShowmodeLabel() ..
+    '%m' ..
+    '[%{&ft ==# "" ? "No ft" : &ft}]' ..
+    '[#%{bufnr("%")}]' ..
+    gina ..
+    '%{<SID>FilenameLabel(bufnr("%"))}' ..
+    '%<%=' ..
+    '[%{pathshorten(getcwd(winnr()))}]'
   return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
-endfunction
+enddef
 def! s:FilenameLabel(bufnr: number): string
   var buftype = getbufvar(bufnr, '&buftype')
   var bufname = bufname(bufnr)
@@ -1550,60 +1609,6 @@ let &statusline = printf('%%!%sStatuslineGenerator()', s:SIDPrefix())
 
 " tabline
 let &tabline = printf('%%!%sTabline()', s:SIDPrefix())
-function! s:ShowmodeInit() abort
-  let colors={
-    \ 'normal': [['22', '148'], ['#005f00', '#afdf00']],
-    \ 'insert': [['23', '117'], ['#005f5f', '#87dfff']],
-    \ 'visual': [['88', '208'], ['#870000', '#ff8700']],
-    \ 'replace': [['231', '160'], ['#ffffff', '#df0000']],
-    \ }
-  for mode in keys(colors)
-    execute printf('highlight VimrcShowMode%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
-          \ mode,
-          \ colors[mode][0][0],
-          \ colors[mode][0][1],
-          \ colors[mode][1][0],
-          \ colors[mode][1][1])
-  endfor
-endfunction
-function! s:ShowmodeMode() abort
-  call s:ShowmodeHighlight()
-  let map = {
-    \ 'n': 'NORMAL',
-    \ 'i': 'INSERT',
-    \ 'R': 'REPLACE',
-    \ 'v': 'VISUAL',
-    \ 'V': 'V-LINE',
-    \ "\<C-v>": 'V-BLOCK',
-    \ 'c': 'COMMAND',
-    \ 'ce': 'EX-COM',
-    \ 's': 'SELECT',
-    \ 'S': 'S-LINE',
-    \ "\<C-s>": 'S-BLOCK',
-    \ 't': 'T-INSERT',
-    \ 'no': 'OPERATOR',
-    \ 'niI': 'N-INSERT',
-    \ 'niR': 'N-REPLACE',
-    \ 'niV': 'N-V-REPLACE',
-    \ }
-  return get(map, mode(), 'UNKNOWN')
-endfunction
-function! s:ShowmodeHighlight() abort
-  let type = get({
-    \  'i': 'insert',
-    \  't': 'insert',
-    \  'R': 'replace',
-    \  'v': 'visual',
-    \  'V': 'visual',
-    \  "\<C-v>": 'visual',
-    \  },
-    \ mode(), 'normal')
-  execute 'highlight link VimrcShowMode VimrcShowMode' .. type
-  return ''
-endfunction
-def! s:ShowmodeLabel(): string
-  return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#TabLine#'
-enddef
 def! s:GenerateTabinfo(tabnr: number): string
   var tablist = tabpagebuflist(tabnr)
   var info = ''
@@ -1612,7 +1617,7 @@ def! s:GenerateTabinfo(tabnr: number): string
   return info
 enddef
 def! s:Tabline(): string
-  var tabline = s:ShowmodeLabel() .. '%#TabLine#|'
+  var tabline = '%#TabLine#|'
   var t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
@@ -1629,10 +1634,6 @@ def! s:Tabline(): string
 
   return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
 enddef
-augroup vimrc_showmode
-  autocmd ColorScheme * call s:ShowmodeInit()
-  autocmd User vimrc_initialize call s:ShowmodeInit()
-augroup END
 
 " :terminal
 augroup vimrc_terminal
