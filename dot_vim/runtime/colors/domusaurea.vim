@@ -1,415 +1,310 @@
-" Last Change: 18-Jun-2020.
-" Author: mityu
-" This colorscheme is based on billw
+# Last Change: 30-Nov-2020.
+# Author: mityu
+# This colorscheme is based on billw
+vim9script
 
-" unlet g:colors_name
 set background=dark
 highlight clear
 if exists('g:syntax_on')
   syntax reset
 endif
 
-let s:colors_name = expand('<sfile>:t:r')
-let g:colors_name = s:colors_name
+final ColorsName = expand('<sfile>:t:r')
+g:colors_name = ColorsName
 
-if !exists('s:TYPE_NUM')
-  let s:TYPE_NUM = type(0)
-  lockvar s:TYPE_NUM
+final Palette = {
+      black:             '#000000',
+      white:             '#ffffff',
+      yellow:            '#ffff00',
+      darkred:           '#650000',
+      red:               '#ff0000',
+      tomato:            '#ff6347',
+      orange:            '#ffa500',
+      vividorange:       '#ff7f00',
+      darkorange:        '#5c4709',
+      deeplydarkorange:  '#322705',
+      cornsilk:          '#fff8dc',
+      gray:              '#bebebe',
+      lightgray:         '#555555',
+      darkgray:          '#333333',
+      blackgray:         '#1f1f1f',
+      lightlightgray:    '#666666',
+      gold:              '#ffd700',
+      cyan:              '#00ffff',
+      deeplydarkblue:    '#002a40',
+      mediumspringgreen: '#00fa9a',
+      purple:            '#a020f0',
+      violet:            '#ee82ee',
+      lightsteelblue:    '#b0c4de',
+      russet:            '#8b8b00',
+      paneldarkorange:   '#493f2f',
+      panelorange:       '#706656',
+      panellightorange:  '#caca9d',
+      sbarorange:        '#82775a',
+      thumborange:       '#b6b689',
+      NONE:              'NONE'
+}
+
+var GuiRunning = has('gui_running') || &termguicolors
+
+def GetColor(name: string): string # {{{
+  return name ==# 'NONE' ? 'NONE' : GetRawColor(Palette[name])
+enddef # }}}
+
+if GuiRunning
+  g:terminal_ansi_colors = [
+        '#000000',
+        '#d54e53',
+        '#b9ca4a',
+        '#e6c547',
+        '#7aa6da',
+        '#c397d8',
+        '#70c0ba',
+        '#eaeaea',
+        '#666666',
+        '#ff3334',
+        '#9ec400',
+        '#e7c547',
+        '#7aa6da',
+        '#b77ee0',
+        '#54ced6',
+        '#ffffff',
+  ]
 endif
 
-let s:palette = {
-      \ 'black':             '#000000',
-      \ 'white':             '#ffffff',
-      \ 'yellow':            '#ffff00',
-      \ 'darkred':           '#650000',
-      \ 'red':               '#ff0000',
-      \ 'tomato':            '#ff6347',
-      \ 'orange':            '#ffa500',
-      \ 'vividorange':       '#ff7f00',
-      \ 'darkorange':        '#5c4709',
-      \ 'deeplydarkorange':  '#322705',
-      \ 'cornsilk':          '#fff8dc',
-      \ 'gray':              '#bebebe',
-      \ 'lightgray':         '#555555',
-      \ 'darkgray':          '#333333',
-      \ 'blackgray':         '#1f1f1f',
-      \ 'lightlightgray':    '#666666',
-      \ 'gold':              '#ffd700',
-      \ 'cyan':              '#00ffff',
-      \ 'deeplydarkblue':    '#002a40',
-      \ 'mediumspringgreen': '#00fa9a',
-      \ 'purple':            '#a020f0',
-      \ 'violet':            '#ee82ee',
-      \ 'lightsteelblue':    '#b0c4de',
-      \ 'russet':            '#8b8b00',
-      \ 'paneldarkorange':   '#493f2f',
-      \ 'panelorange':       '#706656',
-      \ 'panellightorange':  '#caca9d',
-      \ 'sbarorange':        '#82775a',
-      \ 'thumborange':       '#b6b689',
-      \ 'NONE':              'NONE'
-      \ }
-
-let s:gui_running = has('gui_running') || &termguicolors
-
-function! s:get_color(name) abort "{{{
-  return a:name ==# 'NONE' ? 'NONE' : s:get_raw_color(s:palette[a:name])
-endfunction "}}}
-
-if s:gui_running
-  " let g:terminal_ansi_colors = [
-  "      \ '#000000',
-  "      \ '#e00000',
-  "      \ '#00e000',
-  "      \ '#e0e000',
-  "      \ '#2e9ab8',
-  "      \ '#e000e0',
-  "      \ '#00e0e0',
-  "      \ '#e0e0e0',
-  "      \ '#808080',
-  "      \ '#ff4040',
-  "      \ '#ff4040',
-  "      \ '#e6c547',
-  "      \ '#7aa6da',
-  "      \ '#c397d8',
-  "      \ '#70c0ba',
-  "      \ '#ffffff',
-  "      \ ]  " 194 116 212
-  let g:terminal_ansi_colors = [
-        \ '#000000',
-        \ '#d54e53',
-        \ '#b9ca4a',
-        \ '#e6c547',
-        \ '#7aa6da',
-        \ '#c397d8',
-        \ '#70c0ba',
-        \ '#eaeaea',
-        \ '#666666',
-        \ '#ff3334',
-        \ '#9ec400',
-        \ '#e7c547',
-        \ '#7aa6da',
-        \ '#b77ee0',
-        \ '#54ced6',
-        \ '#ffffff',
-        \ ]
-endif
-
-if s:gui_running
-  function! s:get_raw_color(code) abort "{{{
-    return a:code
-  endfunction "}}}
+if GuiRunning
+  def GetRawColor(code: string): string # {{{
+    return code
+  enddef # }}}
 else
-  let s:converted_colors = {}
-  function! s:get_raw_color(color_code) abort "{{{
-    let colorcode = a:color_code[1 :]
-    if !has_key(s:converted_colors, colorcode)
-      let code = str2nr(colorcode, 16)
+  var ConvertedColors = {}
+  def GetRawColor(color_code: string): string # {{{
+    var colorcode = color_code[1 :]
+    if !has_key(ConvertedColors, colorcode)
+      var code = str2nr(colorcode, 16)
+      var color = {r: 0, g: 0, b: 0}
       for kind in ['b', 'g', 'r']
-        let {kind} = code % 256
-        let code = code / 256
+        color[kind] = code % 256
+        code = code / 256
       endfor
-      let s:converted_colors[colorcode] = s:color(r, g, b)
+      ConvertedColors[colorcode] = Color(color.r, color.g, color.b)->string()
     endif
-    return s:converted_colors[colorcode]
-  endfunction "}}}
+    return ConvertedColors[colorcode]
+  enddef # }}}
 
 
-  " These functions are from thinca/vim-guicolorscheme. Thank you!
-  function! s:greynum(x) "{{{
-      if &t_Co == 88
-          if a:x < 23
-              return 0
-          elseif a:x < 69
-              return 1
-          elseif a:x < 103
-              return 2
-          elseif a:x < 127
-              return 3
-          elseif a:x < 150
-              return 4
-          elseif a:x < 173
-              return 5
-          elseif a:x < 196
-              return 6
-          elseif a:x < 219
-              return 7
-          elseif a:x < 243
-              return 8
-          else
-              return 9
-          endif
+  final t_Co = str2nr(&t_Co)
+  # These functions are based on thinca/vim-guicolorscheme. Thank you!
+  def Graynum(x: number): number # {{{
+    if t_Co == 88
+      return [22, 68, 102, 126, 149, 172, 195, 218, 242, x]->sort('n')->index(x)
+    else
+      if x < 14
+        return 0
       else
-          if a:x < 14
-              return 0
-          else
-              let l:n = (a:x - 8) / 10
-              let l:m = (a:x - 8) % 10
-              if l:m < 5
-                  return l:n
-              else
-                  return l:n + 1
-              endif
-          endif
+        var n = (x - 8) / 10
+        var m = (x - 8) % 10
+        return m < 5 ? n : n + 1
       endif
-  endfunction "}}}
-  function! s:greylvl(n) "{{{
-      if &t_Co == 88
-          if a:n == 0
-              return 0
-          elseif a:n == 1
-              return 46
-          elseif a:n == 2
-              return 92
-          elseif a:n == 3
-              return 115
-          elseif a:n == 4
-              return 139
-          elseif a:n == 5
-              return 162
-          elseif a:n == 6
-              return 185
-          elseif a:n == 7
-              return 208
-          elseif a:n == 8
-              return 231
-          else
-              return 255
-          endif
+    endif
+  enddef # }}}
+  def Graylvl(n: number): number # {{{
+    if t_Co == 88
+      return get([0, 46, 92, 115, 139, 162, 185, 208, 231], n, 255)
+    else
+      return n == 0 ? 0 : 8 + (n * 10)
+    endif
+  enddef # }}}
+  def Gray(n: number): number # {{{
+    if t_Co == 88
+      return n == 0 ? 16 : n == 9 ? 79 : 79 + n
+    else
+      return n == 0 ? 16 : n == 25 ? 231 : 231 + n
+    endif
+  enddef # }}}
+  def RGBnum(x: number): number # {{{
+    if t_Co == 88
+      return [68, 171, 229, x]->sort('n')->index(x)
+    else
+      if x < 75
+        return 0
       else
-          if a:n == 0
-              return 0
-          else
-              return 8 + (a:n * 10)
-          endif
+        var n = (x - 55) / 40
+        var m = (x - 55) % 40
+        return m < 20 ? n : n + 1
       endif
-  endfunction "}}}
-  function! s:grey(n) "{{{
-      if &t_Co == 88
-          if a:n == 0
-              return 16
-          elseif a:n == 9
-              return 79
-          else
-              return 79 + a:n
-          endif
-      else
-          if a:n == 0
-              return 16
-          elseif a:n == 25
-              return 231
-          else
-              return 231 + a:n
-          endif
-      endif
-  endfunction "}}}
-  function! s:rgbnum(x) "{{{
-      if &t_Co == 88
-          if a:x < 69
-              return 0
-          elseif a:x < 172
-              return 1
-          elseif a:x < 230
-              return 2
-          else
-              return 3
-          endif
-      else
-          if a:x < 75
-              return 0
-          else
-              let l:n = (a:x - 55) / 40
-              let l:m = (a:x - 55) % 40
-              if l:m < 20
-                  return l:n
-              else
-                  return l:n + 1
-              endif
-          endif
-      endif
-  endfunction "}}}
-  function! s:rgblvl(n) "{{{
-      if &t_Co == 88
-          if a:n == 0
-              return 0
-          elseif a:n == 1
-              return 139
-          elseif a:n == 2
-              return 205
-          else
-              return 255
-          endif
-      else
-          if a:n == 0
-              return 0
-          else
-              return 55 + (a:n * 40)
-          endif
-      endif
-  endfunction "}}}
-  function! s:rgb(r, g, b) "{{{
-      if &t_Co == 88
-          return 16 + (a:r * 16) + (a:g * 4) + a:b
-      else
-          return 16 + (a:r * 36) + (a:g * 6) + a:b
-      endif
-  endfunction "}}}
-  function! s:color(r, g, b) "{{{
-      " get the closest grey
-      let l:gx = s:greynum(a:r)
-      let l:gy = s:greynum(a:g)
-      let l:gz = s:greynum(a:b)
+    endif
+  enddef # }}}
+  def RGBlvl(n: number): number # {{{
+    if t_Co == 88
+      return get([0, 139, 205], n, 255)
+    else
+      return n == 0 ? 0 : 55 + (n * 40)
+    endif
+  enddef # }}}
+  def RGB(r: number, g: number, b: number): number # {{{
+    if t_Co == 88
+      return 16 + (r * 16) + (g * 4) + b
+    else
+      return 16 + (r * 36) + (g * 6) + b
+    endif
+  enddef # }}}
+  def Color(r: number, g: number, b: number): number # {{{
+    # get the closest Gray
+    var gx = Graynum(r)
+    var gy = Graynum(g)
+    var gz = Graynum(b)
 
-      " get the closest color
-      let l:x = s:rgbnum(a:r)
-      let l:y = s:rgbnum(a:g)
-      let l:z = s:rgbnum(a:b)
+    # get the closest color
+    var x = RGBnum(r)
+    var y = RGBnum(g)
+    var z = RGBnum(b)
 
-      let l:level = (a:r * a:r) + (a:g * a:g) + (a:b * a:b)
-      if l:gx == l:gy && l:gy == l:gz
-          " there are two possibilities
-          let l:dgr = s:greylvl(l:gx)
-          let l:dgg = s:greylvl(l:gy)
-          let l:dgb = s:greylvl(l:gz)
-          let l:dgrey = (l:dgr * l:dgr) + (l:dgg * l:dgg) + (l:dgb * l:dgb) - l:level
+    var level = (r * r) + (g * g) + (b * b)
+    if gx == gy && gy == gz
+      # there are two possibilities
+      var dgr = Graylvl(gx)
+      var dgg = Graylvl(gy)
+      var dgb = Graylvl(gz)
+      var dgrey = (dgr * dgr) + (dgg * dgg) + (dgb * dgb) - level
 
-          let l:dr = s:rgblvl(l:gx)
-          let l:dg = s:rgblvl(l:gy)
-          let l:db = s:rgblvl(l:gz)
-          let l:drgb = (l:dr * l:dr) + (l:dg * l:dg) + (l:db * l:db) - l:level
+      var dr = RGBlvl(gx)
+      var dg = RGBlvl(gy)
+      var db = RGBlvl(gz)
+      var drgb = (dr * dr) + (dg * dg) + (db * db) - level
 
-          if l:dgrey < l:drgb
-              " use the grey
-              return s:grey(l:gx)
-          else
-              " use the color
-              return s:rgb(l:x, l:y, l:z)
-          endif
+      if dgrey < drgb
+        # use the Gray
+        return Gray(gx)
       else
-          " only one possibility
-          return s:rgb(l:x, l:y, l:z)
+        # use the color
+        return RGB(x, y, z)
       endif
-  endfunction "}}}
+    else
+      # only one possibility
+      return RGB(x, y, z)
+    endif
+  enddef # }}}
 endif
 
-function! s:hi(group, fg, bg, attr) "{{{
-  let has_fg = type(a:fg) != s:TYPE_NUM
-  let has_bg = type(a:bg) != s:TYPE_NUM
-  let has_attr = type(a:attr) != s:TYPE_NUM
+def Hi(group: string, fg: string, bg: string, attr: string) # {{{
+  var has_fg = fg !=# ''
+  var has_bg = bg !=# ''
+  var has_attr = attr !=# ''
 
-  if has_fg && !has_key(s:palette, a:fg)
-    call s:echoerr(printf('color: %s does not exists. (specified in %s)',
-                  \ a:fg, a:group))
+  if has_fg && !has_key(Palette, fg)
+    Echoerr(printf('color: %s does not exists. (specified in %s)',
+                  \ fg, group))
     return
   endif
-  if has_bg && !has_key(s:palette, a:bg)
-    call s:echoerr(printf('color: %s does not exists. (specified in %s)',
-                  \ a:bg, a:group))
+  if has_bg && !has_key(Palette, bg)
+    Echoerr(printf('color: %s does not exists. (specified in %s)',
+                  \ bg, group))
     return
   endif
 
-  let fg = has_fg ? a:fg : 'NONE'
-  let bg = has_bg ? a:bg : 'NONE'
-  let attr = has_attr ? a:attr : 'NONE'
+  var color_fg = has_fg ? fg : 'NONE'
+  var color_bg = has_bg ? bg : 'NONE'
+  var cmd_attr = has_attr ? attr : 'NONE'
 
-  let type = s:gui_running ? 'gui' : 'cterm'
-  let fg = printf('%sfg=%s', type, s:get_color(fg))
-  let bg = printf('%sbg=%s', type, s:get_color(bg))
+  var type = GuiRunning ? 'gui' : 'cterm'
+  var cmd_fg = printf('%sfg=%s', type, GetColor(color_fg))
+  var cmd_bg = printf('%sbg=%s', type, GetColor(color_bg))
 
-  if s:gui_running && &termguicolors
-    let type = 'cterm'
+  if GuiRunning && &termguicolors
+    type = 'cterm'
   endif
-  let attr = printf('%s=%s', type, attr)
-  execute 'highlight' a:group fg bg attr
-endfunction "}}}
-function! s:echoerr(msg) "{{{
+  cmd_attr = printf('%s=%s', type, cmd_attr)
+  execute 'highlight' group cmd_fg cmd_bg cmd_attr
+enddef # }}}
+def Echoerr(msg: string) # {{{
   echohl Error
-  echom printf('[%s] %s', s:colors_name, a:msg)
+  echomsg printf('[%s] %s', ColorsName, msg)
   echohl None
-endfunction "}}}
+enddef # }}}
 
 
-" highlight statements
-call s:hi('Normal','cornsilk','blackgray',0)
-call s:hi('Comment','gold',0,0)
-call s:hi('Constant','mediumspringgreen',0,0)
-call s:hi('String','orange',0,0)
-call s:hi('Character','orange',0,0)
-call s:hi('Number','mediumspringgreen',0,0)
-call s:hi('Boolean','mediumspringgreen',0,0)
-call s:hi('Float','mediumspringgreen',0,0)
+# highlight statements
+Hi('Normal', 'cornsilk', 'blackgray', '')
+Hi('Comment', 'gold', '', '')
+Hi('Constant', 'mediumspringgreen', '', '')
+Hi('String', 'orange', '', '')
+Hi('Character', 'orange', '', '')
+Hi('Number', 'mediumspringgreen', '', '')
+Hi('Boolean', 'mediumspringgreen', '', '')
+Hi('Float', 'mediumspringgreen', '', '')
 
-call s:hi('Statement','cyan',0,0)
-call s:hi('Conditional','cyan',0,0)
-call s:hi('Repeat','cyan',0,0)
-call s:hi('Label','cyan',0,0)
-call s:hi('Operator','cyan',0,0)
+Hi('Statement', 'cyan', '', '')
+Hi('Conditional', 'cyan', '', '')
+Hi('Repeat', 'cyan', '', '')
+Hi('Label', 'cyan', '', '')
+Hi('Operator', 'cyan', '', '')
 
-call s:hi('PreProc','lightsteelblue',0,0)
-call s:hi('Include','lightsteelblue',0,0)
-call s:hi('Define','lightsteelblue',0,0)
-call s:hi('Macro','lightsteelblue',0,0)
-call s:hi('PreCondit','lightsteelblue',0,0)
+Hi('PreProc', 'lightsteelblue', '', '')
+Hi('Include', 'lightsteelblue', '', '')
+Hi('Define', 'lightsteelblue', '', '')
+Hi('Macro', 'lightsteelblue', '', '')
+Hi('PreCondit', 'lightsteelblue', '', '')
 
-call s:hi('Type','yellow',0,0)
-call s:hi('StorageClass','violet',0,0)
-call s:hi('Structure','violet',0,0)
+Hi('Type', 'yellow', '', '')
+Hi('StorageClass', 'violet', '', '')
+Hi('Structure', 'violet', '', '')
 
-call s:hi('Identifier','yellow',0, 0)
-call s:hi('Function','mediumspringgreen',0,0)
+Hi('Identifier', 'yellow', '', '')
+Hi('Function', 'mediumspringgreen', '', '')
 
-call s:hi('ErrorMsg','white','red',0)
-call s:hi('WarningMsg','white','tomato',0)
+Hi('ErrorMsg', 'white', 'red', '')
+Hi('WarningMsg', 'white', 'tomato', '')
 
-call s:hi('Cursor','blackgray','cornsilk',0)
-call s:hi('CursorIM','blackgray','purple',0)
-call s:hi('CursorLine',0,'black', 0)
-call s:hi('CursorColumn',0,'black',0)
+Hi('Cursor', 'blackgray', 'cornsilk', '')
+Hi('CursorIM', 'blackgray', 'purple', '')
+Hi('CursorLine', '', 'black', '')
+Hi('CursorColumn', '', 'black', '')
 
-call s:hi('LineNr','lightgray',0,0)
-call s:hi('CursorLineNr','yellow',0,0)
+Hi('LineNr', 'lightgray', '', '')
+Hi('CursorLineNr', 'yellow', '', '')
 
-call s:hi('Search','NONE','lightlightgray',0)
-call s:hi('Visual','NONE','lightlightgray',0)
-call s:hi('VisualNOS','black',0,0)
-call s:hi('Title','orange',0,0)
-call s:hi('Folded','gray','blackgray',0)
-call s:hi('FoldColumn','lightlightgray','blackgray',0)
-call s:hi('SignColumn',0,'blackgray',0)
+Hi('Search', 'NONE', 'lightlightgray', '')
+Hi('Visual', 'NONE', 'lightlightgray', '')
+Hi('VisualNOS', 'black', '', '')
+Hi('Title', 'orange', '', '')
+Hi('Folded', 'gray', 'blackgray', '')
+Hi('FoldColumn', 'lightlightgray', 'blackgray', '')
+Hi('SignColumn', '', 'blackgray', '')
 
-call s:hi('StatusLine', 'darkgray', 'orange',0)
-call s:hi('StatusLineNC', 'darkgray','russet',0)
-call s:hi('TabLine','black','russet',0)
-call s:hi('TabLineSel','black','orange',0)
+Hi('StatusLine', 'darkgray', 'orange', '')
+Hi('StatusLineNC', 'darkgray', 'russet', '')
+Hi('TabLine', 'black', 'russet', '')
+Hi('TabLineSel', 'black', 'orange', '')
 
-call s:hi('Underlined',0,0,'underline')
-call s:hi('Ignore','NONE',0,0)
-call s:hi('SpecialKey','gray',0,0)
+Hi('Underlined', '', '', 'underline')
+Hi('Ignore', 'NONE', '', '')
+Hi('SpecialKey', 'gray', '', '')
 
-call s:hi('Directory','cyan',0,0)
-call s:hi('Question','mediumspringgreen',0,0)
-call s:hi('VertSplit','cornsilk','cornsilk',0)
-call s:hi('MatchParen','NONE','purple',0)
+Hi('Directory', 'cyan', '', '')
+Hi('Question', 'mediumspringgreen', '', '')
+Hi('VertSplit', 'cornsilk', 'cornsilk', '')
+Hi('MatchParen', 'NONE', 'purple', '')
 
-call s:hi('WileMenu',0,'yellow',0)
-call s:hi('Pmenu','panellightorange','paneldarkorange',0)
-call s:hi('PmenuSel','panellightorange','panelorange',0)
-call s:hi('PmenuSbar',0,'sbarorange',0)
-call s:hi('PmenuThumb',0,'thumborange',0)
+Hi('WileMenu', '', 'yellow', '')
+Hi('Pmenu', 'panellightorange', 'paneldarkorange', '')
+Hi('PmenuSel', 'panellightorange', 'panelorange', '')
+Hi('PmenuSbar', '', 'sbarorange', '')
+Hi('PmenuThumb', '', 'thumborange', '')
 
 
-call s:hi('DiffAdd', 0, 'deeplydarkorange', 0)
-call s:hi('DiffDelete', 'deeplydarkblue', 'deeplydarkblue', 0)
-call s:hi('DiffChange', 0, 'deeplydarkorange', 0)
-call s:hi('DiffText', 0, 'darkorange', 0)
+Hi('DiffAdd', '', 'deeplydarkorange', '')
+Hi('DiffDelete', 'deeplydarkblue', 'deeplydarkblue', '')
+Hi('DiffChange', '', 'deeplydarkorange', '')
+Hi('DiffText', '', 'darkorange', '')
 
-" TODO: Specify good colors.
-call s:hi('SpellBad', 0, 'darkred', 0)
-call s:hi('SpellCap', 0, 'darkred', 0)
-call s:hi('SpellLocal', 0, 'darkred', 0)
-call s:hi('SpellRare', 0, 'darkred', 0)
+# TODO: Specify good colors.
+Hi('SpellBad', '', 'darkred', '')
+Hi('SpellCap', '', 'darkred', '')
+Hi('SpellLocal', '', 'darkred', '')
+Hi('SpellRare', '', 'darkred', '')
 
-call s:hi('cStatement','violet',0,0)
+Hi('cStatement', 'violet', '', '')
 
 
 highlight StatuslineNC guibg=#a79000
@@ -425,13 +320,13 @@ highlight! link QuickFixLine CursorLine
 
 augroup domusaurea
   autocmd!
-  execute 'autocmd OptionSet termguicolors ++nested colorscheme' s:colors_name
+  execute 'autocmd OptionSet termguicolors ++nested colorscheme' ColorsName
   autocmd ColorSchemePre * ++once autocmd! domusaurea OptionSet
 augroup END
 
-" Plugins
-let g:cursorword_highlight = 0
+# Plugins
+g:cursorword_highlight = 0
 highlight CursorWord0 term=underline cterm=underline gui=underline
 highlight CursorWord1 term=underline cterm=underline gui=underline ctermbg=NONE guibg=NONE
 
-" vim: set expandtab smarttab
+# vim: set expandtab smarttab shiftwidth=2
