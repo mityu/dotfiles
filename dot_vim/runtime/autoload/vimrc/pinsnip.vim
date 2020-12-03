@@ -1,6 +1,6 @@
 vim9script
 
-var SnipList: dict<dict<list<string>>> = #{}
+var SnipList: dict<dict<list<string>>> = {}
 final CursorPlaceholder = '<+CURSOR+>'
 
 export def vimrc#pinsnip#expand(): string
@@ -76,7 +76,7 @@ def FindSnip(filetype: string, comparison: string): list<string>
 
   # Fuzzy matching of dict-key
   {
-    var candidates: list<string> = matchfuzzy(keys, comparison, #{matchseq: true})
+    var candidates: list<string> = matchfuzzy(keys, comparison, {matchseq: true})
     if !empty(candidates)
       return snipdict[candidates[0]]
     endif
@@ -110,7 +110,7 @@ def FindSnip(filetype: string, comparison: string): list<string>
       snipmap[snip[0]] = snip
     endfor
     var candidates: list<string> = keys(snipmap)
-              ->matchfuzzy(comparison, #{matchseq: true})
+              ->matchfuzzy(comparison, {matchseq: true})
     if !empty(candidates)
       return snipmap[candidates[0]]
     endif

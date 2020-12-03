@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Nov-2020.
+" Last Change: 03-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -780,7 +780,7 @@ def! s:CmdwinSelectHistory()
   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
   map(history, {_, val -> matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$')})
   reverse(history)
-  gram#select(#{
+  gram#select({
          name: getcmdwintype() .. 'history',
          items: history,
          callback: s:SIDPrefix() .. 'CmdwinSelectHistoryCallback',
@@ -1069,7 +1069,7 @@ if s:PluginExists('gina.vim')
 
   def! s:gina_config()
     def Gina_nnoremap(scheme: string, lhs: string, rhs: string)
-      gina#custom#mapping#nmap(scheme, lhs, rhs, #{noremap: 1, silent: 1})
+      gina#custom#mapping#nmap(scheme, lhs, rhs, {noremap: 1, silent: 1})
     enddef
 
     Gina_nnoremap('status', '<C-]>', '<Cmd>Gina commit<CR>')
@@ -1112,7 +1112,7 @@ if s:PluginExists('gina.vim')
     var gitroot = fnamemodify(gina#core#get().repository, ':h')
     var cmd = 'git -C ' .. gitroot ..
             ' --no-pager diff --no-color ' .. filename
-    var bufnr = term_start(cmd, #{
+    var bufnr = term_start(cmd, {
             term_name: '[gina diff] ' .. filename,
             norestore: 1,
             })
@@ -1234,7 +1234,7 @@ if s:PluginExists('asyncomplete.vim')
   def! s:RegisterAsyncompleteSources()
     if s:PluginExists('asyncomplete-buffer.vim')
       asyncomplete#register_source(
-          asyncomplete#sources#buffer#get_source_options(#{
+          asyncomplete#sources#buffer#get_source_options({
             name: 'buffer',
             whitelist: ['*'],
             completor: function('asyncomplete#sources#buffer#completor'),
@@ -1536,12 +1536,12 @@ def! s:ShowmodeMode(): string
     R: 'REPLACE',
     v: 'VISUAL',
     V: 'V-LINE',
-    "\<C-v>": 'V-BLOCK',
+    ["\<C-v>"]: 'V-BLOCK',
     c: 'COMMAND',
     ce: 'EX-COM',
     s: 'SELECT',
     S: 'S-LINE',
-    "\<C-s>": 'S-BLOCK',
+    ["\<C-s>"]: 'S-BLOCK',
     t: 'T-INSERT',
     no: 'OPERATOR',
     niI: 'N-INSERT',
@@ -1557,7 +1557,7 @@ def! s:ShowmodeHighlight()
      R: 'replace',
      v: 'visual',
      V: 'visual',
-     "\<C-v>": 'visual',
+     ["\<C-v>"]: 'visual',
    }, mode(), 'normal')
   execute 'highlight link VimrcShowMode VimrcShowMode' .. type
 enddef
@@ -1762,7 +1762,7 @@ def! s:GitDiff(arg_target: string = bufname('%')): void
   if cmd ==# ''
     return
   endif
-  var bufnr = term_start(cmd, #{
+  var bufnr = term_start(cmd, {
           term_name: '[git diff] ' .. fnamemodify(target, ':~:.'),
           norestore: 1,
         })

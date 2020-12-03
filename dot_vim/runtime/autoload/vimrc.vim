@@ -51,9 +51,9 @@ export def vimrc#pathComplete(findstart: bool, base: string): any
     for path in completions
       var completion = fnamemodify(path, ':t')
       if filereadable(path)
-        add(files, #{word: completion, menu: '[file]'})
+        add(files, {word: completion, menu: '[file]'})
       else
-        add(dirs, #{word: completion .. SLASH, menu: '[dir]'})
+        add(dirs, {word: completion .. SLASH, menu: '[dir]'})
       endif
     endfor
     sort(dirs)

@@ -1,6 +1,6 @@
 vim9script
 
-var config: dict<dict<any>> = #{}
+var config: dict<dict<any>> = {}
 var linesCount: number
 var tryToApply: bool
 var justAfterApplying: bool
@@ -44,7 +44,7 @@ def GetLineData(linenr: number): dict<any>
   var text: string = linenr != 0 ? getline(linenr) : ''
   var indentstr: string = matchstr(text, '^\s*')
   var indentdepth: number = strdisplaywidth(indentstr) / shiftwidth()
-  return #{
+  return {
     nr: linenr,
     text: text,
     trimed: trim(text),
@@ -196,9 +196,9 @@ def AddRule(
   endfor
 
   var ref = ft_config
-  ref[pattern] = #{
+  ref[pattern] = {
     pair: pair,
-    interruption: #{literal: literal, regexp: regexp}
+    interruption: {literal: literal, regexp: regexp}
   }
 
   return ft_config
