@@ -1562,7 +1562,8 @@ def! s:ShowmodeHighlight()
   execute 'highlight link VimrcShowMode VimrcShowMode' .. type
 enddef
 def! s:ShowmodeLabel(): string
-  if win_getid() == g:statusline_winid
+  if win_getid() == g:statusline_winid &&
+        getwinvar(g:statusline_winid, '&modifiable') == 1
     return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
   endif
   return ''
@@ -1577,8 +1578,9 @@ def! s:StatuslineGenerator(): string
   var gina = s:PluginExists('gina.vim') ?
       '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
       ''
-  var statusline = s:ShowmodeLabel() ..
+  var statusline =
     '%m' ..
+    s:ShowmodeLabel() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
     '[#%{bufnr("%")}]' ..
     gina ..
