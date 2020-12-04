@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 03-Dec-2020.
+" Last Change: 04-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -125,22 +125,24 @@ def! s:Mkdir(dir: string, ...opt: list<any>): bool
   endif
   return call('mkdir', [dir] + opt) ? true : false
 enddef
-function! s:input(prompt, ...) abort
+def! s:Input(prompt: string, ...opt: list<any>): string
   try
-    return call('input', [a:prompt] + a:000)
+    return call('input', [prompt] + opt)
   catch /\C^Vim:Interrupt$/
     return ''
   endtry
-endfunction
-function! s:WinExecute(id, command, ...) abort
-  let eventignore_save = &eventignore
+  return ''
+enddef
+def! s:WinExecute(id: number, command: string, ...opt: list<any>): any
+  var eventignore_save = &eventignore
   set eventignore=all
   try
-    return call('win_execute', [a:id, a:command] + a:000)
+    return call('win_execute', [id, command] + opt)
   finally
-    let &eventignore = eventignore_save
+    &eventignore = eventignore_save
   endtry
-endfunction
+  return v:none
+enddef
 
 " Global utility functions
 function! VimrcSIDPrefix() abort
@@ -240,13 +242,13 @@ if &loadplugins
   let s:plugin_list = map(filter(s:glob(
         \ s:JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*')
         \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-  function! s:PluginExists(plugin) abort
-    return s:has(s:plugin_list, a:plugin)
-  endfunction
+  def! s:PluginExists(plugin: string): bool
+    return s:has(s:plugin_list, plugin)
+  enddef
 else
-  function! s:PluginExists(plugin) abort
-    return 0
-  endfunction
+  def! s:PluginExists(plugin: string): bool
+    return false
+  enddef
 endif
 def! s:PackRegister(): void
   minpac#add('k-takata/minpac', {'type': 'opt'})
@@ -713,11 +715,10 @@ function! s:cmdwin_enter() abort
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
-    inoremap <expr> <buffer> <C-p> <SID>cmdwin_completion(0)
-    inoremap <expr> <buffer> <C-n> <SID>cmdwin_completion(1)
+    inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
+    inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
     let s:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
     setlocal completeopt=menu,preview
-    " TODO: Delete lines only when gram.vim is loaded.
     execute printf('silent! 1,$-%d delete _', &cmdwinheight)
     normal! G
     call asyncomplete#disable_for_buffer()
@@ -728,14 +729,14 @@ function! s:cmdwin_enter() abort
       autocmd TextChanged,TextchangedI,CursorMoved <buffer>
            \ call s:cmdwin_incsearch()
     augroup END
-    let s:cmdwin_incsearch = {'pattern_save': @/}
+    let s:cmdwin_incsearch = {'pattern_save': @/, 'curpos': getpos('.')}
     if exists('*win_execute')
       let s:cmdwin_incsearch.current_winid = win_getid(winnr('#'))
       function! s:cmdwin_incsearch.win_execute(command) abort
         return s:WinExecute(self.current_winid, a:command)
       endfunction
       call s:cmdwin_incsearch.win_execute(
-            \ 'let s:cmdwin_incsearch.curpos = getpos(".")')
+            \ 'var s:cmdwin_incsearch.curpos = getpos(".")')
     endif
   endif
 endfunction
@@ -754,13 +755,13 @@ function! s:cmdwin_leave() abort
     augroup END
   endif
 endfunction
-function! s:cmdwin_completion(select_next) abort
+def! s:CmdwinCompletion(select_next: bool): string
   if pumvisible()
-    return a:select_next ? '<C-n>' : '<C-p>'
+    return select_next ? '<C-n>' : '<C-p>'
   else
     return "\<C-x>\<C-v>"
   endif
-endfunction
+enddef
 function! s:cmdwin_incsearch() abort
   let @/ = getline('.')
   if exists('*win_execute')
@@ -792,7 +793,7 @@ def! s:CmdwinSelectHistoryCallback(item: dict<string>)
   else
     append('$', item.word)
   endif
-  execute 'noautocmd normal! G$'
+  noautocmd normal! G$
 enddef
 
 augroup vimrc_mapping
@@ -861,11 +862,8 @@ command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
 command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
-def! Filter(pat: string, com: string): list<string>
-  return execute(com)->split("\n")->filter({_, val -> val =~? pat})
-enddef
-def! s:filter(bang: number, pat: string, ...cmd: list<string>): void
-  var output = Filter(pat, join(cmd, ' '))->join("\n")
+def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
+  var output = execute(join(cmd, ' '))->split("\n")->filter({_, val -> val =~? pat})->join("\n")
   if bang
     echomsg output
   else
@@ -885,7 +883,7 @@ enddef
 def! s:Scratch(opener_arg: string)
   var opener = opener_arg
   var prefix = 'scratch://'
-  var name = s:input('Scratch buffer name? ')
+  var name = s:Input('Scratch buffer name? ')
   if name ==# ''
     var identifier = 1
     name = 'nameless/buffer-'
@@ -940,7 +938,6 @@ def! s:GofForMapping()
   var git_root = s:FindGitroot()
   s:Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
-"TODO: Add export when I add :vim9script on the top of this file.
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void
   var winid = win_getid(winnr('#'))
   var buftype = getwinvar(winid, '&buftype')
@@ -976,7 +973,7 @@ if s:PluginExists('vim-operator-user')
     if !s:has(['marker', 'manual'], &l:foldmethod)
       return
     endif
-    let save_options = vital#vital#new('Vim.Guard').store(['&l:commentstring'])
+    let save_options = vital#vital#new().import('Vim.Guard').store(['&l:commentstring'])
     let &l:commentstring = ' ' .. &l:commentstring
     try
       execute 'normal!' a:keys
@@ -1257,8 +1254,6 @@ if s:PluginExists('vim-lsp')
 
   nnoremap <Plug>(<SID>-open-folding) zv
   nmap <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
-  " nmap <silent> <C-p> <Plug>(lsp-previous-error)
-  " nmap <silent> <C-n> <Plug>(lsp-next-error)
 endif
 if s:PluginExists('previm')
   let g:previm_show_header = 0
@@ -1298,7 +1293,6 @@ if s:PluginExists('vim-ambicmd')
     for len in range(1, strlen(cmd))
       var prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '\\l*', 'g')
       var suffix = cmd[len :]
-      # prefix = substitute(toupper(prefix), '.\zs', '\\l*', 'g')
       var matcher = '\C^' .. prefix .. suffix
       rule += [matcher .. '$', matcher]
     endfor
@@ -1410,7 +1404,7 @@ function! s:notes.list_files() abort
         \ 'fnamemodify(v:val, ":p:t")')
 endfunction
 function! s:notes.new(opener) abort
-  let name = s:input('Name: ')
+  let name = s:Input('Name: ')
   if name ==# ''
     call s:echo('Canceled.')
     return
@@ -1482,7 +1476,7 @@ function! s:otameshi.expand_filename(name) abort
   if s:has(a:name, '.') " Filename already has an extension.
     return a:name
   endif
-  let extension = s:input('Extension? (Empty will be non-extension file):')
+  let extension = s:Input('Extension? (Empty will be non-extension file):')
   if extension ==# ''
     return a:name
   else
