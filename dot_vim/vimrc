@@ -251,7 +251,7 @@ else
   enddef
 endif
 def! s:PackRegister(): void
-  minpac#add('k-takata/minpac', {'type': 'opt'})
+  minpac#add('k-takata/minpac', {type: 'opt'})
 
   minpac#add('itchyny/vim-cursorword')
   minpac#add('kana/vim-altr')
@@ -263,7 +263,6 @@ def! s:PackRegister(): void
   minpac#add('kana/vim-textobj-indent')
   minpac#add('kana/vim-textobj-line')
   minpac#add('kana/vim-textobj-user')
-  # minpac#add('lambdalisue/fila.vim')
   minpac#add('lambdalisue/gina.vim')
   minpac#add('lambdalisue/vim-findent')
   minpac#add('lambdalisue/vim-gista')
@@ -274,7 +273,6 @@ def! s:PackRegister(): void
   minpac#add('mityu/vim-textobj-commentblock')
   minpac#add('osyo-manga/vim-jplus')
   minpac#add('osyo-manga/vim-operator-swap')
-  minpac#add('prabirshrestha/async.vim')
   minpac#add('prabirshrestha/asyncomplete-buffer.vim')
   minpac#add('prabirshrestha/asyncomplete-lsp.vim')
   minpac#add('prabirshrestha/asyncomplete.vim')
@@ -285,7 +283,6 @@ def! s:PackRegister(): void
   minpac#add('sgur/vim-operator-openbrowser')
   minpac#add('thinca/vim-ambicmd')
   minpac#add('thinca/vim-ft-help_fold')
-  # minpac#add('thinca/vim-operator-sequence')
   minpac#add('thinca/vim-partedit')
   minpac#add('thinca/vim-prettyprint')
   minpac#add('thinca/vim-quickrun')
@@ -300,11 +297,8 @@ def! s:PackRegister(): void
   minpac#add('vim-jp/vital.vim')
   minpac#add('vim-scripts/autodate.vim')
 
-  minpac#add('gyim/vim-boxdraw', {'type': 'opt'})
-  # minpac#add('mityu/vim-readingvimrc-files', {'type': 'opt'})
-  minpac#add('tweekmonster/helpful.vim', {'type': 'opt'})
-  minpac#add('y0za/vim-reading-vimrc', {'type': 'opt'})
-  minpac#add('rbtnn/vim-coloredit', {'type': 'opt'})
+  minpac#add('tweekmonster/helpful.vim', {type: 'opt'})
+  minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
 enddef
 def! s:PackInit(): bool
   try
