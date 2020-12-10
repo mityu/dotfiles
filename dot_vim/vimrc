@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 04-Dec-2020.
+" Last Change: 10-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -9,10 +9,10 @@ if has('vim_starting')
   let $MYVIMRC = resolve(expand('<sfile>'))
 endif
 def! s:FoldIsBlockOpen(line: string): bool
-  return line =~# '\v^%(fu%[nction]|%(export\s+)?def|if|for|while|try)'
+  return line =~# '\v^%(fu%[nction]|%(export\s+)?def|if|for|while|try)|augroup\s+%(END)@!'
 enddef
 def! s:FoldIsBlockClose(line: string): bool
-  return line =~# '\v^end%(func%[tion]|def|if|for|while|try)'
+  return line =~# '\v^%(end%(func%[tion]|def|if|for|while|try)|augroup\s+END)'
 enddef
 function! FoldExprForVimrc() abort
   " TODO: Fold with marker
@@ -21,7 +21,11 @@ function! FoldExprForVimrc() abort
     return '='
   elseif s:FoldIsBlockOpen(line)
     return '>1'
-  elseif v:lnum == 1 || s:FoldIsBlockClose(getline(v:lnum - 1))
+  elseif v:lnum == 1 ||
+        \ s:FoldIsBlockClose(getline(prevnonblank(v:lnum - 1)))
+    if getline(v:lnum) ==# '' && (v:lnum - 1) == prevnonblank(v:lnum -1)
+      return '='
+    endif
     return 0
   endif
   return '='
@@ -671,6 +675,165 @@ endfunction
 command! -bar EnableShiftTenKey call s:ShiftTenKey(1)
 command! -bar DisableShiftTenKey call s:ShiftTenKey(0)
 
+" f t F T ; ,
+let s:CharJump = {}
+def! s:CharJumpInit()
+  s:CharJump = {
+    forward: v:true,
+    exclusive: v:false, # should be inclusive?
+    char: '',
+  }
+enddef
+call s:CharJumpInit()
+
+def! s:CharJump(forward: bool, exclusive: bool): string
+  var char = s:CharJump_GetChar()
+  if char ==# "\<ESC>"
+    return "\<ESC>"
+  elseif char ==# "\<C-k>"  # Support digraph
+    for i in [0, 1]
+      var graph = s:CharJump_GetChar()
+      if graph ==# "\<ESC>"  # Cancel
+        return "\<ESC>"
+      endif
+      char ..= graph
+    endfor
+  endif
+  s:CharJump.forward = forward
+  s:CharJump.exclusive = exclusive
+  s:CharJump.char = char
+  return "\<Plug>(VimrcCharJumpDo)"  # A trick to make this dot-repeatable
+enddef
+
+def! s:CharJumpRepeat(reverse: bool)
+  var forward_save = s:CharJump.forward
+  if reverse
+    s:CharJump.forward = !s:CharJump.forward
+  endif
+  try
+    s:CharJumpDo()
+  finally
+    s:CharJump.forward = forward_save
+  endtry
+enddef
+
+def! s:CharJumpDo()
+  if s:CharJump.char ==# ''
+    # Not valid
+    return
+  elseif s:CharJump.char[0] =~# '\a'
+    s:CharJumpDo_alphabet()
+  else
+    s:CharJumpDo_theother()
+  endif
+enddef
+
+def! s:CharJumpDo_alphabet_search_pattern(): string
+  # Jump to only boundary of words (support CamelCase and snake_case)
+  var upper = toupper(s:CharJump.char)
+  var lower = tolower(s:CharJump.char)
+  var elements = [
+    '%(^|<|_)@<=[' .. upper .. lower .. ']', # snake_case
+    '[' .. upper .. lower .. ']%(>|_|$)@=', # snake_case
+    lower .. '\u@=', # CamelCase
+    '\l@<=' .. upper, # CamelCase
+  ]
+  return '\C\v%(' .. join(elements, '|') .. ')'
+enddef
+
+def! s:CharJumpDo_alphabet()
+  var curpos_save = getpos('.')
+  var pattern = s:CharJumpDo_alphabet_search_pattern()
+  if s:CharJump.exclusive
+    if s:CharJump.forward
+      pattern = '.' .. pattern .. '@='
+    else
+      pattern ..= '@<=.'
+    endif
+  endif
+  var stopline = line('.')
+  var flags = s:CharJump.forward ? '' : 'b'
+  for i in range(v:count1)
+    if search(pattern, flags, stopline) == 0  # Pattern not found
+      setpos('.', curpos_save)
+      return
+    endif
+  endfor
+  if mode(1) ==# 'no'
+    normal! v
+    setpos('.', curpos_save)
+  endif
+enddef
+
+def! s:CharJumpDo_theother()
+  execute 'normal! ' ..
+    (mode(1) ==# 'no' ? 'v' : '') ..
+    v:count1 ..
+    (s:CharJump.forward ? (s:CharJump.exclusive ? 't' : 'f') : (s:CharJump.exclusive ? 'T' : 'F')) ..
+    s:CharJump.char
+enddef
+
+def! s:CharJump_GetChar(): string
+  var key: any = getchar()
+  if type(key) == v:t_string
+    return key
+  endif
+  return nr2char(key)
+enddef
+
+def! s:CharJump_disable()
+  nunmap f
+  ounmap f
+  vunmap f
+  nunmap F
+  ounmap F
+  vunmap F
+  nunmap t
+  ounmap t
+  vunmap t
+  nunmap T
+  ounmap T
+  vunmap T
+  nunmap ;
+  ounmap ;
+  vunmap ;
+  nunmap ,
+  ounmap ,
+  vunmap ,
+enddef
+
+def! s:CharJump_enable()
+  nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+  onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+  vnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+
+  nmap <expr> f <SID>CharJump(v:true, v:false)
+  omap <expr> f <SID>CharJump(v:true, v:false)
+  vmap <expr> f <SID>CharJump(v:true, v:false)
+
+  nmap <expr> F <SID>CharJump(v:false, v:false)
+  omap <expr> F <SID>CharJump(v:false, v:false)
+  vmap <expr> F <SID>CharJump(v:false, v:false)
+
+  nmap <expr> t <SID>CharJump(v:true, v:true)
+  omap <expr> t <SID>CharJump(v:true, v:true)
+  vmap <expr> t <SID>CharJump(v:true, v:true)
+
+  nmap <expr> T <SID>CharJump(v:false, v:true)
+  omap <expr> T <SID>CharJump(v:false, v:true)
+  vmap <expr> T <SID>CharJump(v:false, v:true)
+
+  nnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+  onoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+  vnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+
+  nnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+  onoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+  vnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+enddef
+
+command! CharJumpEnable call s:CharJump_enable()
+command! CharJumpDisable call s:CharJump_disable()
 
 " Use :execute here to avoid creepy highlight.
 execute 'digraphs (( 65288'
