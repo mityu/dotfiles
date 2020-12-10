@@ -8,28 +8,6 @@ if has('vim_starting')
   scriptencoding utf-8
   let $MYVIMRC = resolve(expand('<sfile>'))
 endif
-def! s:FoldIsBlockOpen(line: string): bool
-  return line =~# '\v^%(fu%[nction]|%(export\s+)?def|if|for|while|try)|augroup\s+%(END)@!'
-enddef
-def! s:FoldIsBlockClose(line: string): bool
-  return line =~# '\v^%(end%(func%[tion]|def|if|for|while|try)|augroup\s+END)'
-enddef
-function! FoldExprForVimrc() abort
-  " TODO: Fold with marker
-  let line = getline(v:lnum)
-  if line =~# '^\s'
-    return '='
-  elseif s:FoldIsBlockOpen(line)
-    return '>1'
-  elseif v:lnum == 1 ||
-        \ s:FoldIsBlockClose(getline(prevnonblank(v:lnum - 1)))
-    if getline(v:lnum) ==# '' && (v:lnum - 1) == prevnonblank(v:lnum -1)
-      return '='
-    endif
-    return 0
-  endif
-  return '='
-endfunction
 
 " Local utility functions
 function! s:SIDPrefix() abort
@@ -441,10 +419,6 @@ augroup vimrc_filetype
   autocmd FileType c,cpp setlocal foldmethod=indent
   autocmd BufRead .envrc set filetype=sh
   autocmd FileType makefile setlocal noexpandtab nosmarttab
-
-  " Cannot set foldexpr in modeline without modelineexpr, so use autocmd.
-  execute 'autocmd BufRead ' .. $MYVIMRC .. ' setlocal foldmethod=expr ' ..
-        \ 'foldexpr=FoldExprForVimrc()'
 augroup END
 augroup vimrc_mru
   autocmd BufWritePost * call vimrc#mru#onReadFile()  " TODO: Change func name
