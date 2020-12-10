@@ -465,13 +465,9 @@ nnoremap <Space>tk <Cmd>terminal ++close<CR>
 nnoremap <Space>tl <Cmd>belowright vertical terminal ++close<CR>
 nnoremap <Space>tt <Cmd>tab terminal ++close<CR>
 nnoremap <Space>w <Cmd>update<CR>
-nnoremap <Space>q <Cmd>quit<CR>
+nnoremap <Space>q <C-w>q
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
-nnoremap <nowait> Z <Cmd>call <SID>toggle_zooming_window()<CR>
-nnoremap <C-w>z <Cmd>call <SID>toggle_zooming_window()<CR>
-" nnoremap <expr> n 'Nn'[v:searchforward] .. 'zzzv'
-" nnoremap <expr> N 'nN'[v:searchforward] .. 'zzzv'
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
 " Avoid to regester calling textobj function commands to the command-history
@@ -483,7 +479,7 @@ inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
-inoremap <silent> <expr> <C-y> pumvisible() ? '<C-y>' : '<C-r>=vimrc#pinsnip#expand()<CR>'
+inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
@@ -613,41 +609,6 @@ def! s:MapTabmove(delta: number)
 enddef
 delfunc s:_loop_define
 delfunc s:_simple_loop_define
-"
-" Shift-ten-key
-let s:ten_key_pair = [
-      \['1', '!'],
-      \['2', '"'],
-      \['3', '#'],
-      \['4', '$'],
-      \['5', '%'],
-      \['6', '&'],
-      \['7', "'"],
-      \['8', '('],
-      \['9', ')'],
-      \]
-let s:ten_key_mapbase = '<Plug>(vimrc-tenkey-%s)'
-for s:pair in s:ten_key_pair
-  for s:key in s:pair
-    execute 'inoremap' printf(s:ten_key_mapbase, s:key) s:key
-  endfor
-  unlet s:key
-endfor|unlet s:pair
-function! s:ShiftTenKey(enablize) abort
-  if a:enablize
-    for [key1, key2] in s:ten_key_pair
-      execute 'imap' key1 printf(s:ten_key_mapbase, key2)
-      execute 'imap' key2 printf(s:ten_key_mapbase, key1)
-    endfor
-  else
-    for [key1, key2] in s:ten_key_pair
-      execute 'imap' key1 printf(s:ten_key_mapbase, key1)
-      execute 'imap' key2 printf(s:ten_key_mapbase, key2)
-    endfor
-  endif
-endfunction
-command! -bar EnableShiftTenKey call s:ShiftTenKey(1)
-command! -bar DisableShiftTenKey call s:ShiftTenKey(0)
 
 " f t F T ; ,
 let s:CharJump = {}
@@ -1246,7 +1207,7 @@ if s:PluginExists('gina.vim')
             })
     if bufnr != 0
       setlocal nocursorline nocursorcolumn filetype=diff
-      nnoremap <buffer> <nowait> q <Cmd>quit<CR>
+      nnoremap <buffer> <nowait> q <C-w>q
       cursor(1, 0)
     endif
   enddef
@@ -1447,23 +1408,23 @@ if s:PluginExists('vim-quickrun')
     \}
   " TODO: Improve. (Support windows, etc)
   let g:quickrun_config['cpp/sfml'] = {
-    \  'type' : 'cpp',
-    \  'cmdopt' : '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
+    \  'type': 'cpp',
+    \  'cmdopt': '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
     \}
   let g:quickrun_config.objc = {
-    \  'command' : 'cc',
-    \  'execute' : ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
+    \  'command': 'cc',
+    \  'execute': ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
     \  'tempfile' : '%{tempname()}.m',
     \}
   let g:quickrun_config.applescript = {
-    \  'command' : 'osascript',
-    \  'execute' : '%c %s:p',
-    \  'tempfile' : '%{tempname()}.applescript',
+    \  'command': 'osascript',
+    \  'execute': '%c %s:p',
+    \  'tempfile': '%{tempname()}.applescript',
     \}
   let g:quickrun_config.swift = {
-    \  'command' : 'swift',
-    \  'execute' : '%c %s%p',
-    \  'tempfile' : '%{tempname()}.swift',
+    \  'command': 'swift',
+    \  'execute': '%c %s%p',
+    \  'tempfile': '%{tempname()}.swift',
     \}
   nnoremap <expr> <C-c> quickrun#is_running() ?
         \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
@@ -1471,7 +1432,7 @@ if s:PluginExists('vim-quickrun')
   nmap <Space>r <Plug>(quickrun)
   vmap <Space>r <Plug>(quickrun)
   augroup vimrc_filetype
-    autocmd FileType quickrun nnoremap <buffer> q <Cmd>q<CR>
+    autocmd FileType quickrun nnoremap <buffer> q <C-w>q
   augroup END
 endif
 if s:PluginExists('vim-textobj-between')
@@ -1480,6 +1441,11 @@ if s:PluginExists('vim-textobj-between')
   vmap ad <Plug>(textobj-between-a)
   vmap id <Plug>(textobj-between-i)
   let g:textobj_between_no_default_key_mappings = 1
+endif
+if s:PluginExists('capture.vim')
+  augroup vimrc_filetype
+    autocmd Filetype capture nnoremap q <C-w>q
+  augroup END
 endif
 if s:PluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
