@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-Dec-2020.
+" Last Change: 13-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -665,14 +665,23 @@ enddef
 
 def! s:CharJumpDo_alphabet_search_pattern(): string
   # Jump to only boundary of words (support CamelCase and snake_case)
-  var upper = toupper(s:CharJump.char)
-  var lower = tolower(s:CharJump.char)
-  var elements = [
-    '%(^|<|_)@<=[' .. upper .. lower .. ']', # snake_case
-    '[' .. upper .. lower .. ']%(>|_|$)@=', # snake_case
-    lower .. '\u@=', # CamelCase
-    '\l@<=' .. upper, # CamelCase
-  ]
+  var elements: list<string>
+  if s:CharJump.char =~# '\l'
+    var upper = toupper(s:CharJump.char)
+    var lower = tolower(s:CharJump.char)
+    elements = [
+      '%(^|<|_)@<=[' .. upper .. lower .. ']', # snake_case
+      '[' .. upper .. lower .. ']%(>|_|$)@=', # snake_case
+      lower .. '\u@=', # CamelCase
+      '\l@<=' .. upper, # CamelCase
+    ]
+  else
+    elements = [
+      '%(^|<|_)@<=' .. s:CharJump.char,
+      s:CharJump.char .. '%(>|_|$)@=',
+      '\l@<=' .. s:CharJump.char,
+    ]
+  endif
   return '\C\v%(' .. join(elements, '|') .. ')'
 enddef
 
@@ -769,6 +778,7 @@ enddef
 
 command! CharJumpEnable call s:CharJump_enable()
 command! CharJumpDisable call s:CharJump_disable()
+CharJumpEnable
 
 " Use :execute here to avoid creepy highlight.
 execute 'digraphs (( 65288'
