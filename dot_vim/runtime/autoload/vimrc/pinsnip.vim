@@ -28,7 +28,8 @@ export def vimrc#pinsnip#expand(): string
     cursor_line += 1
     if idx >= 0
       cursor_col = idx
-      snip[cursor_line] = strpart(line, 0, idx) .. line[idx + strlen(CursorPlaceholder) :]
+      snip[cursor_line] =
+          strpart(line, 0, idx) .. line[idx + strlen(CursorPlaceholder) :]
       remove(snip, -1) # Remove the new line; It's not needed.
       break
     endif
@@ -67,8 +68,8 @@ def FindSnip(filetype: string, comparison: string): list<string>
 
   # Literal matching of dict-key
   {
-    var candidates: list<string> = copy(keys)
-                ->filter({_, key -> stridx(key, comparison) != -1})
+    var candidates: list<string> =
+          copy(keys)->filter({_, key -> stridx(key, comparison) != -1})
     if !empty(candidates)
       return snipdict[candidates[0]]
     endif
@@ -76,7 +77,8 @@ def FindSnip(filetype: string, comparison: string): list<string>
 
   # Fuzzy matching of dict-key
   {
-    var candidates: list<string> = matchfuzzy(keys, comparison, {matchseq: true})
+    var candidates: list<string> =
+            matchfuzzy(keys, comparison, {matchseq: true})
     if !empty(candidates)
       return snipdict[candidates[0]]
     endif

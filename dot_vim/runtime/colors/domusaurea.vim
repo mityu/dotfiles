@@ -1,6 +1,6 @@
-# Last Change: 30-Nov-2020.
-# Author: mityu
-# This colorscheme is based on billw
+" Last Change: 21-Dec-2020.
+" Author: mityu
+" This colorscheme is based on billw
 vim9script
 
 set background=dark
