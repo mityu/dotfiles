@@ -144,3 +144,9 @@ function update_components(){
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     zplug update
 }
+
+if [ -n "$VIM_TERMINAL" ]; then
+    function drop() {
+        echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
+    }
+fi
