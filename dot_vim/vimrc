@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 21-Dec-2020.
+" Last Change: 22-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -537,6 +537,10 @@ function! s:_loop_define(config) abort
   if mode ==# 'n'
     let config = deepcopy(a:config)
     let config.mode = 't'
+    if config.enter_with[: strlen(&termwinkey)] !=# &termwinkey &&
+          \ config.enter_with[0] !=# eval(printf('"\%s"', &termwinkey))
+      let config.enter_with = '<C-w>' .. config.enter_with
+    endif
     call map(config.map, 's:_loop_define_generate_tmap(v:val)')
     call s:_loop_define(config)
   endif
@@ -712,60 +716,40 @@ def! s:CharJump_GetChar(): string
   return nr2char(key)
 enddef
 
-def! s:CharJump_disable()
-  nunmap f
-  ounmap f
-  vunmap f
-  nunmap F
-  ounmap F
-  vunmap F
-  nunmap t
-  ounmap t
-  vunmap t
-  nunmap T
-  ounmap T
-  vunmap T
-  nunmap ;
-  ounmap ;
-  vunmap ;
-  nunmap ,
-  ounmap ,
-  vunmap ,
-enddef
+" f F t T ; , declarations {{{
+nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+vnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
 
-def! s:CharJump_enable()
-  nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-  onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-  vnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+nmap <expr> f <SID>CharJump(v:true, v:false)
+omap <expr> f <SID>CharJump(v:true, v:false)
+vmap <expr> f <SID>CharJump(v:true, v:false)
 
-  nmap <expr> f <SID>CharJump(v:true, v:false)
-  omap <expr> f <SID>CharJump(v:true, v:false)
-  vmap <expr> f <SID>CharJump(v:true, v:false)
+nmap <expr> F <SID>CharJump(v:false, v:false)
+omap <expr> F <SID>CharJump(v:false, v:false)
+vmap <expr> F <SID>CharJump(v:false, v:false)
 
-  nmap <expr> F <SID>CharJump(v:false, v:false)
-  omap <expr> F <SID>CharJump(v:false, v:false)
-  vmap <expr> F <SID>CharJump(v:false, v:false)
+nmap <expr> t <SID>CharJump(v:true, v:true)
+omap <expr> t <SID>CharJump(v:true, v:true)
+vmap <expr> t <SID>CharJump(v:true, v:true)
 
-  nmap <expr> t <SID>CharJump(v:true, v:true)
-  omap <expr> t <SID>CharJump(v:true, v:true)
-  vmap <expr> t <SID>CharJump(v:true, v:true)
+nmap <expr> T <SID>CharJump(v:false, v:true)
+omap <expr> T <SID>CharJump(v:false, v:true)
+vmap <expr> T <SID>CharJump(v:false, v:true)
 
-  nmap <expr> T <SID>CharJump(v:false, v:true)
-  omap <expr> T <SID>CharJump(v:false, v:true)
-  vmap <expr> T <SID>CharJump(v:false, v:true)
+nnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+onoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+vnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
 
-  nnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
-  onoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
-  vnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
+nnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+onoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+vnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
 
-  nnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-  onoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-  vnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-enddef
-
-command! CharJumpEnable call s:CharJump_enable()
-command! CharJumpDisable call s:CharJump_disable()
-CharJumpEnable
+nnoremap _f f
+nnoremap _F F
+nnoremap _t t
+nnoremap _T T
+" }}}
 
 " Use :execute here to avoid creepy highlight.
 execute 'digraphs (( 65288'
