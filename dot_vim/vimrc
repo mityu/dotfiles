@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 13-Dec-2020.
+" Last Change: 21-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -326,9 +326,11 @@ command! -bar PackUpdate call s:PackUpdate()
 command! -bar PackClean  call s:PackClean()
 command! -bar PackStatus call s:PackStatus()
 
-" Options
-syntax on
-filetype plugin indent on
+" Options {{{
+if has('vim_starting')
+  syntax on
+  filetype plugin indent on
+endif
 colorscheme domusaurea
 language C
 set relativenumber number
@@ -375,7 +377,7 @@ set previewpopup=highlight:Normal
 set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
-
+" }}}
 
 let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
 call s:Mkdir(s:cache_dir, 'p')
@@ -412,9 +414,6 @@ if executable('ag')
   let &grepprg = 'ag --vimgrep'
   let &grepformat = '%f:%l:%c:%m'
 endif
-augroup vimrc_syntax
-  autocmd User vimrc_initialize syntax enable
-augroup END
 augroup vimrc_filetype
   autocmd FileType c,cpp setlocal foldmethod=indent
   autocmd BufRead .envrc set filetype=sh
@@ -426,8 +425,8 @@ augroup END
 augroup vimrc_checktime
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
 augroup END
-"
-" Mapping
+
+" Mapping {{{
 nnoremap : q:A
 vnoremap : q:A
 nnoremap <Space>: q:k
@@ -493,22 +492,10 @@ cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
-
-let s:Omap = {range, lhs, rhs ->
-      \[execute(printf('onoremap %s%s %s%s', range, lhs, range, rhs)),
-      \execute(printf('vnoremap %s%s %s%s', range, lhs, range, rhs))]}
-let s:EnhancedOmap = {lhs, rhs ->
-      \ [s:Omap('a', lhs, rhs), s:Omap('i', lhs, rhs)]
-      \}
-call s:EnhancedOmap('2', '"')
-call s:EnhancedOmap('7', "'")
-call s:EnhancedOmap('8', '(')
-call s:EnhancedOmap(', ', '<')
-unlet s:Omap s:EnhancedOmap
-
-def! s:TerminalMap(mapcmd: string, lhs: string, rhs: string, mods: string = ''): void
-  execute printf('%s %s %s%s %s%s',
-       \ mapcmd, mods, &termwinkey, lhs, &termwinkey, rhs)
+" }}}
+def! s:TerminalMap(mapcmd: string, lhs: string, rhs: string): void
+  execute printf('%s %s%s %s%s',
+       \ mapcmd, &termwinkey, lhs, &termwinkey, rhs)
 enddef
 call s:TerminalMap('tnoremap', ':', ':<C-f>A')
 call s:TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
@@ -567,7 +554,7 @@ function! s:_simple_loop_define(config) abort
         \ '[v:val, config.enter_with .. v:val]')
   call s:_loop_define(config)
 endfunction
-"Window management
+" Window management
 call s:_simple_loop_define({
       \ 'id': 'Window',
       \ 'enter_with': '<C-w>',
@@ -812,8 +799,6 @@ function! s:cmdwin_enter() abort
 
   " Execute an previous command easiler.
   nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
-
-  set completefunc=vimrc#pathComplete
 
   let cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
@@ -1670,7 +1655,7 @@ def! s:ShowmodeLabel(): string
   return ''
 enddef
 augroup vimrc_showmode
-  autocmd ColorScheme,Syntax * call s:ShowmodeInit()
+  autocmd ColorScheme * call s:ShowmodeInit()
   autocmd User vimrc_initialize call s:ShowmodeInit()
 augroup END
 
@@ -1752,7 +1737,6 @@ augroup vimrc_emphasize_indent
   autocmd WinEnter * call s:EmphasizeIndent()
   autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:EmphasizeIndent()
   autocmd User vimrc_initialize call s:EmphasizeIndent()
-  autocmd Syntax * highlight link VimrcEmphasisIndent CursorLine
 augroup END
 def! s:EmphasizeIndent()
   if exists('w:disable_emphasis_indent') && <bool>w:disable_emphasis_indent
@@ -1790,7 +1774,6 @@ augroup vimrc_warningspace
   autocmd WinEnter * call s:WarningSpace()
   autocmd OptionSet * call s:WarningSpace()
   autocmd User vimrc_initialize call s:WarningSpace()
-  autocmd Syntax * highlight link WarningSpace Error
 augroup END
 def! s:WarningSpace()
   # Clean up.
@@ -1835,6 +1818,7 @@ def! s:FiloreMapping()
          ['k', 'loop-cursor-up'],
          ['j', 'loop-cursor-down'],
          ['<CR>', 'open-file'],
+         ['/', 'filter-files'],
          ['<C-h>', 'start-history'],
         ]
   map(mapping, {key, val ->
@@ -1882,13 +1866,6 @@ command! -nargs=? -complete=file GitDiff call s:GitDiff(<q-args>)
 augroup vimrc_gyoza
   autocmd User vimrc_initialize call vimrc#gyoza#enable()
 augroup END
-
-" zsh
-" function! Tapi_edit_line(bufnr, args) abort
-"   let buffer = a:args[0]
-"   let curpos = a:args[1]
-"   echom $KEYMAP
-" endfunction
 
 " lvimrc
 let s:_lvimrc = s:Rc('lvimrc')
