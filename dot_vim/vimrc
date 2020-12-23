@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 22-Dec-2020.
+" Last Change: 23-Dec-2020.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -989,7 +989,7 @@ def! s:FindGitroot(arg_target: string = bufname('%')): string
     s:EchomsgWarning('Not a git repository: ' .. target)
     return ''
   endif
-  return fnamemodify(git_dir, ':h')
+  return fnamemodify(git_dir, ':p:h:h')
 enddef
 def! s:Gof(path: string): void
   if !executable('gof')
@@ -1821,10 +1821,17 @@ def! s:GitDiffGetcmd(arg_target: string): string
     return ''
   endif
   return printf('git -C %s --no-pager diff --no-color %s',
-          gitroot, shellescape(target))
+          gitroot, target)
 enddef
-def! s:GitDiff(arg_target: string = bufname('%')): void
-  var target: string = resolve(arg_target)
+
+def! s:GitDiff(arg_target: string): void
+  var target: string
+  if arg_target ==# ''
+    target = bufname('%')
+  else
+    target = arg_target
+  endif
+  target = resolve(target)
   if getftype(target) ==# ''
     s:EchomsgError('File or directory does not exists: ' .. target)
     return
@@ -1837,7 +1844,7 @@ def! s:GitDiff(arg_target: string = bufname('%')): void
           term_name: '[git diff] ' .. fnamemodify(target, ':~:.'),
           norestore: 1,
         })
-  if bufnr
+  if bufnr != 0
     setlocal nocursorline nocursorcolumn filetype=diff
     nnoremap <buffer> <nowait> q <Cmd>quit<CR>
     cursor(1, 0)
