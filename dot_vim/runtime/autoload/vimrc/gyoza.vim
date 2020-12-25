@@ -36,7 +36,7 @@ enddef
 def GetConfig(): list<any>
   var ft_configs = get(config, &filetype, {})
   var global_configs = get(config, '_', {})->
-        \filter({key, val -> !has_key(ft_configs, key)})
+        \filter((key, val) => (!has_key(ft_configs, key)))
 
   return items(ft_configs) + items(global_configs)
 enddef

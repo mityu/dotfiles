@@ -6,16 +6,17 @@ final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
 export def vimrc#delete_undofiles()
   final Echomsg = VimrcFunc('echomsg')
   var undodir_save = &undodir
+  var undofiles: list<string>
   try
     noautocmd set undodir-=.
-    var undofiles = globpath(&undodir, '*', true, true)
+    undofiles = globpath(&undodir, '*', true, true)
   finally
     &undodir = undodir_save
   endtry
 
   # Remove unreadable undofiles and them whose original files are still exists
-  undofiles->filter({_, val -> filereadable(val)})
-    ->filter({_, val -> !fnamemodify(val, ':t')->tr('%', SLASH)->filereadable()})
+  undofiles->filter((_, val) => filereadable(val))
+    ->filter((_, val) => (!fnamemodify(val, ':t')->tr('%', SLASH)->filereadable()))
 
     if empty(undofiles)
       Echomsg('All undofiles are used. It''s already clean.')

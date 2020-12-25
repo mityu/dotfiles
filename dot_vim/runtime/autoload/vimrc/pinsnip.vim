@@ -16,8 +16,8 @@ export def vimrc#pinsnip#expand(): string
   endif
 
   final current_indent = getline('.')->matchstr('^\s*')
-  snip->map({_: number, line: string ->
-          current_indent .. substitute(line, "^\t*\t", GetOneIndentString(), 'g')})
+  snip->map((_: number, line: string) =>
+          current_indent .. substitute(line, "^\t*\t", GetOneIndentString(), 'g'))
   add(snip, current_indent) # Add a new line if there's no `CursorPlaceholder`
 
   var cursor_line = -1
@@ -69,7 +69,7 @@ def FindSnip(filetype: string, comparison: string): list<string>
   # Literal matching of dict-key
   {
     var candidates: list<string> =
-          copy(keys)->filter({_, key -> stridx(key, comparison) != -1})
+          copy(keys)->filter((_, key) => (stridx(key, comparison) != -1))
     if !empty(candidates)
       return snipdict[candidates[0]]
     endif
