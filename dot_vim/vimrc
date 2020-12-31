@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 23-Dec-2020.
+" Last Change: 01-Jan-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -95,7 +95,7 @@ def! s:GetcharString(...expr: list<number>): any
 enddef
 def! s:ask(question: string): bool
   call s:EchoQuestion(question)
-  return s:has(['y', 'Y'], s:getchar_string())
+  return s:has(['y', 'Y'], s:GetcharString())
 enddef
 def! s:Mkdir(dir: string, ...opt: list<any>): bool
   if isdirectory(dir)
@@ -364,7 +364,6 @@ set history=500
 set keywordprg=:help
 set shortmess& shortmess+=Ic
 set helplang=ja
-set foldmethod=marker
 set hidden
 set diffopt=internal,algorithm:histogram
 "set breakindent
@@ -602,6 +601,7 @@ delfunc s:_loop_define
 delfunc s:_simple_loop_define
 
 " f t F T ; ,
+" NOTE: This doesn't consider 'selection'
 let s:CharJump = {}
 def! s:CharJumpInit()
   s:CharJump = {
@@ -701,11 +701,14 @@ def! s:CharJumpDo_alphabet()
 enddef
 
 def! s:CharJumpDo_theother()
-  execute 'normal! ' ..
-    (mode(1) ==# 'no' ? 'v' : '') ..
-    v:count1 ..
+  var first_cur_pos = getcurpos()
+  execute 'normal! ' .. v:count1 ..
     (s:CharJump.forward ? (s:CharJump.exclusive ? 't' : 'f') : (s:CharJump.exclusive ? 'T' : 'F')) ..
     s:CharJump.char
+  if mode(1) ==# 'no' && getcurpos() != first_cur_pos
+    normal! v
+    setpos('.', first_cur_pos)
+  endif
 enddef
 
 def! s:CharJump_GetChar(): string
@@ -794,21 +797,13 @@ function! s:cmdwin_enter() abort
     normal! G
     call asyncomplete#disable_for_buffer()
   elseif s:has('/?', cmdwin_type)
-    " NOTE: :set hlsearch here does not work.
+    " TODO: Support :substitute, :global
     augroup vimrc_incsearch
       autocmd!
       autocmd TextChanged,TextchangedI,CursorMoved <buffer>
-           \ call s:cmdwin_incsearch()
+          \ call s:CmdwinIncsearch()
     augroup END
-    let s:cmdwin_incsearch = {'pattern_save': @/, 'curpos': getpos('.')}
-    if exists('*win_execute')
-      let s:cmdwin_incsearch.current_winid = win_getid(winnr('#'))
-      function! s:cmdwin_incsearch.win_execute(command) abort
-        return s:WinExecute(self.current_winid, a:command)
-      endfunction
-      call s:cmdwin_incsearch.win_execute(
-            \ 'var s:cmdwin_incsearch.curpos = getpos(".")')
-    endif
+    call s:CmdwinIncsearchInit()
   endif
 endfunction
 function! s:cmdwin_leave() abort
@@ -816,11 +811,7 @@ function! s:cmdwin_leave() abort
     call s:cmdwin_save_options.restore()
   endif
   if s:has('/?', expand('<afile>'))
-    let @/ = s:cmdwin_incsearch.pattern_save
-    if has_key(s:cmdwin_incsearch, 'curpos')
-      call s:cmdwin_incsearch.win_execute(
-            \ 'call setpos(".", s:cmdwin_incsearch.curpos)')
-    endif
+    call s:CmdwinIncsearchTerminate()
     augroup vimrc_incsearch
       autocmd!
     augroup END
@@ -833,21 +824,42 @@ def! s:CmdwinCompletion(select_next: bool): string
     return "\<C-x>\<C-v>"
   endif
 enddef
-function! s:cmdwin_incsearch() abort
-  let @/ = getline('.')
-  if exists('*win_execute')
-    call s:cmdwin_incsearch.win_execute('call s:cmdwin_incsearch_jump()')
+def! s:CmdwinIncsearchInit()
+  var flags = 'sc' .. (getcmdwintype() ==# '/' ? '' : 'b') .. (&wrapscan ? 'w' : 'W')
+  final winID = win_getid(winnr('#'))
+  final curpos = s:WinExecute(winID, 'echo getcurpos()')->split("\n")[0]->eval()
+  b:incsearch = {
+    winID: winID,
+    search_flags: flags,
+    restore_curpos_command: printf('call setpos(".", %s)', curpos),
+    match_id: -1
+  }
+enddef
+def! s:CmdwinIncsearch()
+  s:CmdwinIncsearchTerminate()
+  var pat = getline('.')
+  if pat ==# ''
+    return
   endif
-  set hlsearch
+  if &ignorecase # FIXME: Why is this needed?
+    pat = '\c' .. pat
+  endif
+  var command = printf('echo search(%s, %s)',
+                    string(pat), string(b:incsearch.search_flags))
+  if s:WinExecute(b:incsearch.winID, command)->split("\n")[0]->eval() > 0
+    b:incsearch.match_id = matchadd('Search', pat, 0, b:incsearch.match_id,
+                              {window: b:incsearch.winID})
+    nohlsearch
+  endif
   redraw
-endfunction
-function! s:cmdwin_incsearch_jump() abort
-  call setpos('.', s:cmdwin_incsearch.curpos)
-  try
-    normal! n
-  catch
-  endtry
-endfunction
+enddef
+def! s:CmdwinIncsearchTerminate()
+  if b:incsearch.match_id != -1
+    matchdelete(b:incsearch.match_id, b:incsearch.winID)
+    b:incsearch.match_id = -1
+  endif
+  s:WinExecute(b:incsearch.winID, b:incsearch.restore_curpos_command)
+enddef
 def! s:CmdwinSelectHistory()
   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
   map(history, {_, val -> matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$')})
@@ -941,6 +953,7 @@ def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
     echo output
   endif
 enddef
+
 function! s:Draft() abort
   let b:vimrc_draft_save_options = vital#vital#import('Vim.Guard').store(['&l:buftype', '&l:swapfile'])
   setlocal buftype=nofile noswapfile
@@ -973,6 +986,7 @@ def! VimrcScratchComplete(lead: string, line: string, pos: number): list<string>
   var pat = '^' .. lead
   return filter(['split', 'vsplit', 'tabedit', 'edit'], {_, val -> val =~? pat})
 enddef
+
 def! s:ListTasks(args: string)
   var target = '%'
   if args =~# 'rf'
@@ -982,6 +996,7 @@ def! s:ListTasks(args: string)
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 enddef
+
 def! s:FindGitroot(arg_target: string = bufname('%')): string
   var target: string = resolve(arg_target)
   var git_dir: string = finddir('.git', target .. ';')
@@ -991,6 +1006,7 @@ def! s:FindGitroot(arg_target: string = bufname('%')): string
   endif
   return fnamemodify(git_dir, ':p:h:h')
 enddef
+
 def! s:Gof(path: string): void
   if !executable('gof')
     echo '"gof" command not found.'
@@ -1009,6 +1025,7 @@ def! s:GofForMapping()
   var git_root = s:FindGitroot()
   s:Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
+
 def! Tapi_gof(bufnum: number, file_info: dict<string>): void
   var winid = win_getid(winnr('#'))
   var buftype = getwinvar(winid, '&buftype')
