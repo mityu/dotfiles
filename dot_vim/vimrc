@@ -771,12 +771,12 @@ digraphs ,, 12289
 digraphs .. 12290
 digraphs -- 12540
 
-function! s:cmdwin_enter() abort
-  " Type <CR> to execute current line in command-line window.
+def! s:CmdwinEnter()
+  # Type <CR> to execute current line in command-line window.
   nnoremap <buffer> <CR> <CR>
 
-  " Return back to the current window from command-line window with
-  " inputting <C-c> once.
+  # Return back to the current window from command-line window with
+  # inputting <C-c> once.
   nnoremap <buffer> <C-c> <C-c><C-c>
   nmap <buffer> q <C-c>
   imap <buffer> <C-c> <ESC><C-c>
@@ -784,39 +784,40 @@ function! s:cmdwin_enter() abort
   inoremap <buffer> <C-l><C-n> <C-x><C-n>
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
-  " Execute an previous command easiler.
+  # Execute an previous command easiler.
   nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
 
-  let cmdwin_type = expand('<afile>')
+  final cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
-    let s:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
+    b:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
     setlocal completeopt=menu,preview
     execute printf('silent! 1,$-%d delete _', &cmdwinheight)
     normal! G
-    call asyncomplete#disable_for_buffer()
+    asyncomplete#disable_for_buffer()
   elseif s:has('/?', cmdwin_type)
-    " TODO: Support :substitute, :global
+    # TODO: Support :substitute, :global
     augroup vimrc_incsearch
       autocmd!
       autocmd TextChanged,TextchangedI,CursorMoved <buffer>
           \ call s:CmdwinIncsearch()
     augroup END
-    call s:CmdwinIncsearchInit()
+    s:CmdwinIncsearchInit()
   endif
-endfunction
-function! s:cmdwin_leave() abort
-  if exists('s:cmdwin_save_options')
-    call s:cmdwin_save_options.restore()
+enddef
+def! s:CmdwinLeave()
+  if exists('b:cmdwin_save_options')
+    # FIXME: :call b:cmdwin_save_options.restore() doesn't work
+    call(b:cmdwin_save_options.restore, [], b:cmdwin_save_options)
   endif
   if s:has('/?', expand('<afile>'))
-    call s:CmdwinIncsearchTerminate()
+    s:CmdwinIncsearchTerminate()
     augroup vimrc_incsearch
       autocmd!
     augroup END
   endif
-endfunction
+enddef
 def! s:CmdwinCompletion(select_next: bool): string
   if pumvisible()
     return select_next ? '<C-n>' : '<C-p>'
@@ -880,8 +881,8 @@ def! s:CmdwinSelectHistoryCallback(item: dict<string>)
 enddef
 
 augroup vimrc_mapping
-  autocmd CmdWinEnter * call s:cmdwin_enter()
-  autocmd CmdWinLeave * call s:cmdwin_leave()
+  autocmd CmdWinEnter * call s:CmdwinEnter()
+  autocmd CmdWinLeave * call s:CmdwinLeave()
 augroup END
 
 if has('mac')
