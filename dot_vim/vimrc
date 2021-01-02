@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 01-Jan-2021.
+" Last Change: 02-Jan-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -848,7 +848,7 @@ def! s:CmdwinIncsearch()
   var command = printf('echo search(%s, %s)',
                     string(pat), string(b:incsearch.search_flags))
   if s:WinExecute(b:incsearch.winID, command)->split("\n")[0]->eval() > 0
-    b:incsearch.match_id = matchadd('Search', pat, 0, b:incsearch.match_id,
+    b:incsearch.match_id = matchadd('IncSearch', pat, 0, b:incsearch.match_id,
                               {window: b:incsearch.winID})
     nohlsearch
   endif
@@ -1289,18 +1289,41 @@ if s:PluginExists('vim-operator-swap')
 endif
 if s:PluginExists('asyncomplete.vim')
   " Ignorecase.
-  function! s:AsyncompletePreprocessor(context, matches) abort
-    let completions = []
-    let base = tolower(a:context.base)
-    for [source, matches] in items(a:matches)
-      for candidate in matches.items
-        if stridx(tolower(candidate.word), base) == 0
-          call add(completions, candidate)
-        endif
+  def! s:AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
+    var base = tolower(context.base)
+    var completions: list<dict<any>>
+    var subcompletions: list<dict<any>>
+    var fuzzycompletions: list<dict<any>>
+
+    if trim(context.base) !=# ''
+      for matches in values(matches_dict)
+        for candidate in matches.items
+          var idx = stridx(tolower(candidate.word), base)
+          if idx == -1
+            continue
+          elseif idx == 0
+            add(completions, candidate)
+          else
+            add(subcompletions, candidate)
+          endif
+        endfor
       endfor
-    endfor
-    call asyncomplete#preprocess_complete(a:context, completions)
-  endfunction
+    endif
+    completions += subcompletions
+
+    if !empty(completions)
+      asyncomplete#preprocess_complete(context, completions)
+      return
+    endif
+
+    # Workaround; matchfuzzy() always returns list<string>
+    var items: list<any> =
+          matches_dict->values()->map((_, val) => val.items)->flatten()
+    if trim(context.base) !=# ''
+      items = matchfuzzy(items, context.base, {key: 'word'})
+    endif
+    asyncomplete#preprocess_complete(context, items)
+  enddef
 
   let g:asyncomplete_auto_popup = 1
   let g:asyncomplete_force_refresh_on_context_changed = 1
@@ -1317,32 +1340,45 @@ if s:PluginExists('asyncomplete.vim')
   inoremap <C-l><C-n> <C-x><C-n><C-n>
   inoremap <C-l><C-p> <C-x><C-p><C-p>
 
-  def! s:RegisterAsyncompleteSources()
-    if s:PluginExists('asyncomplete-buffer.vim')
-      asyncomplete#register_source(
-          asyncomplete#sources#buffer#get_source_options({
-            name: 'buffer',
-            whitelist: ['*'],
-            completor: function('asyncomplete#sources#buffer#completor'),
-          }))
-    endif
-  enddef
-  augroup vimrc_asyncomplete_sources
-    autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
-  augroup END
+  " def! s:RegisterAsyncompleteSources()
+  "   if s:PluginExists('asyncomplete-buffer.vim')
+  "     asyncomplete#register_source(
+  "         asyncomplete#sources#buffer#get_source_options({
+  "           name: 'buffer',
+  "           whitelist: ['*'],
+  "           completor: function('asyncomplete#sources#buffer#completor'),
+  "         }))
+  "   endif
+  " enddef
+  " augroup vimrc_asyncomplete_sources
+  "   autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
+  " augroup END
 endif
 if s:PluginExists('vim-lsp')
   let g:lsp_signs_enabled = 1
   let g:lsp_signs_error = {'text': '>>'}
   let g:lsp_signs_warning = {'text': '--'}
   let g:lsp_signs_information = {'text': '--'}
-  let g:lsp_signs_hint = {'text': '? '}
+  let g:lsp_signs_hint = {'text': '!?'}
   let g:lsp_diagnostics_enabled = 1
   let g:lsp_diagnostics_float_delay = 10
   let g:lsp_diagnostics_float_cursor = 1
 
-  nnoremap <Plug>(<SID>-open-folding) zv
-  nmap <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
+  def! s:LspEnableForBuffer()
+    setlocal omnifunc=lsp#complete
+    nnoremap <buffer> <Plug>(<SID>-open-folding) zv
+    nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
+  enddef
+
+  def! s:LspDisableForBuffer()
+    setlocal omnifunc=
+    nunmap <buffer> gd
+  enddef
+
+  augroup vimrc_lsp
+    autocmd User lsp_buffer_enabled call s:LspEnableForBuffer()
+    autocmd User lsp_buffer_disabled call s:LspDisableForBuffer()
+  augroup END
 endif
 if s:PluginExists('previm')
   let g:previm_show_header = 0
