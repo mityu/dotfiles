@@ -1,4 +1,4 @@
-" Last Change: 21-Dec-2020.
+" Last Change: 07-Jan-2021.
 " Author: mityu
 " This colorscheme is based on billw
 vim9script
@@ -47,9 +47,9 @@ final Palette = {
 
 var GuiRunning = has('gui_running') || &termguicolors
 
-def GetColor(name: string): string # {{{
+def GetColor(name: string): string
   return name ==# 'NONE' ? 'NONE' : GetRawColor(Palette[name])
-enddef # }}}
+enddef
 
 if GuiRunning
   g:terminal_ansi_colors = [
@@ -73,12 +73,12 @@ if GuiRunning
 endif
 
 if GuiRunning
-  def GetRawColor(code: string): string # {{{
+  def GetRawColor(code: string): string
     return code
-  enddef # }}}
+  enddef
 else
   var ConvertedColors = {}
-  def GetRawColor(color_code: string): string # {{{
+  def GetRawColor(color_code: string): string
     var colorcode = color_code[1 :]
     if !has_key(ConvertedColors, colorcode)
       var code = str2nr(colorcode, 16)
@@ -90,12 +90,12 @@ else
       ConvertedColors[colorcode] = Color(color.r, color.g, color.b)->string()
     endif
     return ConvertedColors[colorcode]
-  enddef # }}}
+  enddef
 
 
   final t_Co = str2nr(&t_Co)
   # These functions are based on thinca/vim-guicolorscheme. Thank you!
-  def Graynum(x: number): number # {{{
+  def Graynum(x: number): number
     if t_Co == 88
       return [22, 68, 102, 126, 149, 172, 195, 218, 242, x]->sort('n')->index(x)
     else
@@ -107,22 +107,22 @@ else
         return m < 5 ? n : n + 1
       endif
     endif
-  enddef # }}}
-  def Graylvl(n: number): number # {{{
+  enddef
+  def Graylvl(n: number): number
     if t_Co == 88
       return get([0, 46, 92, 115, 139, 162, 185, 208, 231], n, 255)
     else
       return n == 0 ? 0 : 8 + (n * 10)
     endif
-  enddef # }}}
-  def Gray(n: number): number # {{{
+  enddef
+  def Gray(n: number): number
     if t_Co == 88
       return n == 0 ? 16 : n == 9 ? 79 : 79 + n
     else
       return n == 0 ? 16 : n == 25 ? 231 : 231 + n
     endif
-  enddef # }}}
-  def RGBnum(x: number): number # {{{
+  enddef
+  def RGBnum(x: number): number
     if t_Co == 88
       return [68, 171, 229, x]->sort('n')->index(x)
     else
@@ -134,22 +134,22 @@ else
         return m < 20 ? n : n + 1
       endif
     endif
-  enddef # }}}
-  def RGBlvl(n: number): number # {{{
+  enddef
+  def RGBlvl(n: number): number
     if t_Co == 88
       return get([0, 139, 205], n, 255)
     else
       return n == 0 ? 0 : 55 + (n * 40)
     endif
-  enddef # }}}
-  def RGB(r: number, g: number, b: number): number # {{{
+  enddef
+  def RGB(r: number, g: number, b: number): number
     if t_Co == 88
       return 16 + (r * 16) + (g * 4) + b
     else
       return 16 + (r * 36) + (g * 6) + b
     endif
-  enddef # }}}
-  def Color(r: number, g: number, b: number): number # {{{
+  enddef
+  def Color(r: number, g: number, b: number): number
     # get the closest Gray
     var gx = Graynum(r)
     var gy = Graynum(g)
@@ -184,10 +184,10 @@ else
       # only one possibility
       return RGB(x, y, z)
     endif
-  enddef # }}}
+  enddef
 endif
 
-def Hi(group: string, fg: string, bg: string, attr: string) # {{{
+def Hi(group: string, fg: string, bg: string, attr: string)
   var has_fg = fg !=# ''
   var has_bg = bg !=# ''
   var has_attr = attr !=# ''
@@ -216,17 +216,18 @@ def Hi(group: string, fg: string, bg: string, attr: string) # {{{
   endif
   cmd_attr = printf('%s=%s', type, cmd_attr)
   execute 'highlight' group cmd_fg cmd_bg cmd_attr
-enddef # }}}
-def Echoerr(msg: string) # {{{
+enddef
+def Echoerr(msg: string)
   echohl Error
   echomsg printf('[%s] %s', ColorsName, msg)
   echohl None
-enddef # }}}
+enddef
 
 
 # highlight statements
 Hi('Normal', 'cornsilk', 'blackgray', '')
 Hi('Comment', 'gold', '', '')
+Hi('Todo', 'vividorange', '', '')
 Hi('Constant', 'mediumspringgreen', '', '')
 Hi('String', 'orange', '', '')
 Hi('Character', 'orange', '', '')
@@ -265,6 +266,7 @@ Hi('LineNr', 'lightgray', '', '')
 Hi('CursorLineNr', 'yellow', '', '')
 
 Hi('Search', 'NONE', 'lightlightgray', '')
+Hi('IncSearch', 'NONE', 'lightlightgray', '')
 Hi('Visual', 'NONE', 'lightlightgray', '')
 Hi('VisualNOS', 'black', '', '')
 Hi('Title', 'orange', '', '')
