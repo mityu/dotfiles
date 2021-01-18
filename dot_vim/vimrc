@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 02-Jan-2021.
+" Last Change: 18-Jan-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -204,10 +204,10 @@ endif
 def! s:InitializeAutocmd(filename: string)
   var pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
   var augroups = readfile(filename)
-                    ->filter({_, line -> stridx(line, 'aug') != -1})
-                    ->filter({_, line -> line =~# pattern})
-                    ->map({_, line -> matchstr(line, pattern)})
-                    ->filter({_, augroup -> augroup !=? 'END'})
+                    ->filter((_, line) => stridx(line, 'aug') != -1)
+                    ->filter((_, line) => line =~# pattern)
+                    ->map((_, line) => matchstr(line, pattern))
+                    ->filter((_, augroup) => augroup !=? 'END')
                     ->sort()
                     ->uniq()
   for augroup in augroups
@@ -796,26 +796,12 @@ def! s:CmdwinEnter()
     execute printf('silent! 1,$-%d delete _', &cmdwinheight)
     normal! G
     asyncomplete#disable_for_buffer()
-  elseif s:has('/?', cmdwin_type)
-    # TODO: Support :substitute, :global
-    augroup vimrc_incsearch
-      autocmd!
-      autocmd TextChanged,TextchangedI,CursorMoved <buffer>
-          \ call s:CmdwinIncsearch()
-    augroup END
-    s:CmdwinIncsearchInit()
   endif
 enddef
 def! s:CmdwinLeave()
   if exists('b:cmdwin_save_options')
     # FIXME: :call b:cmdwin_save_options.restore() doesn't work
     call(b:cmdwin_save_options.restore, [], b:cmdwin_save_options)
-  endif
-  if s:has('/?', expand('<afile>'))
-    s:CmdwinIncsearchTerminate()
-    augroup vimrc_incsearch
-      autocmd!
-    augroup END
   endif
 enddef
 def! s:CmdwinCompletion(select_next: bool): string
@@ -825,45 +811,9 @@ def! s:CmdwinCompletion(select_next: bool): string
     return "\<C-x>\<C-v>"
   endif
 enddef
-def! s:CmdwinIncsearchInit()
-  var flags = 'sc' .. (getcmdwintype() ==# '/' ? '' : 'b') .. (&wrapscan ? 'w' : 'W')
-  final winID = win_getid(winnr('#'))
-  final curpos = s:WinExecute(winID, 'echo getcurpos()')->split("\n")[0]->eval()
-  b:incsearch = {
-    winID: winID,
-    search_flags: flags,
-    restore_curpos_command: printf('call setpos(".", %s)', curpos),
-    match_id: -1
-  }
-enddef
-def! s:CmdwinIncsearch()
-  s:CmdwinIncsearchTerminate()
-  var pat = getline('.')
-  if pat ==# ''
-    return
-  endif
-  if &ignorecase # FIXME: Why is this needed?
-    pat = '\c' .. pat
-  endif
-  var command = printf('echo search(%s, %s)',
-                    string(pat), string(b:incsearch.search_flags))
-  if s:WinExecute(b:incsearch.winID, command)->split("\n")[0]->eval() > 0
-    b:incsearch.match_id = matchadd('IncSearch', pat, 0, b:incsearch.match_id,
-                              {window: b:incsearch.winID})
-    nohlsearch
-  endif
-  redraw
-enddef
-def! s:CmdwinIncsearchTerminate()
-  if b:incsearch.match_id != -1
-    matchdelete(b:incsearch.match_id, b:incsearch.winID)
-    b:incsearch.match_id = -1
-  endif
-  s:WinExecute(b:incsearch.winID, b:incsearch.restore_curpos_command)
-enddef
 def! s:CmdwinSelectHistory()
   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-  map(history, {_, val -> matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$')})
+  map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
   reverse(history)
   gram#select({
          name: getcmdwintype() .. 'history',
@@ -947,7 +897,7 @@ command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
 def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
-  var output = execute(join(cmd, ' '))->split("\n")->filter({_, val -> val =~? pat})->join("\n")
+  var output = execute(join(cmd, ' '))->split("\n")->filter((_, val) => val =~? pat)->join("\n")
   if bang
     echomsg output
   else
@@ -985,7 +935,7 @@ def! s:Scratch(opener_arg: string)
 enddef
 def! VimrcScratchComplete(lead: string, line: string, pos: number): list<string>
   var pat = '^' .. lead
-  return filter(['split', 'vsplit', 'tabedit', 'edit'], {_, val -> val =~? pat})
+  return filter(['split', 'vsplit', 'tabedit', 'edit'], (_, val) => val =~? pat)
 enddef
 
 def! s:ListTasks(args: string)
@@ -1171,8 +1121,10 @@ if s:PluginExists('gina.vim')
     var rhs_base = printf(
             '<Cmd>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
             s:SIDPrefix())
-    Gina_nnoremap('status', 'n', printf(rhs_base, v:false))
-    Gina_nnoremap('status', 'N', printf(rhs_base, v:true))
+    Gina_nnoremap('status', 'n', printf(rhs_base, 'v:false'))
+    Gina_nnoremap('status', 'N', printf(rhs_base, 'v:true'))
+    # NOTE: Using v:true and v:false as variables above doesn't work because
+    # it seems to be changed into 'false' and 'true' (without v: namespace).
 
     Gina_nnoremap('status', 'dd',
            printf('<Cmd>call %sGinaDiff()<CR>', s:SIDPrefix()))
@@ -1233,7 +1185,7 @@ if s:PluginExists('vim-brownie')
   enddef
   def! VimrcTemplateComplete(arg: string, line: string, pos: number): list<string>
     return filter(brownie#list(s:BrownieFiletype(), 'template'),
-                {_, val -> stridx(val, arg) == 0})
+                (_, val) => stridx(val, arg) == 0)
   enddef
 
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
@@ -1687,7 +1639,7 @@ def! s:ShowmodeHighlight()
 enddef
 def! s:ShowmodeLabel(): string
   if win_getid() == g:statusline_winid &&
-        getwinvar(g:statusline_winid, '&modifiable') == 1
+        getwinvar(g:statusline_winid, '&modifiable')
     return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
   endif
   return ''
@@ -1847,20 +1799,19 @@ let g:mru_ignore_pattern = [
 
 " filore
 def! s:FiloreMapping()
-  var mapping = [
-         ['q', 'exit'],
-         ['o', 'toggle-directory-folding'],
-         ['l', 'enter-directory'],
-         ['h', 'leave-directory'],
-         ['.', 'toggle-show-hidden-files'],
-         ['k', 'loop-cursor-up'],
-         ['j', 'loop-cursor-down'],
-         ['<CR>', 'open-file'],
-         ['/', 'filter-files'],
-         ['<C-h>', 'start-history'],
-        ]
-  map(mapping, {key, val ->
-         'nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'})
+  var mapping: list<any> = [
+   ['q', 'exit'],
+   ['o', 'toggle-directory-folding'],
+   ['l', 'enter-directory'],
+   ['h', 'leave-directory'],
+   ['.', 'toggle-show-hidden-files'],
+   ['k', 'loop-cursor-up'],
+   ['j', 'loop-cursor-down'],
+   ['<CR>', 'open-file'],
+   ['/', 'filter-files'],
+   ['<C-h>', 'start-history'],
+  ]->mapnew((_: number, val: list<string>): string =>
+       ('nmap <buffer> ' .. val[0] .. ' <Plug>(filore-' .. val[1] .. ')'))
   execute join(mapping, "\n")
 enddef
 augroup vimrc_additional_plugins
