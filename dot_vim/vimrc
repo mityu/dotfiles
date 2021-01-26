@@ -624,6 +624,12 @@ def! s:CharJump(forward: bool, exclusive: bool): string
       endif
       char ..= graph
     endfor
+  elseif char ==# "\<C-v>"
+    var graph = s:CharJump_GetChar()
+    if graph ==# "\<ESC>" # Cancel
+      return "\<ESC>"
+    endif
+    char ..= graph
   endif
   s:CharJump.forward = forward
   s:CharJump.exclusive = exclusive
@@ -649,8 +655,10 @@ def! s:CharJumpDo()
     return
   elseif s:CharJump.char[0] =~# '\a'
     s:CharJumpDo_alphabet()
+  elseif s:CharJump.char[0] ==# "\<C-v>"
+    s:CharJumpDo_theother(s:CharJump.char[1])
   else
-    s:CharJumpDo_theother()
+    s:CharJumpDo_theother(s:CharJump.char)
   endif
 enddef
 
@@ -700,11 +708,10 @@ def! s:CharJumpDo_alphabet()
   endif
 enddef
 
-def! s:CharJumpDo_theother()
+def! s:CharJumpDo_theother(char: string)
   var first_cur_pos = getcurpos()
-  execute 'normal! ' .. v:count1 ..
-    (s:CharJump.forward ? (s:CharJump.exclusive ? 't' : 'f') : (s:CharJump.exclusive ? 'T' : 'F')) ..
-    s:CharJump.char
+  var operator = (s:CharJump.forward ? (s:CharJump.exclusive ? 't' : 'f') : (s:CharJump.exclusive ? 'T' : 'F'))
+  execute 'normal! ' .. v:count1 .. operator .. char
   if mode(1) ==# 'no' && getcurpos() != first_cur_pos
     normal! v
     setpos('.', first_cur_pos)
@@ -747,11 +754,6 @@ vnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
 nnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
 onoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
 vnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-
-nnoremap _f f
-nnoremap _F F
-nnoremap _t t
-nnoremap _T T
 " }}}
 
 " Use :execute here to avoid creepy highlight.
