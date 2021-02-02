@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Jan-2021.
+" Last Change: 03-Feb-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -795,7 +795,7 @@ def! s:CmdwinEnter()
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
     b:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
     setlocal completeopt=menu,preview
-    execute printf('silent! 1,$-%d delete _', &cmdwinheight)
+    execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
     normal! G
     asyncomplete#disable_for_buffer()
   endif
@@ -1272,7 +1272,8 @@ if s:PluginExists('asyncomplete.vim')
 
     # Workaround; matchfuzzy() always returns list<string>
     var items: list<any> =
-          matches_dict->values()->map((_, val) => val.items)->flatten()
+          matches_dict->values()->mapnew((_, val): list<any> => val.items)->flattennew()
+
     if trim(context.base) !=# ''
       items = matchfuzzy(items, context.base, {key: 'word'})
     endif
