@@ -319,6 +319,7 @@ highlight! link TabLineFill TabLine
 highlight! link StatusLineTerm StatusLine
 highlight! link StatusLineTermNC StatusLineNC
 highlight! link QuickFixLine CursorLine
+highlight! link helpNote PreProc
 
 augroup domusaurea
   autocmd!
