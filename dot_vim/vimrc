@@ -17,12 +17,6 @@ endfunction
 function! s:SNR() abort
   return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
 endfunction
-" function! s:Rc(fname) abort
-"   return s:filesystem.rcfile_prefix .. a:fname
-" endfunction
-" def! s:JoinPath(...arg: list<any>): string
-"   return join(arg, s:filesystem.slash)
-" enddef
 if has('win32')
   def! s:Rc(fname: string): string
     return '_' .. fname
@@ -255,7 +249,6 @@ def! s:PackRegister(): void
   minpac#add('mityu/vim-textobj-commentblock')
   minpac#add('osyo-manga/vim-jplus')
   minpac#add('osyo-manga/vim-operator-swap')
-  minpac#add('prabirshrestha/asyncomplete-buffer.vim')
   minpac#add('prabirshrestha/asyncomplete-lsp.vim')
   minpac#add('prabirshrestha/asyncomplete.vim')
   minpac#add('prabirshrestha/vim-lsp')
@@ -263,6 +256,7 @@ def! s:PackRegister(): void
   minpac#add('rhysd/vim-operator-surround')
   minpac#add('sgur/vim-gf-autoload')
   minpac#add('sgur/vim-operator-openbrowser')
+  minpac#add('skanehira/gh.vim')
   minpac#add('thinca/vim-ambicmd')
   minpac#add('thinca/vim-ft-help_fold')
   minpac#add('thinca/vim-partedit')
@@ -274,7 +268,6 @@ def! s:PackRegister(): void
   minpac#add('tyru/caw.vim')
   minpac#add('tyru/open-browser.vim')
   minpac#add('vim-jp/autofmt')
-  minpac#add('vim-jp/syntax-vim-ex')
   minpac#add('vim-jp/vimdoc-ja')
   minpac#add('vim-jp/vital.vim')
   minpac#add('vim-scripts/autodate.vim')
@@ -1171,9 +1164,6 @@ if s:PluginExists('vim-findent')
     autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
 endif
-if s:PluginExists('vim-Verdin')
-  let g:Verdin#autoparen = 1
-endif
 if s:PluginExists('vim-brownie')
   let g:brownie_template_dirs =
         \ [s:JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
@@ -1242,7 +1232,6 @@ if s:PluginExists('vim-operator-swap')
   map _sp <Plug>(operator-swap)
 endif
 if s:PluginExists('asyncomplete.vim')
-  " Ignorecase.
   def! s:AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
     var base = tolower(context.base)
     var completions: list<dict<any>>
@@ -1294,20 +1283,6 @@ if s:PluginExists('asyncomplete.vim')
   inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
   inoremap <C-l><C-n> <C-x><C-n><C-n>
   inoremap <C-l><C-p> <C-x><C-p><C-p>
-
-  " def! s:RegisterAsyncompleteSources()
-  "   if s:PluginExists('asyncomplete-buffer.vim')
-  "     asyncomplete#register_source(
-  "         asyncomplete#sources#buffer#get_source_options({
-  "           name: 'buffer',
-  "           whitelist: ['*'],
-  "           completor: function('asyncomplete#sources#buffer#completor'),
-  "         }))
-  "   endif
-  " enddef
-  " augroup vimrc_asyncomplete_sources
-  "   autocmd User asyncomplete_setup call s:RegisterAsyncompleteSources()
-  " augroup END
 endif
 if s:PluginExists('vim-lsp')
   let g:lsp_diagnostics_signs_enabled = 1
@@ -1461,6 +1436,10 @@ if s:PluginExists('caw.vim')
   let g:caw_dollarpos_sp_right = ' '
   let g:caw_hatpos_sp = ' '
   let g:caw_zeropos_sp = ' '
+
+  augroup vimrc_filetype
+    autocmd Filetype vim let b:caw_oneline_comment = '#'
+  augroup END
 endif
 if s:PluginExists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
