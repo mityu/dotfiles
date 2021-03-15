@@ -3,8 +3,11 @@ vim9script
 SetUndoFtplugin setlocal shiftwidth<
 SetUndoFtplugin delcommand AddAbort
 SetUndoFtplugin setlocal foldexpr< foldmethod<
+# The below is already set by textobj-function
+# SetUndoFtplugin unlet! b:textobj_function_select
 setlocal shiftwidth=2
 setlocal foldmethod=expr
+setbufvar('%', 'textobj_function_select', function('vimrc#textobj_vim#select'))
 &l:foldexpr = expand('<SID>') .. 'FoldExpr()'
 
 def FoldIsBlockOpen(line: string): bool
