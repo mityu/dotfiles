@@ -662,15 +662,15 @@ def! s:CharJumpDo_alphabet_search_pattern(): string
     var upper = toupper(s:CharJump.char)
     var lower = tolower(s:CharJump.char)
     elements = [
-      '%(^|<|_)@<=[' .. upper .. lower .. ']', # snake_case
-      '[' .. upper .. lower .. ']%(>|_|$)@=', # snake_case
+      '%(^|<|\A)@<=[' .. upper .. lower .. ']', # snake_case
+      '[' .. upper .. lower .. ']%(>|\A|$)@=', # snake_case
       lower .. '\u@=', # CamelCase
       '\l@<=' .. upper, # CamelCase
     ]
   else
     elements = [
-      '%(^|<|_)@<=' .. s:CharJump.char,
-      s:CharJump.char .. '%(>|_|$)@=',
+      '%(^|<|\A)@<=' .. s:CharJump.char,
+      s:CharJump.char .. '%(>|\A|$)@=',
       '\l@<=' .. s:CharJump.char,
     ]
   endif
