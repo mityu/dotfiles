@@ -117,7 +117,7 @@ else
 fi
 if zplug check junegunn/fzf-bin; then
     export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
-    export FZF_DEFAULT_OPTS="--reverse"
+    export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
     function select-history(){
         local bufsave
