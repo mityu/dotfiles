@@ -1405,6 +1405,9 @@ if s:PluginExists('vim-textobj-between')
   vmap ad <Plug>(textobj-between-a)
   vmap id <Plug>(textobj-between-i)
   let g:textobj_between_no_default_key_mappings = 1
+
+  omap i/ id/
+  omap a/ ad/
 endif
 if s:PluginExists('capture.vim')
   augroup vimrc_filetype
