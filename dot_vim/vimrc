@@ -781,6 +781,7 @@ def! s:CmdwinEnter()
 
   # Execute an previous command easiler.
   nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+  vimrc#incsearch#setup()
 
   final cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
