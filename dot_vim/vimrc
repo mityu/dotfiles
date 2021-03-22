@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 15-Mar-2021.
+" Last Change: 22-Mar-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -1844,6 +1844,16 @@ command! -nargs=? -complete=file GitDiff call s:GitDiff(<q-args>)
 augroup vimrc_gyoza
   autocmd User vimrc_initialize call vimrc#gyoza#enable()
 augroup END
+
+" splash
+command! Splash call vimrc#splash#show()
+if !v:vim_did_enter
+  augroup vimrc_splash
+    autocmd!
+    autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
+    autocmd StdinReadPre * autocmd! vimrc_splash VimEnter
+  augroup END
+endif
 
 " lvimrc
 let s:_lvimrc = s:Rc('lvimrc')
