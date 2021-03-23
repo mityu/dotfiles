@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 22-Mar-2021.
+" Last Change: 23-Mar-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -870,6 +870,7 @@ command! -bar LcdCurrent lcd %:p:h
 command! -bar TcdCurrent tcd %:p:h
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! -nargs=? CopyToClipboard call setreg('*', getreg(<q-args>, 1))
+command! -bar -nargs=? ClipBuffer call vimrc#clipbuffer(<q-args>)
 command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0, <f-args>)

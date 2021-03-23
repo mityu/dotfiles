@@ -67,3 +67,24 @@ export def vimrc#pathComplete(findstart: bool, base: string): any
 
   return PathComplete.completions
 enddef
+
+export def vimrc#clipbuffer(arg: string)
+  var opener = strlen(arg) == 0 ? 'tabedit' : arg
+  execute 'hide' opener 'clipboard://buffer'
+
+  setbufvar(bufnr(), 'clipbuffer_bufhidden', &l:bufhidden)
+  setlocal buftype=acwrite nomodified bufhidden=hide noswapfile
+
+  augroup vimrc_clipbuffer
+    autocmd! * <buffer>
+    autocmd BufWriteCmd <buffer> ++nested ClipbufferSet()
+    autocmd BufWipeout  <buffer> ++nested
+          \ setbufvar(bufnr(), '&bufhidden', b:clipbuffer_bufhidden)
+  augroup END
+enddef
+
+def ClipbufferSet()
+  setreg('*', getline(1, '$')->join("\<CR>"))
+  deletebufline(bufnr(), 1, '$')
+  setlocal nomodified
+enddef
