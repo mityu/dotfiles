@@ -90,7 +90,6 @@ bindkey -M visual '_sa' add-surround
 # curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 export ZPLUG_HOME=~/.zplug
 source $ZPLUG_HOME/init.zsh
-zplug "b4b4r07/enhancd", use:init.sh
 zplug "junegunn/fzf-bin", from:gh-r, as:command, rename-to:fzf #, frozen:1
 zplug "b4b4r07/zsh-gomi", as:command, use:bin/gomi, on:junegunn/fzf-bin
 zplug "mafredri/zsh-async", from:github
