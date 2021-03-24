@@ -4,7 +4,7 @@ final MODIFIERS = ["\<Cmd>", "\<Plug>", "\<SNR>"]
 final ASCIIART =<< END
 吾輩はやれば出来る子である。
 
-       ∩ ∩
+        ∩ ∩
        ('･ω･)
    ____|⊃ ／(____
   /    *--(______/
@@ -83,6 +83,11 @@ enddef
 def PopupFilter(winID: number, key: string): bool
   if key[0] !=# "\x80" || index(MODIFIERS, key) >= 0
     popup_close(winID)
+  endif
+
+  # Do not process <CR>
+  if key ==# "\<CR>"
+    return true
   endif
   return false
 enddef
