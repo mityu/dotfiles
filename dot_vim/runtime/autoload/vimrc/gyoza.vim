@@ -272,29 +272,33 @@ MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
 
 
-var BracketCompletefunc_: func(dict<any>, dict<any>): string # Workaround
-BracketCompletefunc_ = (prevline: dict<any>, nextline: dict<any>): string => {
-  return '}'
-}
-bracketCompletefunc['_'] = BracketCompletefunc_
+bracketCompletefunc['_'] = (prevline: dict<any>, nextline: dict<any>): string => '}'
 
-BracketCompletefunc_ = (prevline: dict<any>, nextline: dict<any>): string => {
+bracketCompletefunc['c'] = (prevline: dict<any>, nextline: dict<any>): string => {
   if prevline.trimed =~# '\v^%(typedef\s+)?%(struct|enum)>'
     return '};'
-  elseif prevline.trimed =~# '^class\>' # Also support C++ here
+  endif
+  return '}'
+}
+
+bracketCompletefunc['cpp'] = (prevline: dict<any>, nextline: dict<any>): string => {
+  var c_style_completion = call(bracketCompletefunc.c, [prevline, nextline])
+  if c_style_completion !=# '' && c_style_completion !=# '}'
+    return c_style_completion
+  endif
+
+  if prevline.trimed =~# '^class\>'
     if nextline.trimed =~# '\v^%(public|private|protected)>\:'
       return ''
     endif
     return '};'
   endif
-
   return '}'
 }
-bracketCompletefunc['c'] = BracketCompletefunc_
-bracketCompletefunc['cpp'] = BracketCompletefunc_
 
-BracketCompletefunc_ = (prevline: dict<any>, nextline: dict<any>): string => {
+bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
   # TODO: Support legacy VimScript
   return '}'
 }
-bracketCompletefunc['vim'] = BracketCompletefunc_
+
+bracketCompletefunc['vimspec'] = bracketCompletefunc['vim']

@@ -1,0 +1,59 @@
+call themis#helper('command').with(themis#helper('assert'))
+Describe gyoza.vim
+  Before all
+    command! -nargs=+ Feedkeys call feedkeys(<args>, 'tix')
+
+    call vimrc#gyoza#enable()
+    new
+    inoremap <buffer> @ <CR>
+    call test_override('char_avail', 1)
+  End
+
+  Before each
+    %delete _
+    set filetype=
+  End
+
+  After all
+    delcommand Feedkeys
+    .bwipeout!
+    call vimrc#gyoza#disable()
+    call test_override('char_avail', 0)
+  End
+
+  It completes closing-bracket
+    Feedkeys 'i{@'
+    Assert Equals(getline('.'), '}')
+  End
+
+  It completes closing-bracket with indentation
+    set noexpandtab
+    Feedkeys "i\t{@"
+    Assert Equals(getline('.'), "\t}")
+    set expandtab<
+  End
+
+  It brings closing-bracket to the next line
+    inoremap <buffer> ?
+          \ <Cmd>Assert Equals([getline('.'), getline('$')], ["\t", '})'])<CR>
+    Feedkeys "i{})\<left>\<left>\<CR>?"
+    iunmap <buffer> ?
+  End
+
+  It doesn't complete closing-bracket when the next line has one
+    call append(1, '}')
+    Feedkeys 'i{@'
+    Assert Equals(line('$'), 3)
+    Assert Equals(getline('.'), '')
+    Assert Equals(getline('$'), '}')
+  End
+
+  It completes block with indentation
+    set filetype=vim
+    set noexpandtab
+    Feedkeys "i\tdef Func()@"
+    Assert Equals(line('$'), 2)
+    Assert Equals(getline('.'), "\tenddef")
+    set expandtab<
+  End
+End
