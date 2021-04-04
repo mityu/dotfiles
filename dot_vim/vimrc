@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 23-Mar-2021.
+" Last Change: 04-Apr-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -266,6 +266,7 @@ def! s:PackRegister(): void
   minpac#add('thinca/vim-themis')
   minpac#add('tyru/capture.vim')
   minpac#add('tyru/caw.vim')
+  " minpac#add('tyru/eskk.vim')
   minpac#add('tyru/open-browser.vim')
   minpac#add('vim-jp/autofmt')
   minpac#add('vim-jp/vimdoc-ja')
@@ -1391,6 +1392,15 @@ if s:PluginExists('vim-quickrun')
     \  'execute': '%c %s%p',
     \  'tempfile': '%{tempname()}.swift',
     \}
+  let g:quickrun_config.python = {
+    \  'command': 'python3',
+    \  'hook/eval/template': 'print(%s)'
+    \}
+  let g:quickrun_config.python2 = {
+    \  'command': 'python',
+    \  'hook/eval/template': 'print(%s)'
+    \}
+
   nnoremap <expr> <C-c> quickrun#is_running() ?
         \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
         \ '<C-c>'
@@ -1412,7 +1422,7 @@ if s:PluginExists('vim-textobj-between')
 endif
 if s:PluginExists('capture.vim')
   augroup vimrc_filetype
-    autocmd Filetype capture nnoremap q <C-w>q
+    autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
 if s:PluginExists('caw.vim')
