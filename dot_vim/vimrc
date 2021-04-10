@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 04-Apr-2021.
+" Last Change: 11-Apr-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
@@ -594,160 +594,30 @@ enddef
 delfunc s:_loop_define
 delfunc s:_simple_loop_define
 
-" f t F T ; ,
-" NOTE: This doesn't consider 'selection'
-let s:CharJump = {}
-def! s:CharJumpInit()
-  s:CharJump = {
-    forward: v:true,
-    exclusive: v:false, # should be inclusive?
-    char: '',
-  }
-enddef
-call s:CharJumpInit()
-
-def! s:CharJump(forward: bool, exclusive: bool): string
-  var char = s:CharJump_GetChar()
-  if char ==# "\<ESC>"
-    return "\<ESC>"
-  elseif char ==# "\<C-k>"  # Support digraph
-    for i in [0, 1]
-      var graph = s:CharJump_GetChar()
-      if graph ==# "\<ESC>"  # Cancel
-        return "\<ESC>"
-      endif
-      char ..= graph
-    endfor
-  elseif char ==# "\<C-v>"
-    var graph = s:CharJump_GetChar()
-    if graph ==# "\<ESC>" # Cancel
-      return "\<ESC>"
-    endif
-    char ..= graph
-  endif
-  s:CharJump.forward = forward
-  s:CharJump.exclusive = exclusive
-  s:CharJump.char = char
-  return "\<Plug>(VimrcCharJumpDo)"  # A trick to make this dot-repeatable
-enddef
-
-def! s:CharJumpRepeat(reverse: bool)
-  var forward_save = s:CharJump.forward
-  if reverse
-    s:CharJump.forward = !s:CharJump.forward
-  endif
-  try
-    s:CharJumpDo()
-  finally
-    s:CharJump.forward = forward_save
-  endtry
-enddef
-
-def! s:CharJumpDo()
-  if s:CharJump.char ==# ''
-    # Not valid
-    return
-  elseif s:CharJump.char[0] =~# '\a'
-    s:CharJumpDo_alphabet()
-  elseif s:CharJump.char[0] ==# "\<C-v>"
-    s:CharJumpDo_theother(s:CharJump.char[1])
-  else
-    s:CharJumpDo_theother(s:CharJump.char)
-  endif
-enddef
-
-def! s:CharJumpDo_alphabet_search_pattern(): string
-  # Jump to only boundary of words (support CamelCase and snake_case)
-  var elements: list<string>
-  if s:CharJump.char =~# '\l'
-    var upper = toupper(s:CharJump.char)
-    var lower = tolower(s:CharJump.char)
-    elements = [
-      '%(^|<|\A)@<=[' .. upper .. lower .. ']', # snake_case
-      '[' .. upper .. lower .. ']%(>|\A|$)@=', # snake_case
-      lower .. '\u@=', # CamelCase
-      '\l@<=' .. upper, # CamelCase
-    ]
-  else
-    elements = [
-      '%(^|<|\A)@<=' .. s:CharJump.char,
-      s:CharJump.char .. '%(>|\A|$)@=',
-      '\l@<=' .. s:CharJump.char,
-    ]
-  endif
-  return '\C\v%(' .. join(elements, '|') .. ')'
-enddef
-
-def! s:CharJumpDo_alphabet()
-  var curpos_save = getpos('.')
-  var pattern = s:CharJumpDo_alphabet_search_pattern()
-  if s:CharJump.exclusive
-    if s:CharJump.forward
-      pattern = '.' .. pattern .. '@='
-    else
-      pattern ..= '@<=.'
-    endif
-  endif
-  var stopline = line('.')
-  var flags = s:CharJump.forward ? '' : 'b'
-  for i in range(v:count1)
-    if search(pattern, flags, stopline) == 0  # Pattern not found
-      setpos('.', curpos_save)
-      return
-    endif
-  endfor
-  if mode(1) ==# 'no'
-    normal! v
-    setpos('.', curpos_save)
-  endif
-enddef
-
-def! s:CharJumpDo_theother(char: string)
-  var first_cur_pos = getcurpos()
-  var operator = (s:CharJump.forward ? (s:CharJump.exclusive ? 't' : 'f') : (s:CharJump.exclusive ? 'T' : 'F'))
-  execute 'normal! ' .. v:count1 .. operator .. char
-  if mode(1) ==# 'no' && getcurpos() != first_cur_pos
-    normal! v
-    setpos('.', first_cur_pos)
-  endif
-enddef
-
-def! s:CharJump_GetChar(): string
-  var key: any = getchar()
-  if type(key) == v:t_string
-    return key
-  endif
-  return nr2char(key)
-enddef
-
 " f F t T ; , declarations {{{
-nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-vnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+nmap <expr> f vimrc#charjump#jump(v:true, v:false)
+omap <expr> f vimrc#charjump#jump(v:true, v:false)
+vmap <expr> f vimrc#charjump#jump(v:true, v:false)
 
-nmap <expr> f <SID>CharJump(v:true, v:false)
-omap <expr> f <SID>CharJump(v:true, v:false)
-vmap <expr> f <SID>CharJump(v:true, v:false)
+nmap <expr> F vimrc#charjump#jump(v:false, v:false)
+omap <expr> F vimrc#charjump#jump(v:false, v:false)
+vmap <expr> F vimrc#charjump#jump(v:false, v:false)
 
-nmap <expr> F <SID>CharJump(v:false, v:false)
-omap <expr> F <SID>CharJump(v:false, v:false)
-vmap <expr> F <SID>CharJump(v:false, v:false)
+nmap <expr> t vimrc#charjump#jump(v:true, v:true)
+omap <expr> t vimrc#charjump#jump(v:true, v:true)
+vmap <expr> t vimrc#charjump#jump(v:true, v:true)
 
-nmap <expr> t <SID>CharJump(v:true, v:true)
-omap <expr> t <SID>CharJump(v:true, v:true)
-vmap <expr> t <SID>CharJump(v:true, v:true)
+nmap <expr> T vimrc#charjump#jump(v:false, v:true)
+omap <expr> T vimrc#charjump#jump(v:false, v:true)
+vmap <expr> T vimrc#charjump#jump(v:false, v:true)
 
-nmap <expr> T <SID>CharJump(v:false, v:true)
-omap <expr> T <SID>CharJump(v:false, v:true)
-vmap <expr> T <SID>CharJump(v:false, v:true)
+nnoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
+onoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
+vnoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
 
-nnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
-onoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
-vnoremap ; <Cmd>call <SID>CharJumpRepeat(v:false)<CR>
-
-nnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-onoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
-vnoremap , <Cmd>call <SID>CharJumpRepeat(v:true)<CR>
+nnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
+onoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
+vnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
 " }}}
 
 " Use :execute here to avoid creepy highlight.
@@ -788,17 +658,18 @@ def! s:CmdwinEnter()
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
-    b:cmdwin_save_options = vital#vital#import('Vim.Guard').store(['&l:completeopt'])
+    b:completeopt_save = &completeopt
     setlocal completeopt=menu,preview
     execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
     normal! G
-    asyncomplete#disable_for_buffer()
+    if s:PluginExists('asyncomplete.vim')
+      asyncomplete#disable_for_buffer()
+    endif
   endif
 enddef
 def! s:CmdwinLeave()
-  if exists('b:cmdwin_save_options')
-    # FIXME: :call b:cmdwin_save_options.restore() doesn't work
-    call(b:cmdwin_save_options.restore, [], b:cmdwin_save_options)
+  if exists('b:completeopt_save')
+    &completeopt = b:completeopt_save
   endif
 enddef
 def! s:CmdwinCompletion(select_next: bool): string
@@ -1447,7 +1318,7 @@ if s:PluginExists('caw.vim')
   map _c <Plug>(caw:hatpos:toggle:operator)
   imap <expr> <C-l><C-l> <SID>CawMap()
   let g:caw_no_default_keymappings = 1
-  let g:caw_dollarpos_sp_left = ' '
+  let g:caw_dollarpos_sp_left = '  '
   let g:caw_dollarpos_sp_right = ' '
   let g:caw_hatpos_sp = ' '
   let g:caw_zeropos_sp = ' '
