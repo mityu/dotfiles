@@ -1,9 +1,9 @@
 " Author: mityu
-" Last Change: 11-Apr-2021.
+" Last Change: 16-Apr-2021.
 " vim: shiftwidth=2
 " vim9script
 " Encoding
-if has('vim_starting')
+if !v:vim_did_enter
   set encoding=utf-8
   scriptencoding utf-8
   let $MYVIMRC = resolve(expand('<sfile>'))
@@ -75,12 +75,6 @@ def! s:EchoQuestion(question: string): void
   echohl NONE
   echon "\n"
 enddef
-def! s:IsVisualmode(): bool
-  return s:has(['v', 'V', "\<C-v>"], mode())
-enddef
-def! s:IsCmdwin(): bool
-  return getcmdwintype() !=# ''
-enddef
 def! s:glob(expr: string): list<string>
   return split(glob(expr), "\n")
 enddef
@@ -141,7 +135,8 @@ command! -nargs=1 -complete=command SetUndoFtplugin
 " Startup config
 const s:Windows = has('win32')
 const s:Unix = !s:Windows
-if has('vim_starting')
+let s:filesystem = get(g:, 'filesystem', {})
+if !v:vim_did_enter
   if has('multi_lang')
     if has('menu')
       set langmenu=ja.utf-8
@@ -158,7 +153,6 @@ if has('vim_starting')
     set mouse=a
   endif
 
-  let s:filesystem = {}
   if s:Windows
     let $DOT_VIM = expand('~\vimfiles')
     " let s:filesystem.slash = '\'
@@ -321,7 +315,7 @@ command! -bar PackClean  call s:PackClean()
 command! -bar PackStatus call s:PackStatus()
 
 " Options {{{
-if has('vim_starting')
+if !v:vim_did_enter
   syntax on
   filetype plugin indent on
 endif
@@ -397,7 +391,7 @@ if has('kaoriya')
   set fileencodings=guess,utf-8
   set ambiwidth=auto
 else
-  set fileencodings=utf-8
+  set fileencodings=utf-8,euc-jp,cp932,sjis
   set ambiwidth=double
 endif
 if s:Unix
@@ -441,7 +435,6 @@ noremap + <C-a>
 nnoremap j gj
 nnoremap k gk
 nnoremap <CR> o<ESC>
-nnoremap <S-CR> O<ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
 nnoremap <C-w>s <Cmd>belowright wincmd s<CR>
@@ -477,6 +470,9 @@ vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
 vnoremap <C-k> 7gk
 vnoremap <C-j> 7gj
+vnoremap * <ESC>*Ngvne<Cmd>nohlsearch<CR>
+vnoremap n n<Cmd>nohlsearch<CR>
+vnoremap N N<Cmd>nohlsearch<CR>
 
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
@@ -719,8 +715,6 @@ call add(s:_map, ['nnoremap', 'k', 'call vimrc#mru#start()'])
 call add(s:_map, ['nnoremap', 'b', 'call gram#sources#buffers#launch()'])
 call add(s:_map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
 call add(s:_map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
-call add(s:_map, ['nnoremap', 'm', 'MemoList'])
-call add(s:_map, ['nnoremap', 'o', 'OtameshiList'])
 execute join(map(s:_map, {->join([
       \  v:val[0],
       \  '<Space>' .. v:val[1],
@@ -747,9 +741,6 @@ command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0, <f-args>)
 command! -bar Draft call s:Draft()
-command! -bar UnDraft call s:Undraft()
-command! -bar -nargs=* -complete=customlist,VimrcScratchComplete
-      \ Scratch call s:Scratch(<q-args>)
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call s:ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
@@ -766,7 +757,10 @@ command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
 def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
-  var output = execute(join(cmd, ' '))->split("\n")->filter((_, val) => val =~? pat)->join("\n")
+  var output = execute(join(cmd, ' '))
+                ->split("\n")
+                ->filter((_: number, val: string): bool => val =~? pat)
+                ->join("\n")
   if bang
     echomsg output
   else
@@ -774,37 +768,8 @@ def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
   endif
 enddef
 
-function! s:Draft() abort
-  let b:vimrc_draft_save_options = vital#vital#import('Vim.Guard').store(['&l:buftype', '&l:swapfile'])
+def! s:Draft()
   setlocal buftype=nofile noswapfile
-endfunction
-def! s:Undraft()
-  if !exists('b:vimrc_draft_save_options')
-    return
-  endif
-  call b:vimrc_draft_save_options.restore()
-enddef
-def! s:Scratch(opener_arg: string)
-  var opener = opener_arg
-  var prefix = 'scratch://'
-  var name = s:Input('Scratch buffer name? ')
-  if name ==# ''
-    var identifier = 1
-    name = 'nameless/buffer-'
-    while bufexists(prefix .. name .. string(identifier))
-      identifier += 1
-    endwhile
-    name ..= string(identifier)
-  endif
-  if opener ==# ''
-    opener = 'split'
-  endif
-  execute opener prefix .. name
-  s:Draft()
-enddef
-def! VimrcScratchComplete(lead: string, line: string, pos: number): list<string>
-  var pat = '^' .. lead
-  return filter(['split', 'vsplit', 'tabedit', 'edit'], (_, val) => val =~? pat)
 enddef
 
 def! s:ListTasks(args: string)
@@ -838,8 +803,8 @@ def! s:Gof(path: string): void
   endif
   var minwidth = min([&columns, 100])
   var minheight = min([&lines, 40])
-  popup_create(term_start(gofcmd, {'hidden': 1, 'term_finish': 'close'}),
-        \ {'minwidth': minwidth, 'minheight': minheight})
+  popup_create(term_start(gofcmd, {hidden: 1, term_finish: 'close'}),
+        \ {minwidth: minwidth, minheight: minheight})
 enddef
 def! s:GofForMapping()
   var git_root = s:FindGitroot()
@@ -1209,7 +1174,7 @@ if s:PluginExists('vim-ambicmd')
     inoremap <buffer> <expr> <Space> <SID>AmbicmdExpand("\<Space>")
     inoremap <buffer> <expr> <bar> <SID>AmbicmdExpand("\<bar>")
     inoremap <buffer> <expr> <CR> <SID>AmbicmdExpand("\<CR>")
-    inoremap <buffer> <expr> <C-y> <SID>AmbicmdExpand('')
+    inoremap <buffer> <expr> <C-j> <SID>AmbicmdExpand('')
   enddef
 
   let g:ambicmd#show_completion_menu = 1
@@ -1583,11 +1548,8 @@ enddef
 
 " :terminal
 augroup vimrc_terminal
-  autocmd TerminalWinOpen * call s:TerminalWinOpen()
+  autocmd TerminalWinOpen * setlocal nonumber norelativenumber
 augroup END
-def! s:TerminalWinOpen()
-  setlocal nonumber norelativenumber
-enddef
 
 " EmphasisIndent
 highlight link VimrcEmphasisIndent CursorLine
@@ -1733,13 +1695,13 @@ augroup END
 
 " splash
 command! Splash call vimrc#splash#show()
-if !v:vim_did_enter
-  augroup vimrc_splash
-    autocmd!
-    autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
-    autocmd StdinReadPre * autocmd! vimrc_splash VimEnter
-  augroup END
-endif
+" if !v:vim_did_enter
+"   augroup vimrc_splash
+"     autocmd!
+"     autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
+"     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
+"   augroup END
+" endif
 
 " lvimrc
 let s:_lvimrc = s:Rc('lvimrc')
@@ -1752,7 +1714,7 @@ endif | unlet s:_lvimrc
 
 " gvimrc
 if has('gui_running')
-  if has('vim_starting')
+  if !v:vim_did_enter
     set lines=999
     set columns=9999
   endif
@@ -1768,7 +1730,7 @@ if has('gui_running')
 
     set columns=120
   elseif has('mac')
-    set guifont=Osaka-Mono:h14
+    set guifont=Cica:h14,Osaka-Mono:h14
     "set columns=120
   elseif has('xfontset')
     "for unix (use xfontset)
@@ -1784,14 +1746,14 @@ if has('gui_running')
 endif
 " Initialize when loading this file.
 augroup vimrc_initialize_dummy
-  " Do not provide an error. For more information, see `:h E217`
+  " Not to provide an error. For more information, see `:h E217`
   autocmd User vimrc_initialize " Do nothing.
 augroup END
 
-if has('vim_starting')
+if v:vim_did_enter
+  doautocmd User vimrc_initialize
+else
   augroup vimrc_initialize
     autocmd VimEnter * doautocmd User vimrc_initialize
   augroup END
-else
-  doautocmd User vimrc_initialize
 endif
