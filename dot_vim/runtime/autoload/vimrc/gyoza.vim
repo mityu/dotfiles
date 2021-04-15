@@ -1,4 +1,5 @@
 vim9script
+# TODO: Separate as a plugin when vim9script is fully implemented
 
 var config: dict<dict<any>>
 var bracketCompletefunc: dict<func(dict<any>, dict<any>): string>
@@ -65,10 +66,8 @@ enddef
 def TryToApply()
   tryToApply = false
 
-  # The following type specifier is necessary; vim9script cannot handle type
-  # correctly yet.
-  var nextline: dict<any> = GetLineData(nextnonblank(line('.') + 1))
-  var prevline: dict<any> = GetLineData(prevnonblank(line('.') - 1))
+  var nextline = GetLineData(nextnonblank(line('.') + 1))
+  var prevline = GetLineData(prevnonblank(line('.') - 1))
 
   if nextline.indent_depth > prevline.indent_depth
     return
