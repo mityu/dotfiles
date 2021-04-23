@@ -91,12 +91,12 @@ def FindSnip(filetype: string, comparison: string): list<string>
     var idx: number = -1
     var candidate: list<string>
     for snip in snips
-      var _ = stridx(snip[0], comparison)
-      if _ == -1
+      var idx_ = stridx(snip[0], comparison)
+      if idx_ == -1
         continue
       endif
-      if _ < idx || idx < 0
-        idx = _
+      if idx_ < idx || idx < 0
+        idx = idx_
         candidate = snip
       endif
     endfor
