@@ -1,10 +1,11 @@
 vim9script
 
-final SLASH = fnamemodify(getcwd(), ':p')[-1 :]
+execute 'import * as Vimrc from' string($MYVIMRC)
+
+final SLASH = Vimrc.Filesystem.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
 
 export def vimrc#delete_undofiles()
-  final Echomsg = VimrcFunc('echomsg')
   var undodir_save = &undodir
   var undofiles: list<string>
   try
@@ -15,26 +16,26 @@ export def vimrc#delete_undofiles()
   endtry
 
   # Remove unreadable undofiles and them whose original files are still exists
-  undofiles->filter((_, val) => filereadable(val))
-    ->filter((_, val) => (!fnamemodify(val, ':t')->tr('%', SLASH)->filereadable()))
+  undofiles->filter((_, val): bool => filereadable(val))
+    ->filter((_, val): bool => !fnamemodify(val, ':t')->tr('%', SLASH)->filereadable())
 
     if empty(undofiles)
-      Echomsg('All undofiles are used. It''s already clean.')
+      Vimrc.Echomsg('All undofiles are used. It''s already clean.')
       return
     endif
 
     echo join(undofiles, "\n") .. "\n"
-    if !VimrcFunc('ask')('Delete the above unused undofiles?')
-      Echomsg('Canceled.')
+    if !Vimrc.Ask('Delete the above unused undofiles?')
+      Vimrc.Echomsg('Canceled.')
       return
     endif
 
     for file in undofiles
       if delete(file)
-        Echomsg('Failed to delete: ' .. file)
+        Vimrc.Echomsg('Failed to delete: ' .. file)
       endif
     endfor
-    Echomsg('Deleted.')
+    Vimrc.Echomsg('Deleted.')
 enddef
 
 var PathComplete: dict<any> = {target_path: '', completions: []}
@@ -46,7 +47,7 @@ export def vimrc#pathComplete(findstart: bool, base: string): any
     else
       PathComplete.target_path = split(line, NON_ESCAPED_SPACE)[-1]
     endif
-    var completions = VimrcFunc('glob')(PathComplete.target_path .. '*')
+    var completions = Vimrc.Glob(PathComplete.target_path .. '*')
     var files: list<dict<string>> = []
     var dirs: list<dict<string>> = []
     for path in completions
@@ -85,6 +86,35 @@ enddef
 
 def ClipbufferSet()
   setreg('*', getline(1, '$')->join("\<CR>"))
-  deletebufline(bufnr(), 1, '$')
+  # deletebufline(bufnr(), 1, '$')
   setlocal nomodified
+enddef
+
+export def vimrc#set_digraph_for_japanese()
+  # Use :execute here to avoid creepy highlight.
+  execute 'digraphs (( 65288'
+  execute 'digraphs )) 65289'
+  execute 'digraphs {{ 12302'
+  execute 'digraphs }} 12303'
+  digraphs [[ 12300
+  digraphs ]] 12301
+  digraphs sp 12288
+  digraphs \"\" 8221
+  digraphs !! 65281
+  digraphs ?? 65311
+  digraphs << 65308
+  digraphs >> 65310
+  digraphs ,, 12289
+  digraphs .. 12290
+  digraphs -- 12540
+enddef
+
+export def vimrc#list_tasks()
+  var target = '%'
+  if args =~# 'rf'
+    target = '**/*.' .. expand('%:e')
+  elseif args !=# ''
+    target = args
+  endif
+  execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 enddef

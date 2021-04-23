@@ -1,101 +1,114 @@
 " Author: mityu
-" Last Change: 16-Apr-2021.
-" vim: shiftwidth=2
-" vim9script
-" Encoding
+" Last Change: 23-Apr-2021.
+" vim: shiftwidth=2 commentstring=#%s
+vim9script noclear
+# Encoding
 if !v:vim_did_enter
   set encoding=utf-8
   scriptencoding utf-8
-  let $MYVIMRC = resolve(expand('<sfile>'))
+  $MYVIMRC = resolve(expand('<sfile>'))
 endif
 
-" Local utility functions
-function! s:SIDPrefix() abort
-  " Returns "<SNR>{script-ID}_"
+# Local utility functions
+export def SIDPrefix(): string
+  # Returns "<SNR>{script-ID}_"
   return expand('<SID>')
-endfunction
-function! s:SNR() abort
-  return matchstr(s:SIDPrefix(), '<SNR>\zs\d\+\ze_$')
-endfunction
-if has('win32')
-  def! s:Rc(fname: string): string
-    return '_' .. fname
-  enddef
-  def! s:JoinPath(...arg: list<any>): string
-    return join(arg, '\')
-  enddef
-else
-  def! s:Rc(fname: string): string
-    return '.' .. fname
-  enddef
-  def! s:JoinPath(...arg: list<any>): string
-    return join(arg, '/')
-  enddef
-endif
-function! s:has(object, to_search) abort
-  let object_type = type(a:object)
-  if object_type == v:t_string
-    let func = 'stridx'
-    let not_found = -1
-  elseif object_type == v:t_list
-    let func = 'index'
-    let not_found = -1
-  elseif object_type == v:t_dict
-    let func = 'has_key'
-    let not_found = 0
-  else
-    return 0
+enddef
+def SNR(): string
+  return matchstr(SIDPrefix(), '<SNR>\zs\d\+\ze_$')
+enddef
+
+def Rc(fname: string): string
+  return Filesystem.rcfile_prefix .. fname
+enddef
+
+export def JoinPath(...arg: list<any>): string
+  return join(arg, Filesystem.slash)
+enddef
+
+export def Has(object: any, to_search: any): bool
+  var obj_type = type(object)
+  if obj_type == v:t_string
+    return HasInString(object, to_search)
+  elseif obj_type == v:t_list
+    return HasInList(object, to_search)
+  elseif obj_type == v:t_dict
+    return HasInDict(object, to_search)
   endif
-  return (call(func, [a:object, a:to_search]) != not_found)
-endfunction
-def! s:GetMsgString(msg: string): string
+  return false
+enddef
+
+export def HasInString(object: string, to_search: string): bool
+  return stridx(object, to_search) != -1
+enddef
+
+export def HasInList(object: list<any>, to_search: any): bool
+  return index(object, to_search) != -1
+enddef
+
+export def HasInDict(object: dict<any>, to_search: string): bool
+  return has_key(object, to_search)
+enddef
+
+def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
-def! s:EchomsgWithColor(msg: string, hl_group: string): void
+
+def EchomsgWithColor(msg: string, hl_group: string): void
   execute 'echohl' hl_group
-  echomsg s:GetMsgString(msg)
+  echomsg GetMsgString(msg)
   echohl NONE
 enddef
-def! s:echomsg(msg: string): void
-  call s:EchomsgWithColor(msg, 'NONE')
+
+export def Echomsg(msg: string): void
+  call EchomsgWithColor(msg, 'NONE')
 enddef
-def! s:EchomsgError(msg: string): void
-  call s:EchomsgWithColor(msg, 'Error')
+
+export def EchomsgError(msg: string): void
+  call EchomsgWithColor(msg, 'Error')
 enddef
-def! s:EchomsgWarning(msg: string): void
-  call s:EchomsgWithColor(msg, 'WarningMsg')
+
+export def EchomsgWarning(msg: string): void
+  call EchomsgWithColor(msg, 'WarningMsg')
 enddef
-def! s:echo(msg: string): void
-  echo s:GetMsgString(msg)
+
+export def Echo(msg: string): void
+  echo GetMsgString(msg)
 enddef
-def! s:EchoQuestion(question: string): void
-  echon s:GetMsgString(question) .. ' '
+
+export def EchoQuestion(question: string): void
+  echon GetMsgString(question) .. ' '
   echohl Question
   echon '[Y/N]'
   echohl NONE
   echon "\n"
 enddef
-def! s:glob(expr: string): list<string>
-  return split(glob(expr), "\n")
+
+export def Glob(expr: string, nosuf: bool = false, alllinks: bool = false): list<string>
+  return glob(expr, nosuf, true, alllinks)
 enddef
-def! s:GetcharString(...expr: list<number>): any
+
+export def GetcharString(...expr: list<number>): any
   return nr2char(call('getchar', expr))
 enddef
-def! s:ask(question: string): bool
-  call s:EchoQuestion(question)
-  return s:has(['y', 'Y'], s:GetcharString())
+
+export def Ask(question: string): bool
+  EchoQuestion(question)
+  return GetcharString() =~? 'y'
 enddef
-def! s:Mkdir(dir: string, ...opt: list<any>): bool
+
+export def Mkdir(dir: string, ...opt: list<any>): bool
   if isdirectory(dir)
     return true
   endif
   if !exists('*mkdir')
-    s:EchomsgError('built-in mkdir() not found.')
+    EchomsgError('built-in mkdir() not found.')
     return false
   endif
   return call('mkdir', [dir] + opt) ? true : false
 enddef
-def! s:Input(prompt: string, ...opt: list<any>): string
+
+export def Input(prompt: string, ...opt: list<any>): string
   try
     return call('input', [prompt] + opt)
   catch /\C^Vim:Interrupt$/
@@ -103,7 +116,8 @@ def! s:Input(prompt: string, ...opt: list<any>): string
   endtry
   return ''
 enddef
-def! s:WinExecute(id: number, command: string, ...opt: list<any>): any
+
+def WinExecute(id: number, command: string, ...opt: list<any>): any
   var eventignore_save = &eventignore
   set eventignore=all
   try
@@ -114,113 +128,118 @@ def! s:WinExecute(id: number, command: string, ...opt: list<any>): any
   return v:none
 enddef
 
-" Global utility functions
-function! VimrcSIDPrefix() abort
-  return s:SIDPrefix()
-endfunction
-function! VimrcFunc(func) abort
-  return function(s:SIDPrefix() .. a:func)
-endfunction
-function! SetUndoFtplugin(config) abort
-  let restorer = 'execute ' .. string(a:config)
+# Global utility functions
+export def VimrcFunc(funcname: string): func
+  return function(SIDPrefix() .. funcname)
+enddef
+
+export def SetUndoFtplugin(config: string)
+  var restorer = 'execute ' .. string(config)
   if exists('b:undo_ftplugin')
-    let b:undo_ftplugin = restorer .. '|' .. b:undo_ftplugin
+    b:undo_ftplugin = restorer .. '|' .. b:undo_ftplugin
   else
-    let b:undo_ftplugin = restorer
+    setbufvar('%', 'undo_ftplugin', restorer)
   endif
-endfunction
+enddef
 command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
-" Startup config
-const s:Windows = has('win32')
-const s:Unix = !s:Windows
-let s:filesystem = get(g:, 'filesystem', {})
+final Windows = has('win32')
+final Unix = !Windows
+
+export var Filesystem: dict<string>
+if Windows
+  $DOT_VIM = expand('~\vimfiles')
+  Filesystem = {
+    slash: '\',
+    path_separator: ';',
+    rcfile_prefix: '_'
+  }
+else
+  $DOT_VIM = expand('~/.vim')
+  Filesystem = {
+    slash: '/',
+    path_separator: ':',
+    rcfile_prefix: '.'
+  }
+endif
+
+# Startup config
 if !v:vim_did_enter
-  if has('multi_lang')
-    if has('menu')
-      set langmenu=ja.utf-8
-    endif
+  if has('multi_lang') && has('menu')
+    set langmenu=ja.utf-8
   endif
 
   if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
-    set termguicolors  " Use true color if possible.
+    set termguicolors  # Use true color if possible.
   endif
   if &term =~# '\<xterm\>'
-    let &t_EI = "\<ESC>[2 q"  " Use Block style cursor in Normal-mode.
-    let &t_SI = "\<ESC>[6 q"  " Use Bar style cursor in Insert-mode.
-    let &t_SR = "\<ESC>[4 q"  " Use underline style cursor in Replace-mode.
+    &t_EI = "\<ESC>[2 q"  # Use Block style cursor in Normal-mode.
+    &t_SI = "\<ESC>[6 q"  # Use Bar style cursor in Insert-mode.
+    &t_SR = "\<ESC>[4 q"  # Use underline style cursor in Replace-mode.
     set mouse=a
   endif
 
-  if s:Windows
-    let $DOT_VIM = expand('~\vimfiles')
-    " let s:filesystem.slash = '\'
-    " let s:filesystem.path_separator = ';'
-    " let s:filesystem.rcfile_prefix = '_'
-  else
-    let $DOT_VIM = expand('~/.vim')
-    " let s:filesystem.slash = '/'
-    " let s:filesystem.path_separator = ':'
-    " let s:filesystem.rcfile_prefix = '.'
-  endif
+  # disable default plugins
+  g:loaded_2html_plugin = 1
+  g:loaded_getscriptPlugin = 1
+  g:loaded_gzip = 1
+  g:loaded_zipPlugin = 1
+  g:loaded_tarPlugin = 1
+  g:loaded_vimballPlugin = 1
+  g:loaded_netrwPlugin = 1
 
-  " disable default plugins
-  let g:loaded_2html_plugin = 1
-  let g:loaded_getscriptPlugin = 1
-  let g:loaded_gzip = 1
-  let g:loaded_zipPlugin = 1
-  let g:loaded_tarPlugin = 1
-  let g:loaded_vimballPlugin = 1
-  let g:loaded_netrwPlugin = 1
+  &runtimepath ..= ',' .. escape(JoinPath($DOT_VIM, 'runtime'), ' \')
 
-  let &runtimepath ..= ',' .. escape(s:JoinPath($DOT_VIM, 'runtime'), ' \')
+  # Set environmental variables on gVim.
+  {
+    var envrc_ = JoinPath(expand('~'), Rc('envrc'))
+    if has('gui_running') && filereadable(envrc_)
+      var lines = readfile(envrc_)
+            ->map((_, val): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
+            ->filter((_, val): bool => !empty(val))
 
-  " Set environmental variables on gVim.
-  let s:_envrc = s:JoinPath(expand('~'), s:Rc('envrc'))
-  if has('gui_running') && filereadable(s:_envrc)
-    let s:contents = readfile(s:_envrc)
-    call map(s:contents, "substitute(v:val, '\\(\\_^\\|\\s\\)#.*$', '', 'g')")
-    call filter(s:contents, '!empty(v:val)')
-    call map(s:contents, "split(v:val, '=')")
-    call map(s:contents,
-        \ "execute(printf('let $%s=%s', v:val[0], string(expand(v:val[1]))))")
-    unlet s:contents
-  endif | unlet s:_envrc
+      for line in lines
+        var name: string
+        var value: string
+        [name, value] = line->split('=')
+        execute '$' .. name .. ' = ' .. value->expand()->string()
+      endfor
+    endif
+  }
 endif
-" Initialize autocmd
-def! s:InitializeAutocmd(filename: string)
+# Initialize autocmd
+(filename: string) => {
   var pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
   var augroups = readfile(filename)
-                    ->filter((_, line) => stridx(line, 'aug') != -1)
-                    ->filter((_, line) => line =~# pattern)
-                    ->map((_, line) => matchstr(line, pattern))
-                    ->filter((_, augroup) => augroup !=? 'END')
-                    ->sort()
-                    ->uniq()
+        ->filter((_, line): bool => stridx(line, 'aug') != -1)
+        ->filter((_, line): bool => line =~# pattern)
+        ->map((_, line): string => matchstr(line, pattern))
+        ->filter((_, augroup): bool => augroup !=? 'END')
+        ->sort()
+        ->uniq()
   for augroup in augroups
     execute 'augroup ' .. augroup
       autocmd!
     execute 'augroup END'
   endfor
-enddef
-call s:InitializeAutocmd(expand('<sfile>'))
-delfunction s:InitializeAutocmd
+}(expand('<sfile>'))
 
-" minpac
+# minpac
+var PluginList: list<string>
 if &loadplugins
-  let s:plugin_list = map(filter(s:glob(
-        \ s:JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*')
-        \), 'isdirectory(v:val)'), 'fnamemodify(v:val, ":p:h:t")')
-  def! s:PluginExists(plugin: string): bool
-    return s:has(s:plugin_list, plugin)
+  PluginList = Glob(JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*'))
+               ->filter((_, val): bool => isdirectory(val))
+               ->map((_, val): string => fnamemodify(val, ':p:h:t'))
+  def PluginExists(plugin: string): bool
+    return HasInList(PluginList, plugin)
   enddef
 else
-  def! s:PluginExists(plugin: string): bool
+  def PluginExists(plugin: string): bool
     return false
   enddef
 endif
-def! s:PackRegister(): void
+def PackRegister()
   minpac#add('k-takata/minpac', {type: 'opt'})
 
   minpac#add('itchyny/vim-cursorword')
@@ -260,7 +279,7 @@ def! s:PackRegister(): void
   minpac#add('thinca/vim-themis')
   minpac#add('tyru/capture.vim')
   minpac#add('tyru/caw.vim')
-  " minpac#add('tyru/eskk.vim')
+  # minpac#add('tyru/eskk.vim')
   minpac#add('tyru/open-browser.vim')
   minpac#add('vim-jp/autofmt')
   minpac#add('vim-jp/vimdoc-ja')
@@ -270,51 +289,50 @@ def! s:PackRegister(): void
   minpac#add('tweekmonster/helpful.vim', {type: 'opt'})
   minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
 enddef
-def! s:PackInit(): bool
+def PackInit(): bool
   try
     packadd minpac
   catch /^Vim\%((\a\+)\)\=:E919/
     # Download minpac...
-    var minpac_path = s:JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
-    s:echomsg('Downloading minpac...')
-    system('git clone https://github.com/k-takata/minpac.git ' ..
-          \ minpac_path)
+    var minpac_path = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
+    Echomsg('Downloading minpac...')
+    system('git clone https://github.com/k-takata/minpac ' .. minpac_path)
     try
       packadd minpac
     catch
-      echoerr v:exception
+      EchomsgError(v:exception)
       return false
     endtry
   endtry
 
   minpac#init()
-  s:PackRegister()
+  PackRegister()
 
   return true
 enddef
-def! s:PackUpdate(): void
-  if s:PackInit()
+def PackUpdate()
+  if PackInit()
     minpac#update()
   endif
 enddef
-def! s:PackClean(): void
-  if s:PackInit()
+def PackClean()
+  if PackInit()
     minpac#clean()
   endif
 enddef
-def! s:PackStatus()
+def PackStatus()
   if exists('*minpac#status')
     minpac#status()
   else
-    s:EchomsgError('minpac isn''t loaded yet.')
+    EchomsgError('minpac isn''t loaded yet.')
   endif
 enddef
-command! -bar PackInit   call s:PackInit()
-command! -bar PackUpdate call s:PackUpdate()
-command! -bar PackClean  call s:PackClean()
-command! -bar PackStatus call s:PackStatus()
+command! -bar PackInit   call PackInit()
+command! -bar PackUpdate call PackUpdate()
+command! -bar PackClean  call PackClean()
+command! -bar PackStatus call PackStatus()
 
-" Options {{{
+# Options {{{
 if !v:vim_did_enter
   syntax on
   filetype plugin indent on
@@ -354,8 +372,8 @@ set shortmess& shortmess+=Ic
 set helplang=ja
 set hidden
 set diffopt=internal,algorithm:histogram
-"set breakindent
-"set virtualedit& virtualedit+=block
+#set breakindent
+#set virtualedit& virtualedit+=block
 set virtualedit=block
 set complete=.,i,d,w,b,u
 set noimdisable
@@ -364,28 +382,29 @@ set previewpopup=highlight:Normal
 set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
-" }}}
+# }}}
 
-let s:cache_dir = s:JoinPath(expand('~'), '.cache', 'vimrc')
-call s:Mkdir(s:cache_dir, 'p')
-let s:_undodir = s:JoinPath(s:cache_dir, 'undodir')
-if s:Mkdir(s:_undodir, 'p')
-  set undofile
-  let &undodir = s:_undodir
-else
-  set noundofile
-endif
-unlet s:_undodir
+export final CacheDir = JoinPath(expand('~'), '.cache', 'vimrc')
+Mkdir(CacheDir, 'p')
 
-let s:_directory = s:JoinPath(s:cache_dir, 'swapfile')
-if s:Mkdir(s:_directory, 'p')
-  set swapfile
-  let &directory = s:JoinPath(fnamemodify(s:_directory, ':p'), '')
-else
-  set noswapfile
-endif
-unlet s:_directory
-set nobackup nowritebackup
+{
+  final undodir_ = JoinPath(CacheDir, 'undodir')
+  if Mkdir(undodir_, 'p')
+    set undofile
+    &undodir = undodir_
+  else
+    set noundofile
+  endif
+
+  final directory_ = JoinPath(CacheDir, 'swapfile')
+  if Mkdir(directory_, 'p')
+    set swapfile
+    &directory = JoinPath(fnamemodify(directory_, ':p'), '')
+  else
+    set noswapfile
+  endif
+  set nobackup nowritebackup
+}
 
 if has('kaoriya')
   set fileencodings=guess,utf-8
@@ -394,12 +413,12 @@ else
   set fileencodings=utf-8,euc-jp,cp932,sjis
   set ambiwidth=double
 endif
-if s:Unix
+if Unix
   set path& path+=/usr/local/include
 endif
 if executable('ag')
-  let &grepprg = 'ag --vimgrep'
-  let &grepformat = '%f:%l:%c:%m'
+  &grepprg = 'ag --vimgrep'
+  &grepformat = '%f:%l:%c:%m'
 endif
 augroup vimrc_filetype
   autocmd FileType c,cpp setlocal foldmethod=indent
@@ -407,13 +426,13 @@ augroup vimrc_filetype
   autocmd FileType makefile setlocal noexpandtab nosmarttab
 augroup END
 augroup vimrc_mru
-  autocmd BufWritePost * call vimrc#mru#onReadFile()  " TODO: Change func name
+  autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
 augroup END
 augroup vimrc_checktime
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
 augroup END
 
-" Mapping {{{
+# Mapping {{{
 nnoremap : q:A
 vnoremap : q:A
 nnoremap <Space>: q:k
@@ -455,8 +474,8 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
-" Avoid to regester calling textobj function commands to the command-history
-" when use textobj via dot.
+# Avoid to regester calling textobj function commands to the command-history
+# when use textobj via dot.
 nnoremap <silent> . .
 nnoremap * *N
 
@@ -481,89 +500,86 @@ cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
-" }}}
-def! s:TerminalMap(mapcmd: string, lhs: string, rhs: string): void
+# }}}
+def TerminalMap(mapcmd: string, lhs: string, rhs: string)
   execute printf('%s %s%s %s%s',
-       \ mapcmd, &termwinkey, lhs, &termwinkey, rhs)
+        mapcmd, &termwinkey, lhs, &termwinkey, rhs)
 enddef
-call s:TerminalMap('tnoremap', ':', ':<C-f>A')
-call s:TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
-call s:TerminalMap('tnoremap', '<ESC>', 'N')
-call s:TerminalMap('tnoremap', 'p', '""')
-call s:TerminalMap('tnoremap', '<C-r>', '"')
+TerminalMap('tnoremap', ':', ':<C-f>A')
+TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
+TerminalMap('tnoremap', '<ESC>', 'N')
+TerminalMap('tnoremap', 'p', '""')
+TerminalMap('tnoremap', '<C-r>', '"')
 
-" Loop
-function! s:_loop_define(config) abort
-  let prefix = printf('<Plug>(<SID>-loop-%s)', a:config.id)
-  let enter_with = a:config.enter_with
-  let mode = get(a:config, 'mode', 'n')
-  let plug_map = {}
+# Loop
+def LoopDefine(config: dict<any>)
+  var prefix = printf('<Plug>(<SID>-loop-%s)', config.id)
+  var enter_with = config.enter_with
+  var mode = get(config, 'mode', 'n')
+  var plug_map: dict<string>
   for key in ['prefix', 'main', 'do']
-    let plug_map[key] = printf("%s(%s)", prefix, key)
+    plug_map[key] = printf('%s(%s)', prefix, key)
   endfor
 
   execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
-  for [lhs, rhs] in a:config.map
-    let [lhs, rhs] =
-          \ map([lhs, rhs], {_, val -> substitute(val, '|', '<bar>', 'g')})
-    let com = []
-    call add(com, [mode .. 'noremap',
-          \ plug_map.do .. lhs,
-          \ rhs])
-    call add(com, [mode .. 'map',
-          \ enter_with .. lhs,
-          \ plug_map.main .. lhs])
-    call add(com, [mode .. 'map',
-          \ plug_map.main .. lhs,
-          \ plug_map.do .. lhs .. plug_map.prefix
-          \])
-    call add(com, [mode .. 'map',
-          \ plug_map.prefix .. lhs,
-          \ plug_map.main .. lhs])
-    execute join(map(com, 'join(v:val, " ")'), "\n")
+  for mapping in config.map
+    var lhs: string
+    var rhs: string
+    var commands: list<list<string>>
+    [lhs, rhs] =
+        mapping->map((_, val): string => substitute(val, '|', '<bar>', 'g'))
+    commands->add([mode .. 'noremap', plug_map.do .. lhs, rhs])
+            ->add([mode .. 'map', enter_with .. lhs, plug_map.main .. lhs])
+            ->add([mode .. 'map', plug_map.main .. lhs, plug_map.do .. lhs .. plug_map.prefix])
+            ->add([mode .. 'map', plug_map.prefix .. lhs, plug_map.main .. lhs])
+    execute commands->mapnew('join(v:val)')->join("\n")
   endfor
 
   if mode ==# 'n'
-    let config = deepcopy(a:config)
-    let config.mode = 't'
-    if config.enter_with[: strlen(&termwinkey)] !=# &termwinkey &&
-          \ config.enter_with[0] !=# eval(printf('"\%s"', &termwinkey))
-      let config.enter_with = '<C-w>' .. config.enter_with
+    var t_config = deepcopy(config)
+    t_config.mode = 't'
+    if t_config.enter_with[: strlen(&termwinkey)] !=# &termwinkey &&
+        t_config.enter_with[0] !=# printf('"\%s"', &termwinkey)->eval()
+      t_config.enter_with = &termwinkey .. config.enter_with
     endif
-    call map(config.map, 's:_loop_define_generate_tmap(v:val)')
-    call s:_loop_define(config)
+    t_config.map->map('LoopDefineGenerateTmap(v:val)')
+    LoopDefine(t_config)
   endif
-endfunction
-function! s:_loop_define_generate_tmap(value) abort
-  let rhs = a:value[1]
-  let rhs = substitute(rhs, '\c<SID>', s:SIDPrefix(), 'g')
-  let rhs = substitute(rhs, '\zs<\ze.\{-}>', '\\<lt>', 'g')
-  let rhs = '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
-  return [a:value[0], rhs]
-endfunction
-function! s:_simple_loop_define(config) abort
-  let config = deepcopy(a:config)
-  let config.map = map(split(config.follow_key, '\zs'),
-        \ '[v:val, config.enter_with .. v:val]')
-  call s:_loop_define(config)
-endfunction
-" Window management
-call s:_simple_loop_define({
-      \ 'id': 'Window',
-      \ 'enter_with': '<C-w>',
-      \ 'follow_key': 'hjklHJKLq<>-+_|='
-      \ })
-call s:_loop_define({
-      \ 'id': 'Tab',
-      \ 'enter_with': 'g',
-      \ 'map': [
-      \   ['h', 'gT'],
-      \   ['l', 'gt'],
-      \   ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
-      \   ['t', '<Cmd>call <SID>MapTabmove(1)<CR>']
-      \ ]
-      \ })
-def! s:MapTabmove(delta: number)
+enddef
+
+def LoopDefineGenerateTmap(value: list<string>): list<string>
+  var rhs = value[1]
+        ->substitute('\c<SID>', SIDPrefix(), 'g')
+        ->substitute('\zs<\ze.\{-}>', '\\<lt>', 'g')
+  rhs = '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
+  return [value[0], rhs]
+enddef
+
+def SimpleLoopDefine(config: dict<any>)
+  var new_config = deepcopy(config)
+  new_config.map = config.follow_key->split('\zs')
+        ->mapnew((_, val): list<string> => [val, config.enter_with .. val])
+  LoopDefine(new_config)
+enddef
+
+# Window management
+SimpleLoopDefine({
+  id: 'Window',
+  enter_with: '<C-w>',
+  follow_key: 'hjklHJKLq<>-+_|=',
+})
+LoopDefine({
+  id: 'Tab',
+  enter_with: 'g',
+  map: [
+    ['h', 'gT'],
+    ['l', 'gt'],
+    ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
+    ['t', '<Cmd>call <SID>MapTabmove(1)<CR>'],
+  ]
+})
+
+def MapTabmove(delta: number)
   var tab_count = tabpagenr('$')
   if tab_count == 1
     return
@@ -587,10 +603,10 @@ def! s:MapTabmove(delta: number)
   endif
   execute movecmd
 enddef
-delfunc s:_loop_define
-delfunc s:_simple_loop_define
+# delfunc s:_loop_define
+# delfunc s:_simple_loop_define
 
-" f F t T ; , declarations {{{
+# f F t T ; , declarations {{{
 nmap <expr> f vimrc#charjump#jump(v:true, v:false)
 omap <expr> f vimrc#charjump#jump(v:true, v:false)
 vmap <expr> f vimrc#charjump#jump(v:true, v:false)
@@ -614,26 +630,9 @@ vnoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
 nnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
 onoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
 vnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
-" }}}
+# }}}
 
-" Use :execute here to avoid creepy highlight.
-execute 'digraphs (( 65288'
-execute 'digraphs )) 65289'
-execute 'digraphs {{ 12302'
-execute 'digraphs }} 12303'
-digraphs [[ 12300
-digraphs ]] 12301
-digraphs sp 12288
-digraphs \"\" 8221
-digraphs !! 65281
-digraphs ?? 65311
-digraphs << 65308
-digraphs >> 65310
-digraphs ,, 12289
-digraphs .. 12290
-digraphs -- 12540
-
-def! s:CmdwinEnter()
+def CmdwinEnter()
   # Type <CR> to execute current line in command-line window.
   nnoremap <buffer> <CR> <CR>
 
@@ -658,34 +657,34 @@ def! s:CmdwinEnter()
     setlocal completeopt=menu,preview
     execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
     normal! G
-    if s:PluginExists('asyncomplete.vim')
+    if PluginExists('asyncomplete.vim')
       asyncomplete#disable_for_buffer()
     endif
   endif
 enddef
-def! s:CmdwinLeave()
+def CmdwinLeave()
   if exists('b:completeopt_save')
     &completeopt = b:completeopt_save
   endif
 enddef
-def! s:CmdwinCompletion(select_next: bool): string
+def CmdwinCompletion(select_next: bool): string
   if pumvisible()
     return select_next ? '<C-n>' : '<C-p>'
   else
     return "\<C-x>\<C-v>"
   endif
 enddef
-def! s:CmdwinSelectHistory()
+def CmdwinSelectHistory()
   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
   map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
   reverse(history)
   gram#select({
          name: getcmdwintype() .. 'history',
          items: history,
-         callback: s:SIDPrefix() .. 'CmdwinSelectHistoryCallback',
+         callback: SIDPrefix() .. 'CmdwinSelectHistoryCallback',
        })
 enddef
-def! s:CmdwinSelectHistoryCallback(item: dict<string>)
+def CmdwinSelectHistoryCallback(item: dict<string>)
   if getline('$') ==# ''
     setline('$', item.word)
   else
@@ -695,42 +694,38 @@ def! s:CmdwinSelectHistoryCallback(item: dict<string>)
 enddef
 
 augroup vimrc_mapping
-  autocmd CmdWinEnter * call s:CmdwinEnter()
-  autocmd CmdWinLeave * call s:CmdwinLeave()
+  autocmd CmdWinEnter * call CmdwinEnter()
+  autocmd CmdWinLeave * call CmdwinLeave()
 augroup END
 
 if has('mac')
-  let mapleader = '_'
+  g:mapleader = '_'
 endif
 if has('win32')
   inoremap \ _
   inoremap _ \
 endif
 
-" Command
-let s:_map = []
-call add(s:_map, ['nnoremap', 'ev', 'edit $MYVIMRC'])
-call add(s:_map, ['nnoremap', 'sv', 'source $MYVIMRC'])
-call add(s:_map, ['nnoremap', 'k', 'call vimrc#mru#start()'])
-call add(s:_map, ['nnoremap', 'b', 'call gram#sources#buffers#launch()'])
-call add(s:_map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
-call add(s:_map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
-execute join(map(s:_map, {->join([
-      \  v:val[0],
-      \  '<Space>' .. v:val[1],
-      \  printf('<Cmd>%s<CR>', v:val[2])
-      \ ], ' ')}), "\n")
-unlet s:_map
+# Mapping for commands
+{
+  var map_ = []
+  add(map_, ['nnoremap', 'ev', 'edit $MYVIMRC'])
+  add(map_, ['nnoremap', 'sv', 'source $MYVIMRC'])
+  add(map_, ['nnoremap', 'k', 'call vimrc#mru#start()'])
+  add(map_, ['nnoremap', 'b', 'call gram#sources#buffers#launch()'])
+  add(map_, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
+  add(map_, ['nnoremap', 'f', 'call vimrc#filore#start()'])
+  execute map_->mapnew((_, val): string => [val[0], '<Space>' .. val[1], printf('<Cmd>%s<CR>', val[2])]->join())->join("\n")
+}
 
-
-" Abbreviates
+# Abbreviates
 iabbrev todo: TODO:
 iabbrev fixme: FIXME:
 iabbrev xxx: XXX:
 iabbrev note: NOTE:
 
-" Commands
-" Declarations
+# Commands
+# Declarations
 command! -bar CdCurrent cd %:p:h
 command! -bar LcdCurrent lcd %:p:h
 command! -bar TcdCurrent tcd %:p:h
@@ -739,14 +734,14 @@ command! -nargs=? CopyToClipboard call setreg('*', getreg(<q-args>, 1))
 command! -bar -nargs=? ClipBuffer call vimrc#clipbuffer(<q-args>)
 command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
-command! -bang -nargs=+ -complete=command Filter call s:filter(<bang>0, <f-args>)
-command! -bar Draft call s:Draft()
+command! -bang -nargs=+ -complete=command Filter call Filter(<bang>0, <f-args>)
+command! -bar Draft call Draft()
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
-command! -bar -nargs=* -complete=file ListTasks call s:ListTasks(<q-args>)
+command! -bar -nargs=* -complete=file ListTasks call vimrc#list_tasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
-command! -nargs=? -complete=dir Gof call s:Gof(<q-args>)
+command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 
-" Plugin Shortcuts
+# Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 command! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
 command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
@@ -756,7 +751,7 @@ command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
 command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
-def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
+def Filter(bang: bool, pat: string, ...cmd: list<string>)
   var output = execute(join(cmd, ' '))
                 ->split("\n")
                 ->filter((_: number, val: string): bool => val =~? pat)
@@ -768,31 +763,21 @@ def! s:filter(bang: bool, pat: string, ...cmd: list<string>)
   endif
 enddef
 
-def! s:Draft()
+def Draft()
   setlocal buftype=nofile noswapfile
 enddef
 
-def! s:ListTasks(args: string)
-  var target = '%'
-  if args =~# 'rf'
-    target = '**/*.' .. expand('%:e')
-  elseif args !=# ''
-    target = args
-  endif
-  execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
-enddef
-
-def! s:FindGitroot(arg_target: string = bufname('%')): string
+def FindGitroot(arg_target: string = bufname('%')): string
   var target: string = resolve(arg_target)
   var git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
-    s:EchomsgWarning('Not a git repository: ' .. target)
+    EchomsgWarning('Not a git repository: ' .. target)
     return ''
   endif
   return fnamemodify(git_dir, ':p:h:h')
 enddef
 
-def! s:Gof(path: string): void
+def Gof(path: string)
   if !executable('gof')
     echo '"gof" command not found.'
     return
@@ -806,12 +791,12 @@ def! s:Gof(path: string): void
   popup_create(term_start(gofcmd, {hidden: 1, term_finish: 'close'}),
         \ {minwidth: minwidth, minheight: minheight})
 enddef
-def! s:GofForMapping()
-  var git_root = s:FindGitroot()
-  s:Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
+def GofForMapping()
+  var git_root = FindGitroot()
+  Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 
-def! Tapi_gof(bufnum: number, file_info: dict<string>): void
+def Tapi_gof(bufnum: number, file_info: dict<string>): void
   var winid = win_getid(winnr('#'))
   var buftype = getwinvar(winid, '&buftype')
   var open_cmd = 'edit'
@@ -822,15 +807,15 @@ def! Tapi_gof(bufnum: number, file_info: dict<string>): void
          printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
 enddef
 
-" Installed plugins
-if s:PluginExists('vim-altr')
+# # Installed plugins
+if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
-if s:PluginExists('vim-operator-replace')
-  map _r  <Plug>(operator-replace)
+if PluginExists('vim-operator-replace')
+  map _r <Plug>(operator-replace)
 endif
-if s:PluginExists('vim-operator-user')
+if PluginExists('vim-operator-user')
   nmap zf <Plug>(operator-vimrc-fold-zf)
   nmap zF <Plug>(operator-vimrc-fold-zF)
   nmap zd <Plug>(operator-vimrc-fold-zd)
@@ -841,88 +826,84 @@ if s:PluginExists('vim-operator-user')
   vmap zd <Plug>(operator-vimrc-fold-zd)
   vmap zD <Plug>(operator-vimrc-fold-zD)
   vmap zE <Plug>(operator-vimrc-fold-zE)
-  function! s:map_fold_cmd(keys) abort
-    " Available only when foldmethod is marker or manual.
-    if !s:has(['marker', 'manual'], &l:foldmethod)
+  def MapFoldCmd(keys: string)
+    # This is available only when foldmethod is marker or manual
+    if !HasInList(['marker', 'manual'], &l:foldmethod)
       return
     endif
-    let save_options = vital#vital#new().import('Vim.Guard').store(['&l:commentstring'])
-    let &l:commentstring = ' ' .. &l:commentstring
-    try
-      execute 'normal!' a:keys
-    catch " Usaully this :catch gets E490, 'Folding not found.'
-      call s:EchomsgError(v:exception)
-    finally
-      call save_options.restore()
-    endtry
-  endfunction
-  function! s:map_range_fold_cmd(motion_wizeness, keys) abort
-    let v_cmd = operator#user#visual_command_from_wise_name(a:motion_wizeness)
-    call s:map_fold_cmd(printf('`[%s`]%s', v_cmd, a:keys))
+    var commentstring_save = &l:commentstring
+    &l:commentstring = ' ' .. &l:commentstring
 
-    " Remove spaces in beginning of the line which are inserted when the line was
-    " an empty line.
+    try
+      execute 'normal!' keys
+    catch  # Usually this :catch gets E490, 'Folding not found.'
+      EchomsgError(v:exception)
+    finally
+      &l:commentstring = commentstring_save
+    endtry
+  enddef
+
+  def MapRangeFoldCmd(motion_wiseness: string, keys: string)
+    var v_cmd: string =
+            operator#user#visual_command_from_wise_name(motion_wiseness)
+    MapFoldCmd(printf('`[%s`]%s', v_cmd, keys))
+
     if &foldmethod ==# 'marker'
-      let marker_only_pat = '\m^\s\+%s'
-      let marker_pair = ["'[", "']"]
-      let foldmarker_pair = split(&l:foldmarker, ', ')
-      for index in range(0, len(foldmarker_pair)-1)
-        let marker = marker_pair[index]
-        let foldmarker = printf(&l:commentstring, foldmarker_pair[index])
-        let lnum = getpos(marker)[1]
+      # Remove white-spaces at the beggining of the line
+      var marker_only_pat = '^\s\+%s'
+      var marker_pair = ["'[", "']"]
+      var foldmarker_pair = &l:foldmarker->split(', ')
+      for index in range(foldmarker_pair->len() - 1)
+        var marker = marker_pair[index]
+        var foldmarker = printf(&l:commentstring, foldmarker_pair[index])
+        var lnum = getpos(marker)[1]
         if getline(lnum) =~# printf(marker_only_pat, foldmarker)
-          call setline(lnum, foldmarker)
+          setline(lnum, foldmarker)
         endif
       endfor
     endif
-  endfunction
-  function! s:map_define_operator() abort
-    " ---fold---
-    let foldmotions_with_range = 'fF'
-    let foldmotions_standalone = 'dDE'
-    let sid = s:SIDPrefix()
-    for keys in split(foldmotions_with_range .. foldmotions_standalone, '\zs')
-      let keys = 'z' .. keys
-      let func = [
-            \ printf('function! %smap_fold_%s(motion_wise) abort', sid, keys),
-            \ printf('  call s:map_range_fold_cmd(a:motion_wise, "%s")', keys),
-            \ 'endfunction'
-            \]
-      execute join(func, "\n")
-      call operator#user#define(
-            \ 'vimrc-fold-' .. keys,
-            \ sid .. 'map_fold_' .. keys)
+  enddef
+
+  def MapDefineOperator()
+    var SID = SIDPrefix()
+    for suf in 'fFdDE'
+      var keys = 'z' .. suf
+      var defscript =<< trim END
+        def MapFold_%s(motion_wise: string)
+          MapRangeFoldCmd(motion_wise, "%s")
+        enddef
+      END
+      execute printf(defscript->join("\n"), keys, keys)
+      operator#user#define('vimrc-fold-' .. keys,
+                            SIDPrefix() .. 'MapFold_' .. keys)
     endfor
 
-    " Override for normal mode; Any ranges aren't need for following commands.
-    let map_cmd = join(['nnoremap',
-          \ '<silent>',
-          \ '<Plug>(operator-vimrc-fold-%s)',
-          \ '<Cmd>call <SID>map_fold_cmd("%s")<CR>'], ' ')
-    for keys in split(foldmotions_standalone, '\zs')
-      let keys = 'z' .. keys
-      execute printf(map_cmd, keys, keys)
+    # Override mapping in normal-mode that doesn't need any ranges
+    for suf in 'fF'
+      execute 'nnoremap <Plug>(operator-vimrc-fold-z' .. suf .. ') ' ..
+                  '<Cmd>call <SID>MapFoldCmd("z' .. suf .. '")<CR>'
     endfor
-  endfunction
+  enddef
+
   augroup vimrc_mapping
-    autocmd User vimrc_initialize call s:map_define_operator()
+    autocmd User vimrc_initialize ++once MapDefineOperator()
   augroup END
 endif
-if s:PluginExists('vim-textobj-entire')
+if PluginExists('vim-textobj-entire')
   omap aa <Plug>(textobj-entire-a)
   omap ia <Plug>(textobj-entire-i)
   vmap aa <Plug>(textobj-entire-a)
   vmap ia <Plug>(textobj-entire-i)
-  let g:textobj_entire_no_default_key_mappings = 1
+  g:textobj_entire_no_default_key_mappings = 1
 endif
-if s:PluginExists('vim-textobj-function')
+if PluginExists('vim-textobj-function')
   omap if <Plug>(textobj-function-i)
   omap af <Plug>(textobj-function-a)
   vmap if <Plug>(textobj-function-i)
   vmap af <Plug>(textobj-function-a)
-  let g:textobj_function_no_default_key_mappings = 1
+  g:textobj_function_no_default_key_mappings = 1
 endif
-if s:PluginExists('vim-textobj-indent')
+if PluginExists('vim-textobj-indent')
   omap ii <Plug>(textobj-indent-i)
   omap iI <Plug>(textobj-indent-same-i)
   omap ai <Plug>(textobj-indent-a)
@@ -931,13 +912,13 @@ if s:PluginExists('vim-textobj-indent')
   vmap iI <Plug>(textobj-indent-same-i)
   vmap ai <Plug>(textobj-indent-a)
   vmap aI <Plug>(textobj-indent-same-a)
-  let g:textobj_indent_no_default_key_mappings = 1
+  g:textobj_indent_no_default_key_mappings = 1
 endif
-if s:PluginExists('gina.vim')
-  let g:gina#action#mark_sign_text = '*'
-  let g:gina#core#console#enable_message_history = 1
+if PluginExists('gina.vim')
+  g:gina#action#mark_sign_text = '*'
+  g:gina#core#console#enable_message_history = 1
 
-  def! s:gina_config()
+  def GinaConfig()
     def Gina_nnoremap(scheme: string, lhs: string, rhs: string)
       gina#custom#mapping#nmap(scheme, lhs, rhs, {noremap: 1, silent: 1})
     enddef
@@ -954,28 +935,28 @@ if s:PluginExists('gina.vim')
     # Jump between unadded files with n/p ..
     var rhs_base = printf(
             '<Cmd>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
-            s:SIDPrefix())
+            SIDPrefix())
     Gina_nnoremap('status', 'n', printf(rhs_base, 'v:false'))
     Gina_nnoremap('status', 'N', printf(rhs_base, 'v:true'))
     # NOTE: Using v:true and v:false as variables above doesn't work because
     # it seems to be changed into 'false' and 'true' (without v: namespace).
 
     Gina_nnoremap('status', 'dd',
-           printf('<Cmd>call %sGinaDiff()<CR>', s:SIDPrefix()))
+           printf('<Cmd>call %sGinaDiff()<CR>', SIDPrefix()))
 
     gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
     gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
 
     gina#custom#command#option('\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
   enddef
-  def! s:GinaStatusSelectAnother(repeat_count: number, search_previous: bool)
+  def GinaStatusSelectAnother(repeat_count: number, search_previous: bool)
     var flags = 'w'
     flags ..= search_previous ? 'b' : ''
     for i in range(1, repeat_count)
       search('\e[31.\+\e[m', flags)
     endfor
   enddef
-  def! s:GinaDiff()
+  def GinaDiff()
     var filename = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
     filename = matchstr(filename, '\%(\_^modified\:\s\+\)\?\zs.\+')
     if filename ==# ''
@@ -995,39 +976,39 @@ if s:PluginExists('gina.vim')
     endif
   enddef
   augroup vimrc_gina
-    autocmd User vimrc_initialize call s:gina_config()
+    autocmd User vimrc_initialize ++once GinaConfig()
   augroup END
 endif
-if s:PluginExists('vim-findent')
+if PluginExists('vim-findent')
   augroup vimrc_findent
     autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
 endif
-if s:PluginExists('vim-brownie')
-  let g:brownie_template_dirs =
-        \ [s:JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
-  let g:brownie_extra_imports = {
-        \ 'cpp' : ['c'],
-        \ 'vimspec': ['vim'],
-        \ }
+if PluginExists('vim-brownie')
+  g:brownie_template_dirs =
+        [JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
+  g:brownie_extra_imports = {
+    cpp: ['c'],
+    vimspec: ['vim'],
+  }
 
-  def! s:BrownieFiletype(): string
+  def BrownieFiletype(): string
     return getbufvar(brownie#get_current_bufnr(), '&filetype')
   enddef
-  def! VimrcTemplateComplete(arg: string, line: string, pos: number): list<string>
-    return filter(brownie#list(s:BrownieFiletype(), 'template'),
+  def VimrcTemplateComplete(arg: string, line: string, pos: number): list<string>
+    return filter(brownie#list(BrownieFiletype(), 'template'),
                 (_, val) => stridx(val, arg) == 0)
   enddef
 
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
-        \ call brownie#extract(s:BrownieFiletype(), 'template', <q-args>)
+        \ call brownie#extract(BrownieFiletype(), 'template', <q-args>)
 endif
-if s:PluginExists('vim-gram')
+if PluginExists('vim-gram')
   augroup vimrc_gram_init
-    autocmd User gram-first-start call s:InitGramMapping()
+    autocmd User gram-first-start ++once InitGramMapping()
   augroup END
 
-  def! s:InitGramMapping()
+  def InitGramMapping()
     gram#custom#map_action('n', '<CR>', 'select-item')
     gram#custom#map_action('n', 'q', 'quit')
     gram#custom#map_action('n', 'j', 'select-next-item')
@@ -1049,29 +1030,29 @@ if s:PluginExists('vim-gram')
     gram#custom#map_key('i', '<BS>', '<C-h>')
   enddef
 endif
-if s:PluginExists('vim-textobj-commentblock')
+if PluginExists('vim-textobj-commentblock')
   omap ac <Plug>(textobj-commentblock-a)
   omap ic <Plug>(textobj-commentblock-i)
   vmap ac <Plug>(textobj-commentblock-a)
   vmap ic <Plug>(textobj-commentblock-i)
-  let g:textobj_commentblock_no_default_key_mapings = 1
+  g:textobj_commentblock_no_default_key_mapings = 1
 
   augroup vimrc_textobj_commentblock
     execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
-          \   (s:PluginExists('caw.vim') ? 'caw' :
+          \   (PluginExists('caw.vim') ? 'caw' :
           \   'commentstring')
           \ .. '()'
   augroup END
 endif
-if s:PluginExists('vim-jplus')
+if PluginExists('vim-jplus')
   map J <Plug>(jplus)
 endif
-if s:PluginExists('vim-operator-swap')
+if PluginExists('vim-operator-swap')
   map _sy <Plug>(operator-swap-marking)
   map _sp <Plug>(operator-swap)
 endif
-if s:PluginExists('asyncomplete.vim')
-  def! s:AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
+if PluginExists('asyncomplete.vim')
+  def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
     var base = tolower(context.base)
     var completions: list<dict<any>>
     var subcompletions: list<dict<any>>
@@ -1108,11 +1089,11 @@ if s:PluginExists('asyncomplete.vim')
     asyncomplete#preprocess_complete(context, items)
   enddef
 
-  let g:asyncomplete_auto_popup = 1
-  let g:asyncomplete_force_refresh_on_context_changed = 1
-  let g:asyncomplete_smart_completion = 1
-  let g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
-  let g:asyncomplete_auto_completeopt = 0
+  g:asyncomplete_auto_popup = 1
+  g:asyncomplete_force_refresh_on_context_changed = 1
+  g:asyncomplete_smart_completion = 1
+  g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
+  g:asyncomplete_auto_completeopt = 0
   set completeopt=menuone,noselect
 
   inoremap <expr> <C-n>
@@ -1123,63 +1104,63 @@ if s:PluginExists('asyncomplete.vim')
   inoremap <C-l><C-n> <C-x><C-n><C-n>
   inoremap <C-l><C-p> <C-x><C-p><C-p>
 endif
-if s:PluginExists('vim-lsp')
-  let g:lsp_diagnostics_signs_enabled = 1
-  let g:lsp_diagnostics_signs_error = {'text': '>>'}
-  let g:lsp_diagnostics_signs_warning = {'text': '--'}
-  let g:lsp_diagnostics_signs_information = {'text': '--'}
-  let g:lsp_diagnostics_signs_hint = {'text': '!?'}
-  let g:lsp_diagnostics_enabled = 1
-  let g:lsp_diagnostics_float_delay = 10
-  let g:lsp_diagnostics_float_cursor = 1
+if PluginExists('vim-lsp')
+  g:lsp_diagnostics_signs_enabled = 1
+  g:lsp_diagnostics_signs_error = {'text': '>>'}
+  g:lsp_diagnostics_signs_warning = {'text': '--'}
+  g:lsp_diagnostics_signs_information = {'text': '--'}
+  g:lsp_diagnostics_signs_hint = {'text': '!?'}
+  g:lsp_diagnostics_enabled = 1
+  g:lsp_diagnostics_float_delay = 10
+  g:lsp_diagnostics_float_cursor = 1
 
-  def! s:LspEnableForBuffer()
+  def LspEnableForBuffer()
     setlocal omnifunc=lsp#complete
     nnoremap <buffer> <Plug>(<SID>-open-folding) zv
     nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
   enddef
 
-  def! s:LspDisableForBuffer()
+  def LspDisableForBuffer()
     setlocal omnifunc=
     nunmap <buffer> gd
   enddef
 
   augroup vimrc_lsp
-    autocmd User lsp_buffer_enabled call s:LspEnableForBuffer()
-    autocmd User lsp_buffer_disabled call s:LspDisableForBuffer()
+    autocmd User lsp_buffer_enabled call LspEnableForBuffer()
+    autocmd User lsp_buffer_disabled call LspDisableForBuffer()
   augroup END
 endif
-if s:PluginExists('previm')
-  let g:previm_show_header = 0
-  let g:previm_enable_realtime = 1
+if PluginExists('previm')
+  g:previm_show_header = 0
+  g:previm_enable_realtime = 1
 endif
-if s:PluginExists('vim-operator-surround')
+if PluginExists('vim-operator-surround')
   map _sa <Plug>(operator-surround-append)
   map _sd <Plug>(operator-surround-delete)
   map _sr <Plug>(operator-surround-replace)
 endif
-if s:PluginExists('vim-ambicmd')
-  def! s:AmbicmdExpand(key: string): string
+if PluginExists('vim-ambicmd')
+  def AmbicmdExpand(key: string): string
     var expander = ambicmd#expand(key)
     return (expander ==# key ? '' : "\<C-g>u") .. expander
   enddef
   augroup vimrc_ambicmd
-    autocmd CmdWinEnter : call s:SetupAmbicmdForCmdwin()
+    autocmd CmdWinEnter : call SetupAmbicmdForCmdwin()
   augroup END
   cnoremap <expr> <Space> ambicmd#expand("\<Space>")
   cnoremap <expr> <CR> ambicmd#expand("\<CR>")
   cnoremap <expr> <bar> ambicmd#expand("\<bar>")
 
-  def! s:SetupAmbicmdForCmdwin()
+  def SetupAmbicmdForCmdwin()
     inoremap <buffer> <expr> <Space> <SID>AmbicmdExpand("\<Space>")
     inoremap <buffer> <expr> <bar> <SID>AmbicmdExpand("\<bar>")
     inoremap <buffer> <expr> <CR> <SID>AmbicmdExpand("\<CR>")
     inoremap <buffer> <expr> <C-j> <SID>AmbicmdExpand('')
   enddef
 
-  let g:ambicmd#show_completion_menu = 1
+  g:ambicmd#show_completion_menu = 1
 
-  def! s:AmbicmdBuildRule(cmd: string): list<string>
+  def AmbicmdBuildRule(cmd: string): list<string>
     var rule = []
     rule += ['\c^' .. cmd .. '$']
     rule += ['\c^' .. cmd]
@@ -1195,47 +1176,43 @@ if s:PluginExists('vim-ambicmd')
     rule += ['.*' .. substitute(cmd, '.\zs', '.*', 'g')]
     return rule
   enddef
-  let g:ambicmd#build_rule = s:SIDPrefix() .. 'AmbicmdBuildRule'
+  g:ambicmd#build_rule = SIDPrefix() .. 'AmbicmdBuildRule'
 endif
-if s:PluginExists('vim-quickrun')
-  let g:quickrun_config = {}
-  let g:quickrun_config._ = {
-    \  'outputter/message': 1,
-    \  'outputter/message/log': 1,
-    \  'outputter/buffer/close_on_empty': 1,
-    \  'runner': 'job',
-    \}
-  let g:quickrun_config.cpp = {
-    \  'cmdopt' : '-std=c++17'
-    \}
-  " TODO: Improve. (Support windows, etc)
-  let g:quickrun_config['cpp/sfml'] = {
-    \  'type': 'cpp',
-    \  'cmdopt': '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
-    \}
-  let g:quickrun_config.objc = {
-    \  'command': 'cc',
-    \  'execute': ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
-    \  'tempfile' : '%{tempname()}.m',
-    \}
-  let g:quickrun_config.applescript = {
-    \  'command': 'osascript',
-    \  'execute': '%c %s:p',
-    \  'tempfile': '%{tempname()}.applescript',
-    \}
-  let g:quickrun_config.swift = {
-    \  'command': 'swift',
-    \  'execute': '%c %s%p',
-    \  'tempfile': '%{tempname()}.swift',
-    \}
-  let g:quickrun_config.python = {
-    \  'command': 'python3',
-    \  'hook/eval/template': 'print(%s)'
-    \}
-  let g:quickrun_config.python2 = {
-    \  'command': 'python',
-    \  'hook/eval/template': 'print(%s)'
-    \}
+if PluginExists('vim-quickrun')
+  g:quickrun_config = {}
+  g:quickrun_config['_'] = {
+    ['outputter/message']: 1,
+    ['outputter/message/log']: 1,
+    ['outputter/buffer/close_on_empty']: 1,
+    runner: 'job',
+  }
+
+  g:quickrun_config.cpp = {
+    cmdopt: '-std=c++17'
+  }
+  # TODO: Improve. (Support windows, etc)
+  g:quickrun_config['cpp/sfml'] = {
+    type: 'cpp',
+    cmdopt: '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
+  }
+  g:quickrun_config.objc = {
+    command: 'cc',
+    execute: ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
+    tempfile: '%{tempname()}.m',
+  }
+  g:quickrun_config.applescript = {
+    command: 'osascript',
+    execute: '%c %s:p',
+    tempfile: '%{tempname()}.applescript',
+  }
+  g:quickrun_config.python = {
+    command: 'python3',
+    ['hook/eval/template']: 'print(%s)'
+  }
+  g:quickrun_config.python2 = {
+    command: 'python',
+    ['hook/eval/template']: 'print(%s)'
+  }
 
   nnoremap <expr> <C-c> quickrun#is_running() ?
         \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
@@ -1246,27 +1223,27 @@ if s:PluginExists('vim-quickrun')
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
   augroup END
 endif
-if s:PluginExists('vim-textobj-between')
+if PluginExists('vim-textobj-between')
   omap ad <Plug>(textobj-between-a)
   omap id <Plug>(textobj-between-i)
   vmap ad <Plug>(textobj-between-a)
   vmap id <Plug>(textobj-between-i)
-  let g:textobj_between_no_default_key_mappings = 1
+  g:textobj_between_no_default_key_mappings = 1
 
   omap i/ id/
   omap a/ ad/
 endif
-if s:PluginExists('capture.vim')
+if PluginExists('capture.vim')
   augroup vimrc_filetype
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
-if s:PluginExists('caw.vim')
+if PluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
         \ <C-r>=b:caw_oneline_comment<CR>
 
-  def! s:CawMap(): string
+  def CawMap(): string
     var kind = ''
     if col('.') == 1
       kind = 'zeropos'
@@ -1282,130 +1259,38 @@ if s:PluginExists('caw.vim')
 
   map _c <Plug>(caw:hatpos:toggle:operator)
   imap <expr> <C-l><C-l> <SID>CawMap()
-  let g:caw_no_default_keymappings = 1
-  let g:caw_dollarpos_sp_left = '  '
-  let g:caw_dollarpos_sp_right = ' '
-  let g:caw_hatpos_sp = ' '
-  let g:caw_zeropos_sp = ' '
+  g:caw_no_default_keymappings = 1
+  g:caw_dollarpos_sp_left = '  '
+  g:caw_dollarpos_sp_right = ' '
+  g:caw_hatpos_sp = ' '
+  g:caw_zeropos_sp = ' '
 
   augroup vimrc_filetype
-    autocmd Filetype vim let b:caw_oneline_comment = '#'
+    autocmd Filetype vim b:caw_oneline_comment = '#'
   augroup END
 endif
-if s:PluginExists('autofmt')
+if PluginExists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
 endif
-" ReadingVimrc
-command! -bar ReadingVimrc call s:ReadingVimrc()
-function! s:ReadingVimrc()
+# ReadingVimrc
+command! -bar ReadingVimrc call ReadingVimrc()
+def ReadingVimrc()
   try
     packadd vim-reading-vimrc
-    ReadingVimrcNext
+    execute 'ReadingVimrcNext'
+    # Use :execute here because :ReadingVimrcNext command doesn't defined yet
+    # when compiling this function and E476 error is given
   catch
-    call s:EchomsgError(v:throwpoint .. v:exception)
+    EchomsgError(v:throwpoint .. v:exception)
   endtry
-endfunction
+enddef
 
-" Additional plugins
-" Taking notes
-let s:notes = {'save_dir_': ''}
-function! s:notes.instance(path) abort
-  let new_obj = deepcopy(self)
-  let new_obj.save_dir_ = a:path
-  return new_obj
-endfunction
-function! s:notes.list_files() abort
-  return map(s:glob(s:JoinPath(self.save_dir_, '*.*')),
-        \ 'fnamemodify(v:val, ":p:t")')
-endfunction
-function! s:notes.new(opener) abort
-  let name = s:Input('Name: ')
-  if name ==# ''
-    call s:echo('Canceled.')
-    return
-  endif
-  if s:has(self, 'expand_filename')
-    let name = self.expand_filename(name)
-  endif
-  let filepath = s:JoinPath(self.save_dir_, name)
-  execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
-endfunction
-function! s:notes.list() abort
-  call vimrc#files#start(self.save_dir_)
-endfunction
-function! s:notes.delete(...) abort
-  let files = self.list_files()
-  for target in a:000
-    if !s:has(files, target)
-      call s:EchomsgError('File does not exists: ' .. target)
-      continue
-    endif
-    call s:echomsg(printf('Delete %s ? [y/n]', target))
-    if s:GetcharString() !~? 'y'
-      call s:echomsg('Canceled.')
-      continue
-    endif
-    if delete(s:JoinPath(self.save_dir_, target)) == 0
-      call s:echomsg('Successfully deleted: ' .target)
-    else
-      call s:echomsg('Failed to delete: ' .target)
-    endif
-  endfor
-endfunction
-function! s:notes.get_save_dir() abort
-  return self.save_dir_
-endfunction
-function! s:notes.get_completion(arg_lead) abort
-  return map(filter(self.list_files(), 'v:val =~? a:arg_lead'),
-        \ 'fnameescape(v:val)')
-endfunction
-" Define :Memo* :Otameshi*
-for s:type_ in ['memo', 'otameshi']
-  let s:{s:type_} = s:notes.instance(s:JoinPath(
-      \ s:cache_dir, s:type_))
-  if !isdirectory(s:{s:type_}.get_save_dir())
-    call mkdir(s:{s:type_}.get_save_dir(), 'p')
-  endif
-  if isdirectory(s:{s:type_}.get_save_dir())
-    let s:com_prefix_ = toupper(s:type_[0]) .. s:type_[1:]
-    execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
-          \ s:com_prefix_, s:type_)
-    execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
-          \ s:com_prefix_, s:com_prefix_, s:type_)
-    execute printf('command! -bar %sList call s:%s.list()',
-          \ s:com_prefix_, s:type_)
-    unlet s:com_prefix_
-  endif
-endfor | unlet s:type_
-"
-function! s:memo.expand_filename(name) abort
-  let name = a:name
-  if !s:has(name, '.')
-    " Add .md extension only when use didn't specificate extension.
-    let name ..= '.md'
-  endif
-  let name = strftime('%Y-%m-%d %H:%M ') .. name
-  return name
-endfunction
-function! s:otameshi.expand_filename(name) abort
-  if s:has(a:name, '.') " Filename already has an extension.
-    return a:name
-  endif
-  let extension = s:Input('Extension? (Empty will be non-extension file):')
-  if extension ==# ''
-    return a:name
-  else
-    return a:name .. '.' .. extension
-  endif
-endfunction
-function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort
-  return s:memo.get_completion(a:arg_lead)
-endfunction
-function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort
-  return s:otameshi.get_completion(a:arg_lead)
-endfunction
-"
-" working-plugin
+# Additional plugins
+# Taking notes
+# TODO: Define only commands here
+source $DOT_VIM/runtime/autoload/vimrc/notes.vim
+
+# working-plugin
 command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
       \ WorkingPluginLoad call vimrc#workingplugin#load(<f-args>)
 command! -bar -bang -nargs=1 -complete=customlist,vimrc#workingplugin#complete
@@ -1414,17 +1299,19 @@ command! -bar -nargs=+ WorkingPluginClone call vimrc#workingplugin#clone(<f-args
 command! -bar -nargs=+ WorkingPluginNew call vimrc#workingplugin#new(<f-args>)
 command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
       \ WorkingPluginRm call vimrc#workingplugin#rm(<f-args>)
-" Sessions
-let s:session_dir = s:JoinPath(s:cache_dir, 'sessions')
-call s:Mkdir(s:session_dir)
-command! MkSession call vimrc#session#make()
-command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
-      \ call vimrc#session#delete(1, <f-args>)
-command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
-      \ call vimrc#session#restore(<q-args>)
+# Sessions
+{
+  final session_dir_ = JoinPath(CacheDir, 'sessions')
+  Mkdir(session_dir_)
+  command! MkSession call vimrc#session#make()
+  command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
+       \ call vimrc#session#delete(1, <f-args>)
+  command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
+       \ call vimrc#session#restore(<q-args>)
+}
 
-" Showmode
-def! s:ShowmodeInit()
+# Showmode
+def ShowmodeInit()
   var colors = {
     normal: [['22', '148'], ['#005f00', '#afdf00']],
     insert: [['23', '117'], ['#005f5f', '#87dfff']],
@@ -1437,8 +1324,8 @@ def! s:ShowmodeInit()
       mode, color[0][0], color[0][1], color[1][0], color[1][1])
   endfor
 enddef
-def! s:ShowmodeMode(): string
-  s:ShowmodeHighlight()
+def ShowmodeMode(): string
+  ShowmodeHighlight()
   var map = {
     n: 'NORMAL',
     i: 'INSERT',
@@ -1459,7 +1346,7 @@ def! s:ShowmodeMode(): string
   }
   return get(map, mode(), 'UNKNOWN')
 enddef
-def! s:ShowmodeHighlight()
+def ShowmodeHighlight()
   var type = get({
      i: 'insert',
      t: 'insert',
@@ -1470,7 +1357,7 @@ def! s:ShowmodeHighlight()
    }, mode(), 'normal')
   execute 'highlight link VimrcShowMode VimrcShowMode' .. type
 enddef
-def! s:ShowmodeLabel(): string
+def ShowmodeLabel(): string
   if win_getid() == g:statusline_winid &&
         getwinvar(g:statusline_winid, '&modifiable')
     return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
@@ -1478,27 +1365,27 @@ def! s:ShowmodeLabel(): string
   return ''
 enddef
 augroup vimrc_showmode
-  autocmd ColorScheme * call s:ShowmodeInit()
-  autocmd User vimrc_initialize call s:ShowmodeInit()
+  autocmd ColorScheme * ShowmodeInit()
+  autocmd User vimrc_initialize ++once ShowmodeInit()
 augroup END
 
-" statusline
-def! s:StatuslineGenerator(): string
-  var gina = s:PluginExists('gina.vim') ?
+# statusline
+def StatuslineGenerator(): string
+  var gina = PluginExists('gina.vim') ?
       '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
       ''
   var statusline =
     '%m' ..
-    s:ShowmodeLabel() ..
+    ShowmodeLabel() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
     '[#%{bufnr("%")}]' ..
     gina ..
     '%{<SID>FilenameLabel(bufnr("%"))}' ..
     '%<%=' ..
     '[%{pathshorten(getcwd(winnr()))}]'
-  return substitute(statusline, '\c<SID>', s:SIDPrefix(), 'g')
+  return substitute(statusline, '\c<SID>', SIDPrefix(), 'g')
 enddef
-def! s:FilenameLabel(bufnr: number): string
+def FilenameLabel(bufnr: number): string
   var buftype = getbufvar(bufnr, '&buftype')
   var bufname = bufname(bufnr)
   if buftype ==# 'help'
@@ -1516,24 +1403,24 @@ def! s:FilenameLabel(bufnr: number): string
       (bufname ==# '' ? '[NoName]' : pathshorten(fnamemodify(bufname, ':.')))
   endif
 enddef
-let &statusline = printf('%%!%sStatuslineGenerator()', s:SIDPrefix())
+&statusline = printf('%%!%sStatuslineGenerator()', SIDPrefix())
 
-" tabline
-let &tabline = printf('%%!%sTabline()', s:SIDPrefix())
-def! s:GenerateTabinfo(tabnr: number): string
+# tabline
+&tabline = printf('%%!%sTabline()', SIDPrefix())
+def GenerateTabinfo(tabnr: number): string
   var tablist = tabpagebuflist(tabnr)
   var info = ''
   info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) > 0 ? '[+]' : ''
   info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
   return info
 enddef
-def! s:Tabline(): string
+def Tabline(): string
   var tabline = '%#TabLine#|'
   var t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
     tabline ..= '%' .. n .. 'T'
-    var info = ' ' .. s:GenerateTabinfo(n) .. ' '
+    var info = ' ' .. GenerateTabinfo(n) .. ' '
     if t == n
       tabline ..= '%#TabLineSel# %999Xx%X' .. info .. '%#TabLine#'
     else
@@ -1543,22 +1430,22 @@ def! s:Tabline(): string
   endfor
   tabline ..= '%>%=[%{pathshorten(getcwd())}]'
 
-  return substitute(tabline, '\c<SID>', s:SIDPrefix(), 'g')
+  return substitute(tabline, '\c<SID>', SIDPrefix(), 'g')
 enddef
 
-" :terminal
+# :terminal
 augroup vimrc_terminal
   autocmd TerminalWinOpen * setlocal nonumber norelativenumber
 augroup END
 
-" EmphasisIndent
+# EmphasisIndent
 highlight link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
-  autocmd WinEnter * call s:EmphasizeIndent()
-  autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth call s:EmphasizeIndent()
-  autocmd User vimrc_initialize call s:EmphasizeIndent()
+  autocmd WinEnter * EmphasizeIndent()
+  autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth EmphasizeIndent()
+  autocmd User vimrc_initialize ++once EmphasizeIndent()
 augroup END
-def! s:EmphasizeIndent()
+def EmphasizeIndent()
   if exists('w:disable_emphasis_indent') && <bool>w:disable_emphasis_indent
     return
   endif
@@ -1574,28 +1461,28 @@ def! s:EmphasizeIndent()
   endif
   w:emphasis_indent_id = matchadd('VimrcEmphasisIndent', pat)
 enddef
-def! s:EmphasisIndentEnable()
+def EmphasisIndentEnable()
   w:disable_emphasis_indent = 0
-  s:EmphasizeIndent()
+  EmphasizeIndent()
 enddef
-def! s:EmphasisIndentDisable()
+def EmphasisIndentDisable()
   w:disable_emphasis_indent = 0
   if exists('w:emphasis_indent_id')
     matchdelete(w:emphasis_indent_id)
     unlet w:emphasis_indent_id
   endif
 enddef
-command! EmphasisIndentDisable call s:EmphasisIndentDisable()
-command! EmphasisIndentEnable call s:EmphasisIndentEnable()
+command! EmphasisIndentDisable call EmphasisIndentDisable()
+command! EmphasisIndentEnable call EmphasisIndentEnable()
 
-" WarningSpace
+# WarningSpace
 highlight link WarningSpace Error
 augroup vimrc_warningspace
-  autocmd WinEnter * call s:WarningSpace()
-  autocmd OptionSet * call s:WarningSpace()
-  autocmd User vimrc_initialize call s:WarningSpace()
+  autocmd WinEnter * WarningSpace()
+  autocmd OptionSet * WarningSpace()  # TODO: specify option?
+  autocmd User vimrc_initialize ++once WarningSpace()
 augroup END
-def! s:WarningSpace()
+def WarningSpace()
   # Clean up.
   if exists('w:twobyte_space_id')
     matchdelete(w:twobyte_space_id)
@@ -1620,15 +1507,15 @@ enddef
 command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 
-" mru
-let g:mru_history_file = s:JoinPath(s:cache_dir, 'mru', 'history')
-let g:mru_ignore_pattern = [
+# mru
+g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
+g:mru_ignore_pattern = [
       \ '\.git\>',
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
       \ ]
 
-" filore
-def! s:FiloreMapping()
+# filore
+def FiloreMapping()
   var mapping: list<any> = [
    ['q', 'exit'],
    ['o', 'toggle-directory-folding'],
@@ -1645,13 +1532,13 @@ def! s:FiloreMapping()
   execute join(mapping, "\n")
 enddef
 augroup vimrc_additional_plugins
-  autocmd FileType filore call s:FiloreMapping()
+  autocmd FileType filore call FiloreMapping()
 augroup END
 
-" git
-def! s:GitDiffGetcmd(arg_target: string): string
+# git
+def GitDiffGetcmd(arg_target: string): string
   var target: string = resolve(arg_target)
-  var gitroot: string = s:FindGitroot(target)
+  var gitroot: string = FindGitroot(target)
   if gitroot ==# ''
     return ''
   endif
@@ -1659,7 +1546,7 @@ def! s:GitDiffGetcmd(arg_target: string): string
           gitroot, target)
 enddef
 
-def! s:GitDiff(arg_target: string): void
+def GitDiff(arg_target: string): void
   var target: string
   if arg_target ==# ''
     target = bufname('%')
@@ -1668,10 +1555,10 @@ def! s:GitDiff(arg_target: string): void
   endif
   target = resolve(target)
   if getftype(target) ==# ''
-    s:EchomsgError('File or directory does not exists: ' .. target)
+    EchomsgError('File or directory does not exists: ' .. target)
     return
   endif
-  var cmd: string = s:GitDiffGetcmd(target)
+  var cmd: string = GitDiffGetcmd(target)
   if cmd ==# ''
     return
   endif
@@ -1686,33 +1573,35 @@ def! s:GitDiff(arg_target: string): void
   endif
   return
 enddef
-command! -nargs=? -complete=file GitDiff call s:GitDiff(<q-args>)
+command! -nargs=? -complete=file GitDiff call GitDiff(<q-args>)
 
-" gyoza
+# gyoza
 augroup vimrc_gyoza
-  autocmd User vimrc_initialize call vimrc#gyoza#enable()
+  autocmd User vimrc_initialize ++once vimrc#gyoza#enable()
 augroup END
 
-" splash
+# splash
 command! Splash call vimrc#splash#show()
-" if !v:vim_did_enter
-"   augroup vimrc_splash
-"     autocmd!
-"     autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
-"     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
-"   augroup END
-" endif
+# if !v:vim_did_enter
+#   augroup vimrc_splash
+#     autocmd!
+#     autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
+#     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
+#   augroup END
+# endif
 
-" lvimrc
-let s:_lvimrc = s:Rc('lvimrc')
-if filereadable(s:JoinPath(expand('~'), s:_lvimrc))
-  let s:_lvimrc = s:JoinPath('~', s:_lvimrc)
-  execute 'command! -bar -nargs=* LVimrc ' ..
-        \ 'execute ((<q-args> ==# "") ? "edit" : <q-args>)' string(s:_lvimrc)
-  execute 'source' s:_lvimrc
-endif | unlet s:_lvimrc
+# lvimrc
+{
+  var lvimrc_ = Rc('lvimrc')
+  if filereadable(JoinPath('~', lvimrc_)->expand())
+    lvimrc_ = JoinPath('~', lvimrc_)
+    execute 'command! -bar -nargs=* LVimrc ' ..
+            'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
+    execute 'source' lvimrc_
+  endif
+}
 
-" gvimrc
+# gvimrc
 if has('gui_running')
   if !v:vim_did_enter
     set lines=999
@@ -1727,13 +1616,10 @@ if has('gui_running')
   if has('win32')
     set guifont=MS_Gothic:h10:cSHIFTJIS
     set linespace=1
-
-    set columns=120
   elseif has('mac')
     set guifont=Cica:h14,Osaka-Mono:h14
-    "set columns=120
   elseif has('xfontset')
-    "for unix (use xfontset)
+    #for unix (use xfontset)
     set guifont=a14,r14,k14
   endif
 
@@ -1744,10 +1630,11 @@ if has('gui_running')
     augroup END
   endif
 endif
-" Initialize when loading this file.
+
+# Initialize when loading this file.
 augroup vimrc_initialize_dummy
-  " Not to provide an error. For more information, see `:h E217`
-  autocmd User vimrc_initialize " Do nothing.
+  # Not to provide an error. For more information, see `:h E217`
+  autocmd User vimrc_initialize ++once # Do nothing.
 augroup END
 
 if v:vim_did_enter

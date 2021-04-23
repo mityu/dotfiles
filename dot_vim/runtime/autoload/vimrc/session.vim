@@ -1,18 +1,20 @@
+finish  " Disable this script temporally
+
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
 let s:session_dir = VimrcFunc('vars')().session_dir
 function! vimrc#session#make() abort "{{{
-  let name = VimrcFunc('input')('Session name >> ')
+  let name = VimrcFunc('Input')('Session name >> ')
   if name ==# ''
-    call VimrcFunc('echo')('Canceled.')
+    call VimrcFunc('Echo')('Canceled.')
     return
   endif
   let file = vimrc#session#get_file(name)
   if filereadable(file)
-    call VimrcFunc('echomsg')('Session already exists: ' . name)
-    if !VimrcFunc('ask')('Overwrite?')
-      call VimrcFunc('echo')('Canceled.')
+    call VimrcFunc('Echomsg')('Session already exists: ' . name)
+    if !VimrcFunc('Ask')('Overwrite?')
+      call VimrcFunc('Echo')('Canceled.')
       return
     endif
   endif
@@ -20,9 +22,9 @@ function! vimrc#session#make() abort "{{{
 endfunction "}}}
 function! vimrc#session#delete(need_ask, ...) abort "{{{
   if a:need_ask
-    call VimrcFunc('echo')(join(a:000, "\n") . "\n")
+    call VimrcFunc('Echo')(join(a:000, "\n") . "\n")
     if !VimrcFunc('ask')('Delete these sessions?')
-      call VimrcFunc('echo')('Canceled.')
+      call VimrcFunc('Echo')('Canceled.')
       return
     endif
   endif

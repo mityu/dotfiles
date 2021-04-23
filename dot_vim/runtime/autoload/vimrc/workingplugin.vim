@@ -1,14 +1,10 @@
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-let s:JoinPath = VimrcFunc('JoinPath')
-let s:Has = VimrcFunc('has')
-let s:workplace = s:JoinPath(expand('$DOT_VIM'), 'workplace')
+execute 'import * as Vimrc from' string($MYVIMRC)
+
+let s:workplace = s:Vimrc.JoinPath(expand('$DOT_VIM'), 'workplace')
 let s:available = isdirectory(s:workplace)
-let s:message = {
-      \ 'echomsg': VimrcFunc('echomsg'),
-      \ 'EchomsgError': VimrcFunc('EchomsgError'),
-      \ }
 
 function! s:list_plugins() abort
   if !s:available | return [] | endif
@@ -23,15 +19,15 @@ function! vimrc#workingplugin#load(...) abort
 
   for plugin in a:000
     if index(plugins, plugin) == -1
-      call s:message.EchomsgError('Failed to load: ' . plugin)
+      call s:Vimrc.EchomsgError('Failed to load: ' . plugin)
       continue
     endif
-    let plugin_dir = s:JoinPath(s:workplace, plugin)
+    let plugin_dir = s:Vimrc.JoinPath(s:workplace, plugin)
     call filter(rtp, 'fnamemodify(v:val, ":p:h:t") !=# "vim-" . plugin')
     call add(rtp, plugin_dir)
     for file_name in extend(
-        \ split(glob(s:JoinPath(plugin_dir, 'plugin', '*.vim')), "\n"),
-        \ split(glob(s:JoinPath(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
+        \ split(glob(s:Vimrc.JoinPath(plugin_dir, 'plugin', '*.vim')), "\n"),
+        \ split(glob(s:Vimrc.JoinPath(plugin_dir, 'after', 'plugin', '*.vim')), "\n")
         \)
       " TODO: Do this unlet with autocmd?
       execute 'unlet! g:loaded_' . fnamemodify(file_name, ':p:t:r')
@@ -43,15 +39,15 @@ endfunction
 
 function! vimrc#workingplugin#cd(has_bang, plugin) abort
   if !s:available | return | endif
-  execute (a:has_bang ? 'lcd' : 'tcd') s:JoinPath(s:workplace, a:plugin)
+  execute (a:has_bang ? 'lcd' : 'tcd') s:Vimrc.JoinPath(s:workplace, a:plugin)
 endfunction
 
 function! vimrc#workingplugin#clone(...) abort
   if !(s:available && executable('git') && a:0)
     return
   endif
-  if !s:Has(a:1, '/')
-    call s:message.EchomsgError(string(a:1) . ' is not a repository.')
+  if !s:Vimrc.Has(a:1, '/')
+    call s:Vimrc.EchomsgError(string(a:1) . ' is not a repository.')
     return
   endif
   let repository = printf('https://github.com/%s.git', a:1)
@@ -61,31 +57,31 @@ function! vimrc#workingplugin#clone(...) abort
   else
     let clone_to = a:2
   endif
-  if s:Has(s:list_plugins(), clone_to)
-    call s:message.EchomsgError('Directory already exists: ' . clone_to)
+  if s:Vimrc.Has(s:list_plugins(), clone_to)
+    call s:Vimrc.EchomsgError('Directory already exists: ' . clone_to)
     return
   endif
-  let clone_to = s:JoinPath(s:workplace, clone_to)
+  let clone_to = s:Vimrc.JoinPath(s:workplace, clone_to)
   execute '!git clone' repository clone_to
 endfunction
 
 function! vimrc#workingplugin#new(...) abort
   if !s:available | return | endif
   if !exists('*mkdir')
-    call s:message.EchomsgError(
+    call s:Vimrc.EchomsgError(
           \ 'Built-in mkdir() function is not available.')
     return
   endif
   for plugin in a:000
-    let base_dir = s:JoinPath(s:workplace, plugin)
+    let base_dir = s:Vimrc.JoinPath(s:workplace, plugin)
     if isdirectory(base_dir)
-      call s:message.EchomsgError('Plugin already exists: ' . base_dir)
+      call s:Vimrc.EchomsgError('Plugin already exists: ' . base_dir)
       continue
     endif
     call mkdir(base_dir)
-    call mkdir(s:JoinPath(base_dir, 'plugin'))
-    call mkdir(s:JoinPath(base_dir, 'autoload'))
-    call s:message.echomsg('Created: ' . plugin)
+    call mkdir(s:Vimrc.JoinPath(base_dir, 'plugin'))
+    call mkdir(s:Vimrc.JoinPath(base_dir, 'autoload'))
+    call s:Vimrc.Echomsg('Created: ' . plugin)
   endfor
 endfunction
 
@@ -94,19 +90,19 @@ function! vimrc#workingplugin#rm(...) abort "{{{
 
   let plugin_list = s:list_plugins()
   for plugin in a:000
-    if !s:Has(plugin_list, plugin)
-      call s:message.EchomsgError('Plugin does not exist: ' . plugin)
+    if !s:Vimrc.Has(plugin_list, plugin)
+      call s:Vimrc.EchomsgError('Plugin does not exist: ' . plugin)
       continue
     endif
-    call s:message.echomsg(printf('Delete %s ? [y/n]', plugin))
+    call s:Vimrc.Echomsg(printf('Delete %s ? [y/n]', plugin))
     if VimrcFunc('GetcharString')() !~? 'y'
-      call s:message.echomsg('Canceled.')
+      call s:Vimrc.Echomsg('Canceled.')
       continue
     endif
-    if delete(s:JoinPath(s:workplace, plugin), 'rf') != 0
-      call s:message.EchomsgError('Failed to delete: ' . plugin)
+    if delete(s:Vimrc.JoinPath(s:workplace, plugin), 'rf') != 0
+      call s:Vimrc.EchomsgError('Failed to delete: ' . plugin)
     else
-      call s:message.echomsg('Succesfully deleted: ' . plugin)
+      call s:Vimrc.Echomsg('Succesfully deleted: ' . plugin)
     endif
   endfor
 endfunction "}}}
