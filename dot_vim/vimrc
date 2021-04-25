@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 23-Apr-2021.
+" Last Change: 25-Apr-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1509,6 +1509,12 @@ command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
 
 # mru
 g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
+{
+  var dir_ = JoinPath(CacheDir, 'mru')
+  if !isdirectory(dir_)
+    Mkdir(dir_)
+  endif
+}
 g:mru_ignore_pattern = [
       \ '\.git\>',
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
