@@ -76,7 +76,7 @@ def TryToApply()
   var blockPair: string
 
   if prevline.trimed[-1] ==# '{'
-    if nextline.trimed[0] ==# '}'
+    if nextline.trimed[0] ==# '}' && nextline.indent_depth == prevline.indent_depth
       return
     endif
 
