@@ -97,7 +97,7 @@ DOTZSH=$HOME/.zsh
 
 function install_zsh_plugins() {
     if [ ! which git &> /dev/null ]; then
-        echo -e '\033[41mgit command not found\033[m'  # TODO: echo with Red color
+        echo -e '\033[41mgit command not found\033[m'
         return 1
     fi
     if [ ! -d "$DOTZSH/zsh-syntax-highlighting" ]; then
@@ -122,9 +122,9 @@ function update_zsh_plugins() {
 }
 
 if [ ! -d "$DOTZSH" ]; then
-    mkdir -p $DOTZSH
     printf "Install plugins? [y/N]: "
-    if read -q; then;
+    if read -q; then
+        mkdir -p $DOTZSH
         install_zsh_plugins
     fi
 fi
