@@ -18,7 +18,8 @@ fi
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
 
-# autoload -U compinit
+# Enable smart completion
+# autoload -Uz compinit
 # compinit
 
 # The file to save history
@@ -85,34 +86,71 @@ bindkey -M visual '_sa' add-surround
 # bindkey -M vicmd '^o' edit-line-in-vim
 
 
-# Plugins for zsh
-# NOTE: To install zplug (A plugin manager for zsh):
-# curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
-export ZPLUG_HOME=~/.zplug
-source $ZPLUG_HOME/init.zsh
-zplug "mafredri/zsh-async", from:github
-zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
-zplug "zplug/zplug", hook-build:"zplug --self-manage"
-zplug "zsh-users/zsh-syntax-highlighting", defer:2
+if [ -n "$VIM_TERMINAL" ]; then
+    function drop() {
+        echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
+    }
+fi
 
-# Install uninstalled plugins.
-if ! zplug check; then
+# Plugins
+DOTZSH=$HOME/.zsh
+
+function install_zsh_plugins() {
+    if [ ! which git &> /dev/null ]; then
+        echo -e '\033[41mgit command not found\033[m'  # TODO: echo with Red color
+        return 1
+    fi
+    if [ ! -d "$DOTZSH/zsh-syntax-highlighting" ]; then
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting \
+            $DOTZSH/zsh-syntax-highlighting
+    fi
+
+    if [ ! -d "$DOTZSH/zsh-async" ]; then
+        git clone https://github.com/mafredri/zsh-async $DOTZSH/zsh-async
+    fi
+    if [ ! -d "$DOTZSH/pure" ]; then
+        git clone https://github.com/sindresorhus/pure $DOTZSH/pure
+    fi
+}
+
+function update_zsh_plugins() {
+    local dir
+    for dir in $(find $DOTZSH/* -maxdepth 0 -type d); do
+        echo -e '\033[32m'$(basename $dir)'\033[m'
+        git -C $dir pull
+    done
+}
+
+if [ ! -d "$DOTZSH" ]; then
+    mkdir -p $DOTZSH
     printf "Install plugins? [y/N]: "
-    if read -q; then
-        echo; zplug install
+    if read -q; then;
+        install_zsh_plugins
     fi
 fi
-zplug load --verbose
 
-# Plugin settings
-if zplug check sindresorhus/pure; then
+# Add plugin directories to fpath ('runtimepath' like variable)
+function() {
+    local dir
+    for dir in $(find $DOTZSH/* -maxdepth 0 -type d); do
+        fpath+=$dir
+    done
+}
+
+if [ -d "$DOTZSH/zsh-async" ] && [ -d "$DOTZSH/pure" ]; then
     autoload -U promptinit; promptinit
-    # prompt pure
+    prompt pure
 else
+    echo "zsh-async or pure is not installed."
     PROMPT='%c $ '
     RPROMPT='[%~]'
 fi
-if zplug check junegunn/fzf-bin; then
+
+if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
+    source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+fi
+
+if which fzf &> /dev/null; then
     export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
@@ -128,7 +166,6 @@ if zplug check junegunn/fzf-bin; then
     }
     zle -N select-history
     bindkey '^r' select-history
-
 fi
 
 function update_components(){
@@ -136,11 +173,5 @@ function update_components(){
     brew cleanup
     brew upgrade --cask
     pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
-    zplug update
+    update_zsh_plugins
 }
-
-if [ -n "$VIM_TERMINAL" ]; then
-    function drop() {
-        echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
-    }
-fi
