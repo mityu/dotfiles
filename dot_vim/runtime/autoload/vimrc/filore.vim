@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 06-Feb-2020.
+"Last Change: 27-Apr-2021.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -148,6 +148,7 @@ function! s:filore_define_plugin_mappings() abort "{{{
       \ ['loop-cursor-down', 'filore_loop_cursor(v:count1)'],
       \ ['open-file', 'browse_open_file_under_cursor()'],
       \ ['start-history', 'history_start_select()'],
+      \ ['filter-files', 'browse_filter_files()']
       \ ]
       " \ ['', ''],
   call map(maps,{key, val ->
@@ -536,6 +537,17 @@ function! s:browse_color() abort "{{{
         \ printf('\%%%dl\_^(No\sItem)$', 1 + s:prompt_lines_count))
 endfunction "}}}
 
+function! s:browse_filter_files() abort
+  let cwd_strlen = s:win_get_reference_of_current_items().current_directory
+        \->strlen() + 1
+  let files = s:win_get_reference_of_current_items().file_list
+        \->mapnew({idx, item -> #{word: item.abs[cwd_strlen :], user_data: idx}})
+  call gram#select({
+        \ 'name': 'Move to file',
+        \ 'items': files,
+        \ 'callback': {item -> cursor(s:browse_get_lnum_from_index(item.user_data), 0)},
+        \ })
+endfunction
 " History
 function! s:history_register(path) abort "{{{
   call s:remove_item(s:history, a:path)
