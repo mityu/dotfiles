@@ -19,8 +19,8 @@ alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
 
 # Enable smart completion
-# autoload -Uz compinit
-# compinit
+autoload -Uz compinit
+compinit
 
 # The file to save history
 export HISTFILE=${HOME}/.zhistory
@@ -105,9 +105,6 @@ function install_zsh_plugins() {
             $DOTZSH/zsh-syntax-highlighting
     fi
 
-    if [ ! -d "$DOTZSH/zsh-async" ]; then
-        git clone https://github.com/mafredri/zsh-async $DOTZSH/zsh-async
-    fi
     if [ ! -d "$DOTZSH/pure" ]; then
         git clone https://github.com/sindresorhus/pure $DOTZSH/pure
     fi
@@ -129,7 +126,7 @@ if [ ! -d "$DOTZSH" ]; then
     fi
 fi
 
-# Add plugin directories to fpath ('runtimepath' like variable)
+# Add plugin directories to fpath (&runtimepath like variable)
 function() {
     local dir
     for dir in $(find $DOTZSH/* -maxdepth 0 -type d); do
@@ -137,11 +134,16 @@ function() {
     done
 }
 
-if [ -d "$DOTZSH/zsh-async" ] && [ -d "$DOTZSH/pure" ]; then
+if [ -d "$DOTZSH/pure" ]; then
     autoload -U promptinit; promptinit
+    zstyle ':prompt:pure:git:stash' show yes
+    zstyle ':prompt:pure:path' color yellow
+    zstyle ':prompt:pure:prompt:*' color default
     prompt pure
+
+    # Show $? value with color (green=succeeded, red=failed)
+    prompt_newline=$' %{%(?.%F{green}.%F{red})%}$?%f\n%{\r%}'
 else
-    echo "zsh-async or pure is not installed."
     PROMPT='%c $ '
     RPROMPT='[%~]'
 fi
