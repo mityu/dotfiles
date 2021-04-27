@@ -90,8 +90,6 @@ bindkey -M visual '_sa' add-surround
 # curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 export ZPLUG_HOME=~/.zplug
 source $ZPLUG_HOME/init.zsh
-zplug "junegunn/fzf-bin", from:gh-r, as:command, rename-to:fzf #, frozen:1
-zplug "b4b4r07/zsh-gomi", as:command, use:bin/gomi, on:junegunn/fzf-bin
 zplug "mafredri/zsh-async", from:github
 zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
 zplug "zplug/zplug", hook-build:"zplug --self-manage"
@@ -132,9 +130,6 @@ if zplug check junegunn/fzf-bin; then
     bindkey '^r' select-history
 
 fi
-# if zplug check b4b4r07/enhancd; then
-#     export ENHANCD_FILTER=peco:fzf
-# fi
 
 function update_components(){
     brew upgrade
