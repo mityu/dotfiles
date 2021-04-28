@@ -35,3 +35,6 @@ done
 
 echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
+
+echo "Deploying i3/"
+ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
