@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 25-Apr-2021.
+" Last Change: 28-Apr-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1627,6 +1627,8 @@ if has('gui_running')
   elseif has('xfontset')
     #for unix (use xfontset)
     set guifont=a14,r14,k14
+  elseif has('linux')
+    set guifont=Cica:h14
   endif
 
   if has('multi_byte_ime') || has('xim')
