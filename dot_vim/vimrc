@@ -1504,8 +1504,8 @@ def WarningSpace()
   # White spaces in the end of line
   w:end_of_line_space_id = matchadd('WarningSpace', '\s\+$')
 enddef
-command! ReplaceTwobyteSpace keeppatterns %s/\%d12288/ /g
-command! DeleteLineEndSpace keeppatterns %s/\s\+$//g
+command! ReplaceTwobyteSpace keeppatterns :%s/\%d12288/ /g
+command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 
 # mru
 g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
