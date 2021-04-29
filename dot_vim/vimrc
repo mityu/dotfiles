@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 28-Apr-2021.
+" Last Change: 29-Apr-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1288,7 +1288,7 @@ enddef
 # Additional plugins
 # Taking notes
 # TODO: Define only commands here
-source $DOT_VIM/runtime/autoload/vimrc/notes.vim
+autocmd User vimrc_initialize ++once call vimrc#notes#load()
 
 # working-plugin
 command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete

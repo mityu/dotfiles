@@ -1,3 +1,6 @@
+let s:cpoptions_save = &cpoptions
+set cpoptions&vim
+
 execute 'import * as Vimrc from' string($MYVIMRC)
 
 let s:notes = {'save_dir_': ''}
@@ -13,7 +16,7 @@ endfunction
 function! s:notes.new(opener) abort
   let name = s:Vimrc.Input('Name: ')
   if name ==# ''
-    call Echo('Canceled.')
+    call s:Vimrc.Echo('Canceled.')
     return
   endif
   if s:Vimrc.Has(self, 'expand_filename')
@@ -96,3 +99,11 @@ endfunction
 function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort
   return s:otameshi.get_completion(a:arg_lead)
 endfunction
+
+function! vimrc#notes#load() abort
+  " Do nothing
+endfunction
+
+
+let &cpoptions = s:cpoptions_save
+unlet s:cpoptions_save
