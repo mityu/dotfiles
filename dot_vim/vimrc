@@ -117,17 +117,6 @@ export def Input(prompt: string, ...opt: list<any>): string
   return ''
 enddef
 
-def WinExecute(id: number, command: string, ...opt: list<any>): any
-  var eventignore_save = &eventignore
-  set eventignore=all
-  try
-    return call('win_execute', [id, command] + opt)
-  finally
-    &eventignore = eventignore_save
-  endtry
-  return v:none
-enddef
-
 # Global utility functions
 export def VimrcFunc(funcname: string): func
   return function(SIDPrefix() .. funcname)

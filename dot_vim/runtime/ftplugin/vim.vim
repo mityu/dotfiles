@@ -1,7 +1,6 @@
 vim9script
 
 SetUndoFtplugin setlocal shiftwidth<
-SetUndoFtplugin delcommand AddAbort
 SetUndoFtplugin setlocal foldexpr< foldmethod<
 # The below is already set by textobj-function
 # SetUndoFtplugin unlet! b:textobj_function_select
@@ -43,13 +42,4 @@ def FoldExpr(): any
     return 0
   endif
   return '='
-enddef
-
-command! -bar -buffer -range=% AddAbort call AddAbort(<line1>, <line2>)
-def AddAbort(start: number, end: number)
-  var curpos_save = getcurpos()
-  var cmd = printf('keeppatterns :%d,%d ', start, end)
-  cmd ..= ' s/^\s*\%(end\)\@<!fu\%[nction]!\?\s\+.\+)\zs\%(\s*abort\)\@!/ abort/g'
-  execute cmd
-  setpos('.', curpos_save)
 enddef
