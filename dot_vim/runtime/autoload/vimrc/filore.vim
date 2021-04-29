@@ -1,6 +1,6 @@
 "Plugin Name: filore.vim
 "Author: mityu
-"Last Change: 27-Apr-2021.
+"Last Change: 29-Apr-2021.
 
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
@@ -126,7 +126,7 @@ function! vimrc#filore#start(...) abort "{{{
     call s:notify.error('filore cannot be used in command-line window')
     return
   endif
-  let current_directory = get(a:000, 0, '')
+  let current_directory = get(a:000, 0, '')->expand()
   if current_directory !=# '' && isdirectory(current_directory)
     " Do nothing.
   elseif expand('%') !=# '' && &buftype ==# '' && &buflisted
