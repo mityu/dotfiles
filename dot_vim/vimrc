@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-Apr-2021.
+" Last Change: 01-May-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1609,7 +1609,7 @@ if has('gui_running')
   set mousehide
 
   if has('win32')
-    set guifont=MS_Gothic:h10:cSHIFTJIS
+    set guifont=Cica:h14,MS_Gothic:h10:cSHIFTJIS
     set linespace=1
   elseif has('mac')
     set guifont=Cica:h14,Osaka-Mono:h14
