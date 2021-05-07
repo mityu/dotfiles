@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 01-May-2021.
+" Last Change: 07-May-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1585,17 +1585,6 @@ command! Splash call vimrc#splash#show()
 #   augroup END
 # endif
 
-# lvimrc
-{
-  var lvimrc_ = Rc('lvimrc')
-  if filereadable(JoinPath('~', lvimrc_)->expand())
-    lvimrc_ = JoinPath('~', lvimrc_)
-    execute 'command! -bar -nargs=* LVimrc ' ..
-            'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
-    execute 'source' lvimrc_
-  endif
-}
-
 # gvimrc
 if has('gui_running')
   if !v:vim_did_enter
@@ -1627,6 +1616,17 @@ if has('gui_running')
     augroup END
   endif
 endif
+
+# lvimrc
+{
+  var lvimrc_ = Rc('lvimrc')
+  if filereadable(JoinPath('~', lvimrc_)->expand())
+    lvimrc_ = JoinPath('~', lvimrc_)
+    execute 'command! -bar -nargs=* LVimrc ' ..
+            'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
+    execute 'source' lvimrc_
+  endif
+}
 
 # Initialize when loading this file.
 augroup vimrc_initialize_dummy
