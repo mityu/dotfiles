@@ -1620,10 +1620,10 @@ endif
 # lvimrc
 {
   var lvimrc_ = Rc('lvimrc')
-  if filereadable(JoinPath('~', lvimrc_)->expand())
-    lvimrc_ = JoinPath('~', lvimrc_)
-    execute 'command! -bar -nargs=* LVimrc ' ..
-            'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
+  lvimrc_ = JoinPath('~', lvimrc_)
+  execute 'command! -bar -nargs=* LVimrc ' ..
+          'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
+  if filereadable(expand(lvimrc_))
     execute 'source' lvimrc_
   endif
 }
