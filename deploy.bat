@@ -4,6 +4,6 @@
 setlocal
 set PARENT_DIR=%~dp0
 set PARENT_DIR=%PARENT_DIR:~0,-1%
-set HOME=%HOMEDRIVE%%HOMEPATH%
 
-mklink /D %HOME%\vimfiles %PARENT_DIR%\dot_vim
+mklink /D %USERPROFILE%\vimfiles %PARENT_DIR%\dot_vim
+mklink /D %APPDATA%\alacritty %PARENT_DIR%\alacritty
