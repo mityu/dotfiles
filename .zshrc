@@ -92,6 +92,15 @@ if [ -n "$VIM_TERMINAL" ]; then
     }
 fi
 
+# WSL2
+if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
+    USERPROFILE=$(wslpath -u $(cmd.exe /c echo %USERPROFILE%))
+    cd ~
+    function open() {
+        cmd.exe /c start $1
+    }
+fi
+
 # Plugins
 DOTZSH=$HOME/.zsh
 
