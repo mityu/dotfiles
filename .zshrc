@@ -96,7 +96,7 @@ fi
 if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
     LOCAL_IP=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
     export DISPLAY=$LOCAL_IP:0
-    USERPROFILE=$(wslpath -u $(cmd.exe /c echo %USERPROFILE%))
+    export USERPROFILE=$(wslpath -u $(cmd.exe /c echo %USERPROFILE%))
     cd ~
     function open() {
         cmd.exe /c start $1
