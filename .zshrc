@@ -96,7 +96,11 @@ fi
 if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
     LOCAL_IP=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
     export DISPLAY=$LOCAL_IP:0
-    export USERPROFILE=$(wslpath -u $(cmd.exe /c echo %USERPROFILE%))
+    if [ -n "$APPDATA" ]; then
+        export SUMATRAPDF=$(dirname $APPDATA)/Local/SumatraPDF/SumatraPDF.exe
+    else
+        echo "\033[41m\$APPDATA is empty\033[m"
+    fi
     cd ~
     function open() {
         cmd.exe /c start $1

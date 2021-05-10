@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 07-May-2021.
+" Last Change: 10-May-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -135,6 +135,7 @@ command! -nargs=1 -complete=command SetUndoFtplugin
 
 final Windows = has('win32')
 final Unix = !Windows
+final WSL = system('uname -r') =~? 'microsoft'
 
 export var Filesystem: dict<string>
 if Windows
@@ -1202,6 +1203,13 @@ if PluginExists('vim-quickrun')
     command: 'python',
     ['hook/eval/template']: 'print(%s)'
   }
+
+  if WSL
+    g:quickrun_config.dosbatch = {
+      command: 'cmd.exe',
+      exec: '%c /Q /c \$(wslpath -w %s) %a'
+    }
+  endif
 
   nnoremap <expr> <C-c> quickrun#is_running() ?
         \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
