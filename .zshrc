@@ -103,7 +103,7 @@ if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
     fi
     cd ~
     function open() {
-        cmd.exe /c start $1
+        cmd.exe /c start $(wslpath -w $1)
     }
 fi
 
