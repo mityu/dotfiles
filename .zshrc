@@ -11,7 +11,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         if [ ${path_expr:0:1} = "#" ]; then
             continue
         fi
-        export $(eval echo ${path_expr})
+        eval 'export' $path_expr
     done
 fi
 
