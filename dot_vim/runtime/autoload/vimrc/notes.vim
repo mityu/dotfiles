@@ -1,109 +1,124 @@
-let s:cpoptions_save = &cpoptions
-set cpoptions&vim
-
+vim9script
 execute 'import * as Vimrc from' string($MYVIMRC)
 
-let s:notes = {'save_dir_': ''}
-function! s:notes.instance(path) abort
-  let new_obj = deepcopy(self)
-  let new_obj.save_dir_ = a:path
-  return new_obj
-endfunction
-function! s:notes.list_files() abort
-  return map(s:Vimrc.Glob(s:Vimrc.JoinPath(self.save_dir_, '*.*')),
-       \ 'fnamemodify(v:val, ":p:t")')
-endfunction
-function! s:notes.new(opener) abort
-  let name = s:Vimrc.Input('Name: ')
-  if name ==# ''
-    call s:Vimrc.Echo('Canceled.')
-    return
+def NewInstance(name: string): dict<string>
+  var path = Vimrc.JoinPath(Vimrc.CacheDir, name)
+  if !isdirectory(path)
+    mkdir(path, 'p')
   endif
-  if s:Vimrc.Has(self, 'expand_filename')
-    let name = self.expand_filename(name)
+  return {save_dir_: path}
+enddef
+
+def ListFiles(self: dict<string>): list<string>
+  return Vimrc.Glob(Vimrc.JoinPath(self.save_dir_, '*.*'))
+         ->map((_: number, val: string): string => fnamemodify(val, ':p:t'))
+enddef
+
+def CreateNewNote(self: dict<string>, filename_specified: string = '')
+  var filename: string
+  if filename_specified ==# ''
+    filename = Vimrc.Input('Name: ')
+    if filename ==# ''
+      Vimrc.Echo('Canceled.')
+      return
+    endif
+  else
+    filename = filename_specified
   endif
-  let filepath = s:Vimrc.JoinPath(self.save_dir_, name)
-  execute (a:opener ==# '' ? 'edit' : a:opener) fnameescape(filepath)
-endfunction
-function! s:notes.list() abort
-  call vimrc#files#start(self.save_dir_)
-endfunction
-function! s:notes.delete(...) abort
-  let files = self.list_files()
-  for target in a:000
-    if !s:Vimrc.Has(files, target)
-      call EchomsgError('File does not exists: ' .. target)
+  if Vimrc.HasInDict(self, 'ExpandFilename')
+    filename = call(self.ExpandFilename, [filename])
+  endif
+  var filepath = Vimrc.JoinPath(self.save_dir_, filename)
+  execute 'edit' fnameescape(filepath)
+enddef
+
+def OpenNote(self: dict<string>)
+  vimrc#files#start(self.save_dir_)
+enddef
+
+def DeleteNote(self: dict<string>, ...notes: list<string>)
+  files = self->ListFiles()
+  for target in notes
+    if !Vimrc.HasInList(files, target)
+      Vimrc.EchomsgError('File does not exist: ' .. target)
       continue
     endif
-    call s:Vimrc.Echomsg(printf('Delete %s ? [y/n]', target))
-    if s:Vimrc.GetcharString() !~? 'y'
-      call s:Vimrc.Echomsg('Canceled.')
+    Vimrc.EchoQuestion(printf('Delete %s ?', target))
+    if Vimrc.GetCharString() !~? 'y'
+      Vimrc.Echomsg('Canceled')
       continue
     endif
-    if delete(s:Vimrc.JoinPath(self.save_dir_, target)) == 0
-      call s:Vimrc.Echomsg('Successfully deleted: ' .target)
+    if delete(Vimrc.JoinPath(self.save_dir_, target)) == 0
+      Vimrc.Echomsg('Successfully deleted: ' .. target)
     else
-      call s:Vimrc.Echomsg('Failed to delete: ' .target)
+      Vimrc.Echomsg('Failed to delete: ' .. target)
     endif
   endfor
-endfunction
-function! s:notes.get_save_dir() abort
-  return self.save_dir_
-endfunction
-function! s:notes.get_completion(arg_lead) abort
-  return map(filter(self.list_files(), 'v:val =~? a:arg_lead'),
-       \ 'fnameescape(v:val)')
-endfunction
-" Define :Memo* :Otameshi*
-for s:type_ in ['memo', 'otameshi']
-  let s:{s:type_} = s:notes.instance(s:Vimrc.JoinPath(
-     \ s:Vimrc.CacheDir, s:type_))
-  if !isdirectory(s:{s:type_}.get_save_dir())
-    call mkdir(s:{s:type_}.get_save_dir(), 'p')
-  endif
-  if isdirectory(s:{s:type_}.get_save_dir())
-    let s:com_prefix_ = toupper(s:type_[0]) .. s:type_[1:]
-    execute printf('command! -bar -nargs=* %sNew call s:%s.new(<q-args>)',
-         \ s:com_prefix_, s:type_)
-    execute printf('command! -bar -nargs=+ -complete=customlist,Vimrc%sComplete %sDelete call s:%s.delete(<f-args>)',
-         \ s:com_prefix_, s:com_prefix_, s:type_)
-    execute printf('command! -bar %sList call s:%s.list()',
-         \ s:com_prefix_, s:type_)
-    unlet s:com_prefix_
-  endif
-endfor | unlet s:type_
+enddef
 
-function! s:memo.expand_filename(name) abort
-  let name = a:name
-  if !s:Vimrc.Has(name, '.')
-    " Add .md extension only when use didn't specificate extension.
-    let name ..= '.md'
+def GetCompletion(self: dict<any>, arg_lead: string): list<string>
+  return self->ListFiles()
+             ->filter((_: number, val: string): bool => val =~? arg_lead)
+             ->map((_: number, val: string): string => fnameescape(val))
+enddef
+
+var MemoList = NewInstance('memo')
+var OtameshiList = NewInstance('otameshi')
+
+def MemoExpandFilename(name_arg: string): string
+  var name = name_arg
+  if !Vimrc.HasInString(name, '.')
+    name ..= '.md'
   endif
-  let name = strftime('%Y-%m-%d %H:%M ') .. name
+  name = strftime('%Y-%m-%d-%H-%M-') .. name
   return name
-endfunction
-function! s:otameshi.expand_filename(name) abort
-  if s:Vimrc.Has(a:name, '.') " Filename already s:Vimrc.has an extension.
+enddef
+
+def OtameshiExpandFilename(name: string): string
+  if Vimrc.HasInString(name, '.')
     return a:name
   endif
-  let extension = s:Vimrc.Input('Extension? (Empty will be non-extension file):')
+  var extension = Vimrc.Input('Extension? (Empty will be non-extension file): ')
   if extension ==# ''
-    return a:name
-  else
-    return a:name .. '.' .. extension
+    return name
   endif
-endfunction
-function! VimrcMemoComplete(arg_lead, cmd_line, cur_pos) abort
-  return s:memo.get_completion(a:arg_lead)
-endfunction
-function! VimrcOtameshiComplete(arg_lead, cmd_line, cur_pos) abort
-  return s:otameshi.get_completion(a:arg_lead)
-endfunction
+  return name .. '.' .. extension
+enddef
 
-function! vimrc#notes#load() abort
-  " Do nothing
-endfunction
+export def vimrc#notes#memo_new(filename: string)
+  MemoList->CreateNewNote(filename)
+enddef
 
+export def vimrc#notes#otameshi_new(filename: string)
+  OtameshiList->CreateNewNote(filename)
+enddef
 
-let &cpoptions = s:cpoptions_save
-unlet s:cpoptions_save
+export def vimrc#notes#memo_delete(files: list<string>)
+  MemoList->DeleteNote(files)
+enddef
+
+export def vimrc#notes#otameshi_delete(files: list<string>)
+  OtamemshiList->DeleteNote(files)
+enddef
+
+export def vimrc#notes#memo_list()
+  MemoList->OpenNote()
+enddef
+
+export def vimrc#notes#otameshi_list()
+  OtameshiList->OpenNote()
+enddef
+
+export def vimrc#notes#memo_complete(
+  arg_lead: string,
+  command_line: string,
+  cursor_pos: number): list<string>
+  return MemoList->GetCompletion(arg_lead)
+enddef
+
+export def vimrc#notes#otameshi_complete(
+  arg_lead: string,
+  command_line: string,
+  cursor_pos: number): list<string>
+  return OtameshiList->GetCompletion(arg_lead)
+enddef

@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 10-May-2021.
+" Last Change: 17-May-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1285,7 +1285,16 @@ enddef
 # Additional plugins
 # Taking notes
 # TODO: Define only commands here
-autocmd User vimrc_initialize ++once call vimrc#notes#load()
+# autocmd User vimrc_initialize ++once call vimrc#notes#load()
+command! -bar -nargs=* MemoNew call vimrc#notes#memo_new(<q-args>)
+command! -bar -nargs=+ -complete=customlist,vimrc#notes#memo_complete
+      \ MemoDelete call vimrc#notes#memo_delete(<f-args>)
+command! -bar MemoList call vimrc#notes#memo_list()
+command! -bar -nargs=* OtameshiNew call vimrc#notes#otameshi_new(<q-args>)
+command! -bar -nargs=+ -complete=customlist,vimrc#notes#otameshi_complete
+      \ OtameshiDelete call vimrc#notes#otameshi_delete(<f-args>)
+command! -bar OtameshiList call vimrc#notes#otameshi_list()
+
 
 # working-plugin
 command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
