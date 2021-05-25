@@ -1,7 +1,7 @@
 vim9script
 execute 'import * as Vimrc from' string($MYVIMRC)
 
-def NewInstance(name: string): dict<string>
+def NewInstance(name: string): dict<any>
   var path = Vimrc.JoinPath(Vimrc.CacheDir, name)
   if !isdirectory(path)
     mkdir(path, 'p')
@@ -9,12 +9,12 @@ def NewInstance(name: string): dict<string>
   return {save_dir_: path}
 enddef
 
-def ListFiles(self: dict<string>): list<string>
+def ListFiles(self: dict<any>): list<string>
   return Vimrc.Glob(Vimrc.JoinPath(self.save_dir_, '*.*'))
          ->map((_: number, val: string): string => fnamemodify(val, ':p:t'))
 enddef
 
-def CreateNewNote(self: dict<string>, filename_specified: string = '')
+def CreateNewNote(self: dict<any>, filename_specified: string = '')
   var filename: string
   if filename_specified ==# ''
     filename = Vimrc.Input('Name: ')
@@ -32,11 +32,11 @@ def CreateNewNote(self: dict<string>, filename_specified: string = '')
   execute 'edit' fnameescape(filepath)
 enddef
 
-def OpenNote(self: dict<string>)
+def OpenNote(self: dict<any>)
   vimrc#files#start(self.save_dir_)
 enddef
 
-def DeleteNote(self: dict<string>, ...notes: list<string>)
+def DeleteNote(self: dict<any>, ...notes: list<string>)
   files = self->ListFiles()
   for target in notes
     if !Vimrc.HasInList(files, target)
@@ -62,8 +62,8 @@ def GetCompletion(self: dict<any>, arg_lead: string): list<string>
              ->map((_: number, val: string): string => fnameescape(val))
 enddef
 
-var MemoList = NewInstance('memo')
-var OtameshiList = NewInstance('otameshi')
+var MemoList: dict<any> = NewInstance('memo')
+var OtameshiList: dict<any> = NewInstance('otameshi')
 
 def MemoExpandFilename(name_arg: string): string
   var name = name_arg
@@ -73,10 +73,11 @@ def MemoExpandFilename(name_arg: string): string
   name = strftime('%Y-%m-%d-%H-%M-') .. name
   return name
 enddef
+MemoList.ExpandFilename = MemoExpandFilename
 
 def OtameshiExpandFilename(name: string): string
   if Vimrc.HasInString(name, '.')
-    return a:name
+    return name
   endif
   var extension = Vimrc.Input('Extension? (Empty will be non-extension file): ')
   if extension ==# ''
@@ -84,6 +85,7 @@ def OtameshiExpandFilename(name: string): string
   endif
   return name .. '.' .. extension
 enddef
+OtameshiList.ExpandFilename = OtameshiExpandFilename
 
 export def vimrc#notes#memo_new(filename: string)
   MemoList->CreateNewNote(filename)
