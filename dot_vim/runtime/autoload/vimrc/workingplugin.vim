@@ -1,8 +1,14 @@
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-execute 'import * as Vimrc from' string($MYVIMRC)
+execute 'import * as VimrcFuncs from' string($MYVIMRC)
 
+let s:Vimrc = {
+      \'JoinPath': s:VimrcFuncs.JoinPath,
+      \'Echomsg': s:VimrcFuncs.Echomsg,
+      \'EchomsgError': s:VimrcFuncs.EchomsgError,
+      \'Has': s:VimrcFuncs.Has,
+      \}
 let s:workplace = s:Vimrc.JoinPath(expand('$DOT_VIM'), 'workplace')
 let s:available = isdirectory(s:workplace)
 
