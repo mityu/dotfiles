@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-May-2021.
+" Last Change: 29-May-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -440,6 +440,8 @@ vnoremap <Space>; :
 
 noremap - <C-x>
 noremap + <C-a>
+noremap ( [(
+noremap ) ])
 
 nnoremap j gj
 nnoremap k gk
@@ -464,8 +466,7 @@ nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
-# Avoid to regester calling textobj function commands to the command-history
-# when use textobj via dot.
+# Avoid textobj-function calls appearing on command history
 nnoremap <silent> . .
 nnoremap * *N
 
@@ -597,33 +598,17 @@ enddef
 # delfunc s:_simple_loop_define
 
 # f F t T ; , declarations {{{
-nmap <expr> f vimrc#charjump#jump(v:true, v:false)
-omap <expr> f vimrc#charjump#jump(v:true, v:false)
-vmap <expr> f vimrc#charjump#jump(v:true, v:false)
-
-nmap <expr> F vimrc#charjump#jump(v:false, v:false)
-omap <expr> F vimrc#charjump#jump(v:false, v:false)
-vmap <expr> F vimrc#charjump#jump(v:false, v:false)
-
-nmap <expr> t vimrc#charjump#jump(v:true, v:true)
-omap <expr> t vimrc#charjump#jump(v:true, v:true)
-vmap <expr> t vimrc#charjump#jump(v:true, v:true)
-
-nmap <expr> T vimrc#charjump#jump(v:false, v:true)
-omap <expr> T vimrc#charjump#jump(v:false, v:true)
-vmap <expr> T vimrc#charjump#jump(v:false, v:true)
-
-nnoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
-onoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
-vnoremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
-
-nnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
-onoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
-vnoremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
+map <expr> f vimrc#charjump#jump(v:true, v:false)
+map <expr> F vimrc#charjump#jump(v:false, v:false)
+map <expr> t vimrc#charjump#jump(v:true, v:true)
+map <expr> T vimrc#charjump#jump(v:false, v:true)
+noremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
+noremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
 # }}}
 
 def CmdwinEnter()
   # Type <CR> to execute current line in command-line window.
+  # This mapping is overwritten when ambicmd.vim is installed.
   nnoremap <buffer> <CR> <CR>
 
   # Return back to the current window from command-line window with
@@ -635,7 +620,7 @@ def CmdwinEnter()
   inoremap <buffer> <C-l><C-n> <C-x><C-n>
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
-  # Execute an previous command easiler.
+  # Make executing a previous command easier.
   nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
   vimrc#incsearch#setup()
 
@@ -1180,7 +1165,6 @@ if PluginExists('vim-quickrun')
   g:quickrun_config.cpp = {
     cmdopt: '-std=c++17'
   }
-  # TODO: Improve. (Support windows, etc)
   g:quickrun_config['cpp/sfml'] = {
     type: 'cpp',
     cmdopt: '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
