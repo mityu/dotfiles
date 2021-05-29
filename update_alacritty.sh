@@ -1,6 +1,6 @@
 cd $1
 git fetch
-if [ -z "$(git diff)" ]; then
+if [ -n "$(git diff)" ]; then
     echo "Alacritty is already up-to-date."
     exit 0
 fi
