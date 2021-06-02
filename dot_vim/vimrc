@@ -280,20 +280,18 @@ def PackRegister()
   minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
 enddef
 def PackInit(): bool
-  try
-    packadd minpac
-  catch /^Vim\%((\a\+)\)\=:E919/
+  silent! packadd minpac
+  if !exists('*minpac#init()')
     # Download minpac...
     var minpac_path = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
     Echomsg('Downloading minpac...')
     system('git clone https://github.com/k-takata/minpac ' .. minpac_path)
-    try
-      packadd minpac
-    catch
-      EchomsgError(v:exception)
+
+    silent! packadd minpac
+    if !exists('*minpac#init()')
       return false
-    endtry
-  endtry
+    endif
+  endif
 
   minpac#init()
   PackRegister()
