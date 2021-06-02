@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 02-Jun-2021.
+" Last Change: 03-Jun-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1425,8 +1425,34 @@ enddef
 
 # :terminal
 augroup vimrc_terminal
-  autocmd TerminalWinOpen * setlocal nonumber norelativenumber
+  autocmd TerminalWinOpen * call OnTerminalWinOpen()
 augroup END
+
+# This config is based on:
+# https://github.com/thinca/config/blob/435fbf2d926061e8dfdf6b48a49b76c59ede5949/dotfiles/dot.vim/vimrc#L1591-L1613
+# Thanks!
+def OnTerminalWinOpen()
+  setlocal nonumber norelativenumber
+  augroup vimrc_terminal_window
+    autocmd! * <buffer>
+    autocmd WinEnter <buffer> call OnTerminalWinEnter()
+    autocmd WinLeave <buffer> call OnTerminalWinLeave()
+  augroup END
+enddef
+
+def OnTerminalWinEnter()
+  if get(b:, 'term_normal', false)
+    feedkeys("\<C-\>\<C-n>", 'nt')
+    unlet b:term_normal
+  endif
+enddef
+
+def OnTerminalWinLeave()
+  if term_getstatus('%') ==# 'running,normal'
+    setbufvar('%', 'term_normal', true)
+    normal! i
+  endif
+enddef
 
 # EmphasisIndent
 highlight link VimrcEmphasisIndent CursorLine
