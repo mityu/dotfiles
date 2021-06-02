@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 29-May-2021.
+" Last Change: 02-Jun-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -951,7 +951,7 @@ if PluginExists('gina.vim')
     endif
   enddef
   augroup vimrc_gina
-    autocmd User vimrc_initialize ++once GinaConfig()
+    autocmd Filetype gina-* ++once GinaConfig()
   augroup END
 endif
 if PluginExists('vim-findent')
