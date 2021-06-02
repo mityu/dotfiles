@@ -1361,15 +1361,11 @@ augroup END
 
 # statusline
 def StatuslineGenerator(): string
-  var gina = PluginExists('gina.vim') ?
-      '[%{gina#component#repo#branch() ==# "" ? "no-git" : gina#component#repo#branch()}]' :
-      ''
   var statusline =
     '%m' ..
     ShowmodeLabel() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
     '[#%{bufnr("%")}]' ..
-    gina ..
     '%{<SID>FilenameLabel(bufnr("%"))}' ..
     '%<%=' ..
     '[%{pathshorten(getcwd(winnr()))}]'
