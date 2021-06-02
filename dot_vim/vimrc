@@ -1268,7 +1268,6 @@ enddef
 
 # Additional plugins
 # Taking notes
-# TODO: Define only commands here
 # autocmd User vimrc_initialize ++once call vimrc#notes#load()
 command! -bar -nargs=* MemoNew call vimrc#notes#memo_new(<q-args>)
 command! -bar -nargs=+ -complete=customlist,vimrc#notes#memo_complete
@@ -1360,12 +1359,44 @@ augroup vimrc_showmode
 augroup END
 
 # statusline
+if PluginExists('gina.vim')
+  augroup vimrc_gina
+    autocmd CursorHold * ++once call gina#component#repo#branch() | redrawstatus
+  augroup END
+  def StatuslineGitBranch(): string
+    if exists('*gina#component#repo#branch')
+      var branch = gina#component#repo#branch()
+      if branch ==# ''
+        return 'no-git'
+      else
+        var ahead: any = gina#component#traffic#ahead()
+        var behind: any = gina#component#traffic#behind()
+        var staged = !!gina#component#status#staged()->str2nr()
+        var unstaged = !!gina#component#status#unstaged()->str2nr()
+
+        var icon_modified = (staged || unstaged) ? '*' : ''
+        var icon_ahead =
+              ahead->type() == v:t_number && !!ahead ? '↑' : ''
+        var icon_behind =
+              behind->type() == v:t_number && !!behind ? '↓' : ''
+        return branch .. icon_modified .. icon_ahead .. icon_behind
+      endif
+    else
+      return 'loading...'
+    endif
+  enddef
+else
+  def StatuslineGitBranch(): string
+    return 'no-gina'
+  enddef
+endif
 def StatuslineGenerator(): string
   var statusline =
     '%m' ..
     ShowmodeLabel() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
     '[#%{bufnr("%")}]' ..
+    '[%{<SID>StatuslineGitBranch()}]' ..
     '%{<SID>FilenameLabel(bufnr("%"))}' ..
     '%<%=' ..
     '[%{pathshorten(getcwd(winnr()))}]'
