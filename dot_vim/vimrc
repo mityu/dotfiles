@@ -283,6 +283,7 @@ def PackRegister()
 enddef
 def PackInit(): bool
   silent! packadd minpac
+  silent! minpac#init()
   if !exists('*minpac#init()')
     # Download minpac...
     var minpac_path = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
@@ -290,12 +291,12 @@ def PackInit(): bool
     system('git clone https://github.com/k-takata/minpac ' .. minpac_path)
 
     silent! packadd minpac
+    silent! minpac#init()
     if !exists('*minpac#init()')
       return false
     endif
   endif
 
-  minpac#init()
   PackRegister()
 
   return true
