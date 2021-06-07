@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 03-Jun-2021.
+" Last Change: 07-Jun-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -133,12 +133,14 @@ enddef
 command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
-final Windows = has('win32')
-final Unix = !Windows
-final WSL = system('uname -r') =~? 'microsoft'
+final IsWindows = has('win32')
+final IsLinux = has('linux')
+final IsMac = has('mac')
+final IsUnix = IsLinux || IsMac
+final IsWSL = IsLinux && system('uname -r') =~? 'microsoft'
 
 export var Filesystem: dict<string>
-if Windows
+if IsWindows
   $DOT_VIM = expand('~\vimfiles')
   Filesystem = {
     slash: '\',
@@ -401,7 +403,7 @@ else
   set fileencodings=utf-8,euc-jp,cp932,sjis
   set ambiwidth=double
 endif
-if Unix
+if IsUnix
   set path& path+=/usr/local/include
 endif
 if executable('ag')
@@ -1186,7 +1188,7 @@ if PluginExists('vim-quickrun')
     ['hook/eval/template']: 'print(%s)'
   }
 
-  if WSL
+  if IsWSL
     g:quickrun_config.dosbatch = {
       command: 'cmd.exe',
       exec: '%c /Q /c \$(wslpath -w %s) %a'
