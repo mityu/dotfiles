@@ -595,8 +595,6 @@ def MapTabmove(delta: number)
   endif
   execute movecmd
 enddef
-# delfunc s:_loop_define
-# delfunc s:_simple_loop_define
 
 # f F t T ; , declarations {{{
 map <expr> f vimrc#charjump#jump(v:true, v:false)
@@ -674,10 +672,10 @@ augroup vimrc_mapping
   autocmd CmdWinLeave * call CmdwinLeave()
 augroup END
 
-if has('mac')
+if IsMac
   g:mapleader = '_'
 endif
-if has('win32')
+if IsWindows || IsLinux
   inoremap \ _
   inoremap _ \
 endif
@@ -897,6 +895,12 @@ if PluginExists('gina.vim')
   def GinaConfig()
     def Gina_nnoremap(scheme: string, lhs: string, rhs: string)
       gina#custom#mapping#nmap(scheme, lhs, rhs, {noremap: 1, silent: 1})
+
+      # Set mapping manually for the first time.
+      # TODO: More smart solution
+      if HasInString(&filetype, scheme)
+        execute 'nnoremap <buffer> <silent>' lhs rhs
+      endif
     enddef
 
     Gina_nnoremap('status', '<C-]>', '<Cmd>Gina commit<CR>')
@@ -906,7 +910,6 @@ if PluginExists('gina.vim')
     Gina_nnoremap('branch', 'N',
             '<Cmd>call gina#action#call("branch:new")<CR>')
     Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
-    nnoremap <Space>g <Cmd>Gina status<CR>
 
     # Jump between unadded files with n/p ..
     var rhs_base = printf(
@@ -925,6 +928,7 @@ if PluginExists('gina.vim')
 
     gina#custom#command#option('\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
   enddef
+
   def GinaStatusSelectAnother(repeat_count: number, search_previous: bool)
     var flags = 'w'
     flags ..= search_previous ? 'b' : ''
@@ -932,6 +936,7 @@ if PluginExists('gina.vim')
       search('\e[31.\+\e[m', flags)
     endfor
   enddef
+
   def GinaDiff()
     var filename = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
     filename = matchstr(filename, '\%(\_^modified\:\s\+\)\?\zs.\+')
@@ -954,6 +959,7 @@ if PluginExists('gina.vim')
   augroup vimrc_gina
     autocmd Filetype gina-* ++once GinaConfig()
   augroup END
+  nnoremap <Space>g <Cmd>Gina status<CR>
 endif
 if PluginExists('vim-findent')
   augroup vimrc_findent
