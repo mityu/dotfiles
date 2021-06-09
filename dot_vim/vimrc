@@ -1246,7 +1246,7 @@ if PluginExists('caw.vim')
   enddef
 
   map _c <Plug>(caw:hatpos:toggle:operator)
-  imap <expr> <C-l><C-l> <SID>CawMap()
+  imap <expr> <C-l><C-j> <SID>CawMap()
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
