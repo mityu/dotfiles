@@ -393,6 +393,7 @@ set previewpopup=highlight:Normal
 set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
+set timeoutlen=3000 ttimeoutlen=100
 # }}}
 
 export final CacheDir = JoinPath(expand('~'), '.cache', 'vimrc')
