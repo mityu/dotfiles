@@ -781,20 +781,20 @@ def Gof(path: string)
   popup_create(term_start(gofcmd, {hidden: 1, term_finish: 'close'}),
         \ {minwidth: minwidth, minheight: minheight})
 enddef
+
 def GofForMapping()
   var git_root = FindGitroot()
   Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 
-def Tapi_gof(bufnum: number, file_info: dict<string>): void
+legacy def! Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
   var winid = win_getid(winnr('#'))
   var buftype = getwinvar(winid, '&buftype')
   var open_cmd = 'edit'
   if !(buftype ==# 'nofile' || buftype ==# '')
     open_cmd = 'split'
   endif
-  call win_execute(winid,
-         printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
+  win_execute(winid, open_cmd .. ' ' .. fnameescape(file_info.fullpath))
 enddef
 
 # Installed plugins
