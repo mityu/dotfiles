@@ -802,77 +802,6 @@ if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
-if PluginExists('vim-operator-user')
-  # nmap zf <Plug>(operator-vimrc-fold-zf)
-  # nmap zF <Plug>(operator-vimrc-fold-zF)
-  # nmap zd <Plug>(operator-vimrc-fold-zd)
-  # nmap zD <Plug>(operator-vimrc-fold-zD)
-  # nmap zE <Plug>(operator-vimrc-fold-zE)
-  # vmap zf <Plug>(operator-vimrc-fold-zf)
-  # vmap zF <Plug>(operator-vimrc-fold-zF)
-  # vmap zd <Plug>(operator-vimrc-fold-zd)
-  # vmap zD <Plug>(operator-vimrc-fold-zD)
-  # vmap zE <Plug>(operator-vimrc-fold-zE)
-  # 
-  # def MapFoldCmd(keys: string)
-  #   # This is available only when foldmethod is marker or manual
-  #   if !HasInList(['marker', 'manual'], &l:foldmethod)
-  #     return
-  #   endif
-  #   var commentstring_save = &l:commentstring
-  #   &l:commentstring = ' ' .. &l:commentstring
-  # 
-  #   try
-  #     execute 'normal!' keys
-  #   catch  # Usually this :catch gets E490, 'Folding not found.'
-  #     EchomsgError(v:exception)
-  #   finally
-  #     &l:commentstring = commentstring_save
-  #   endtry
-  # enddef
-  # 
-  # def MapRangeFoldCmd(motion_wiseness: string, keys: string)
-  #   var v_cmd: string =
-  #           operator#user#visual_command_from_wise_name(motion_wiseness)
-  #   MapFoldCmd(printf('`[%s`]%s', v_cmd, keys))
-  # 
-  #   if &foldmethod ==# 'marker'
-  #     # Remove white-spaces at the beggining of the line
-  #     var marker_only_pat = '^\s\+%s'
-  #     var marker_pair = ["'[", "']"]
-  #     var foldmarker_pair = &l:foldmarker->split(', ')
-  #     for index in range(foldmarker_pair->len() - 1)
-  #       var marker = marker_pair[index]
-  #       var foldmarker = printf(&l:commentstring, foldmarker_pair[index])
-  #       var lnum = getpos(marker)[1]
-  #       if getline(lnum) =~# printf(marker_only_pat, foldmarker)
-  #         setline(lnum, foldmarker)
-  #       endif
-  #     endfor
-  #   endif
-  # enddef
-  # 
-  # def MapDefineVimrcOperator()
-  #   var SID = SIDPrefix()
-  #   for suf in 'fFdDE'
-  #     var keys = 'z' .. suf
-  #     var defscript =<< trim END
-  #       def MapFold_%s(motion_wise: string)
-  #         MapRangeFoldCmd(motion_wise, "%s")
-  #       enddef
-  #     END
-  #     execute printf(defscript->join("\n"), keys, keys)
-  #     operator#user#define('vimrc-fold-' .. keys,
-  #                           SIDPrefix() .. 'MapFold_' .. keys)
-  #   endfor
-  # 
-  #   # Override mapping in normal-mode that doesn't need any ranges
-  #   for suf in 'fF'
-  #     execute 'nnoremap <Plug>(operator-vimrc-fold-z' .. suf .. ') ' ..
-  #                 '<Cmd>call <SID>MapFoldCmd("z' .. suf .. '")<CR>'
-  #   endfor
-  # enddef
-endif
 if PluginExists('gina.vim')
   g:gina#action#mark_sign_text = '*'
   g:gina#core#console#enable_message_history = 1
@@ -1674,13 +1603,13 @@ augroup END
 
 # splash
 command! Splash call vimrc#splash#show()
-# if !v:vim_did_enter
-#   augroup vimrc_splash
-#     autocmd!
-#     autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
-#     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
-#   augroup END
-# endif
+if !v:vim_did_enter && !has('gui_running')
+  augroup vimrc_splash
+    autocmd!
+    autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
+    autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
+  augroup END
+endif
 
 # gvimrc
 if has('gui_running')
