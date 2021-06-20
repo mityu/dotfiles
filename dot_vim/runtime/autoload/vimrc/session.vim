@@ -1,9 +1,7 @@
-finish  " Disable this script temporally
-
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-let s:session_dir = VimrcFunc('vars')().session_dir
+let s:session_dir = VimrcFunc('VimrcVar')('SessionDir')
 function! vimrc#session#make() abort "{{{
   let name = VimrcFunc('Input')('Session name >> ')
   if name ==# ''
