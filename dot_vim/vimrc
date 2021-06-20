@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Jun-2021.
+" Last Change: 20-Jun-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -219,15 +219,27 @@ endif
 
 # minpac
 var PluginList: list<string>
+var OptPluginList: list<string>
 if &loadplugins
   PluginList = Glob(JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*'))
+               ->filter((_, val): bool => isdirectory(val))
+               ->map((_, val): string => fnamemodify(val, ':p:h:t'))
+  OptPluginList = Glob(JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', '*'))
                ->filter((_, val): bool => isdirectory(val))
                ->map((_, val): string => fnamemodify(val, ':p:h:t'))
   def PluginExists(plugin: string): bool
     return HasInList(PluginList, plugin)
   enddef
+
+  def OptPluginExists(plugin: string): bool
+    return HasInList(OptPluginList, plugin)
+  enddef
 else
   def PluginExists(plugin: string): bool
+    return false
+  enddef
+
+  def OptPluginExists(plugin: string): bool
     return false
   enddef
 endif
@@ -237,12 +249,7 @@ def PackRegister()
   minpac#add('itchyny/vim-cursorword')
   minpac#add('kana/vim-altr')
   minpac#add('kana/vim-gf-user')
-  minpac#add('kana/vim-operator-replace')
   minpac#add('kana/vim-operator-user')
-  minpac#add('kana/vim-textobj-entire')
-  minpac#add('kana/vim-textobj-function')
-  minpac#add('kana/vim-textobj-indent')
-  minpac#add('kana/vim-textobj-line')
   minpac#add('kana/vim-textobj-user')
   minpac#add('lambdalisue/gina.vim')
   minpac#add('lambdalisue/vim-findent')
@@ -251,26 +258,20 @@ def PackRegister()
   minpac#add('mityu/vim-brownie')
   minpac#add('mityu/vim-gram')
   minpac#add('mityu/vim-gram-sources')
-  minpac#add('mityu/vim-textobj-commentblock')
   minpac#add('osyo-manga/vim-jplus')
-  minpac#add('osyo-manga/vim-operator-swap')
   minpac#add('prabirshrestha/asyncomplete-lsp.vim')
   minpac#add('prabirshrestha/asyncomplete.vim')
   minpac#add('prabirshrestha/vim-lsp')
   minpac#add('previm/previm')
-  minpac#add('rhysd/vim-operator-surround')
   minpac#add('sgur/vim-gf-autoload')
-  minpac#add('sgur/vim-operator-openbrowser')
   minpac#add('skanehira/gh.vim')
   minpac#add('thinca/vim-ambicmd')
   minpac#add('thinca/vim-ft-help_fold')
   minpac#add('thinca/vim-partedit')
   minpac#add('thinca/vim-prettyprint')
   minpac#add('thinca/vim-quickrun')
-  minpac#add('thinca/vim-textobj-between')
   minpac#add('thinca/vim-themis')
   minpac#add('tyru/capture.vim')
-  minpac#add('tyru/caw.vim')
   # minpac#add('tyru/eskk.vim')
   minpac#add('tyru/open-browser.vim')
   minpac#add('vim-jp/autofmt')
@@ -280,6 +281,21 @@ def PackRegister()
 
   minpac#add('tweekmonster/helpful.vim', {type: 'opt'})
   minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
+
+  # Operator-user plugins
+  minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
+  minpac#add('kana/vim-operator-replace', {type: 'opt'})
+  minpac#add('rhysd/vim-operator-surround', {type: 'opt'})
+  minpac#add('tyru/caw.vim', {type: 'opt'})
+  minpac#add('sgur/vim-operator-openbrowser', {type: 'opt'})
+
+  # Textobj-user plugins
+  minpac#add('kana/vim-textobj-entire', {type: 'opt'})
+  minpac#add('kana/vim-textobj-function', {type: 'opt'})
+  minpac#add('kana/vim-textobj-indent', {type: 'opt'})
+  minpac#add('kana/vim-textobj-line', {type: 'opt'})
+  minpac#add('mityu/vim-textobj-commentblock', {type: 'opt'})
+  minpac#add('thinca/vim-textobj-between', {type: 'opt'})
 enddef
 def PackInit(): bool
   silent! packadd minpac
@@ -781,112 +797,81 @@ def Tapi_gof(bufnum: number, file_info: dict<string>): void
          printf('%s %s', open_cmd, fnameescape(file_info.fullpath)))
 enddef
 
-# # Installed plugins
+# Installed plugins
 if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
-if PluginExists('vim-operator-replace')
-  map _r <Plug>(operator-replace)
-endif
 if PluginExists('vim-operator-user')
-  nmap zf <Plug>(operator-vimrc-fold-zf)
-  nmap zF <Plug>(operator-vimrc-fold-zF)
-  nmap zd <Plug>(operator-vimrc-fold-zd)
-  nmap zD <Plug>(operator-vimrc-fold-zD)
-  nmap zE <Plug>(operator-vimrc-fold-zE)
-  vmap zf <Plug>(operator-vimrc-fold-zf)
-  vmap zF <Plug>(operator-vimrc-fold-zF)
-  vmap zd <Plug>(operator-vimrc-fold-zd)
-  vmap zD <Plug>(operator-vimrc-fold-zD)
-  vmap zE <Plug>(operator-vimrc-fold-zE)
-  def MapFoldCmd(keys: string)
-    # This is available only when foldmethod is marker or manual
-    if !HasInList(['marker', 'manual'], &l:foldmethod)
-      return
-    endif
-    var commentstring_save = &l:commentstring
-    &l:commentstring = ' ' .. &l:commentstring
-
-    try
-      execute 'normal!' keys
-    catch  # Usually this :catch gets E490, 'Folding not found.'
-      EchomsgError(v:exception)
-    finally
-      &l:commentstring = commentstring_save
-    endtry
-  enddef
-
-  def MapRangeFoldCmd(motion_wiseness: string, keys: string)
-    var v_cmd: string =
-            operator#user#visual_command_from_wise_name(motion_wiseness)
-    MapFoldCmd(printf('`[%s`]%s', v_cmd, keys))
-
-    if &foldmethod ==# 'marker'
-      # Remove white-spaces at the beggining of the line
-      var marker_only_pat = '^\s\+%s'
-      var marker_pair = ["'[", "']"]
-      var foldmarker_pair = &l:foldmarker->split(', ')
-      for index in range(foldmarker_pair->len() - 1)
-        var marker = marker_pair[index]
-        var foldmarker = printf(&l:commentstring, foldmarker_pair[index])
-        var lnum = getpos(marker)[1]
-        if getline(lnum) =~# printf(marker_only_pat, foldmarker)
-          setline(lnum, foldmarker)
-        endif
-      endfor
-    endif
-  enddef
-
-  def MapDefineOperator()
-    var SID = SIDPrefix()
-    for suf in 'fFdDE'
-      var keys = 'z' .. suf
-      var defscript =<< trim END
-        def MapFold_%s(motion_wise: string)
-          MapRangeFoldCmd(motion_wise, "%s")
-        enddef
-      END
-      execute printf(defscript->join("\n"), keys, keys)
-      operator#user#define('vimrc-fold-' .. keys,
-                            SIDPrefix() .. 'MapFold_' .. keys)
-    endfor
-
-    # Override mapping in normal-mode that doesn't need any ranges
-    for suf in 'fF'
-      execute 'nnoremap <Plug>(operator-vimrc-fold-z' .. suf .. ') ' ..
-                  '<Cmd>call <SID>MapFoldCmd("z' .. suf .. '")<CR>'
-    endfor
-  enddef
-
-  augroup vimrc_mapping
-    autocmd User vimrc_initialize ++once MapDefineOperator()
-  augroup END
-endif
-if PluginExists('vim-textobj-entire')
-  omap aa <Plug>(textobj-entire-a)
-  omap ia <Plug>(textobj-entire-i)
-  vmap aa <Plug>(textobj-entire-a)
-  vmap ia <Plug>(textobj-entire-i)
-  g:textobj_entire_no_default_key_mappings = 1
-endif
-if PluginExists('vim-textobj-function')
-  omap if <Plug>(textobj-function-i)
-  omap af <Plug>(textobj-function-a)
-  vmap if <Plug>(textobj-function-i)
-  vmap af <Plug>(textobj-function-a)
-  g:textobj_function_no_default_key_mappings = 1
-endif
-if PluginExists('vim-textobj-indent')
-  omap ii <Plug>(textobj-indent-i)
-  omap iI <Plug>(textobj-indent-same-i)
-  omap ai <Plug>(textobj-indent-a)
-  omap aI <Plug>(textobj-indent-same-a)
-  vmap ii <Plug>(textobj-indent-i)
-  vmap iI <Plug>(textobj-indent-same-i)
-  vmap ai <Plug>(textobj-indent-a)
-  vmap aI <Plug>(textobj-indent-same-a)
-  g:textobj_indent_no_default_key_mappings = 1
+  # nmap zf <Plug>(operator-vimrc-fold-zf)
+  # nmap zF <Plug>(operator-vimrc-fold-zF)
+  # nmap zd <Plug>(operator-vimrc-fold-zd)
+  # nmap zD <Plug>(operator-vimrc-fold-zD)
+  # nmap zE <Plug>(operator-vimrc-fold-zE)
+  # vmap zf <Plug>(operator-vimrc-fold-zf)
+  # vmap zF <Plug>(operator-vimrc-fold-zF)
+  # vmap zd <Plug>(operator-vimrc-fold-zd)
+  # vmap zD <Plug>(operator-vimrc-fold-zD)
+  # vmap zE <Plug>(operator-vimrc-fold-zE)
+  # 
+  # def MapFoldCmd(keys: string)
+  #   # This is available only when foldmethod is marker or manual
+  #   if !HasInList(['marker', 'manual'], &l:foldmethod)
+  #     return
+  #   endif
+  #   var commentstring_save = &l:commentstring
+  #   &l:commentstring = ' ' .. &l:commentstring
+  # 
+  #   try
+  #     execute 'normal!' keys
+  #   catch  # Usually this :catch gets E490, 'Folding not found.'
+  #     EchomsgError(v:exception)
+  #   finally
+  #     &l:commentstring = commentstring_save
+  #   endtry
+  # enddef
+  # 
+  # def MapRangeFoldCmd(motion_wiseness: string, keys: string)
+  #   var v_cmd: string =
+  #           operator#user#visual_command_from_wise_name(motion_wiseness)
+  #   MapFoldCmd(printf('`[%s`]%s', v_cmd, keys))
+  # 
+  #   if &foldmethod ==# 'marker'
+  #     # Remove white-spaces at the beggining of the line
+  #     var marker_only_pat = '^\s\+%s'
+  #     var marker_pair = ["'[", "']"]
+  #     var foldmarker_pair = &l:foldmarker->split(', ')
+  #     for index in range(foldmarker_pair->len() - 1)
+  #       var marker = marker_pair[index]
+  #       var foldmarker = printf(&l:commentstring, foldmarker_pair[index])
+  #       var lnum = getpos(marker)[1]
+  #       if getline(lnum) =~# printf(marker_only_pat, foldmarker)
+  #         setline(lnum, foldmarker)
+  #       endif
+  #     endfor
+  #   endif
+  # enddef
+  # 
+  # def MapDefineVimrcOperator()
+  #   var SID = SIDPrefix()
+  #   for suf in 'fFdDE'
+  #     var keys = 'z' .. suf
+  #     var defscript =<< trim END
+  #       def MapFold_%s(motion_wise: string)
+  #         MapRangeFoldCmd(motion_wise, "%s")
+  #       enddef
+  #     END
+  #     execute printf(defscript->join("\n"), keys, keys)
+  #     operator#user#define('vimrc-fold-' .. keys,
+  #                           SIDPrefix() .. 'MapFold_' .. keys)
+  #   endfor
+  # 
+  #   # Override mapping in normal-mode that doesn't need any ranges
+  #   for suf in 'fF'
+  #     execute 'nnoremap <Plug>(operator-vimrc-fold-z' .. suf .. ') ' ..
+  #                 '<Cmd>call <SID>MapFoldCmd("z' .. suf .. '")<CR>'
+  #   endfor
+  # enddef
 endif
 if PluginExists('gina.vim')
   g:gina#action#mark_sign_text = '*'
@@ -1012,26 +997,8 @@ if PluginExists('vim-gram')
     gram#custom#map_key('i', '<BS>', '<C-h>')
   enddef
 endif
-if PluginExists('vim-textobj-commentblock')
-  omap ac <Plug>(textobj-commentblock-a)
-  omap ic <Plug>(textobj-commentblock-i)
-  vmap ac <Plug>(textobj-commentblock-a)
-  vmap ic <Plug>(textobj-commentblock-i)
-  g:textobj_commentblock_no_default_key_mapings = 1
-
-  augroup vimrc_textobj_commentblock
-    execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
-          \   (PluginExists('caw.vim') ? 'caw' :
-          \   'commentstring')
-          \ .. '()'
-  augroup END
-endif
 if PluginExists('vim-jplus')
   map J <Plug>(jplus)
-endif
-if PluginExists('vim-operator-swap')
-  map _sy <Plug>(operator-swap-marking)
-  map _sp <Plug>(operator-swap)
 endif
 if PluginExists('asyncomplete.vim')
   def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
@@ -1115,11 +1082,6 @@ endif
 if PluginExists('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
-endif
-if PluginExists('vim-operator-surround')
-  map _sa <Plug>(operator-surround-append)
-  map _sd <Plug>(operator-surround-delete)
-  map _sr <Plug>(operator-surround-replace)
 endif
 if PluginExists('vim-ambicmd')
   def AmbicmdExpand(key: string): string
@@ -1211,22 +1173,75 @@ if PluginExists('vim-quickrun')
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
   augroup END
 endif
-if PluginExists('vim-textobj-between')
-  omap ad <Plug>(textobj-between-a)
-  omap id <Plug>(textobj-between-i)
-  vmap ad <Plug>(textobj-between-a)
-  vmap id <Plug>(textobj-between-i)
-  g:textobj_between_no_default_key_mappings = 1
-
-  omap i/ id/
-  omap a/ ad/
-endif
 if PluginExists('capture.vim')
   augroup vimrc_filetype
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
-if PluginExists('caw.vim')
+if PluginExists('autofmt')
+  set formatexpr=autofmt#japanese#formatexpr()
+endif
+# Textobj/Operator-user plugins
+# @param
+# - plugin_name: the name of plugin
+# - info: mapping-information; the keys are:
+#   - rhs (string)
+#   - lhs (string)
+#   - modes (string)
+# TODO: Improve; do remapping
+# TODO: Support Funcref as on_load?
+# TODO: Do not hold on_load separately
+def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '')
+  var info = extend(info_arg, {modes: 'nvo'}, 'keep')
+  MapTextModifierPlugin(plugin_name, info, on_load)
+enddef
+
+def MapTextobj(plugin_name: string, info_arg: dict<string>, on_load: string = '')
+  var info = extend(info_arg, {modes: 'vo'}, 'keep')
+  MapTextModifierPlugin(plugin_name, info, on_load)
+enddef
+
+def MapTextModifierPlugin(
+      plugin_name: string, info: dict<string>, on_load: string)
+  for key in ['rhs', 'lhs', 'modes']
+    if !has_key(info, key)
+      EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
+      return
+    endif
+  endfor
+
+  var loadermap = printf('[%s][<SID>LoadTextModifierPlugin("%s", "%s")]',
+                  string(info.rhs), plugin_name, on_load)
+  for mode in split(info.modes, '\zs')
+    execute mode .. 'map' info.lhs loadermap
+  endfor
+enddef
+
+def LoadTextModifierPlugin(plugin: string, on_load: string): number
+  if !HasInString(&runtimepath, plugin)
+    execute 'packadd' plugin
+
+    var on_load_type = type(on_load)
+    if on_load_type == v:t_string && on_load != ''
+      call(on_load, [])
+    endif
+  endif
+
+  return 0
+enddef
+
+if OptPluginExists('vim-operator-replace')
+  MapOperator('vim-operator-replace', {lhs: '_r', rhs: '<Plug>(operator-replace)'})
+endif
+if OptPluginExists('vim-operator-surround')
+  MapOperator('vim-operator-surround',
+      {lhs: '_sa', rhs: '<Plug>(operator-surround-append)'})
+  MapOperator('vim-operator-surround',
+      {lhs: '_sd', rhs: '<Plug>(operator-surround-delete)'})
+  MapOperator('vim-operator-surround',
+      {lhs: '_sr', rhs: '<Plug>(operator-surround-replace)'})
+endif
+if OptPluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
         \ <C-r>=b:caw_oneline_comment<CR>
@@ -1245,7 +1260,7 @@ if PluginExists('caw.vim')
     return "\<Plug>(vimrc:caw:prefix)\<Plug>(caw:" .. kind .. ":comment)"
   enddef
 
-  map _c <Plug>(caw:hatpos:toggle:operator)
+  MapOperator('caw.vim', {lhs: '_c', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
   imap <expr> <C-l><C-j> <SID>CawMap()
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
@@ -1257,9 +1272,56 @@ if PluginExists('caw.vim')
     autocmd Filetype vim b:caw_oneline_comment = '#'
   augroup END
 endif
-if PluginExists('autofmt')
-  set formatexpr=autofmt#japanese#formatexpr()
+if OptPluginExists('vim-operator-swap')
+  MapOperator('vim-operator-swap', {lhs: '_sy', rhs: '<Plug>(operator-swap-marking)'})
+  MapOperator('vim-operator-swap', {lhs: '_sp', rhs: '<Plug>(operator-swap)'})
 endif
+if OptPluginExists('vim-textobj-entire')
+  MapTextobj('vim-textobj-entire', {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'})
+  MapTextobj('vim-textobj-entire', {lhs: 'ia', rhs: '<Plug>(textobj-entire-i)'})
+  g:textobj_entire_no_default_key_mappings = 1
+endif
+if OptPluginExists('vim-textobj-function')
+  MapTextobj('vim-textobj-function', {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
+  MapTextobj('vim-textobj-function', {lhs: 'if', rhs: '<Plug>(textobj-function-i)'})
+  g:textobj_function_no_default_key_mappings = 1
+endif
+if OptPluginExists('vim-textobj-indent')
+  MapTextobj('vim-textobj-indent', {lhs: 'ai', rhs: '<Plug>(textobj-indent-a)'})
+  MapTextobj('vim-textobj-indent', {lhs: 'aI', rhs: '<Plug>(textobj-indent-same-a)'})
+  MapTextobj('vim-textobj-indent', {lhs: 'ii', rhs: '<Plug>(textobj-indent-i)'})
+  MapTextobj('vim-textobj-indent', {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'})
+  g:textobj_indent_no_default_key_mappings = 1
+endif
+if OptPluginExists('vim-textobj-commentblock')
+  MapTextobj('vim-textobj-commentblock',
+        {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'},
+        'OnLoadingTextobjCommentblock')
+  MapTextobj('vim-textobj-commentblock',
+        {lhs: 'ic', rhs: '<Plug>(textobj-commentblock-i)'},
+        'OnLoadingTextobjCommentblock')
+  g:textobj_commentblock_no_default_key_mapings = 1
+
+  def OnLoadingTextobjCommentblock()
+    augroup vimrc_textobj_commentblock
+      autocmd!
+      # TODO: Do not use PluginExists()
+      execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
+           \   (PluginExists('caw.vim') ? 'caw' : 'commentstring') .. '()'
+    augroup END
+  enddef
+endif
+if OptPluginExists('vim-textobj-between')
+  MapTextobj('vim-textobj-between', {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'})
+  MapTextobj('vim-textobj-between', {lhs: 'id', rhs: '<Plug>(textobj-between-i)'})
+  g:textobj_between_no_default_key_mappings = 1
+
+  omap i/ id/
+  omap a/ ad/
+  vmap i/ id/
+  vmap a/ ad/
+endif
+
 # ReadingVimrc
 command! -bar ReadingVimrc call ReadingVimrc()
 def ReadingVimrc()
