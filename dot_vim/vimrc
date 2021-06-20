@@ -1125,7 +1125,7 @@ endif
 # TODO: Support Funcref as on_load?
 # TODO: Do not hold on_load separately
 def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '')
-  var info = extend(info_arg, {modes: 'nvo'}, 'keep')
+  var info = extend(info_arg, {modes: 'nxo'}, 'keep')
   MapTextModifierPlugin(plugin_name, info, on_load)
 enddef
 
@@ -1135,7 +1135,7 @@ def MapTextobj(plugin_name: string, info_arg: dict<string>, on_load: string = ''
 enddef
 
 def MapTextModifierPlugin(
-      plugin_name: string, info: dict<string>, on_load: string)
+      plugin_name: string, info: dict<string>, on_load: string = '')
   for key in ['rhs', 'lhs', 'modes']
     if !has_key(info, key)
       EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
@@ -1146,7 +1146,7 @@ def MapTextModifierPlugin(
   var loadermap = printf('[%s][<SID>LoadTextModifierPlugin("%s", "%s")]',
                   string(info.rhs), plugin_name, on_load)
   for mode in split(info.modes, '\zs')
-    execute mode .. 'map' info.lhs loadermap
+    execute mode .. 'map <expr>' info.lhs loadermap
   endfor
 enddef
 
@@ -1192,9 +1192,11 @@ if OptPluginExists('caw.vim')
     endif
     return "\<Plug>(vimrc:caw:prefix)\<Plug>(caw:" .. kind .. ":comment)"
   enddef
+  imap <expr> <Plug>(vimrc:caw:map) <SID>CawMap()
 
   MapOperator('caw.vim', {lhs: '_c', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
-  imap <expr> <C-l><C-j> <SID>CawMap()
+  MapTextModifierPlugin('caw.vim', {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'})
+  # imap <expr> <C-l><C-j> <SID>CawMap()
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
@@ -1225,6 +1227,11 @@ if OptPluginExists('vim-textobj-indent')
   MapTextobj('vim-textobj-indent', {lhs: 'ii', rhs: '<Plug>(textobj-indent-i)'})
   MapTextobj('vim-textobj-indent', {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'})
   g:textobj_indent_no_default_key_mappings = 1
+endif
+if OptPluginExists('vim-textobj-line')
+  MapTextobj('vim-textobj-line', {lhs: 'al', rhs: '<Plug>(textobj-line-a)'})
+  MapTextobj('vim-textobj-line', {lhs: 'il', rhs: '<Plug>(textobj-line-i)'})
+  g:textobj_line_no_default_key_mappings = 1
 endif
 if OptPluginExists('vim-textobj-commentblock')
   MapTextobj('vim-textobj-commentblock',
