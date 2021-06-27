@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 20-Jun-2021.
+" Last Change: 27-Jun-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -696,10 +696,6 @@ augroup END
 if IsMac
   g:mapleader = '_'
 endif
-if IsWindows || IsLinux
-  inoremap \ _
-  inoremap _ \
-endif
 
 # Mapping for commands
 {
@@ -735,6 +731,7 @@ command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call vimrc#list_tasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
+command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
 
 # Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
@@ -800,6 +797,16 @@ legacy def! Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
     open_cmd = 'split'
   endif
   win_execute(winid, open_cmd .. ' ' .. fnameescape(file_info.fullpath))
+enddef
+
+def SwapBackslashAndBar()
+  if maparg('\', 'i') ==# "\<Nop>"
+    inoremap \ _
+    inoremap _ \
+  else
+    iunmap \
+    iunmap _
+  endif
 enddef
 
 # Installed plugins
