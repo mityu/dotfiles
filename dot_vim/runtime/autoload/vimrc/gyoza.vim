@@ -247,8 +247,8 @@ NewFiletypeRule('vim')
     endif
     return ']'
   })
-  ->AddRule('^\s*%(export\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
-  ->AddRule('^\s*function!?\s+\S+(.*).*$', 'endfunction')
+  ->AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
+  ->AddRule('^\s*%(legacy\s)?\s*function!?\s+\S+(.*).*$', 'endfunction')
   ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
