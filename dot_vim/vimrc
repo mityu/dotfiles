@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 27-Jun-2021.
+" Last Change: 03-Jul-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -732,6 +732,13 @@ command! -bar -nargs=* -complete=file ListTasks call vimrc#list_tasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
+
+# Thanks to cohama
+command! Utf8 edit ++enc=utf-8 %
+command! Cp932 edit ++enc=cp932 %
+command! Unix edit ++ff=unix %
+command! Dos edit ++ff=dos %
+command! AsUtf8 set fenc=utf-8|w
 
 # Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
