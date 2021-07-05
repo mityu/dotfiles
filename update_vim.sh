@@ -5,6 +5,6 @@ if [ -n "$(git diff)" ]; then
 fi
 git merge FETCH_HEAD
 make && make install
-if [ $? -neq 0 ]; then
+if [ $? -ne 0 ]; then
     make distclean && make && make install
 fi
