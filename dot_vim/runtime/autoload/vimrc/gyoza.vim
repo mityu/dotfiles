@@ -261,8 +261,8 @@ NewFiletypeRule('vimspec')
 NewFiletypeRule('sh')
   ->AddRule('%(^|;)\s*<do>', 'done')
   ->AddRule('^\s*if>', 'fi', ['\=^elif>', 'else'])
-NewFiletypeRule('markdown')
-  ->AddRule('^```%(\s*\w+)?', '```')
+# NewFiletypeRule('markdown')
+#   ->AddRule('^```%(\s*\w+)?', '```')
 NewFiletypeRule('html')
   ->AddRule('^\<\s*\w+[^>]*>', (line: string): string => ('</' .. matchstr(line, '^<\s*\zs\w\+\ze') .. '>')) # TODO: Improve
 
