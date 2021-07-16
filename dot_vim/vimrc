@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 11-Jul-2021.
+" Last Change: 16-Jul-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1030,6 +1030,9 @@ endif
 if PluginExists('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
+  if IsWSL
+    g:previm_open_cmd = '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe'
+  endif
 endif
 if PluginExists('vim-ambicmd')
   def AmbicmdExpand(key: string): string
