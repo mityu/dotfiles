@@ -1,7 +1,7 @@
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-execute 'import * as VimrcFuncs from' string($MYVIMRC)
+import * as Vimrc from $MYVIMRC
 
 let s:Vimrc = {
       \'JoinPath': s:VimrcFuncs.JoinPath,

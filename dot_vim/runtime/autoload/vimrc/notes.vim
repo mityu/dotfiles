@@ -1,5 +1,6 @@
 vim9script
-execute 'import * as Vimrc from' string($MYVIMRC)
+
+import * as Vimrc from $MYVIMRC
 
 def NewInstance(name: string): dict<any>
   var path = Vimrc.JoinPath(Vimrc.CacheDir, name)

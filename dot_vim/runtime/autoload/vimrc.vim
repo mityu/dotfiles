@@ -1,6 +1,6 @@
 vim9script
 
-execute 'import * as Vimrc from' string($MYVIMRC)
+import * as Vimrc from $MYVIMRC
 
 final SLASH = Vimrc.Filesystem.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
