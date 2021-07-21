@@ -85,8 +85,7 @@ export def vimrc#clipbuffer(arg: string)
 enddef
 
 def ClipbufferSet()
-  setreg('*', getline(1, '$')->join("\<CR>"))
-  # deletebufline(bufnr(), 1, '$')
+  %yank +
   setlocal nomodified
 enddef
 
