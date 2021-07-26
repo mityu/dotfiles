@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 16-Jul-2021.
+" Last Change: 24-Jul-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1300,17 +1300,17 @@ def ReadingVimrc()
 enddef
 
 def OnOpenReadingVimrcBuffer()
-  bufname = expand('<amatch>')->matchstr('readingvimrc://\zs.*')
+  var bufname = expand('<amatch>')->matchstr('readingvimrc://\zs.*')
   if bufname ==# 'next'
     if winnr('$') == 1
       return
     endif
 
-    curwinnr = winnr()
+    var curwinnr = winnr()
     for winnr in range(1, winnr('$'))
       if winnr == curwinnr
         continue
-      elseif line('$') > 1 || winbufnr(winnr)->getbufline(1) !=# ''
+      elseif line('$') > 1 || winbufnr(winnr)->getbufline(1)[0] !=# ''
         wincmd T
         return
       endif
