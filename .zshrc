@@ -85,6 +85,9 @@ bindkey -M visual '_sa' add-surround
 # zle -N edit-line-in-vim
 # bindkey -M vicmd '^o' edit-line-in-vim
 
+if type "vim" > /dev/null 2>&1; then
+    export MANPAGER="vim -M +MANPAGER -"
+fi
 
 if [ -n "$VIM_TERMINAL" ]; then
     function drop() {
