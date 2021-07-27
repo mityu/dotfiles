@@ -189,9 +189,13 @@ if which fzf &> /dev/null; then
 fi
 
 function update_components(){
-    brew upgrade
-    brew cleanup
-    brew upgrade --cask
-    pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
+    if which brew &> /dev/null; then
+        brew upgrade
+        brew cleanup
+        brew upgrade --cask
+    fi
+    if which pip3 &> /dev/null; then
+        pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
+    fi
     update_zsh_plugins
 }
