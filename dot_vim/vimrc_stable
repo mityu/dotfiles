@@ -24,6 +24,7 @@ set noimdisable
 set nowrapscan
 set lazyredraw
 set laststatus=2
+set scrolloff=1
 let &statusline = '%m%y[#%n] %<%t'
 
 nnoremap Y y$
