@@ -18,6 +18,12 @@ fi
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
 
+if which vim &> /dev/null; then
+    THISFILE="${(%):-%N}"
+    THISFILE=${$(readlink $THISFILE):-$THISFILE}
+    eval 'alias vi="vim -u' $(dirname $THISFILE)'/dot_vim/vimrc_stable"'
+fi
+
 # Enable smart completion
 autoload -Uz compinit
 compinit
