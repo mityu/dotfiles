@@ -232,8 +232,7 @@ enddef
 
 def MergeRule(from: string, to: string)
   NewFiletypeRule(to)
-  var additional: dict<any> = get(config, from, {})  # typename({}) == dict<unknown>
-  extend(config[to], additional, 'keep')
+  extend(config[to], get(config, from, {}), 'keep')
 enddef
 
 # Register rules
@@ -263,8 +262,8 @@ NewFiletypeRule('sh')
   ->AddRule('^\s*if>', 'fi', ['\=^elif>', 'else'])
 # NewFiletypeRule('markdown')
 #   ->AddRule('^```%(\s*\w+)?', '```')
-NewFiletypeRule('html')
-  ->AddRule('^\<\s*\w+[^>]*>', (line: string): string => ('</' .. matchstr(line, '^<\s*\zs\w\+\ze') .. '>')) # TODO: Improve
+# NewFiletypeRule('html')
+#   ->AddRule('^\<\s*\w+[^>]*>', (line: string): string => ('</' .. matchstr(line, '^<\s*\zs\w\+\ze') .. '>')) # TODO: Improve
 
 MergeRule('c', 'cpp')
 MergeRule('vim', 'vimspec')
