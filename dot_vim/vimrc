@@ -1264,10 +1264,16 @@ if OptPluginExists('vim-textobj-commentblock')
   def OnLoadingTextobjCommentblock()
     augroup vimrc_textobj_commentblock
       autocmd!
-      # TODO: Do not use PluginExists()
-      execute 'autocmd Filetype * call textobj#commentblock#pick#' ..
-           \   (PluginExists('caw.vim') ? 'caw' : 'commentstring') .. '()'
+      autocmd Filetype * TextobjCommentblockPickerCaw()
     augroup END
+  enddef
+
+  def TextobjCommentblockPickerCaw()
+    if exists('g:loaded_caw')
+      textobj#commentblock#pick#caw()
+    else
+      textobj#commentblock#pick#commentblock()
+    endif
   enddef
 endif
 if OptPluginExists('vim-textobj-between')
