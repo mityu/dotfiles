@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 24-Jul-2021.
+" Last Change: 25-Aug-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -294,6 +294,7 @@ def PackRegister()
   minpac#add('sgur/vim-operator-openbrowser', {type: 'opt'})
 
   # Textobj-user plugins
+  minpac#add('kamichidu/vim-textobj-function-go', {type: 'opt'})
   minpac#add('kana/vim-textobj-entire', {type: 'opt'})
   minpac#add('kana/vim-textobj-function', {type: 'opt'})
   minpac#add('kana/vim-textobj-indent', {type: 'opt'})
