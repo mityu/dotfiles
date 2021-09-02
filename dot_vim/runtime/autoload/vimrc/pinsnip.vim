@@ -150,7 +150,7 @@ enddef
 SnipFiletype('go')
   ->AddSnip('ifnil', [
     'if err != nil {',
-    "\tfmt.Println(err)",
+    "\t<<+CURSOR+>>",
     "}"
     ])
 SnipFiletype('cpp')
