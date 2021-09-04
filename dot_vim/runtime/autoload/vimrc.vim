@@ -85,7 +85,7 @@ export def vimrc#clipbuffer(arg: string)
 enddef
 
 def ClipbufferSet()
-  %yank +
+  :%yank +
   setlocal nomodified
 enddef
 
