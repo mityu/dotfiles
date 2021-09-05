@@ -150,7 +150,7 @@ enddef
 SnipFiletype('go')
   ->AddSnip('ifnil', [
     'if err != nil {',
-    "\t<<+CURSOR+>>",
+    "\t<+CURSOR+>",
     "}"
     ])
 SnipFiletype('cpp')
