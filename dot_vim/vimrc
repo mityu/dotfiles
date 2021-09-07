@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 25-Aug-2021.
+" Last Change: 07-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -258,14 +258,10 @@ def PackRegister()
   minpac#add('lambdalisue/gina.vim')
   minpac#add('lambdalisue/vim-findent')
   minpac#add('lambdalisue/vim-gista')
-  minpac#add('mattn/vim-lsp-settings')
   minpac#add('mityu/vim-brownie')
   minpac#add('mityu/vim-gram')
   minpac#add('mityu/vim-gram-sources')
   minpac#add('osyo-manga/vim-jplus')
-  minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-  minpac#add('prabirshrestha/asyncomplete.vim')
-  minpac#add('prabirshrestha/vim-lsp')
   minpac#add('previm/previm')
   minpac#add('sgur/vim-gf-autoload')
   minpac#add('skanehira/gh.vim')
@@ -283,6 +279,10 @@ def PackRegister()
   minpac#add('vim-jp/vital.vim')
   minpac#add('vim-scripts/autodate.vim')
 
+  minpac#add('mattn/vim-lsp-settings', {type: 'opt'})
+  minpac#add('prabirshrestha/asyncomplete-lsp.vim', {type: 'opt'})
+  minpac#add('prabirshrestha/asyncomplete.vim', {type: 'opt'})
+  minpac#add('prabirshrestha/vim-lsp', {type: 'opt'})
   minpac#add('tweekmonster/helpful.vim', {type: 'opt'})
   minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
 
@@ -358,6 +358,7 @@ set cinoptions=:0,g0,N-s,E-s
 set backspace=eol,start,indent
 set pumheight=10
 set completefunc=vimrc#pathComplete
+set completeopt=menuone,noselect
 set noequalalways
 set scrolloff=1
 set colorcolumn=78
@@ -497,6 +498,8 @@ inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
+inoremap <C-l><C-n> <C-x><C-n><C-n>
+inoremap <C-l><C-p> <C-x><C-p><C-p>
 inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>
@@ -504,6 +507,7 @@ vnoremap g- g<C-x>
 vnoremap <C-k> 7gk
 vnoremap <C-j> 7gj
 vnoremap * <ESC>*Ngvne<Cmd>nohlsearch<CR>
+vnoremap g* <ESC>g*Ngvne<Cmd>nohlsearch<CR>
 vnoremap n n<Cmd>nohlsearch<CR>
 vnoremap N N<Cmd>nohlsearch<CR>
 
@@ -653,7 +657,7 @@ def CmdwinEnter()
     setlocal completeopt=menu,preview
     execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
     normal! G
-    if PluginExists('asyncomplete.vim')
+    if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
     endif
   endif
@@ -949,85 +953,6 @@ endif
 if PluginExists('vim-jplus')
   map J <Plug>(jplus)
 endif
-if PluginExists('asyncomplete.vim')
-  def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
-    var base = tolower(context.base)
-    var completions: list<dict<any>>
-    var subcompletions: list<dict<any>>
-    var fuzzycompletions: list<dict<any>>
-
-    if trim(context.base) !=# ''
-      for matches in values(matches_dict)
-        for candidate in matches.items
-          var idx = stridx(tolower(candidate.word), base)
-          if idx == -1
-            continue
-          elseif idx == 0
-            add(completions, candidate)
-          else
-            add(subcompletions, candidate)
-          endif
-        endfor
-      endfor
-    endif
-    completions += subcompletions
-
-    if !empty(completions)
-      asyncomplete#preprocess_complete(context, completions)
-      return
-    endif
-
-    # Workaround; matchfuzzy() always returns list<string>
-    var items: list<any> =
-          matches_dict->values()->mapnew((_, val): list<any> => val.items)->flattennew()
-
-    if trim(context.base) !=# ''
-      items = matchfuzzy(items, context.base, {key: 'word'})
-    endif
-    asyncomplete#preprocess_complete(context, items)
-  enddef
-
-  g:asyncomplete_auto_popup = 1
-  g:asyncomplete_force_refresh_on_context_changed = 1
-  g:asyncomplete_smart_completion = 1
-  g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
-  g:asyncomplete_auto_completeopt = 0
-  set completeopt=menuone,noselect
-
-  inoremap <expr> <C-n>
-        \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-x>\<C-n>"
-  inoremap <expr> <C-p>
-        \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-x>\<C-p>"
-  inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
-  inoremap <C-l><C-n> <C-x><C-n><C-n>
-  inoremap <C-l><C-p> <C-x><C-p><C-p>
-endif
-if PluginExists('vim-lsp')
-  g:lsp_diagnostics_signs_enabled = 1
-  g:lsp_diagnostics_signs_error = {'text': '>>'}
-  g:lsp_diagnostics_signs_warning = {'text': '--'}
-  g:lsp_diagnostics_signs_information = {'text': '--'}
-  g:lsp_diagnostics_signs_hint = {'text': '!?'}
-  g:lsp_diagnostics_enabled = 1
-  g:lsp_diagnostics_float_delay = 10
-  g:lsp_diagnostics_float_cursor = 1
-
-  def LspEnableForBuffer()
-    setlocal omnifunc=lsp#complete
-    nnoremap <buffer> <Plug>(<SID>-open-folding) zv
-    nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
-  enddef
-
-  def LspDisableForBuffer()
-    setlocal omnifunc=
-    nunmap <buffer> gd
-  enddef
-
-  augroup vimrc_lsp
-    autocmd User lsp_buffer_enabled call LspEnableForBuffer()
-    autocmd User lsp_buffer_disabled call LspDisableForBuffer()
-  augroup END
-endif
 if PluginExists('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
@@ -1132,6 +1057,126 @@ if PluginExists('capture.vim')
 endif
 if PluginExists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
+endif
+if OptPluginExists('asyncomplete.vim')
+  def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
+    var base = tolower(context.base)
+    var completions: list<dict<any>>
+    var subcompletions: list<dict<any>>
+    var fuzzycompletions: list<dict<any>>
+
+    if trim(context.base) !=# ''
+      for matches in values(matches_dict)
+        for candidate in matches.items
+          var idx = stridx(tolower(candidate.word), base)
+          if idx == -1
+            continue
+          elseif idx == 0
+            add(completions, candidate)
+          else
+            add(subcompletions, candidate)
+          endif
+        endfor
+      endfor
+    endif
+    completions += subcompletions
+
+    if !empty(completions)
+      asyncomplete#preprocess_complete(context, completions)
+      return
+    endif
+
+    # Workaround; matchfuzzy() always returns list<string>
+    var items: list<any> =
+          matches_dict->values()->mapnew((_, val): list<any> => val.items)->flattennew()
+
+    if trim(context.base) !=# ''
+      items = matchfuzzy(items, context.base, {key: 'word'})
+    endif
+    asyncomplete#preprocess_complete(context, items)
+  enddef
+
+  g:asyncomplete_auto_popup = 1
+  g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
+  g:asyncomplete_auto_completeopt = 0
+endif
+if OptPluginExists('vim-lsp')
+  # Lazy-loading
+  augroup vimrc_lsp_lazyload
+    autocmd BufReadPre * LoadLspPlugins()
+    autocmd BufNewFile * {
+      LoadLspPlugins()
+      doautocmd lsp BufNewFile
+    }
+    if !v:vim_did_enter
+      autocmd VimEnter * {
+        # Do not load lsp plugins on git commit
+        if argc() != 0 && argv()[0] !~# '\<COMMIT_EDITMSG\>$'
+          LoadLspPlugins()
+          doautocmd lsp BufReadPost
+        endif
+      }
+    endif
+  augroup END
+
+  def LoadLspPlugins()
+    # Load completion plugin first.
+    if OptPluginExists('asyncomplete.vim')
+      # asyncomplete-lsp.vim must be loaded before asyncomplete.vim
+      if OptPluginExists('asyncomplete-lsp.vim')
+        packadd asyncomplete-lsp.vim
+      endif
+      packadd asyncomplete.vim
+    endif
+
+    # vim-lsp-settings must be loaded before vim-lsp
+    if OptPluginExists('vim-lsp-settings')
+      packadd vim-lsp-settings
+    endif
+    packadd vim-lsp
+
+    # Plugin initializations
+    inoremap <expr> <C-n>
+          \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-x>\<C-n>"
+    inoremap <expr> <C-p>
+          \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-x>\<C-p>"
+    inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
+    lsp#enable()
+
+    autocmd! vimrc_lsp_lazyload
+    command! -bar LoadLspPlugins {
+      echohl WarningMsg
+      echo 'Lsp plugins are already loaded'
+      echohl NONE
+    }
+  enddef
+  command! -bar LoadLspPlugins LoadLspPlugins()|echo 'Loaded lsp plugins'
+
+
+  g:lsp_diagnostics_signs_enabled = 1
+  g:lsp_diagnostics_signs_error = {'text': '>>'}
+  g:lsp_diagnostics_signs_warning = {'text': '--'}
+  g:lsp_diagnostics_signs_information = {'text': '--'}
+  g:lsp_diagnostics_signs_hint = {'text': '!?'}
+  g:lsp_diagnostics_enabled = 1
+  g:lsp_diagnostics_float_delay = 10
+  g:lsp_diagnostics_float_cursor = 1
+
+  def LspEnableForBuffer()
+    setlocal omnifunc=lsp#complete
+    nnoremap <buffer> <Plug>(<SID>-open-folding) zv
+    nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
+  enddef
+
+  def LspDisableForBuffer()
+    setlocal omnifunc=
+    nunmap <buffer> gd
+  enddef
+
+  augroup vimrc_lsp
+    autocmd User lsp_buffer_enabled call LspEnableForBuffer()
+    autocmd User lsp_buffer_disabled call LspDisableForBuffer()
+  augroup END
 endif
 # Textobj/Operator-user plugins
 # @param
