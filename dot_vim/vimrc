@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 07-Sep-2021.
+" Last Change: 08-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -252,7 +252,6 @@ def PackRegister()
 
   minpac#add('itchyny/vim-cursorword')
   minpac#add('kana/vim-altr')
-  minpac#add('kana/vim-gf-user')
   minpac#add('kana/vim-operator-user')
   minpac#add('kana/vim-textobj-user')
   minpac#add('lambdalisue/gina.vim')
@@ -263,7 +262,6 @@ def PackRegister()
   minpac#add('mityu/vim-gram-sources')
   minpac#add('osyo-manga/vim-jplus')
   minpac#add('previm/previm')
-  minpac#add('sgur/vim-gf-autoload')
   minpac#add('skanehira/gh.vim')
   minpac#add('thinca/vim-ambicmd')
   minpac#add('thinca/vim-ft-help_fold')
