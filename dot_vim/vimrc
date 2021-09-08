@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 08-Sep-2021.
+" Last Change: 09-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1183,9 +1183,8 @@ endif
 #   - rhs (string)
 #   - lhs (string)
 #   - modes (string)
-# TODO: Improve; do remapping
+# - on_load: the hook that is fired on just after loading plugin
 # TODO: Support Funcref as on_load?
-# TODO: Do not hold on_load separately
 def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '')
   var info = extend(info_arg, {modes: 'nxo'}, 'keep')
   MapTextModifierPlugin(plugin_name, info, on_load)
@@ -1205,24 +1204,29 @@ def MapTextModifierPlugin(
     endif
   endfor
 
-  var loadermap = printf('[%s][<SID>LoadTextModifierPlugin("%s", "%s")]',
-                  string(info.rhs), plugin_name, on_load)
-  for mode in split(info.modes, '\zs')
+  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s, "%s")', plugin_name, string(info), on_load)
+  for mode in info.modes
     execute mode .. 'map <expr>' info.lhs loadermap
   endfor
 enddef
 
-def LoadTextModifierPlugin(plugin: string, on_load: string): number
+def LoadTextModifierPlugin(plugin: string, info: dict<string>, on_load: string): string
   if !HasInString(&runtimepath, plugin)
     execute 'packadd' plugin
 
-    var on_load_type = type(on_load)
-    if on_load_type == v:t_string && on_load != ''
+    if on_load !=# ''
       call(on_load, [])
     endif
   endif
 
-  return 0
+  # "\<Plug>" -> '<Plug>'
+  var rhs = info.rhs->substitute("\\C\<Plug>", '<Plug>', 'g')
+  for mode in info.modes
+    execute mode .. 'map' info.lhs rhs
+  endfor
+
+  # '<Plug>' -> "\<Plug>"
+  return info.rhs->substitute('\c<Plug>', "\<Plug>", 'g')
 enddef
 
 if OptPluginExists('vim-operator-replace')
@@ -1309,6 +1313,7 @@ if OptPluginExists('vim-textobj-commentblock')
       autocmd!
       autocmd Filetype * TextobjCommentblockPickerCaw()
     augroup END
+    TextobjCommentblockPickerCaw()
   enddef
 
   def TextobjCommentblockPickerCaw()
@@ -1743,7 +1748,7 @@ if has('gui_running')
     #for unix (use xfontset)
     set guifont=a14,r14,k14
   elseif has('linux')
-    set guifont=Cica:h14
+    set guifont=Cica\ 14,DejaVu\ Sans\ Mono\ 14
   endif
 
   if has('multi_byte_ime') || has('xim')
