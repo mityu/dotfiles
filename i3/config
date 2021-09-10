@@ -212,4 +212,5 @@ bindsym --release $cmd+r exec --no-startup-id xdotool key --clearmodifiers ctrl+
 bindsym --release $cmd+t exec --no-startup-id xdotool key --clearmodifiers ctrl+t
 bindsym --release $cmd+n exec --no-startup-id xdotool key --clearmodifiers ctrl+n
 bindsym --release $cmd+a exec --no-startup-id xdotool key --clearmodifiers ctrl+a
-# bindsym --release $cmd+Shift+4 exec --no-startup-id import
+bindsym --release $cmd+Shift+3 exec --no-startup-id scrot ~/screenshots/screenshot-%Y-%m-%dj-%T.png
+bindsym --release $cmd+Shift+4 exec --no-startup-id scrot -s ~/screenshots/screenshot-%Y-%m-%dj-%T.png
