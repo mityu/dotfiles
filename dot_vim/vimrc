@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 09-Sep-2021.
+" Last Change: 11-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 # Encoding
@@ -1585,7 +1585,7 @@ def EmphasizeIndent()
   endif
 
   var pat = '\v%%(^%%(%s)*)@<=%s'
-  if &l:expandtab || &l:smarttab
+  if &l:expandtab
     pat = printf(pat, repeat('\s', shiftwidth()), '\s')
   else
     pat = printf(pat, '\t\t', '\t')
