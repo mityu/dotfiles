@@ -71,12 +71,12 @@ Gen.Hi('FoldColumn', '#666666', '#1f1f1f', '')
 Gen.Hi('SignColumn', '', '#1f1f1f', '')
 
 Gen.Hi('StatusLine', '#333333', '#ffa500', '')
-Gen.Hi('StatusLineNC', '#333333', '#8b8b00', '')
+Gen.Hi('StatusLineNC', '#333333', '#a79000', '')
 Gen.HiLink('StatusLineTerm', 'StatusLine')
 Gen.HiLink('StatusLineTermNC', 'StatusLineNC')
 
-Gen.Hi('TabLine', '#000000', '#8b8b00', '')
-Gen.Hi('TabLineSel', '#000000', '#ffa500', '')
+Gen.Hi('TabLine', '#333333', '#a0933d', '')
+Gen.Hi('TabLineSel', '#1f1f1f', '#ffa000', '')
 Gen.HiLink('TabLineFill', 'TabLine')
 
 Gen.Hi('Pmenu', '#caca9d', '#493f2f', '')
