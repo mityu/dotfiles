@@ -821,6 +821,13 @@ def SwapBackslashAndBar()
 enddef
 
 # Installed plugins
+if PluginExists('vim-cursorword')
+  g:cursorword_highlight = 0
+  augroup vimrc_cursorword
+    autocmd ColorScheme * highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
+  augroup END
+endif
 if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
