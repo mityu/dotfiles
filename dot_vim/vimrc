@@ -1,7 +1,8 @@
 " Author: mityu
-" Last Change: 16-Sep-2021.
+" Last Change: 17-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
+
 # Encoding
 if !v:vim_did_enter
   set encoding=utf-8
@@ -827,6 +828,8 @@ if PluginExists('vim-cursorword')
     autocmd ColorScheme * highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
     autocmd ColorScheme * highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
   augroup END
+    highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
+    highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
 endif
 if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
