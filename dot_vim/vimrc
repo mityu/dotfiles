@@ -1208,6 +1208,12 @@ enddef
 
 def MapTextModifierPlugin(
       plugin_name: string, info: dict<string>, on_load: string = '')
+  # When the plugin is already loaded, do not use loader mapping. This load
+  # guard is mainly for vimrc-reloading
+  if HasInString(&runtimepath, plugin_name)
+    return
+  endif
+
   for key in ['rhs', 'lhs', 'modes']
     if !has_key(info, key)
       EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
@@ -1215,7 +1221,8 @@ def MapTextModifierPlugin(
     endif
   endfor
 
-  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s, "%s")', plugin_name, string(info), on_load)
+  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s, "%s")',
+            plugin_name, string(info)->substitute('<', '<lt>', 'g'), on_load)
   for mode in info.modes
     execute mode .. 'map <expr>' info.lhs loadermap
   endfor
