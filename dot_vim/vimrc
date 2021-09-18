@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 17-Sep-2021.
+" Last Change: 18-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 
@@ -1280,16 +1280,11 @@ if OptPluginExists('caw.vim')
 
   MapOperator('caw.vim', {lhs: '_c', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
   MapTextModifierPlugin('caw.vim', {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'})
-  # imap <expr> <C-l><C-j> <SID>CawMap()
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
   g:caw_hatpos_sp = ' '
   g:caw_zeropos_sp = ' '
-
-  augroup vimrc_filetype
-    autocmd Filetype vim b:caw_oneline_comment = '#'
-  augroup END
 endif
 if OptPluginExists('vim-operator-swap')
   MapOperator('vim-operator-swap', {lhs: '_sy', rhs: '<Plug>(operator-swap-marking)'})
