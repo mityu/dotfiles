@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 18-Sep-2021.
+" Last Change: 19-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 
@@ -1009,8 +1009,12 @@ if PluginExists('vim-ambicmd')
   g:ambicmd#build_rule = SIDPrefix() .. 'AmbicmdBuildRule'
 endif
 if PluginExists('vim-quickrun')
+  # TODO: Set errorformat for each runner
   g:quickrun_config = {}
   g:quickrun_config['_'] = {
+    ['outputter']: 'error',
+    ['outputter/error/success']: 'buffer',
+    ['outputter/error/error']: 'quickfix',
     ['outputter/message']: 1,
     ['outputter/message/log']: 1,
     ['outputter/buffer/close_on_empty']: 1,
