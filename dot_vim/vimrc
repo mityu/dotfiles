@@ -1,5 +1,5 @@
 " Author: mityu
-" Last Change: 19-Sep-2021.
+" Last Change: 24-Sep-2021.
 " vim: shiftwidth=2 commentstring=#%s
 vim9script noclear
 
@@ -726,7 +726,7 @@ command! -bar CdCurrent cd %:p:h
 command! -bar LcdCurrent lcd %:p:h
 command! -bar TcdCurrent tcd %:p:h
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
-command! -nargs=? CopyToClipboard call setreg('*', getreg(<q-args>, 1))
+command! -nargs=? CopyToClipboard call setreg('+', getreg(<q-args>, 1))
 command! -bar -nargs=? ClipBuffer call vimrc#clipbuffer(<q-args>)
 command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
