@@ -669,7 +669,7 @@ def CmdwinLeave()
 enddef
 def CmdwinCompletion(select_next: bool): string
   if pumvisible()
-    return select_next ? '<C-n>' : '<C-p>'
+    return select_next ? "\<C-n>" : "\<C-p>"
   else
     return "\<C-x>\<C-v>"
   endif
