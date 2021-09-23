@@ -137,7 +137,7 @@ function install_zsh_plugins() {
 function update_zsh_plugins() {
     local dir
     for dir in $(find $DOTZSH/* -maxdepth 0 -type d); do
-        echo -e '\033[32m'$(basename $dir)'\033[m'
+        echo -e '\033[1mChecking updates: '$(basename $dir)'\033[m'
         git -C $dir pull
     done
 }
