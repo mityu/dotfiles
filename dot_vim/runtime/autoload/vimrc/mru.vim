@@ -1,7 +1,3 @@
-"Plugin Name: mru.vim
-"Author: mityu
-"Last Change: 29-Sep-2020.
-
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 

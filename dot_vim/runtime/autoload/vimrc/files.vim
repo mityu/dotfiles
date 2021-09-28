@@ -1,7 +1,3 @@
-" Plugin Name: files.vim
-" Author: mityu
-" Last Change: 06-Sep-2019.
-
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 

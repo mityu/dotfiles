@@ -1,4 +1,3 @@
-" Last Change: 06-Sep-2019.
 scriptencoding utf-8
 " if exists('b:did_ftplugin_after')
 "   finish

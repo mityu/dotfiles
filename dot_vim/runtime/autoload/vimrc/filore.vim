@@ -1,7 +1,3 @@
-"Plugin Name: filore.vim
-"Author: mityu
-"Last Change: 29-Apr-2021.
-
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 

@@ -1,6 +1,4 @@
-" Author: mityu
-" Last Change: 29-Sep-2021.
-" vim: shiftwidth=2 commentstring=#%s
+" vim: shiftwidth=2
 vim9script noclear
 
 # Encoding

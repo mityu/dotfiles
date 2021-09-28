@@ -1,6 +1,3 @@
-" Last Change: 27-Feb-2020.
-
-
 " SetUndoFtplugin nunmap <CR>
 " SetUndoFtplugin nunmap o
 " SetUndoFtplugin nunmap q

@@ -1,7 +1,3 @@
-"Plugin Name: shcmd.vim
-"Author: mityu
-"Last Change: 06-Mar-2020.
-
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
