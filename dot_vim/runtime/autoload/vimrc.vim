@@ -76,16 +76,26 @@ export def vimrc#clipbuffer(arg: string)
   setbufvar(bufnr(), 'clipbuffer_bufhidden', &l:bufhidden)
   setlocal buftype=acwrite nomodified bufhidden=hide noswapfile
 
+  ClipbufferCatchup()
+
   augroup vimrc_clipbuffer
     autocmd! * <buffer>
     autocmd BufWriteCmd <buffer> ++nested ClipbufferSet()
     autocmd BufWipeout  <buffer> ++nested
           \ setbufvar(bufnr(), '&bufhidden', b:clipbuffer_bufhidden)
+    autocmd BufEnter <buffer> ++nested ClipbufferCatchup()
   augroup END
 enddef
 
 def ClipbufferSet()
   :%yank +
+  setlocal nomodified
+enddef
+
+def ClipbufferCatchup()
+  :%delete _
+  :1 put +
+  :1 delete _
   setlocal nomodified
 enddef
 
