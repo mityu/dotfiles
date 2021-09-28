@@ -445,6 +445,19 @@ augroup END
 augroup vimrc_checktime
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
 augroup END
+if executable('chmod')
+  # This hack is from github.com/thinca/config/dotfiles/dot.vim/vimrc. Thanks!
+  augroup vimrc_autoexecutable
+    autocmd BufWritePost * AddPermissionX()
+  augroup END
+
+  def AddPermissionX()
+    var file = expand('%:p')
+    if stridx(getline(1), '#!') == 0 && !executable(file)
+      silent! call system('chmod a+x ' .. shellescape(file))
+    endif
+  enddef
+endif
 
 # Mapping {{{
 nnoremap : q:A
