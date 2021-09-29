@@ -1,0 +1,14 @@
+[memory]
+label=
+command=free -h | awk 'match($0, /^Mem/){print $3 "/" $2}'
+interval=5
+
+[battery]
+command=~/.config/i3blocks/battery.sh
+format=json
+interval=persist
+
+[date]
+label=
+command=date +'%m/%d(%a) %H:%M'
+interval=1

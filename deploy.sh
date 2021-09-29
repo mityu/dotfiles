@@ -38,3 +38,6 @@ ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
 
 echo "Deploying i3/"
 ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
+
+echo "Deploying i3blocks/"
+ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
