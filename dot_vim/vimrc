@@ -288,7 +288,8 @@ def PackRegister()
   minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
   minpac#add('kana/vim-operator-replace', {type: 'opt'})
   minpac#add('rhysd/vim-operator-surround', {type: 'opt'})
-  minpac#add('tyru/caw.vim', {type: 'opt'})
+  # minpac#add('tyru/caw.vim', {type: 'opt'})
+  minpac#add('mityu/caw.vim', {type: 'opt', branch: 'support-vim9script-tmp'})  # tmp
   minpac#add('sgur/vim-operator-openbrowser', {type: 'opt'})
 
   # Textobj-user plugins
