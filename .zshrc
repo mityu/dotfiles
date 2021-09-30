@@ -205,3 +205,11 @@ function update_components(){
     fi
     update_zsh_plugins
 }
+
+function gitinit() {
+    if ! [ -d "./.git" ]; then
+        git init
+        git branch -m main
+        git commit --allow-empty -m "Initial commit"
+    fi
+}
