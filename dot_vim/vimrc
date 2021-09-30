@@ -749,6 +749,7 @@ command! -bar -nargs=* -complete=file ListTasks call vimrc#list_tasks(<q-args>)
 command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
+command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#git_init_repo(<q-args>)
 
 # Thanks to cohama
 command! Utf8 edit ++enc=utf-8 %
@@ -915,6 +916,7 @@ if PluginExists('gina.vim')
       cursor(1, 0)
     endif
   enddef
+
   augroup vimrc_gina
     autocmd Filetype gina-* ++once GinaConfig()
   augroup END

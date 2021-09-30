@@ -126,3 +126,37 @@ export def vimrc#list_tasks()
   endif
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 enddef
+
+export def vimrc#git_init_repo(cmdarg: string)
+  var d: string
+  if cmdarg ==# ''
+    d = getcwd(0)  # Refer the cwd of the current window.
+  else
+    d = expand(cmdarg)
+    if !isdirectory(d)
+      Vimrc.EchomsgError('Not a directory: ' .. cmdarg)
+      return
+    endif
+  endif
+  if isdirectory(fnamemodify(d, '%:p') .. '.git')
+    Vimrc.Echo('Already a git repository: ' .. cmdarg)
+    return
+  endif
+
+  var cmdbase = 'git -C ' .. shellescape(d) .. ' '
+  var cmds = [
+    cmdbase .. 'init',
+    cmdbase .. 'branch -m main',
+    cmdbase .. 'commit --allow-empty -m "Initial commit"'
+  ]
+
+  for cmd in cmds
+    var m = system(cmd)
+    if !!v:shell_error
+      Vimrc.EchomsgError('Command Failed: The stdout message is:')
+      Vimrc.EchomsgError(m)
+      return
+    endif
+  endfor
+  Vimrc.Echo('Initialized git repository: ' .. cmdarg)
+enddef
