@@ -18,11 +18,7 @@ ln -sn ${SCRIPT_DIR}/.zshrc ~/.zshrc
 
 
 echo "Deploying .vim/"
-auto_mkdir $HOME/.vim
-for file in ${SCRIPT_DIR}/dot_vim/*
-do
-	ln -snfv $file ${HOME}/.vim
-done
+ln -snfv ${SCRIPT_DIR}/dot_vim ~/.vim
 
 
 echo "Deploying .mlterm/"
