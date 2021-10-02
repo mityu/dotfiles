@@ -99,6 +99,24 @@ def PopupCallback(winID: number, result: number)
   RestoreSettings()
 enddef
 
+def ForceRedrawCursor()
+  var curpos = getpos('.')
+  normal! h
+  if getpos('.') != curpos
+    redraw!
+    return
+  endif
+
+  final virtualedit_save = &virtualedit
+  try
+    set virtualedit=all
+    normal! l
+    redraw!
+  finally
+    &virtualedit = virtualedit_save
+  endtry
+enddef
+
 export def vimrc#splash#show()
   final splash = SPLASH[: &lines - 3]
   final popupID = popup_create(splash, {
@@ -116,13 +134,14 @@ export def vimrc#splash#show()
   RestoreSettings = (t_ve: string): void => {
     &t_ve = t_ve
     setcellwidths([])
+    redraw  # Reflect t_ve
   }->function([&t_ve])
 
   set t_ve= # Hide cursor
   setcellwidths([0x3c9, 0x2229]->mapnew('[v:val, v:val, 1]'))
   matchadd('SpecialKey', '<.\{-}>', 10, -1, {window: popupID})
 
-  # When quitting, popup-callback isn't called.
+  # It seems that popup-callback isn't called when quitting.
   augroup splash-vim
     autocmd!
     autocmd VimLeavePre * RestoreSettings()
