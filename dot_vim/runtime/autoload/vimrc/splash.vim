@@ -99,24 +99,6 @@ def PopupCallback(winID: number, result: number)
   RestoreSettings()
 enddef
 
-def ForceRedrawCursor()
-  var curpos = getpos('.')
-  normal! h
-  if getpos('.') != curpos
-    redraw!
-    return
-  endif
-
-  final virtualedit_save = &virtualedit
-  try
-    set virtualedit=all
-    normal! l
-    redraw!
-  finally
-    &virtualedit = virtualedit_save
-  endtry
-enddef
-
 export def vimrc#splash#show()
   final splash = SPLASH[: &lines - 3]
   final popupID = popup_create(splash, {
