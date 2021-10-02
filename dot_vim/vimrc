@@ -1191,6 +1191,15 @@ if OptPluginExists('vim-lsp')
     setlocal omnifunc=lsp#complete
     nnoremap <buffer> <Plug>(<SID>-open-folding) zv
     nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
+
+    if &filetype ==# 'go'
+      augroup vimrc_lsp_go
+        autocmd! * <buffer>
+        autocmd BufWritePre <buffer> silent LspDocumentFormatSync
+        autocmd BufWritePre <buffer> silent LspCodeActionSync source.organizeImports
+        autocmd Filetype <buffer> ++once autocmd! vimrc_lsp_go BufWritePre <buffer>
+      augroup END
+    endif
   enddef
 
   def LspDisableForBuffer()
