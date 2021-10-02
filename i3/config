@@ -32,7 +32,7 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id nm-applet
 
 # Enable IM
-# exec --no-startup-id fcitx
+exec --no-startup-id fcitx
 
 # Show wallpaper
 exec --no-startup-id feh --bg-scale ~/.config/i3/wallpaper/Arisu.png
