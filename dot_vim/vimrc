@@ -1187,24 +1187,47 @@ if OptPluginExists('vim-lsp')
   g:lsp_diagnostics_float_delay = 10
   g:lsp_diagnostics_float_cursor = 1
 
+  def LspDefineBufferAutocmds()
+    LspClearBufferAutocmds()
+
+    augroup vimrc_lsp_buffer
+      autocmd BufWritePost <buffer> silent LspDocumentDiagnostics
+    augroup END
+
+    if &filetype ==# 'go'
+      augroup vimrc_lsp_buffer_go
+        autocmd BufWritePre <buffer> silent LspDocumentFormatSync
+        autocmd BufWritePre <buffer> silent LspCodeActionSync source.organizeImports
+        autocmd Filetype <buffer> ++once LspClearBufferAutocmds()
+      augroup END
+    endif
+  enddef
+
+  def LspClearBufferAutocmds()
+    augroup vimrc_lsp_buffer
+      autocmd! * <buffer>
+    augroup END
+
+    if &filetype ==# 'go'
+      augroup vimrc_lsp_buffer_go
+        autocmd! * <buffer>
+      augroup END
+    endif
+  enddef
+
   def LspEnableForBuffer()
     setlocal omnifunc=lsp#complete
     nnoremap <buffer> <Plug>(<SID>-open-folding) zv
     nmap <buffer> <silent> gd <Plug>(lsp-declaration)<Plug>(<SID>-open-folding)
 
-    if &filetype ==# 'go'
-      augroup vimrc_lsp_go
-        autocmd! * <buffer>
-        autocmd BufWritePre <buffer> silent LspDocumentFormatSync
-        autocmd BufWritePre <buffer> silent LspCodeActionSync source.organizeImports
-        autocmd Filetype <buffer> ++once autocmd! vimrc_lsp_go BufWritePre <buffer>
-      augroup END
-    endif
+    LspDefineBufferAutocmds()
   enddef
 
   def LspDisableForBuffer()
     setlocal omnifunc=
     nunmap <buffer> gd
+
+    LspClearBufferAutocmds()
   enddef
 
   augroup vimrc_lsp
