@@ -66,7 +66,7 @@ bindsym $mod+Return exec alacritty
 # bindsym $mod+Tab exec gvim
 
 # kill focused window
-bindsym $mod+q kill
+bindsym --release $mod+q kill
 
 # start dmenu (a program launcher)
 # bindsym Control+space exec --no-startup-id dmenu_run
@@ -245,7 +245,6 @@ bindsym $mod+k mode "WindowManagement"
 
 # macOS like keybinding supports
 set $cmd Mod4
-bindsym --release $cmd+q kill
 bindsym --release $cmd+w exec --no-startup-id xdotool key --clearmodifiers ctrl+w
 bindsym --release $cmd+Shift+w exec --no-startup-id xdotool key --clearmodifiers ctrl+Shift+w
 # bindsym --release $cmd+v exec --no-startup-id xdotool key --clearmodifiers ctrl+v
