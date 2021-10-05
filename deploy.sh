@@ -37,3 +37,6 @@ ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
 
 echo "Deploying i3blocks/"
 ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
+
+echo "Deploying wezterm/"
+ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
