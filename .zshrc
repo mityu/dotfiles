@@ -203,6 +203,9 @@ function update_components(){
     if which pip3 &> /dev/null; then
         pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     fi
+    if which pacman &> /dev/null; then
+        sudo pacman -Syyu
+    fi
     update_zsh_plugins
 }
 
