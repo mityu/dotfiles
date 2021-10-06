@@ -160,3 +160,24 @@ export def vimrc#git_init_repo(cmdarg: string)
   endfor
   Vimrc.Echo('Initialized git repository: ' .. cmdarg)
 enddef
+
+export def vimrc#update_local_packages()
+  if !executable('git')
+    Vimrc.EchomsgError('No git')
+    return
+  endif
+  var dirs: list<string>
+  dirs = Vimrc.JoinPath($DOT_VIM, 'pack', 'local', 'start', '*', '.git')->glob(true, true)
+  dirs += Vimrc.JoinPath($DOT_VIM, 'pack', 'local', 'opt', '*', '.git')->glob(true, true)
+  var cmds: list<string>
+  for dir in dirs
+    cmds->add('git -C ' .. dir->fnamemodify(':h')->shellescape() .. ' pull')
+  endfor
+
+  var fname = tempname() .. '.sh'
+  writefile(cmds, fname)
+  term_start([&shell, fname], {
+    term_name: 'Update Local Packages',
+    exit_cb: (_, _) => delete(fname)
+  })
+enddef

@@ -750,6 +750,7 @@ command! DeleteUndoFiles call vimrc#delete_undofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
 command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#git_init_repo(<q-args>)
+command! -bar LocalPackUpdate call vimrc#update_local_packages()
 
 # Thanks to cohama
 command! Utf8 edit ++enc=utf-8 %
