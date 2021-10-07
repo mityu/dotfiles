@@ -241,19 +241,3 @@ mode "WindowManagement" {
 }
 
 bindsym $mod+k mode "WindowManagement"
-
-
-# macOS like keybinding supports
-set $cmd Mod4
-bindsym --release $cmd+w exec --no-startup-id xdotool key --clearmodifiers ctrl+w
-bindsym --release $cmd+Shift+w exec --no-startup-id xdotool key --clearmodifiers ctrl+Shift+w
-# bindsym --release $cmd+v exec --no-startup-id xdotool key --clearmodifiers ctrl+v
-# bindsym --release $cmd+c exec --no-startup-id xdotool key --clearmodifiers ctrl+c
-# bindsym --release $cmd+f exec --no-startup-id xdotool key --clearmodifiers ctrl+f
-bindsym --release $cmd+l exec --no-startup-id xdotool key --clearmodifiers ctrl+l
-bindsym --release $cmd+r exec --no-startup-id xdotool key --clearmodifiers ctrl+r
-bindsym --release $cmd+t exec --no-startup-id xdotool key --clearmodifiers ctrl+t
-bindsym --release $cmd+n exec --no-startup-id xdotool key --clearmodifiers ctrl+n
-bindsym --release $cmd+a exec --no-startup-id xdotool key --clearmodifiers ctrl+a
-bindsym --release $cmd+Shift+3 exec --no-startup-id scrot ~/screenshots/screenshot-%Y-%m-%d-%T.png
-bindsym --release $cmd+Shift+4 exec --no-startup-id scrot -s ~/screenshots/screenshot-%Y-%m-%d-%T.png
