@@ -46,6 +46,7 @@ define_keymap(re.compile("Firefox|Google-chrome|Chromium|Vivaldi", re.IGNORECASE
     # K("Super-l"): K("C-l"),
     K("Super-f"): K("C-f"),
     K("Super-d"): K("C-d"),
+    K("Super-y"): K("C-h"),
 }, "WebBrowser")
 
 macLikeExceptions = ("URxvt", "org.wezfurlong.wezterm", "Alacritty", "Gvim")

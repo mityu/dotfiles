@@ -40,3 +40,6 @@ ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
 
 echo "Deploying wezterm/"
 ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
+
+echo "Deploying xkeysnail/"
+ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail

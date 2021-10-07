@@ -16,7 +16,7 @@ Description=xkeysnail
 
 [Service]
 KillMode=process
-ExecStart=/usr/local/bin/xkeysnail /home/your_username/.xkeysnail/config.py
+ExecStart=/usr/bin/xkeysnail /home/mityu/.config/xkeysnail/config.py
 ExecStartPre=/usr/bin/xhost +SI:localuser:root
 Type=simple
 Restart=always
