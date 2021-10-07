@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 from xkeysnail.transform import *
 
@@ -48,8 +46,6 @@ define_keymap(re.compile("Firefox|Google-chrome|Chromium|Vivaldi", re.IGNORECASE
     # K("Super-l"): K("C-l"),
     K("Super-f"): K("C-f"),
     K("Super-d"): K("C-d"),
-    # very naive "Edit in editor" feature (just an example)
-    K("C-o"): [K("C-a"), K("C-c"), launch(["gedit"]), sleep(0.5), K("C-v")],
 }, "WebBrowser")
 
 macLikeExceptions = ("URxvt", "org.wezfurlong.wezterm", "Alacritty", "Gvim")
@@ -74,4 +70,6 @@ define_keymap(lambda wm_class: wm_class not in macLikeExceptions, {
     # Copy and paste
     K("Super-c"): K("C-c"),
     K("Super-v"): K("C-v"),
+
+    K("Super-a"): K("C-a")
 }, "macOS-like keys")
