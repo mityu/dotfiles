@@ -25,4 +25,30 @@ return {
     },
 
     disable_default_key_bindings = true,
+    leader = {key = 'p', mods = 'SUPER'},
+    keys = {
+        {key = 't', mods = 'SUPER', action = wezterm.action{SpawnTab="CurrentPaneDomain"}},
+        {key = 'w', mods = 'SUPER', action = wezterm.action{CloseCurrentTab={confirm=true}}},
+        {key = 'Tab', mods = 'CTRL', action = wezterm.action{ActivateTabRelative = 1}},
+        {key = 'Tab', mods = 'CTRL|SHIFT', action = wezterm.action{ActivateTabRelative = -1}},
+        {key = 'f', mods = 'SUPER', action = wezterm.action{Search = {CaseInSensitiveString = ''}}},
+        {key = 'v', mods = 'SUPER', action = wezterm.action{PasteFrom = "Clipboard"}},
+        {key = 'c', mods = 'SUPER', action = wezterm.action{CopyTo = "Clipboard"}},
+        -- {key = 'c', mods = 'SUPER', action = wezterm.action{CompleteSelection = "Clipboard"}},
+        {key = 's', mods = 'LEADER', action = wezterm.action{SplitHorizontal = {domain = "CurrentPaneDomain"}}},
+        {key = 'v', mods = 'LEADER', action = wezterm.action{SplitVertical = {domain = "CurrentPaneDomain"}}},
+        {key = 'q', mods = 'LEADER', action = wezterm.action{CloseCurrentPane={confirm=true}}},
+        {key = 'h', mods = 'LEADER', action = wezterm.action{ActivatePaneDirection = "Left"}},
+        {key = 'j', mods = 'LEADER', action = wezterm.action{ActivatePaneDirection = "Down"}},
+        {key = 'k', mods = 'LEADER', action = wezterm.action{ActivatePaneDirection = "Up"}},
+        {key = 'l', mods = 'LEADER', action = wezterm.action{ActivatePaneDirection = "Right"}},
+        {key = 'H', mods = 'LEADER', action = wezterm.action{AdjustPaneSize = {"Left", 1}}},
+        {key = 'J', mods = 'LEADER', action = wezterm.action{AdjustPaneSize = {"Down", 1}}},
+        {key = 'K', mods = 'LEADER', action = wezterm.action{AdjustPaneSize = {"Up", 1}}},
+        {key = 'L', mods = 'LEADER', action = wezterm.action{AdjustPaneSize = {"Right", 1}}},
+        {key = 'Escape', mods = 'LEADER', action = "Nop"},
+
+        {key = 'x', mods = 'SUPER', action = "ActivateCopyMode"},
+        {key = 'z', mods = 'SUPER', action = "TogglePaneZoomState"},
+    }
 }
