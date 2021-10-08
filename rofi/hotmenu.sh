@@ -2,15 +2,11 @@
 
 if [ $# -eq 0 ]; then
     cat <<EOF
-gvim
-wezterm
-alacritty
 sleep
 shutdown
 reboot
 suspend
-firefox
-chromium
+lock
 EOF
     exit 0
 fi
@@ -18,7 +14,8 @@ fi
 case $@ in
     sleep) systemctl suspend ;;
     suspend) systemctl suspend ;;
-    shutdown) systemctl shutdown ;;
+    shutdown) systemctl poweroff ;;
+    lock) dm-tool lock ;;
     reboot) systemctl reboot ;;
-    *) exec $@ ;;
 esac
+exit 0
