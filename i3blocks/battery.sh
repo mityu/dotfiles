@@ -32,7 +32,7 @@ function main() {
   local -Ar \
     high=( ['value']=79 ['icon']='' ['color']='#fff8dc') \
     middle=( ['icon']='' ['color']='#fff8dc') \
-    low=( ['value']=21 ['icon']='' ['color']='#ff0000')
+    low=( ['value']=31 ['icon']='' ['color']='#ff0000')
 
   local online_icon='' cnt=0
   while sleep 1; do
