@@ -1843,6 +1843,6 @@ if v:vim_did_enter
   doautocmd User vimrc_initialize
 else
   augroup vimrc_initialize
-    autocmd VimEnter * doautocmd User vimrc_initialize
+    autocmd VimEnter * ++once doautocmd User vimrc_initialize
   augroup END
 endif
