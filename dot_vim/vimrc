@@ -479,8 +479,6 @@ noremap + <C-a>
 noremap ( [(
 noremap ) ])
 
-nnoremap j gj
-nnoremap k gk
 nnoremap <CR> o<ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
