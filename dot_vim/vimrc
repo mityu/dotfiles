@@ -1190,10 +1190,6 @@ if OptPluginExists('vim-lsp')
   def LspDefineBufferAutocmds()
     LspClearBufferAutocmds()
 
-    augroup vimrc_lsp_buffer
-      autocmd BufWritePost <buffer> silent LspDocumentDiagnostics
-    augroup END
-
     if &filetype ==# 'go'
       augroup vimrc_lsp_buffer_go
         autocmd BufWritePre <buffer> silent LspDocumentFormatSync
@@ -1201,6 +1197,10 @@ if OptPluginExists('vim-lsp')
         autocmd Filetype <buffer> ++once LspClearBufferAutocmds()
       augroup END
     endif
+
+    augroup vimrc_lsp_buffer
+      autocmd BufWritePost <buffer> silent LspDocumentDiagnostics
+    augroup END
   enddef
 
   def LspClearBufferAutocmds()
