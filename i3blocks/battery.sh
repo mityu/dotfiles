@@ -23,7 +23,8 @@ function get_battery() {
 }
 
 function online() {
-  [[ $(cat /sys/class/power_supply/ADP1/online) -eq 1 ]] \
+  [[ -e '/sys/class/power_supply/BAT1/status' && \
+    $(cat /sys/class/power_supply/BAT1/status) == 'Charging' ]] \
     && return 0
   return 1
 }
@@ -49,7 +50,7 @@ function main() {
     local battery
     battery=$(get_battery)
     if [[ ${battery} -eq 0 ]]; then
-      echo_battery ${online_icon}
+      echo_battery "${online_icon}" "#22ff22"
     elif [[ ${battery} -gt ${high['value']} ]];then
       echo_battery \
         "${online_icon:-${high['icon']}} ${battery}%" ${high['color']}
