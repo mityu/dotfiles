@@ -12,7 +12,7 @@ EOF
 fi
 
 case $@ in
-    sleep) systemctl suspend ;;
+    sleep) systemctl suspend && dm-tool lock ;;
     suspend) systemctl suspend ;;
     shutdown) systemctl poweroff ;;
     lock) dm-tool lock ;;
