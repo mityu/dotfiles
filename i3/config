@@ -16,6 +16,9 @@ set $mod Mod4
 # font pango:monospace 8
 font pango:Cica 16
 
+# Use tabbed layout in default
+workspace_layout tabbed
+
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 # font pango:DejaVu Sans Mono 8
@@ -136,19 +139,20 @@ bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+bindsym $mod+i workspace prev
+bindsym $mod+o workspace next
+
 # reload the configuration file
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
-
-# Start i3bar to display a workspace bar (plus the system information i3status
-# finds out, if available)
-# bar {
-#         position top
-#         status_command i3blocks
-# }
+# bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # Colors
 set $background #1f1f1f
@@ -201,32 +205,30 @@ mode "WindowManagement" {
         bindsym Shift+k move up
         bindsym Shift+l move right
 
-        # bindsym < resize shrink width 10 px or 10 ppt
-        # bindsym > resize grow height 10 px or 10 ppt
-        bindsym Shift+commma resize shrink width 10 px or 10 ppt
-        bindsym Shift+period resize grow width 10 px or 10 ppt
-        bindsym minus resize shrink height 10 px or 10 ppt
-        bindsym plus resize grow width 10 px or 10 ppt
+        bindsym Shift+comma resize shrink width 2 px or 2 ppt
+        bindsym Shift+period resize grow width 2 px or 2 ppt
+        bindsym minus resize shrink height 2 px or 2 ppt
+        bindsym plus resize grow width 2 px or 2 ppt
 
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+        bindsym Left resize shrink width 2 px or 2 ppt
+        bindsym Down resize grow height 2 px or 2 ppt
+        bindsym Up resize shrink height 2 px or 2 ppt
+        bindsym Right resize grow width 2 px or 2 ppt
 
         # enter fullscreen mode for the focused container
-        bindsym F fullscreen toggle
+        bindsym f fullscreen toggle; mode "default"
 
         # toggle tiling / floating
-        bindsym $mod+Shift+space floating toggle
+        bindsym F floating toggle; mode "default"
 
         # change focus between tiling / floating windows
-        bindsym $mod+space focus mode_toggle
+        bindsym $mod+space focus mode_toggle; mode "default"
 
         # focus the parent container
-        bindsym $mod+a focus parent
+        bindsym p focus parent; mode "default"
         #
         # focus the child container
-        bindsym $mod+d focus child
+        bindsym c focus child; mode "default"
 
         # change container layout (stacked, tabbed, toggle split)
         bindsym $mod+s layout stacking
@@ -242,4 +244,4 @@ mode "WindowManagement" {
         bindsym Control+bracketleft mode "default"
 }
 
-bindsym $mod+k mode "WindowManagement"
+bindsym $mod+semicolon mode "WindowManagement"
