@@ -867,6 +867,8 @@ if PluginExists('gina.vim')
     Gina_nnoremap('commit', '<C-]>', '<Cmd>Gina status<CR>')
     Gina_nnoremap('status', '<Space>g', '<Cmd>Gina commit<CR>')
     Gina_nnoremap('commit', '<Space>g', '<Cmd>Gina status<CR>')
+    Gina_nnoremap('status', '<C-l>', '<Cmd>Gina status<CR>')
+    Gina_nnoremap('log', '<C-l>', '<Cmd>Gina log<CR>')
     Gina_nnoremap('branch', 'N',
             '<Cmd>call gina#action#call("branch:new")<CR>')
     Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
