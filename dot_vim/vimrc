@@ -1013,14 +1013,14 @@ if PluginExists('vim-ambicmd')
     rule += ['\c^' .. cmd]
 
     for len in range(1, strlen(cmd))
-      var prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '\\l*', 'g')
+      var prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '.\\{-}', 'g')
       var suffix = cmd[len :]
       var matcher = '\C^' .. prefix .. suffix
       rule += [matcher .. '$', matcher]
     endfor
 
     rule += ['\c' .. cmd]
-    rule += ['.*' .. substitute(cmd, '.\zs', '.*', 'g')]
+    rule += ['.\\{-}' .. substitute(cmd, '.\zs', '.\\{-}', 'g')]
     return rule
   enddef
   g:ambicmd#build_rule = SIDPrefix() .. 'AmbicmdBuildRule'
