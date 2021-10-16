@@ -356,7 +356,6 @@ set smartindent autoindent
 set cinoptions=:0,g0,N-s,E-s
 set backspace=eol,start,indent
 set pumheight=10
-set completefunc=vimrc#pathComplete
 set completeopt=menuone,noselect
 set noequalalways
 set scrolloff=1
@@ -511,6 +510,8 @@ inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
 inoremap <C-l><C-n> <C-x><C-n><C-n>
 inoremap <C-l><C-p> <C-x><C-p><C-p>
+inoremap <silent> <C-l><C-f> <C-r>=vimrc#pathComplete()<CR>
+inoremap <silent> <C-x><C-f> <C-r>=vimrc#pathComplete()<CR>
 inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>

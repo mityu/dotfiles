@@ -38,35 +38,67 @@ export def vimrc#delete_undofiles()
     Vimrc.Echomsg('Deleted.')
 enddef
 
-var PathComplete: dict<any> = {target_path: '', completions: []}
-export def vimrc#pathComplete(findstart: bool, base: string): any
-  if findstart
-    var line = getline('.')[: col('.') - 1]
-    if line ==# ''
-      PathComplete.target_path = ''
-    else
-      PathComplete.target_path = split(line, NON_ESCAPED_SPACE)[-1]
-    endif
-    var completions = Vimrc.Glob(PathComplete.target_path .. '*')
-    var files: list<dict<string>> = []
-    var dirs: list<dict<string>> = []
-    for path in completions
-      var completion = fnamemodify(path, ':t')
-      if filereadable(path)
-        add(files, {word: completion, menu: '[file]'})
-      else
-        add(dirs, {word: completion .. SLASH, menu: '[dir]'})
-      endif
-    endfor
-    sort(dirs)
-    sort(files)
-    PathComplete->remove('completions') # To avoid E1121 error in the next line.
-    PathComplete.completions = dirs + files
-
-    return col('.') - fnamemodify(PathComplete.target_path, ':t')->strlen() - 1
+def ExpandEnviron(src: string): string
+  if strlen(src) == 0
+    return ''
   endif
 
-  return PathComplete.completions
+  var env = environ()
+  var dest = substitute(src, '\v%(%(\_^|[^\\])%(\\\\)*)@<=\$\a+',
+    (m): string => get(env, m[0][1 :], ''), 'g')
+  if src[0] ==# '~'
+    dest = expand('~') .. dest[1 :]
+  endif
+  return dest
+enddef
+
+export def vimrc#pathComplete(): string
+  var target_path = getline('.')[: col('.') - 1]
+  if target_path !=# ''
+    target_path = split(target_path, NON_ESCAPED_SPACE)[-1]
+  endif
+
+  var completions = getcompletion(target_path, 'file')
+
+  var truncate_len: number
+  var truncate_len_buffer: number
+  if target_path ==# fnamemodify(target_path, ':t')
+    truncate_len = 0
+    truncate_len_buffer = 0
+  else
+    var dir_buffer = fnamemodify(target_path, ':h')
+    var dir = ExpandEnviron(dir_buffer)
+    while true
+      if stridx(completions[0], dir) == 0
+        truncate_len = strlen(dir) + 1
+        truncate_len_buffer = strlen(dir_buffer) + 1
+        break
+      elseif fnamemodify(dir_buffer, ':t') ==# dir_buffer
+        truncate_len = 0
+        truncate_len_buffer = 0
+        break
+      endif
+
+      dir = fnamemodify(dir, ':h')
+      dir_buffer = fnamemodify(dir_buffer, ':h')
+    endwhile
+  endif
+
+
+  var dirs: list<dict<string>>
+  var files: list<dict<string>>
+  for path in completions
+    var c = path[truncate_len :]
+    if fnamemodify(path, ':t') ==# ''
+      dirs->add({word: c, menu: '[dir]'})
+    else
+      files->add({word: c, menu: '[file]'})
+    endif
+  endfor
+
+  var startcol = col('.') - strlen(target_path) + truncate_len_buffer
+  complete(startcol, dirs + files)
+  return ''
 enddef
 
 export def vimrc#clipbuffer(arg: string)
