@@ -49,6 +49,7 @@ highlight VertSplit    guifg=#fff8dc guibg=#fff8dc ctermfg=230  ctermbg=230  gui
 highlight MatchParen   guifg=NONE    guibg=#a020f0 ctermfg=NONE ctermbg=129  gui=NONE      cterm=NONE      term=NONE
 
 highlight! link ModeMsg          Normal
+highlight! link EndOfBuffer      Normal
 highlight! link Constant         Number
 highlight! link Boolean          Number
 highlight! link Float            Number
