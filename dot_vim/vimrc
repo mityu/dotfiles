@@ -348,7 +348,9 @@ if !v:vim_did_enter
   syntax on
   filetype plugin indent on
 endif
-colorscheme domusaurea
+if !exists('g:colors_name')  # Don't override colorscheme
+  colorscheme domusaurea
+endif
 language C
 set relativenumber number
 set wrap
