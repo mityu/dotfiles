@@ -502,7 +502,11 @@ nnoremap <C-j> 7gj
 # Avoid textobj-function calls appearing on command history
 nnoremap <silent> . .
 nnoremap * *N
+
 nnoremap s <Nop>
+vnoremap s <Nop>
+nnoremap ss s
+vnoremap ss s
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -1299,7 +1303,7 @@ def LoadTextModifierPlugin(plugin: string, info: dict<string>, on_load: string):
 enddef
 
 if OptPluginExists('vim-operator-replace')
-  MapOperator('vim-operator-replace', {lhs: 'ss', rhs: '<Plug>(operator-replace)'})
+  MapOperator('vim-operator-replace', {lhs: 'sk', rhs: '<Plug>(operator-replace)'})
 endif
 if OptPluginExists('vim-operator-surround')
   MapOperator('vim-operator-surround',
