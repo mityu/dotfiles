@@ -203,12 +203,12 @@ function! s:win_open_new() abort "{{{
 
   augroup filore_window
     autocmd! * <buffer>
+    autocmd! ColorScheme
     autocmd BufHidden,BufWipeOut <buffer> call s:win_BufHidden()
     autocmd BufWinEnter <buffer> call s:win_BufWinEnter()
     autocmd WinEnter <buffer> call s:win_WinEnter()
     autocmd BufEnter <buffer> call s:win_BufEnter()
-    autocmd BufEnter <buffer> call s:browse_color()
-    autocmd ColorScheme <buffer> call s:browse_color()
+    autocmd ColorScheme * call s:browse_color()
   augroup END
 
   setlocal nobuflisted noswapfile noundofile filetype=filore
@@ -515,22 +515,24 @@ endfunction "}}}
 function! s:browse_color() abort "{{{
   let node_directory = '\(\_^\(\s\s\)*\)\@<=|[+-]\s\@='
   let node_file = '\(\_^\(\s\s\)*\)\@<=|\(\s\s\)\@='
-  let SyntaxMatch = {hlgroup, pat ->
-        \ execute(printf('syntax match %s /%s/', hlgroup, pat))}
+  let SyntaxMatch = {winnr, hlgroup, pat ->
+        \ win_execute(winnr, printf('syntax match %s /%s/', hlgroup, pat))}
   let HighlightLink = {hlgroup, link_to ->
-        \ hlexists(hlgroup) ? 0 :
-        \ execute(printf('highlight link %s %s', hlgroup, link_to))}
+        \ execute(printf('highlight! link %s %s', hlgroup, link_to))}
 
-  syntax clear
   call HighlightLink('filoreBrowseNode', 'Title')
   call HighlightLink('filoreBrowseDirectory', 'Directory')
   call HighlightLink('filoreBrowseNoItem', 'Comment')
-  call SyntaxMatch('filoreBrowseNode', node_directory)
-  call SyntaxMatch('filoreBrowseNode', node_file)
-  call SyntaxMatch('filoreBrowseDirectory',
-        \ printf('\(%s\)\@<=.\+$', node_directory))
-  call SyntaxMatch('filoreBrowseNoItem',
-        \ printf('\%%%dl\_^(No\sItem)$', 1 + s:prompt_lines_count))
+  for f in values(s:filore_list)
+    let winid = bufwinid(f.bufnr)
+    call win_execute(winid, 'syntax clear')
+    call SyntaxMatch(winid, 'filoreBrowseNode', node_directory)
+    call SyntaxMatch(winid, 'filoreBrowseNode', node_file)
+    call SyntaxMatch(winid, 'filoreBrowseDirectory',
+          \ printf('\(%s\)\@<=.\+$', node_directory))
+    call SyntaxMatch(winid, 'filoreBrowseNoItem',
+          \ printf('\%%%dl\_^(No\sItem)$', 1 + s:prompt_lines_count))
+  endfor
 endfunction "}}}
 
 function! s:browse_filter_files() abort
