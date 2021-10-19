@@ -52,7 +52,7 @@ def ExpandEnviron(src: string): string
   return dest
 enddef
 
-export def vimrc#pathComplete(): string
+export def vimrc#pathComplete()
   # TODO: improve split(); improve target_path detection
   # TODO: support `filename-modifiers` if in cmdline
   var target_path = getline('.')[: col('.') - 1]
@@ -100,7 +100,6 @@ export def vimrc#pathComplete(): string
 
   var startcol = col('.') - strlen(target_path) + truncate_len_buffer
   complete(startcol, dirs + files)
-  return ''
 enddef
 
 export def vimrc#clipbuffer(arg: string)
