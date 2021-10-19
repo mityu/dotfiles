@@ -53,6 +53,8 @@ def ExpandEnviron(src: string): string
 enddef
 
 export def vimrc#pathComplete(): string
+  # TODO: improve split(); improve target_path detection
+  # TODO: support `filename-modifiers` if in cmdline
   var target_path = getline('.')[: col('.') - 1]
   if target_path !=# ''
     target_path = split(target_path, NON_ESCAPED_SPACE)[-1]
