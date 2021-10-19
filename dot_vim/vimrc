@@ -175,6 +175,11 @@ if !v:vim_did_enter
     set mouse=a
   endif
 
+  if expand('$TERM_PROGRAM') ==# 'WezTerm'
+    &t_Cs = "\e[4:3m"
+    &t_Ce = "\e[4:0m"
+  endif
+
   # disable default plugins
   g:loaded_2html_plugin = 1
   g:loaded_getscriptPlugin = 1
