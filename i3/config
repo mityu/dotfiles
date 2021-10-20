@@ -71,6 +71,8 @@ bindsym $mod+Return exec wezterm
 # kill focused window
 bindsym --release $mod+q kill
 
+for_window [title="^zoom$"] floating enable
+
 # start dmenu (a program launcher)
 # bindsym Control+space exec --no-startup-id dmenu_run
 # A more modern dmenu replacement is rofi:
