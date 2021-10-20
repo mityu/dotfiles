@@ -24,7 +24,7 @@ case $@ in
     reboot) systemctl reboot ;;
     logout) i3-msg exit ;;  # TODO: Confirm?
     restart-xkeysnail) systemctl --user restart xkeysnail ;;
-    wezterm-float) i3-msg -q exec wezterm ;;  # TODO: How can I make the new terminal float?
+    wezterm-float) i3-msg -q exec ~/.config/i3/dropdown_wezterm.sh ;;
     *) i3-msg -q exec $@ ;;
 esac
 exit 0
