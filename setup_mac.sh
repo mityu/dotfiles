@@ -51,7 +51,7 @@ fi
 
 # Install Homebrew if it doesn't exists.
 if ! has_cmd brew ; then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew update
     brew upgrade --all --cleanup
 fi
