@@ -126,10 +126,12 @@ def ClipbufferSet()
 enddef
 
 def ClipbufferCatchup()
-  :%delete _
-  :1 put +
-  :1 delete _
-  setlocal nomodified
+  if !&modified
+    :%delete _
+    :1 put +
+    :1 delete _
+    setlocal nomodified
+  endif
 enddef
 
 export def vimrc#set_digraph_for_japanese()
