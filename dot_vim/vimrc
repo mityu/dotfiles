@@ -1289,7 +1289,7 @@ def MapTextModifierPlugin(
 enddef
 
 def LoadTextModifierPlugin(plugin: string, info: dict<string>, on_load: string): string
-  if !HasInString(&runtimepath, plugin)
+  if !(HasInString(&runtimepath, plugin .. ',') || &runtimepath[-len(plugin) :] == plugin)
     execute 'packadd' plugin
 
     if on_load !=# ''
