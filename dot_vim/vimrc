@@ -265,6 +265,7 @@ def PackRegister()
   minpac#add('mityu/vim-brownie')
   minpac#add('mityu/vim-gram')
   minpac#add('mityu/vim-gram-sources')
+  minpac#add('mityu/vim-wispath')
   minpac#add('osyo-manga/vim-jplus')
   minpac#add('previm/previm')
   minpac#add('skanehira/gh.vim')
@@ -984,6 +985,9 @@ if PluginExists('vim-gram')
     gram#custom#map_key('i', '<Del>', '<C-h>')
     gram#custom#map_key('i', '<BS>', '<C-h>')
   enddef
+endif
+if PluginExists('vim-wispath')
+  imap <C-l><C-f> <Plug>(wispath-complete)
 endif
 if PluginExists('vim-jplus')
   map J <Plug>(jplus)
