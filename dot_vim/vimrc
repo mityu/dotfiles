@@ -384,7 +384,7 @@ set laststatus=2
 set showtabline=2
 set cmdheight=2 cmdwinheight=10
 set wildmenu
-set wildignore& wildignore+=*.DS_STORE,*.jpg,*.png,*.gif
+set wildignore& wildignore+=*.DS_STORE
 set history=500
 set keywordprg=:help
 set shortmess& shortmess+=Ic
