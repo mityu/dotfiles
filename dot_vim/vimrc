@@ -1215,7 +1215,7 @@ if OptPluginExists('vim-lsp')
     endif
 
     augroup vimrc_lsp_buffer
-      autocmd BufWritePost <buffer> silent LspDocumentDiagnostics
+      autocmd BufWritePost <buffer> cclose | silent LspDocumentDiagnostics
     augroup END
   enddef
 
