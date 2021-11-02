@@ -296,9 +296,17 @@ bracketCompletefunc['cpp'] = (prevline: dict<any>, nextline: dict<any>): string 
   return '}'
 }
 
+final hasVim9contextPlugin = globpath(&rtp, 'autoload/vim9context.vim') !=# ''
 bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  # TODO: Support legacy VimScript
-  return '}'
+  var isVim9script = false
+  if hasVim9contextPlugin
+    isVim9script = vim9context#get_context() == g:vim9context#CONTEXT_VIM9_SCRIPT
+  endif
+
+  if isVim9script
+    return '}'
+  endif
+  return '\}'
 }
 
 bracketCompletefunc['vimspec'] = bracketCompletefunc['vim']
