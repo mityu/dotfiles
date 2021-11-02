@@ -247,7 +247,7 @@ NewFiletypeRule('vim')
     return ']'
   })
   ->AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
-  ->AddRule('^\s*%(legacy\s)?\s*function!?\s+\S+(.*).*$', 'endfunction')
+  ->AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$', 'endfunction')
   ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
@@ -310,3 +310,14 @@ bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string 
 }
 
 bracketCompletefunc['vimspec'] = bracketCompletefunc['vim']
+
+bracketCompletefunc['go'] = (prevline: dict<any>, nextline: dict<any>): string => {
+  if prevline.trimed =~# '^select\>\s*{'
+    if nextline.trimed =~# '\v^%(case\s*.*\:|default\:)'
+      return ''
+    endif
+  elseif prevline.trimed =~# '\v^%(defer|go)\s+func\s*\([^)]{-}\)\s*\{'
+    return '}()'
+  endif
+  return '}'
+}
