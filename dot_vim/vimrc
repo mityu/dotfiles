@@ -486,6 +486,10 @@ noremap - <C-x>
 noremap + <C-a>
 noremap ( [(
 noremap ) ])
+noremap j gj
+noremap k gk
+noremap gj j
+noremap gk k
 
 nnoremap <CR> o<ESC>
 nnoremap Y y$
