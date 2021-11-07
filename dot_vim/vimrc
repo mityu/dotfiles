@@ -1271,7 +1271,7 @@ def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '
 enddef
 
 def MapTextobj(plugin_name: string, info_arg: dict<string>, on_load: string = '')
-  var info = extend(info_arg, {modes: 'vo'}, 'keep')
+  var info = extend(info_arg, {modes: 'xo'}, 'keep')
   MapTextModifierPlugin(plugin_name, info, on_load)
 enddef
 
