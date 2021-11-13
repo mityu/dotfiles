@@ -555,6 +555,8 @@ TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
 TerminalMap('tnoremap', '<ESC>', 'N')
 TerminalMap('tnoremap', 'p', '""')
 TerminalMap('tnoremap', '<C-r>', '"')
+TerminalMap('tnoremap', 't', '<Cmd>tabnew<CR>')
+TerminalMap('tnoremap', 'n', '<Cmd>botright new<CR>')
 
 # Loop
 def LoopDefine(config: dict<any>)
