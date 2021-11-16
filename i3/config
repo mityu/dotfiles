@@ -23,6 +23,14 @@ workspace_layout tabbed
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 # font pango:DejaVu Sans Mono 8
 
+
+for_window [all] title_format "%class"
+for_window [class="^org\.wezfurlong\.wezterm$"] title_format "WezTerm"
+for_window [all] title_window_icon yes
+for_window [all] border normal 0
+focus_follows_mouse no
+
+
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
 
