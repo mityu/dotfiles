@@ -25,7 +25,7 @@ case $@ in
     reboot) systemctl reboot ;;
     logout) i3-msg exit ;;  # TODO: Confirm?
     restart-xkeysnail) systemctl --user restart xkeysnail ;;
-    wezterm-float) i3-msg -q exec ~/.config/i3/dropdown_wezterm.sh ;;
+    wezterm-float) i3-msg -q exec ~/.config/i3/open-floating-app.sh wezterm ;;
     clipbuffer) i3-msg -q "exec --no-startup-id gvim -S ~/.config/i3/clipbuffer.vim" ;;
     *) i3-msg -q exec $@ ;;
 esac
