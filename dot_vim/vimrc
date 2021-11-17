@@ -1815,8 +1815,14 @@ endif
 # gvimrc
 if has('gui_running')
   if !v:vim_did_enter
-    set lines=999
-    set columns=9999
+    if executable('i3')
+      # It seems that too large window on i3 does not work properly.
+      set lines=50
+      set columns=200
+    else
+      set lines=999
+      set columns=9999
+    endif
   endif
   set guioptions& guioptions-=e guioptions-=T guioptions-=m
   set guioptions-=R guioptions-=r guioptions-=L guioptions-=l
