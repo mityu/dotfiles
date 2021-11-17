@@ -148,11 +148,31 @@ enddef
 
 
 SnipFiletype('go')
-  ->AddSnip('ifnil', [
+  ->AddSnip('iferr', [
     'if err != nil {',
     "\t<+CURSOR+>",
     "}"
     ])
+  ->AddSnip('iferrreturn', [
+    'if err != nil {',
+    "\treturn err",
+    '}',
+  ])
+  ->AddSnip('iferrprint', [
+    'if err != nil {',
+    "\tfmt.Println(err)",
+    '}',
+  ])
+  ->AddSnip('iferrlog', [
+    'if err != nil {',
+    "\tlog.Fatal(err)",
+    '}',
+  ])
+  ->AddSnip('iferrpanic', [
+    'if err != nil {',
+    "\tpanic(err)",
+    '}',
+  ])
 SnipFiletype('cpp')
   ->AddSnip('std::cout', ['std::cout << "<+CURSOR+>" << std::endl;'])
   ->AddSnip('std::cerr', ['std::cerr << "<+CURSOR+>" << std::endl;'])
