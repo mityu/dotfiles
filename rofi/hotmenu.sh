@@ -12,6 +12,7 @@ lock
 logout
 restart-xkeysnail
 wezterm-float
+clipbuffer
 EOF
     exit 0
 fi
@@ -25,6 +26,7 @@ case $@ in
     logout) i3-msg exit ;;  # TODO: Confirm?
     restart-xkeysnail) systemctl --user restart xkeysnail ;;
     wezterm-float) i3-msg -q exec ~/.config/i3/dropdown_wezterm.sh ;;
+    clipbuffer) i3-msg -q "exec --no-startup-id gvim -S ~/.config/i3/clipbuffer.vim" ;;
     *) i3-msg -q exec $@ ;;
 esac
 exit 0
