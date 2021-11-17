@@ -236,15 +236,26 @@ def MergeRule(from: string, to: string)
 enddef
 
 # Register rules
+if globpath(&rtp, 'autoload/vim9context.vim') ==# ''
+  def IsInVim9script(): bool
+    return false
+  enddef
+else
+  def IsInVim9script(): bool
+    return vim9context#get_context() == g:vim9context#CONTEXT_VIM9_SCRIPT
+  enddef
+endif
 NewFiletypeRule('vim')
   ->AddRule('\[\s*$', (line: string): string => {
+    var prefix = IsInVim9script() ? '' : '\'
     var currentline = getline('.')->trim()
     if currentline[0] ==# ']'
+      # TODO: We cannot concatenate prefix here...
       return currentline
     elseif getline(nextnonblank(line('.') + 1))->trim()[0] ==# ']'
       return ''
     endif
-    return ']'
+    return prefix .. ']'
   })
   ->AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
   ->AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$', 'endfunction')
@@ -296,14 +307,8 @@ bracketCompletefunc['cpp'] = (prevline: dict<any>, nextline: dict<any>): string 
   return '}'
 }
 
-final hasVim9contextPlugin = globpath(&rtp, 'autoload/vim9context.vim') !=# ''
 bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  var isVim9script = false
-  if hasVim9contextPlugin
-    isVim9script = vim9context#get_context() == g:vim9context#CONTEXT_VIM9_SCRIPT
-  endif
-
-  if isVim9script
+  if IsInVim9script()
     return '}'
   endif
   return '\}'
