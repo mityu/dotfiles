@@ -71,8 +71,8 @@ bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec ~/.config/i3/dropdown_wezterm.sh
-bindsym Mod3+Return exec wezterm
+bindsym $mod+Return exec --no-startup-id ~/.config/i3/open-floating-app.sh wezterm
+bindsym Mod1+Return exec --no-startup-id wezterm
 
 
 # bindsym $mod+Tab exec gvim
