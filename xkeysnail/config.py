@@ -1,4 +1,5 @@
 import re
+import subprocess
 from xkeysnail.transform import *
 
 # define timeout for multipurpose_modmap
@@ -74,3 +75,13 @@ define_keymap(lambda wm_class: wm_class not in macLikeExceptions, {
 
     K("Super-a"): K("C-a")
 }, "macOS-like keys")
+
+
+useBuiltinKillApps = ("Slack", "discord")
+define_keymap(lambda wm_class: wm_class not in useBuiltinKillApps, {
+    K("Super-q"): [lambda: subprocess.call(["i3-msg", "-q", "kill"])]
+}, "i3msg-kill")
+
+define_keymap(lambda wm_class: wm_class in useBuiltinKillApps, {
+    K("Super-q"): K("C-q")
+}, "Built-in kill")

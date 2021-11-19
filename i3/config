@@ -78,7 +78,7 @@ bindsym Mod3+Return exec wezterm
 # bindsym $mod+Tab exec gvim
 
 # kill focused window
-bindsym --release $mod+q kill
+bindsym --release $mod+Shift+q kill
 
 for_window [title="^zoom$"] floating enable
 
