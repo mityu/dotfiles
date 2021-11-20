@@ -39,6 +39,7 @@ define_modmap({
 # Keybindings for Web browsers
 define_keymap(re.compile("Firefox|Google-chrome|Chromium|Vivaldi", re.IGNORECASE), {
     K("Super-t"): K("C-t"),
+    K("Super-Shift-t"): K("C-Shift-t"),
     K("Super-n"): K("C-n"),
     K("Super-Shift-n"): K("C-Shift-n"),
     K("Super-w"): K("C-w"),
@@ -48,6 +49,8 @@ define_keymap(re.compile("Firefox|Google-chrome|Chromium|Vivaldi", re.IGNORECASE
     K("Super-f"): K("C-f"),
     K("Super-d"): K("C-d"),
     K("Super-y"): K("C-h"),
+    K("Super-["): K("M-left"),
+    K("Super-]"): K("M-right"),
 }, "WebBrowser")
 
 macLikeExceptions = ("URxvt", "org.wezfurlong.wezterm", "Alacritty", "Gvim")
