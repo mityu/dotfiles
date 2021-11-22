@@ -10,6 +10,7 @@ Description=xkeysnail
 KillMode=process
 ExecStartPre=/usr/bin/xhost +SI:localuser:root
 ExecStart=/usr/bin/sudo /usr/bin/xkeysnail /home/mityu/.config/xkeysnail/config.py
+ExecStartPost=-/usr/bin/dunstify -a 'xkeysnailActivation' -t 2000 'xkeysnail is now active.'
 Type=simple
 Restart=always
 RestartSec=5s
