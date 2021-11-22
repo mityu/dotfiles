@@ -43,3 +43,6 @@ ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 
 echo "Deploying xkeysnail/"
 ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
+
+echo "Deploygin dunst/"
+ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
