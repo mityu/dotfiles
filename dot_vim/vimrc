@@ -525,8 +525,6 @@ inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
 inoremap <C-l><C-n> <C-x><C-n><C-n>
 inoremap <C-l><C-p> <C-x><C-p><C-p>
-inoremap <silent> <C-l><C-f> <Cmd>call vimrc#pathComplete()<CR>
-inoremap <silent> <C-x><C-f> <Cmd>call vimrc#pathComplete()<CR>
 inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#expand()<CR>
 
 vnoremap g+ g<C-a>
