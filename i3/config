@@ -64,8 +64,10 @@ bindsym XF86AudioMicMute exec --no-startup-id \
         ~/.config/dunst/change-volume.sh set-source-mute toggle && $refresh_i3status
 
 # Use xbacklight to control monitor brightness
-bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 5
-bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 5
+bindsym XF86MonBrightnessUp \
+        exec --no-startup-id ~/.config/dunst/change-backlight.sh -inc 5
+bindsym XF86MonBrightnessDown \
+        exec --no-startup-id ~/.config/dunst/change-backlight.sh -dec 5
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
