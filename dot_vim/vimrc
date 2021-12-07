@@ -511,6 +511,7 @@ nnoremap <Space>w <Cmd>update<CR>
 nnoremap <Space>q <C-w>q
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
+nnoremap Q <Nop>
 nnoremap <C-k> 7gk
 nnoremap <C-j> 7gj
 # Avoid textobj-function calls appearing on command history
