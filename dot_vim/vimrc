@@ -209,8 +209,7 @@ if !v:vim_did_enter
   }
 endif
 # Initialize autocmd
-{
-  var filename = expand('<sfile>')
+(filename: string) => {
   var pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
   var augroups = readfile(filename)
         ->filter((_, line): bool => stridx(line, 'aug') != -1)
@@ -224,7 +223,7 @@ endif
       autocmd!
     execute 'augroup END'
   endfor
-}
+}(expand('<sfile>'))
 
 # minpac
 var PluginList: list<string>
