@@ -544,6 +544,39 @@ cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
+
+nnoremap <C-w>, <Cmd>call <SID>ToggleQuickfix()<CR>
+def ToggleQuickfix()
+  var wincount = winnr('$')
+  try
+    cclose
+    if wincount == winnr('$')
+      cwindow
+      if wincount == winnr('$')
+        EchomsgError('No quickfix window')
+      endif
+    endif
+  catch
+    echo v:exception
+  endtry
+enddef
+
+nnoremap <C-w>. <Cmd>call <SID>ToggleLocationlist()<CR>
+def ToggleLocationlist()
+  var wincount = winnr('$')
+  try
+    lclose
+    if wincount == winnr('$')
+      lwindow
+    endif
+  catch /^Vim(\S\{-})\:E776\:/
+    echohl ErrorMsg
+    echomsg matchstr(v:exception, '^Vim(\S\{-})\:\zs.*$')
+    echohl NONE
+  catch
+    echoerr v:exception
+  endtry
+enddef
 # }}}
 def TerminalMap(mapcmd: string, lhs: string, rhs: string)
   execute printf('%s %s%s %s%s',
