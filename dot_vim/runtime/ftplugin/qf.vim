@@ -4,4 +4,4 @@
 
 nnoremap <buffer> <CR> <CR>
 nnoremap <buffer> o <CR>zz<C-w>p
-nnoremap <buffer> <silent> q :<C-u>cclose<CR>
+nnoremap <buffer> <silent> q <C-w>q
