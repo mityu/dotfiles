@@ -465,6 +465,10 @@ if executable('chmod')
     endif
   enddef
 endif
+augroup vimrc_quickfix_window
+  autocmd QuickfixCmdPost [^l]* cwindow
+  autocmd QuickfixCmdPost l* lwindow
+augroup END
 
 # Mapping {{{
 nnoremap : q:A
