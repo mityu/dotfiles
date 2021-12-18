@@ -780,10 +780,10 @@ endif
 }
 
 # Abbreviates
-iabbrev todo: TODO:
-iabbrev fixme: FIXME:
-iabbrev xxx: XXX:
-iabbrev note: NOTE:
+inoreabbrev todo: TODO:
+inoreabbrev fixme: FIXME:
+inoreabbrev xxx: XXX:
+inoreabbrev note: NOTE:
 
 # Commands
 # Declarations
