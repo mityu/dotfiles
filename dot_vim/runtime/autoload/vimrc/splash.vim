@@ -63,7 +63,8 @@ enddef
 final SPLASH = GenerateSplash()
 
 
-var RestoreSettings: func(): string
+var RestoreSettings: func(): void
+
 def ComputePadding(text: list<string>): list<number>
   final text_height = len(text)
   final text_width = GetTextBlockWidth(text)
