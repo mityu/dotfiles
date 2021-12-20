@@ -4,7 +4,7 @@ if [ -n "$(git diff)" ]; then
     exit 0
 fi
 git merge FETCH_HEAD
-make && make install
+make -j4 && make install
 if [ $? -ne 0 ]; then
-    make distclean && make && make install
+    make distclean && make -j4 && make install
 fi
