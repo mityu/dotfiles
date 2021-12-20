@@ -63,10 +63,17 @@ enddef
 
 def ClipbufferCatchup()
   if !&modified
-    :%delete _
-    :1 put +
-    :1 delete _
-    setlocal nomodified
+    try
+      :%delete _
+      :1 put +
+      :1 delete _
+      setlocal nomodified
+    catch /^Vim\:E353\:/
+      # Ignore "E353: Nothing in register +" error
+    catch
+      Vimrc.EchomsgError(v:throwpoint)
+      Vimrc.EchomsgError(v:exception)
+    endtry
   endif
 enddef
 
