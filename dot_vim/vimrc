@@ -437,7 +437,10 @@ endif
 if IsUnix
   set path& path+=/usr/local/include
 endif
-if executable('ag')
+if executable('rg')
+  &grepprg = 'rg --vimgrep'
+  &grepformat = '%f:%l:%c:%m'
+elseif executable('ag')
   &grepprg = 'ag --vimgrep'
   &grepformat = '%f:%l:%c:%m'
 endif
