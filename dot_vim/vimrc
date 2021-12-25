@@ -60,15 +60,15 @@ def EchomsgWithColor(msg: string, hl_group: string): void
 enddef
 
 export def Echomsg(msg: string): void
-  call EchomsgWithColor(msg, 'NONE')
+  EchomsgWithColor(msg, 'NONE')
 enddef
 
 export def EchomsgError(msg: string): void
-  call EchomsgWithColor(msg, 'Error')
+  EchomsgWithColor(msg, 'Error')
 enddef
 
 export def EchomsgWarning(msg: string): void
-  call EchomsgWithColor(msg, 'WarningMsg')
+  EchomsgWithColor(msg, 'WarningMsg')
 enddef
 
 export def Echo(msg: string): void
@@ -1782,9 +1782,7 @@ command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
 {
   var dir_ = JoinPath(CacheDir, 'mru')
-  if !isdirectory(dir_)
-    Mkdir(dir_)
-  endif
+  Mkdir(dir_)
 }
 g:mru_ignore_pattern = [
       \ '\.git\>',
