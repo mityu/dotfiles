@@ -1301,11 +1301,11 @@ endif
 # Textobj/Operator-user plugins
 # @param
 # - plugin_name: the name of plugin
-# - info: mapping-information; the keys are:
+# - info: mapping-information. The keys are:
 #   - rhs (string)
 #   - lhs (string)
 #   - modes (string)
-# - on_load: the hook that is fired on just after loading plugin
+# - on_load: the hook fired just after loading plugin
 # TODO: Support Funcref as on_load?
 def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '')
   var info = extend(info_arg, {modes: 'nxo'}, 'keep')
@@ -1408,8 +1408,23 @@ if OptPluginExists('vim-textobj-entire')
   g:textobj_entire_no_default_key_mappings = 1
 endif
 if OptPluginExists('vim-textobj-function')
-  MapTextobj('vim-textobj-function', {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
-  MapTextobj('vim-textobj-function', {lhs: 'if', rhs: '<Plug>(textobj-function-i)'})
+  augroup vim_textobj_function
+    autocmd Filetype c,java,vim ++once {
+      packadd vim-textobj-function
+      execute 'runtime ftplugin/vim-textobj-function/' .. expand('<amatch>') .. '/textobj-function.vim'
+    }
+  augroup END
+  def CleanTextobjFunctionAutocmd()
+    augroup vim_textobj_function
+      autocmd!
+    augroup END
+  enddef
+  MapTextobj('vim-textobj-function',
+    {lhs: 'af', rhs: '<Plug>(textobj-function-a)'},
+    'CleanTextobjFunctionAutocmd')
+  MapTextobj('vim-textobj-function',
+    {lhs: 'if', rhs: '<Plug>(textobj-function-i)'},
+    'CleanTextobjFunctionAutocmd')
   g:textobj_function_no_default_key_mappings = 1
 endif
 if OptPluginExists('vim-textobj-indent')
