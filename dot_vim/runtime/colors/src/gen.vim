@@ -133,8 +133,12 @@ def GenerateHiLinkCmd(): list<string>
 enddef
 
 def GenerateScriptsSection(): list<string>
-  # TODO: Insert a blank line between each script block?
-  return Scripts->flattennew()
+  var script = []
+  for block in Scripts
+    script->extend(block->flattennew())
+    script->add('')
+  endfor
+  return script
 enddef
 
 
