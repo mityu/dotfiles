@@ -117,7 +117,13 @@ let g:terminal_ansi_colors = [
 \      '#ffffff',
 \ ]
 
-" Acknowledgements: This colorscheme is based on molokai.vim.
+" License: The MIT License
+"
+" Acknowledgements:
+" This colorscheme is based on molokai.vim.
+"
+" The MIT License (MIT)
+"
 " Copyright (c) 2011 Tomas Restrepo
 "
 " Permission is hereby granted, free of charge, to any person obtaining a copy
