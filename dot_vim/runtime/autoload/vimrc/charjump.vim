@@ -3,7 +3,7 @@ vim9script
 
 nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
 onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-vnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
+xnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
 
 var CharJump: dict<any>
 def CharJumpInit()
