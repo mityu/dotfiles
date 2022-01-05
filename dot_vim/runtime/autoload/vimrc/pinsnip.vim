@@ -1,6 +1,7 @@
 vim9script
 
-var SnipList: dict<dict<list<string>>> = {}
+var SnipList: dict<list<func(string): bool>> = {}
+var FuzzySnipList: dict<list<list<string>>> = {}
 final CursorPlaceholder = '<+CURSOR+>'
 
 export def vimrc#pinsnip#expand(): string
@@ -9,12 +10,18 @@ export def vimrc#pinsnip#expand(): string
     Warning('Empty pattern')
     return ''
   endif
-  var snip = copy(FindSnip(&filetype, comparison))
-  if empty(snip)
-    Error('Snippet not found: ' .. string(comparison))
-    return ''
-  endif
 
+  for SnipFunc in get(SnipList, &filetype, [])
+    if SnipFunc(comparison)
+      return ''
+    endif
+  endfor
+
+  Error('Snippet not found: ' .. string(comparison))
+  return ''
+enddef
+
+def ApplySnip(snip: list<string>)
   final current_indent = getline('.')->matchstr('^\s*')
   snip->map((_: number, line: string) =>
           current_indent .. substitute(line, "^\t*\t", GetOneIndentString(), 'g'))
@@ -41,8 +48,6 @@ export def vimrc#pinsnip#expand(): string
   append('.', snip)
   delete _
   cursor(line('.') + cursor_line, cursor_col)
-
-  return ''
 enddef
 
 def GetOneIndentString(): string
@@ -52,39 +57,47 @@ def GetOneIndentString(): string
   return "\t"
 enddef
 
-def FindSnip(filetype: string, comparison: string): list<string>
-  var snipdict = get(SnipList, filetype, {})
-  if empty(snipdict)
+def Error(msg: string)
+  echohl ErrorMsg
+  echomsg '[pinsnip] ' .. msg
+  echohl NONE
+enddef
+
+def Warning(msg: string)
+  echohl WarningMsg
+  echomsg '[pinsnip] ' .. msg
+  echohl NONE
+enddef
+
+def SnipFiletype(filetype: string): list<func(string): bool>
+  if !has_key(SnipList, filetype)
+    SnipList[filetype] = []
+  endif
+  return SnipList[filetype]
+enddef
+
+def AddSnip(
+  snips: list<func(string): bool>,
+  snip: func(string): bool,
+): list<func(string): bool>
+  snips->add(snip)
+  return snips
+enddef
+
+def TrySnipFuzzy(comparison: string): bool
+  var snip = FindSnipFuzzy(comparison)
+  if empty(snip)
+    return false
+  endif
+  ApplySnip(snip)
+  return true
+enddef
+
+def FindSnipFuzzy(comparison: string): list<string>
+  final snips = get(FuzzySnipList, &filetype, [])
+  if empty(snips)
     return []
   endif
-
-  # Exact matching of dict-key
-  if has_key(snipdict, comparison)
-    return snipdict[comparison]
-  endif
-
-  final keys = keys(snipdict)
-  final comparison_reg = '\V' .. comparison
-
-  # Literal matching of dict-key
-  {
-    var candidates: list<string> =
-          copy(keys)->filter((_, key) => (stridx(key, comparison) != -1))
-    if !empty(candidates)
-      return snipdict[candidates[0]]
-    endif
-  }
-
-  # Fuzzy matching of dict-key
-  {
-    var candidates: list<string> =
-            matchfuzzy(keys, comparison, {matchseq: true})
-    if !empty(candidates)
-      return snipdict[candidates[0]]
-    endif
-  }
-
-  final snips = values(snipdict)
 
   # Literal matching of the first line of snippet
   {
@@ -120,70 +133,81 @@ def FindSnip(filetype: string, comparison: string): list<string>
   return []
 enddef
 
-def Error(msg: string)
-  echohl ErrorMsg
-  echomsg '[pinsnip] ' .. msg
-  echohl NONE
-enddef
-def Warning(msg: string)
-  echohl WarningMsg
-  echomsg '[pinsnip] ' .. msg
-  echohl NONE
-enddef
-
-def SnipFiletype(filetype: string): dict<list<string>>
-  if !has_key(SnipList, filetype)
-    SnipList[filetype] = {}
-  endif
-  return SnipList[filetype]
-enddef
-def AddSnip(
-  snips: dict<list<string>>,
-  name: string,
-  snip: list<string>,
-): dict<list<string>>
-  snips[name] = snip
-  return snips
-enddef
-
 
 SnipFiletype('go')
-  ->AddSnip('iferr', [
-    'if err != nil {',
-    "\t<+CURSOR+>",
-    "}"
-    ])
-  ->AddSnip('iferrreturn', [
-    'if err != nil {',
-    "\treturn err",
-    '}',
-  ])
-  ->AddSnip('iferrprint', [
-    'if err != nil {',
-    "\tfmt.Println(err)",
-    '}',
-  ])
-  ->AddSnip('iferrlog', [
-    'if err != nil {',
-    "\tlog.Fatal(err)",
-    '}',
-  ])
-  ->AddSnip('iferrpanic', [
-    'if err != nil {',
-    "\tpanic(err)",
-    '}',
-  ])
-SnipFiletype('cpp')
-  ->AddSnip('std::cout', ['std::cout << "<+CURSOR+>" << std::endl;'])
-  ->AddSnip('std::cerr', ['std::cerr << "<+CURSOR+>" << std::endl;'])
-  ->AddSnip('template', ['template <typename T>'])
-SnipFiletype('vim')
-  ->AddSnip('cpoptions', [
-      'let s:cpoptions_save = &cpoptions',
-      'set cpoptions&vim',
-      '',
-      '<+CURSOR+>',
-      '',
-      'let &cpoptions = s:cpoptions_save',
-      'unlet s:cpoptions_save'
-      ])
+  ->AddSnip((comparison: string): bool => {
+    var r = '^\vif(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
+
+    var m = matchlist(comparison, r)
+    if empty(m)
+      return false
+    endif
+
+    var snip = ['if' .. m[1] .. ' err != nil {']
+    if m[2] !=# ''
+      var processes = [
+        'return err',
+        'fmt.Println(err)',
+        'log.Fatal(err)',
+        'panic(err)',
+      ]
+      for p in processes
+        if stridx(tolower(p), m[2]) != -1
+          snip->add("\t" .. p)
+          break
+        endif
+      endfor
+    endif
+    if len(snip) == 1
+      snip->add("\t<+CURSOR+>")
+    endif
+    snip->add('}')
+    ApplySnip(snip)
+    return true
+  })
+  ->AddSnip((line: string): bool => {
+    var r = '^\v((\w|_)+)\s*:\=\s*func\((.{-})\)\s*(\S+|\(%(\s*\S+)+\s*\))?\s*\{\s*$'
+    var m = matchlist(line, r)
+    var funcName = m[1]
+    var funcArgs = m[3]
+    var funcRet  = m[4]
+    var funcArgTypes = substitute(
+      ',' .. funcArgs,
+      '\v(%(\s*,\s*%(\w|_)+)+)\s+(\S+)\ze%(,|$)',
+      (): string => (repeat([submatch(2)], count(submatch(1), ',')) + [''])->join(', '),
+      'g')[: -3]
+
+    var funcVarDecl = 'var ' .. funcName .. ' func(' .. funcArgTypes .. ')'
+    if funcRet !=# ''
+      funcVarDecl ..= ' ' .. funcRet
+    endif
+
+    var funcDecl = funcName .. ' = func(' .. funcArgs .. ')'
+    if funcRet !=# ''
+      funcDecl ..= ' ' .. funcRet
+    endif
+    funcDecl ..= ' {<+CURSOR+>'
+
+    ApplySnip([funcVarDecl, funcDecl])
+    return true
+  })
+
+SnipFiletype('cpp')->AddSnip(TrySnipFuzzy)
+FuzzySnipList['cpp'] = [
+  ['std::cout << "<+CURSOR+>" << std::endl;'],
+  ['std::cerr << "<+CURSOR+>" << std::endl;'],
+  ['template <typename T>'],
+]
+
+SnipFiletype('vim')->AddSnip(TrySnipFuzzy)
+FuzzySnipList['vim'] = [
+  [
+    'let s:cpoptions_save = &cpoptions',
+    'set cpoptions&vim',
+    '',
+    '<+CURSOR+>',
+    '',
+    'let &cpoptions = s:cpoptions_save',
+    'unlet s:cpoptions_save'
+  ]
+]
