@@ -10,13 +10,16 @@ var justAfterApplying: bool
 def StrDivPos(str: string, pos: number): list<string>
   return [strpart(str, 0, pos), strpart(str, pos, strlen(str) - pos)]
 enddef
+
 def InitForBuffer()
   linesCount = line('$')
   tryToApply = false
 enddef
+
 def NeedTry(): bool
   return line('$') > linesCount
 enddef
+
 def GetOneIndent(): string
   if &l:expandtab || strdisplaywidth("\t") != shiftwidth()
     return repeat(' ', shiftwidth())
@@ -24,13 +27,16 @@ def GetOneIndent(): string
     return "\t"
   endif
 enddef
+
 def GetIndentDepth(line: number): number
   var indent = getline(line)->matchstr('^\s*')->strdisplaywidth()
   return indent / shiftwidth()
 enddef
+
 def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
+
 def GetConfig(): list<any>
   var ft_configs = get(config, &filetype, {})
   var global_configs =
@@ -38,6 +44,7 @@ def GetConfig(): list<any>
 
   return items(ft_configs) + items(global_configs)
 enddef
+
 def GetLineData(linenr: number): dict<any>
   var text: string = linenr != 0 ? getline(linenr) : ''
   var indentstr: string = matchstr(text, '^\s*')
@@ -50,6 +57,7 @@ def GetLineData(linenr: number): dict<any>
     indent_depth: indentdepth,
   }
 enddef
+
 def CheckInterruption(line: string, interruption: dict<list<string>>): bool # Better name
   for comparison in interruption.literal
     if line ==# comparison
@@ -63,6 +71,7 @@ def CheckInterruption(line: string, interruption: dict<list<string>>): bool # Be
   endfor
   return false
 enddef
+
 def TryToApply()
   tryToApply = false
 
@@ -145,24 +154,29 @@ def TryToApply()
 
   UpdateContext()
 enddef
+
 def UpdateContext()
   linesCount = line('$')
 enddef
+
 def OnCursorMoved()
   justAfterApplying = false
   tryToApply = NeedTry() || tryToApply
   UpdateContext()
 enddef
+
 def OnTextChanged()
   if tryToApply
     TryToApply()
   endif
 enddef
+
 def OnInsertEnter()
   if NeedTry()
     TryToApply()
   endif
 enddef
+
 def OnInsertLeave()
   if justAfterApplying && trim(getline('.')) ==# ''
     delete _
@@ -203,6 +217,7 @@ def NewFiletypeRule(filetype: string): dict<any>
   endif
   return config[filetype]
 enddef
+
 def AddRule(
     ft_config: dict<any>,
     pattern: string, # NOTE: This pattern is evaluated under very magic
