@@ -1,14 +1,17 @@
 vim9script
 # TODO: Separate as a plugin when vim9script is fully implemented
 
-var config: dict<dict<any>>
-var bracketCompletefunc: dict<func(dict<any>, dict<any>): string>
+var newlineRules: dict<dict<any>>
 var linesCount: number
 var tryToApply: bool
 var justAfterApplying: bool
 
+final RuleApplyFailed = 0
+final RuleAppled      = 1
+final RuleUnnecessary = 2
+
 def StrDivPos(str: string, pos: number): list<string>
-  return [strpart(str, 0, pos), strpart(str, pos, strlen(str) - pos)]
+  return [strpart(str, 0, pos), str[pos :]]
 enddef
 
 def InitForBuffer()
@@ -37,10 +40,10 @@ def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
 
-def GetConfig(): list<any>
-  var ft_configs = get(config, &filetype, {})
+def GetNewlineRules(): list<any>
+  var ft_configs = get(newlineRules, &filetype, {})
   var global_configs =
-        get(config, '_', {})->filter((key, val) => !has_key(ft_configs, key))
+        get(newlineRules, '_', {})->filter((key, val) => !has_key(ft_configs, key))
 
   return items(ft_configs) + items(global_configs)
 enddef
@@ -58,13 +61,16 @@ def GetLineData(linenr: number): dict<any>
   }
 enddef
 
-def CheckInterruption(line: string, interruption: dict<list<string>>): bool # Better name
-  for comparison in interruption.literal
+def CheckNoIndentedStaements(
+  line: string,
+  no_indented_statements: dict<list<string>>
+): bool
+  for comparison in no_indented_statements.literal
     if line ==# comparison
       return true
     endif
   endfor
-  for pattern in interruption.regexp
+  for pattern in no_indented_statements.regexp
     if line =~# pattern
       return true
     endif
@@ -78,81 +84,80 @@ def TryToApply()
   var nextline = GetLineData(nextnonblank(line('.') + 1))
   var prevline = GetLineData(prevnonblank(line('.') - 1))
 
-  if nextline.indent_depth > prevline.indent_depth
-    return
-  endif
-
-  var blockPair: string
-
-  if prevline.trimed[-1] ==# '{'
-    if nextline.trimed[0] ==# '}' && nextline.indent_depth == prevline.indent_depth
-      return
+  var rules = GetNewlineRules()
+  for rule in rules
+    if prevline.trimed !~# '\v' .. rule[0]
+      continue
     endif
 
-    var currentline = getline('.')->trim()
-    if currentline[0] ==# '}'
-      blockPair = currentline
+    var status = RuleApplyFailed
+    if type(rule[1].pair) == v:t_func
+      status = call(rule[1].pair, [prevline, nextline])
     else
-      if has_key(bracketCompletefunc, &filetype)
-        blockPair = call(bracketCompletefunc[&filetype], [prevline, nextline])
-      elseif has_key(bracketCompletefunc, '_')
-        blockPair = call(bracketCompletefunc._, [prevline, nextline])
+      status = CompleteClosingBlock(
+          prevline,
+          nextline,
+          rule[1].pair,
+          rule[1].no_indented_statements)
+    endif
+    if status != RuleApplyFailed
+      if status == RuleAppled
+        justAfterApplying = true
+        UpdateContext()
       endif
-    endif
-
-    if blockPair ==# ''  # Cancel
       return
     endif
+  endfor
+enddef
 
-    if nextline.indent_depth == prevline.indent_depth &&
-        nextline.trimed ==# blockPair
-      return
-    endif
+def CompleteClosingBlock(
+  prevline: dict<any>,
+  nextline: dict<any>,
+  closer: string,
+  no_indented: dict<list<string>> = {literal: [], regexp: []}
+): number
+  var curpos_save = getcurpos()
+  var curline_save = getline('.')
+  var RestoreBuffer = () => {
+    setline('.', curline_save)
+    setpos('.', curpos_save)
+  }
+
+  setline('.', closer)
+  try
+    normal! ==
+  catch
+    RestoreBuffer()
+    echohl Error
+    echomsg '[gyoza]' v:throwpoint
+    echomsg '[gyoza]' v:exception
+    echohl NONE
+    return RuleApplyFailed
+  endtry
+
+  var indent_depth = GetIndentDepth(line('.'))
+  if nextline.indent_depth > indent_depth ||
+      (nextline.indent_depth == indent_depth &&
+        (CheckNoIndentedStaements(nextline.trimed, no_indented) ||
+          stridx(nextline.trimed, closer) == 0))
+    RestoreBuffer()
+    return RuleUnnecessary
+  endif
+
+  # Break undo sequence
+  execute "normal! i\<C-g>u\<ESC>"
+
+  var [cur_before, cur_after] = StrDivPos(curline_save, col('.') - 1)
+  var curlinenr = line('.')
+  if stridx(cur_after->trim(), closer) == 0
+    append(curlinenr - 1, cur_before)
+    cursor(curlinenr, len(cur_before) + 1)
   else
-    var configs = GetConfig()
-    for config in configs
-      var pattern = config[0]
-
-      if prevline.trimed !~# '\v' .. pattern
-        continue
-      elseif nextline.indent_depth == prevline.indent_depth &&
-              CheckInterruption(nextline.trimed, config[1].interruption)
-        continue
-      endif
-
-      if type(config[1].pair) == v:t_func
-        blockPair = call(config[1].pair, [prevline.trimed])
-      else
-        blockPair = config[1].pair
-      endif
-
-      if blockPair ==# ''  # Cancel
-        continue
-      endif
-
-      if nextline.indent_depth == prevline.indent_depth &&
-          nextline.trimed ==# blockPair
-        return
-      endif
-
-      break
-    endfor
+    append(curlinenr - 1, curline_save)
+    setpos('.', curpos_save)
   endif
 
-  if blockPair ==# ''
-    return
-  endif
-
-  if StrDivPos(getline('.'), col('.') - 1)[1] ==# blockPair
-    # If there is the `blockPair` after the cursor, remove it to make it on
-    # the new line.
-    setline('.', GetIndentStr(prevline.indent_depth + 1))
-    cursor(line('.'), strlen(getline('.')) + 1)
-  endif
-  append('.', prevline.indent_str .. blockPair)
-  justAfterApplying = true
-
-  UpdateContext()
+  return RuleAppled
 enddef
 
 def UpdateContext()
@@ -212,21 +217,21 @@ export def vimrc#gyoza#disable()
 enddef
 
 def NewFiletypeRule(filetype: string): dict<any>
-  if !has_key(config, filetype)
-    config[filetype] = {}
+  if !has_key(newlineRules, filetype)
+    newlineRules[filetype] = {}
   endif
-  return config[filetype]
+  return newlineRules[filetype]
 enddef
 
 def AddRule(
     ft_config: dict<any>,
     pattern: string, # NOTE: This pattern is evaluated under very magic
     pair: any,
-    interruption: list<string> = []): dict<any>
+    no_indented_statements: list<string> = []): dict<any>
 
   var literal: list<string>
   var regexp: list<string>
-  for interrupt in interruption
+  for interrupt in no_indented_statements
     if interrupt ==# ''
       continue
     elseif stridx(interrupt, '\=') == 0
@@ -239,7 +244,7 @@ def AddRule(
   var ref = ft_config
   ref[pattern] = {
     pair: pair,
-    interruption: {literal: literal, regexp: regexp}
+    no_indented_statements: {literal: literal, regexp: regexp}
   }
 
   return ft_config
@@ -247,7 +252,7 @@ enddef
 
 def MergeRule(from: string, to: string)
   NewFiletypeRule(to)
-  extend(config[to], get(config, from, {}), 'keep')
+  extend(newlineRules[to], get(newlineRules, from, {}), 'keep')
 enddef
 
 # Register rules
@@ -261,16 +266,16 @@ else
   enddef
 endif
 NewFiletypeRule('vim')
-  ->AddRule('\[\s*$', (line: string): string => {
+  ->AddRule('\[\s*$', (prev: dict<any>, next: dict<any>): number => {
     var prefix = IsInVim9script() ? '' : '\'
+    var closer = prefix .. ']'
     var currentline = getline('.')->trim()
     if currentline[0] ==# ']'
-      # TODO: We cannot concatenate prefix here...
-      return currentline
-    elseif getline(nextnonblank(line('.') + 1))->trim()[0] ==# ']'
-      return ''
+      closer = prefix .. currentline
+      setline('.', closer)
+      cursor(line('.'), 1)
     endif
-    return prefix .. ']'
+    return CompleteClosingBlock(prev, next, closer)
   })
   ->AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
   ->AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$', 'endfunction')
@@ -280,64 +285,77 @@ NewFiletypeRule('vim')
   ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
   ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE')
   ->AddRule('^\s*augroup\s+%(END)@!\S+$', 'augroup END')
-  ->AddRule('^\s*%(let|var|const|final)\s+\w+\s*\=\<\<\s*%(trim\s+)?\s*\w+$', (line: string): string => matchstr(line, '\w\+$'))
+  ->AddRule('^\s*%(let|var|const|final)\s+\w+\s*\=\<\<\s*%(trim\s+)?\s*\w+$',
+      (prev: dict<any>, next: dict<any>): number => {
+        # TODO: check if already on heredoc via syntax
+        var closer = matchstr(prev.trimed, '\w\+\ze\s*$')
+        return CompleteClosingBlock(prev, next, closer)
+      })
 NewFiletypeRule('vimspec')
   ->AddRule('^\s*%(Describe|Before|After|Context|It)>', 'End')
 NewFiletypeRule('sh')
   ->AddRule('%(^|;)\s*<do>', 'done')
   ->AddRule('^\s*if>', 'fi', ['\=^elif>', 'else'])
 NewFiletypeRule('go')
-  ->AddRule('\v^%(var|const|import)\s*\($', ')')
+  ->AddRule('^%(var|const|import)\s*\($', ')')
+NewFiletypeRule('python')
+  ->AddRule(
+    '^%(def|for|while|if|elif|else)>.*[^:]\s*$',
+    (prev: dict<any>, next: dict<any>): number => {
+      setline(prev.nr, prev.text .. ':')
+      return RuleAppled
+  })
 # NewFiletypeRule('markdown')
 #   ->AddRule('^```%(\s*\w+)?', '```')
 # NewFiletypeRule('html')
 #   ->AddRule('^\<\s*\w+[^>]*>', (line: string): string => ('</' .. matchstr(line, '^<\s*\zs\w\+\ze') .. '>')) # TODO: Improve
 
+
+def GenericBracketCompletor(prevline: dict<any>, nextline: dict<any>): number
+  var curline = getline('.')->StrDivPos(col('.') - 1)
+  var closer = '}'
+  var trimed = curline[1]->trim()
+  if trimed !=# ''
+    if stridx(',)]', trimed[0]) != -1
+      closer = '}' .. curline[1]
+      setline('.', curline[0] .. closer)
+      cursor(line('.'), strlen(curline[0]))
+    elseif trimed[0] ==# '}'
+      closer = curline[1]
+    endif
+  endif
+  return CompleteClosingBlock(prevline, nextline, closer)
+enddef
+
+NewFiletypeRule('_')
+  ->AddRule('\{$', GenericBracketCompletor)
+
+NewFiletypeRule('c')
+  ->AddRule(
+    '^%(%(typedef\s+)?%(struct|enum)|class)>.*\{$',
+    '};',
+    ['\=^%(public|private|protected)>\:'])
+  ->AddRule(
+    '^switch\s*\(.*\)\s*\{',
+    '}',
+    ['\=^%(case\s*.*\:|default\:)'])
+
+NewFiletypeRule('go')
+  ->AddRule(
+    '^%(select>|switch\s*\S*\s*)\s*\{',
+    '}',
+    ['\=^%(case\s*.*\:|default\:)'])
+  ->AddRule(
+    '^%(defer|go)\s+func\s*\([^)]{-}\)\s*\{$',
+    '}()')
+
+# bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
+#   if IsInVim9script()
+#     return '}'
+#   endif
+#   return '\}'
+# }
+
 MergeRule('c', 'cpp')
 MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
-
-
-bracketCompletefunc['_'] = (prevline: dict<any>, nextline: dict<any>): string => '}'
-
-bracketCompletefunc['c'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  if prevline.trimed =~# '\v^%(typedef\s+)?%(struct|enum)>'
-    return '};'
-  endif
-  return '}'
-}
-
-bracketCompletefunc['cpp'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  var c_style_completion = call(bracketCompletefunc.c, [prevline, nextline])
-  if c_style_completion !=# '' && c_style_completion !=# '}'
-    return c_style_completion
-  endif
-
-  if prevline.trimed =~# '^class\>'
-    if nextline.trimed =~# '\v^%(public|private|protected)>\:'
-      return ''
-    endif
-    return '};'
-  endif
-  return '}'
-}
-
-bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  if IsInVim9script()
-    return '}'
-  endif
-  return '\}'
-}
-
-bracketCompletefunc['vimspec'] = bracketCompletefunc['vim']
-
-bracketCompletefunc['go'] = (prevline: dict<any>, nextline: dict<any>): string => {
-  if prevline.trimed =~# '^select\>\s*{'
-    if nextline.trimed =~# '\v^%(case\s*.*\:|default\:)'
-      return ''
-    endif
-  elseif prevline.trimed =~# '\v^%(defer|go)\s+func\s*\([^)]{-}\)\s*\{'
-    return '}()'
-  endif
-  return '}'
-}
