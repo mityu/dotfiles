@@ -143,11 +143,39 @@ def CompleteClosingBlock(
   endif
 
   # Manipulate undo sequence
+  #   The desired undo sequences are:
+  # Case1. Leave insert mode just after inserting newline
+  #   1       ->      2
+  #
+  #   {               {
+  #   }
+  # Case2. Insert some text after inserting newline
+  #   1       ->      2       ->      3
+  #
+  #   {               {               {
+  #     aaa           }
+  #   }
+  #
+  # So, breaking undo sequences here won't satisfy the case1.  We have to
+  # break undo sequences only when we observe buffer modifications.  The
+  # following autocmds do this.
+  #   Note that we give up to break undo sequences when cursor is moved
+  # because it is hard to restore the buffer state correctly.
+  #
+  # Technical Notes:
+  #   TextChangedI event is fired after CursorMovedI event, so we cannot
+  # figure out the first CursorMovedI event is triggered by modifying text or
+  # just by cursor moves.  Only after the second CursorMovedI event we are
+  # able to know the first CursorMovedI event is not followed by TextChangedI
+  # event.
+  UndoManipulatorFunc = function(ManipulateUndoSequence, [line('.')])
   augroup gyoza-undo-sequence
     autocmd!
-    autocmd InsertCharPre <buffer> ++once
-          \ timer_start(0, ManipulateUndoSequence)
-    autocmd InsertLeave <buffer>+ ++once autocmd! gyoza-undo-sequence
+    autocmd TextChangedI * ++once timer_start(0, UndoManipulatorFunc)
+    autocmd CursorMovedI * ++once
+        \ autocmd gyoza-undo-sequence CursorMovedI * ++once
+        \   CleanManipulateUndoAutocommands()
+    autocmd InsertLeave * ++once CleanManipulateUndoAutocommands()
   augroup END
 
   var [cur_before, cur_after] = StrDivPos(curline_save, col('.') - 1)
@@ -159,24 +187,33 @@ def CompleteClosingBlock(
     append(curlinenr - 1, curline_save)
     setpos('.', curpos_save)
   endif
-
   return RuleAppled
 enddef
 
-def ManipulateUndoSequence(_: number)
+var UndoManipulatorFunc: func(number): void
+def ManipulateUndoSequence(precurlinenr: number, _: number)
+  CleanManipulateUndoAutocommands()
   var curlinenr = line('.')
-  var curline = getline('.')
+  if curlinenr < precurlinenr
+    return
+  endif
+
+  var lines = getline(precurlinenr, curlinenr)
   var curpos = getcurpos()
   try
-    delete _
+    deletebufline('%', precurlinenr, curlinenr)
     execute "normal! i\<C-g>u\<ESC>"
   catch
     Error(v:throwpoint)
     Error(v:exception)
   finally
-    append(curlinenr - 1, curline)
+    append(precurlinenr - 1, lines)
     setpos('.', curpos)
   endtry
+enddef
+
+def CleanManipulateUndoAutocommands()
+  autocmd! gyoza-undo-sequence
 enddef
 
 def UpdateContext()
