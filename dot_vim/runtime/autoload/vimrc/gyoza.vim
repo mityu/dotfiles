@@ -178,7 +178,7 @@ def CompleteClosingBlock(
     autocmd InsertLeave * ++once CleanManipulateUndoAutocommands()
   augroup END
 
-  var [cur_before, cur_after] = StrDivPos(curline_save, col('.') - 1)
+  var [cur_before, cur_after] = StrDivPos(curline_save, curpos_save[2] - 1)
   var curlinenr = line('.')
   if stridx(cur_after->trim(), closer) == 0
     append(curlinenr - 1, cur_before)
