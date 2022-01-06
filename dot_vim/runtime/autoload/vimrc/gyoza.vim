@@ -128,10 +128,8 @@ def CompleteClosingBlock(
     normal! ==
   catch
     RestoreBuffer()
-    echohl Error
-    echomsg '[gyoza]' v:throwpoint
-    echomsg '[gyoza]' v:exception
-    echohl NONE
+    Error(v:throwpoint)
+    Error(v:exception)
     return RuleApplyFailed
   endtry
 
@@ -173,11 +171,8 @@ def ManipulateUndoSequence(_: number)
     delete _
     execute "normal! i\<C-g>u\<ESC>"
   catch
-    echohl Error
-    echomsg '[gyoza]' v:throwpoint
-    echomsg '[gyoza]' v:exception
-    echohl NONE
-    rror(v:exception)
+    Error(v:throwpoint)
+    Error(v:exception)
   finally
     append(curlinenr - 1, curline)
     setpos('.', curpos)
@@ -220,6 +215,12 @@ def OnCmdwinEnter()
     autocmd!
     autocmd CmdwinLeave * ++once vimrc#gyoza#enable()
   augroup END
+enddef
+
+def Error(msg: string)
+  echohl ErrorMsg
+  echomsg '[gyoza]' msg
+  echohl NONE
 enddef
 
 export def vimrc#gyoza#enable()
