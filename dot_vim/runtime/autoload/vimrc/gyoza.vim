@@ -144,8 +144,13 @@ def CompleteClosingBlock(
     return RuleUnnecessary
   endif
 
-  # Break undo sequence
-  execute "normal! i\<C-g>u\<ESC>"
+  # Manipulate undo sequence
+  augroup gyoza-undo-sequence
+    autocmd!
+    autocmd InsertCharPre <buffer> ++once
+          \ timer_start(0, ManipulateUndoSequence)
+    autocmd InsertLeave <buffer>+ ++once autocmd! gyoza-undo-sequence
+  augroup END
 
   var [cur_before, cur_after] = StrDivPos(curline_save, col('.') - 1)
   var curlinenr = line('.')
@@ -158,6 +163,25 @@ def CompleteClosingBlock(
   endif
 
   return RuleAppled
+enddef
+
+def ManipulateUndoSequence(_: number)
+  var curlinenr = line('.')
+  var curline = getline('.')
+  var curpos = getcurpos()
+  try
+    delete _
+    execute "normal! i\<C-g>u\<ESC>"
+  catch
+    echohl Error
+    echomsg '[gyoza]' v:throwpoint
+    echomsg '[gyoza]' v:exception
+    echohl NONE
+    rror(v:exception)
+  finally
+    append(curlinenr - 1, curline)
+    setpos('.', curpos)
+  endtry
 enddef
 
 def UpdateContext()
