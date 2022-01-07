@@ -1,6 +1,10 @@
 vim9script
 
-import * as Vimrc from $MYVIMRC
+if has('patch-8.2.4019')
+  import $MYVIMRC as Vimrc
+else
+  import * as Vimrc from $MYVIMRC
+endif
 
 final SLASH = Vimrc.Filesystem.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
