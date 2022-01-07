@@ -216,3 +216,11 @@ function gitinit() {
         git commit --allow-empty -m "Initial commit"
     fi
 }
+
+function CAPSLOCK() {
+    if which xdotool &> /dev/null; then
+        xdotool key Caps_Lock
+    else
+        echo "\033[41m\xdotool not found\033[m"
+    fi
+}
