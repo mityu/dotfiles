@@ -10,7 +10,7 @@ reboot
 suspend
 lock
 logout
-restart-xkeysnail
+restart-xremap
 wezterm-float
 clipbuffer
 EOF
@@ -24,7 +24,7 @@ case $@ in
     lock) dm-tool lock ;;
     reboot) systemctl reboot ;;
     logout) i3-msg exit ;;  # TODO: Confirm?
-    restart-xkeysnail) systemctl --user restart xkeysnail ;;
+    restart-xremap) systemctl --user restart xremap ;;
     wezterm-float) i3-msg -q exec ~/.config/i3/open-floating-app.sh wezterm ;;
     clipbuffer) i3-msg -q "exec --no-startup-id gvim -S ~/.config/i3/clipbuffer.vim" ;;
     *) i3-msg -q exec $@ ;;
