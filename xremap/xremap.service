@@ -1,0 +1,17 @@
+[Unit]
+Description=xremap
+
+[Service]
+KillMode=process
+ExecStartPre=/usr/bin/xhost +SI:localuser:root
+ExecStart=/home/mityu/.cargo/bin/xremap /home/mityu/.config/xremap/config.yml
+ExecStartPost=-/usr/bin/dunstify -a 'xremapActivation' -t 2000 'xremap is now active.'
+Type=simple
+Restart=always
+RestartSec=5s
+
+# Update DISPLAY to be the same as `echo $DISPLAY` on your graphical terminal.
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target

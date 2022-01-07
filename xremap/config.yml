@@ -1,0 +1,68 @@
+modmap:
+  - name: Global
+    remap:
+      CapsLock: CTRL_L
+      Super_L:
+        held: Super_L
+        alone: Muhenkan
+        alone_timeout_millis: 750
+      Super_R:
+        held: Super_R
+        alone: Henkan
+        alone_timeout_millis: 750
+
+keymap:
+  - name: Browser
+    application:
+      only: [Firefox, Google-chrome, Chromium, Vivaldi-stable]
+    remap:
+      Super-t: C-t
+      Super-Shift-t: C-Shift-t
+      Super-n: C-n
+      Super-Shift-n: C-Shift-n
+      Super-w: C-w
+      Super-Shift-w: C-Shift-w
+      Super-r: C-r
+      # Super-l: C-l
+      Super-f: C-f
+      Super-d: C-d
+      Super-y: C-h
+      Super-LeftBrace: Super-left
+      Super-RightBrace: Super-right
+
+  - name: macOS like
+    application:
+      not: [URxvt, org.wezfurlong.wezterm, Alacritty, Gvim]
+    remap:
+      # Cursor
+      C-b: Left
+      C-f: Right
+      C-p: Up
+      C-n: Down
+      C-h: Backspace
+      C-d: Delete
+      C-a: Home
+      C-e: End
+      C-m: Enter
+      C-j: Enter
+      C-o: [Enter, Left]
+
+      # Copy and paste
+      Super-c: C-c
+      Super-v: C-v
+
+      Super-a: C-a
+
+  - name: Application specific kill
+    application:
+      only: [Slack, discord]
+    remap:
+      Super-q: C-q
+
+  - name: i3's kill
+    remap:
+      Super-q:
+        launch:
+          - "i3-msg"
+          - "-q"
+          - "kill"
