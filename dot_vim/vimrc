@@ -1857,7 +1857,7 @@ augroup END
 
 # splash
 command! Splash call vimrc#splash#show()
-if !v:vim_did_enter && !has('gui_running')
+if !v:vim_did_enter && !(IsMac && has('gui_running'))
   augroup vimrc_splash
     autocmd!
     autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
