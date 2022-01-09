@@ -100,10 +100,6 @@ export def Mkdir(dir: string, ...opt: list<any>): bool
   if isdirectory(dir)
     return true
   endif
-  if !exists('*mkdir')
-    EchomsgError('built-in mkdir() not found.')
-    return false
-  endif
   return call('mkdir', [dir] + opt) ? true : false
 enddef
 
