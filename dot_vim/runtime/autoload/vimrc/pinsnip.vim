@@ -4,7 +4,7 @@ var SnipList: dict<list<func(string): bool>> = {}
 var FuzzySnipList: dict<list<list<string>>> = {}
 final CursorPlaceholder = '<+CURSOR+>'
 
-export def vimrc#pinsnip#expand(): string
+def vimrc#pinsnip#expand(): string
   var comparison = trim(getline('.'))
   if comparison ==# ''
     Warning('Empty pattern')

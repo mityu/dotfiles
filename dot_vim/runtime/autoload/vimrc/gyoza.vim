@@ -260,7 +260,7 @@ def Error(msg: string)
   echohl NONE
 enddef
 
-export def vimrc#gyoza#enable()
+def vimrc#gyoza#enable()
   augroup gyoza
     autocmd!
     autocmd BufEnter * InitForBuffer()
@@ -272,7 +272,7 @@ export def vimrc#gyoza#enable()
   augroup END
 enddef
 
-export def vimrc#gyoza#disable()
+def vimrc#gyoza#disable()
   augroup gyoza
     autocmd!
   augroup END

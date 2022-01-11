@@ -92,38 +92,38 @@ def OtameshiExpandFilename(name: string): string
 enddef
 OtameshiList.ExpandFilename = OtameshiExpandFilename
 
-export def vimrc#notes#memo_new(filename: string)
+def vimrc#notes#memo_new(filename: string)
   MemoList->CreateNewNote(filename)
 enddef
 
-export def vimrc#notes#otameshi_new(filename: string)
+def vimrc#notes#otameshi_new(filename: string)
   OtameshiList->CreateNewNote(filename)
 enddef
 
-export def vimrc#notes#memo_delete(files: list<string>)
+def vimrc#notes#memo_delete(files: list<string>)
   MemoList->DeleteNote(files)
 enddef
 
-export def vimrc#notes#otameshi_delete(files: list<string>)
+def vimrc#notes#otameshi_delete(files: list<string>)
   OtamemshiList->DeleteNote(files)
 enddef
 
-export def vimrc#notes#memo_list()
+def vimrc#notes#memo_list()
   MemoList->OpenNote()
 enddef
 
-export def vimrc#notes#otameshi_list()
+def vimrc#notes#otameshi_list()
   OtameshiList->OpenNote()
 enddef
 
-export def vimrc#notes#memo_complete(
+def vimrc#notes#memo_complete(
   arg_lead: string,
   command_line: string,
   cursor_pos: number): list<string>
   return MemoList->GetCompletion(arg_lead)
 enddef
 
-export def vimrc#notes#otameshi_complete(
+def vimrc#notes#otameshi_complete(
   arg_lead: string,
   command_line: string,
   cursor_pos: number): list<string>

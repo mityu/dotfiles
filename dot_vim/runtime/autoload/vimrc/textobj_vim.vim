@@ -4,7 +4,7 @@ export final FUNCTION_BEGIN = '\v\C^\s*%(export\s+|legacy\s+)?%(fu%[nction]|def)
 export final FUNCTION_END = '\v\C^\s*end%(f%[unction]|def)>'
 export final RANGE_NOT_FOUND = [0, 0]
 
-export def vimrc#textobj_vim#select(object_type: string): any
+def vimrc#textobj_vim#select(object_type: string): any
   var range: list<number>
   if object_type ==# 'a'
     range = GetRangeA(FUNCTION_BEGIN, FUNCTION_END)

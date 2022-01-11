@@ -100,7 +100,7 @@ def PopupCallback(winID: number, result: number)
   RestoreSettings()
 enddef
 
-export def vimrc#splash#show()
+def vimrc#splash#show()
   final splash = SPLASH[: &lines - 3]
   final popupID = popup_create(splash, {
     minwidth: &columns,
@@ -131,7 +131,7 @@ export def vimrc#splash#show()
   augroup END
 enddef
 
-export def vimrc#splash#intro()
+def vimrc#splash#intro()
   if argc() == 0 && bufnr('$') == 1
     vimrc#splash#show()
   endif

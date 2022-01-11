@@ -2,7 +2,7 @@ vim9script
 
 # TODO: Implement c_CTRL-G and c_CTRL-T like key-mapping
 
-export def vimrc#incsearch#setup()
+def vimrc#incsearch#setup()
   final cmdwintype = getcmdwintype()
   if !(cmdwintype ==# '/' || cmdwintype ==# '?')
     return

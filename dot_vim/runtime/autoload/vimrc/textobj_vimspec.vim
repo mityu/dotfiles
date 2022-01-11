@@ -9,7 +9,7 @@ endif
 final BLOCK_BEGIN = '\v\c^\s*<%(Describe|Before|After|Context|It)>'
 final BLOCK_END = '\v\c^\s*<End>'
 
-export def vimrc#textobj_vimspec#select(object_type: string): any
+def vimrc#textobj_vimspec#select(object_type: string): any
   var GetRange: func(string, string): list<number>
   if object_type ==# 'a'
     GetRange = function('Vim.GetRangeA')

@@ -9,7 +9,7 @@ endif
 final SLASH = Vimrc.Filesystem.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
 
-export def vimrc#delete_undofiles()
+def vimrc#delete_undofiles()
   var undodir_save = &undodir
   var undofiles: list<string>
   try
@@ -42,7 +42,7 @@ export def vimrc#delete_undofiles()
     Vimrc.Echomsg('Deleted.')
 enddef
 
-export def vimrc#clipbuffer(arg: string)
+def vimrc#clipbuffer(arg: string)
   var opener = strlen(arg) == 0 ? 'tabedit' : arg
   execute 'hide' opener 'clipboard://buffer'
 
@@ -81,7 +81,7 @@ def ClipbufferCatchup()
   endif
 enddef
 
-export def vimrc#set_digraph_for_japanese()
+def vimrc#set_digraph_for_japanese()
   digraph_set('((', '（')
   digraph_set('))', '）')
   digraph_set('{{', '『')
@@ -99,7 +99,7 @@ export def vimrc#set_digraph_for_japanese()
   digraph_set('--', 'ー')
 enddef
 
-export def vimrc#list_tasks()
+def vimrc#list_tasks()
   var target = '%'
   if args =~# 'rf'
     target = '**/*.' .. expand('%:e')
@@ -109,7 +109,7 @@ export def vimrc#list_tasks()
   execute 'vimgrep /\C\v<(TODO|FIXME|XXX)>/' target
 enddef
 
-export def vimrc#git_init_repo(cmdarg: string)
+def vimrc#git_init_repo(cmdarg: string)
   var d: string
   if cmdarg ==# ''
     d = getcwd(0)  # Refer the cwd of the current window.
@@ -143,7 +143,7 @@ export def vimrc#git_init_repo(cmdarg: string)
   Vimrc.Echo('Initialized git repository: ' .. cmdarg)
 enddef
 
-export def vimrc#update_local_packages()
+def vimrc#update_local_packages()
   if !executable('git')
     Vimrc.EchomsgError('No git')
     return
