@@ -1,10 +1,6 @@
 vim9script
 
-if has('patch-8.2.4019')
-  import $MYVIMRC as Vimrc
-else
-  import * as Vimrc from $MYVIMRC
-endif
+import $MYVIMRC as Vimrc
 
 def NewInstance(name: string): dict<any>
   var path = Vimrc.JoinPath(Vimrc.CacheDir, name)

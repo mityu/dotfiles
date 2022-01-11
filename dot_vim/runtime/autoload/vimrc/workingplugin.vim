@@ -1,11 +1,7 @@
 let s:cpoptions_save = &cpoptions
 set cpoptions&vim
 
-if has('patch-8.2.4019')
-  import $MYVIMRC as VimrcFuncs
-else
-  import * as VimrcFuncs from $MYVIMRC
-endif
+import $MYVIMRC as VimrcFuncs
 
 let s:Vimrc = {
       \'JoinPath': s:VimrcFuncs.JoinPath,

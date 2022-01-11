@@ -1,10 +1,6 @@
 vim9script noclear
 
-if has('patch-8.2.4019')
-  import "./textobj_vim.vim" as Vim
-else
-  import * as Vim from "./textobj_vim.vim"
-endif
+import "./textobj_vim.vim" as Vim
 
 final BLOCK_BEGIN = '\v\c^\s*<%(Describe|Before|After|Context|It)>'
 final BLOCK_END = '\v\c^\s*<End>'
