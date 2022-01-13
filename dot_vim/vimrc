@@ -1904,7 +1904,7 @@ endif
   var lvimrc_ = Rc('lvimrc')
   lvimrc_ = JoinPath('~', lvimrc_)
   execute 'command! -bar -nargs=* LVimrc ' ..
-          'execute (<q-args> ==# "" ? "edit" : <q-args>)' string(lvimrc_)
+          'execute <q-args> ?? "edit"' string(lvimrc_)
   if filereadable(expand(lvimrc_))
     execute 'source' lvimrc_
   endif
