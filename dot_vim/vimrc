@@ -791,6 +791,7 @@ inoreabbrev note: NOTE:
 command! -bar CdCurrent cd %:p:h
 command! -bar LcdCurrent lcd %:p:h
 command! -bar TcdCurrent tcd %:p:h
+command! -bar FileName echo expand('%:p')
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! -nargs=? CopyToClipboard call setreg('+', getreg(<q-args>, 1))
 command! -bar -nargs=? ClipBuffer call vimrc#clipbuffer(<q-args>)
