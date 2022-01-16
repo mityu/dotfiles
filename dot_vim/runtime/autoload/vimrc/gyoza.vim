@@ -345,11 +345,19 @@ NewFiletypeRule('vim')
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
   ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
-  ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE')
+  ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE', ['\=^ec%[homsg]>', '\=^echon>', '\=^echoe%[rr]>', '\=^echoc%[onsole]'])
   ->AddRule('^\s*augroup\s+%(END)@!\S+$', 'augroup END')
   ->AddRule('^\s*%(let|var|const|final)\s+\w+\s*\=\<\<\s*%(trim\s+)?\s*\w+$',
       (prev: dict<any>, next: dict<any>): number => {
-        # TODO: check if already on heredoc via syntax
+        var curpos = getcurpos()
+        try
+          cursor(next.nr, 0)
+          if synIDattr(synID(line('.'), col('.'), 1), 'name') ==# 'vimLetHereDoc'
+            return RuleUnnecessary
+          endif
+        finally
+          setpos('.', curpos)
+        endtry
         var closer = matchstr(prev.trimed, '\w\+\ze\s*$')
         return CompleteClosingBlock(prev, next, closer)
       })
