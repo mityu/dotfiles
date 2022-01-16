@@ -1,6 +1,6 @@
 vim9script
 
-import * as Gen from './gen.vim'
+import './gen.vim' as Gen
 
 
 Gen.Init(expand('<sfile>'), 'dark')
