@@ -4,7 +4,6 @@ vim9script
 var newlineRules: dict<dict<any>>
 var linesCount: number
 var tryToApply: bool
-var justAfterApplying: bool
 
 final RuleApplyFailed = 0
 final RuleAppled      = 1
@@ -102,7 +101,7 @@ def TryToApply()
     endif
     if status != RuleApplyFailed
       if status == RuleAppled
-        justAfterApplying = true
+        SetUpCurlineRemoval()
         UpdateContext()
       endif
       return
@@ -217,12 +216,27 @@ def CleanManipulateUndoAutocommands()
   autocmd! gyoza-undo-sequence
 enddef
 
+def SetUpCurlineRemoval()
+  augroup gyoza-curline-removal
+    autocmd!
+    autocmd InsertLeave * ++once {
+      if getline('.') =~# '^\s*$'
+        delete _
+      endif
+      if exists('#gyoza-curline-removal#CursorMovedI')
+        autocmd! gyoza-curline-removal CursorMovedI *
+      endif
+    }
+    autocmd CursorMovedI * ++once
+          \ autocmd! gyoza-curline-removal InsertLeave *
+  augroup END
+enddef
+
 def UpdateContext()
   linesCount = line('$')
 enddef
 
 def OnCursorMoved()
-  justAfterApplying = false
   tryToApply = NeedTry() || tryToApply
   UpdateContext()
 enddef
@@ -240,10 +254,6 @@ def OnInsertEnter()
 enddef
 
 def OnInsertLeave()
-  if justAfterApplying && trim(getline('.')) ==# ''
-    delete _
-  endif
-  justAfterApplying = false
   tryToApply = false
 enddef
 
@@ -319,6 +329,7 @@ def MergeRule(from: string, to: string)
 enddef
 
 def ReplaceLine(nr: number, text: string)
+  # Revert <CR> input, setline(), and then separate undo sequences.
   var curpos = getcurpos()
   var curline = getline('.')
   try
