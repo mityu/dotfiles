@@ -142,6 +142,16 @@ def CompleteClosingBlock(
     return RuleUnnecessary
   endif
 
+  var [cur_before, cur_after] = StrDivPos(curline_save, curpos_save[2] - 1)
+  var curlinenr = line('.')
+  if stridx(cur_after->trim(), closer) == 0
+    append(curlinenr - 1, cur_before)
+    cursor(curlinenr, len(cur_before) + 1)
+  else
+    append(curlinenr - 1, curline_save)
+    setpos('.', curpos_save)
+  endif
+
   # Manipulate undo sequence
   #   The desired undo sequences are:
   # Case1. Leave insert mode just after inserting newline
@@ -178,15 +188,6 @@ def CompleteClosingBlock(
     autocmd InsertLeave * ++once CleanManipulateUndoAutocommands()
   augroup END
 
-  var [cur_before, cur_after] = StrDivPos(curline_save, curpos_save[2] - 1)
-  var curlinenr = line('.')
-  if stridx(cur_after->trim(), closer) == 0
-    append(curlinenr - 1, cur_before)
-    cursor(curlinenr, len(cur_before) + 1)
-  else
-    append(curlinenr - 1, curline_save)
-    setpos('.', curpos_save)
-  endif
   return RuleAppled
 enddef
 
@@ -202,7 +203,7 @@ def ManipulateUndoSequence(precurlinenr: number, _: number)
   var curpos = getcurpos()
   try
     deletebufline('%', precurlinenr, curlinenr)
-    execute "normal! i\<C-g>u\<ESC>"
+    execute "normal! i\<C-g>ua\<C-h>\<ESC>"
   catch
     Error(v:throwpoint)
     Error(v:exception)
@@ -317,6 +318,21 @@ def MergeRule(from: string, to: string)
   extend(newlineRules[to], get(newlineRules, from, {}), 'keep')
 enddef
 
+def ReplaceLine(nr: number, text: string)
+  var curpos = getcurpos()
+  var curline = getline('.')
+  try
+    delete _
+    setline(nr, text)
+    execute "normal! i\<C-g>ua\<C-h>\<ESC>"
+  catch
+    Error(v:throwpoint)
+    Error(v:exception)
+  finally
+    append(curpos[1] - 1, curline)
+    setpos('.', curpos)
+  endtry
+enddef
 # Register rules
 if globpath(&rtp, 'autoload/vim9context.vim') ==# ''
   def IsInVim9script(): bool
@@ -340,7 +356,16 @@ NewFiletypeRule('vim')
     return CompleteClosingBlock(prev, next, closer)
   })
   ->AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
-  ->AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$', 'endfunction')
+  ->AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$',
+      (prev: dict<any>, next: dict<any>): number => {
+        var r = '^\v(.{-})(fu%[nction])(.*)$'
+        var m = matchlist(prev.text, r)
+        if m[2] !=# 'function'
+          m[2] = 'function'
+          ReplaceLine(prev.nr, join(m[1 :], ''))
+        endif
+        return CompleteClosingBlock(prev, next, 'endfunction')
+      })
   ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
@@ -372,7 +397,7 @@ NewFiletypeRule('python')
   ->AddRule(
     '^%(def|for|while|if|elif|else)>.*[^:]\s*$',
     (prev: dict<any>, next: dict<any>): number => {
-      setline(prev.nr, prev.text .. ':')
+      ReplaceLine(prev.nr, prev.text .. ':')
       return RuleAppled
   })
 # NewFiletypeRule('markdown')
