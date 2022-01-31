@@ -250,7 +250,7 @@ def OnCmdwinEnter()
   # Do not use gyoza.vim in cmdwin
   augroup gyoza
     autocmd!
-    autocmd CmdwinLeave * ++once vimrc#gyoza#enable()
+    autocmd CmdwinLeave * ++once Enable()
   augroup END
 enddef
 
@@ -260,7 +260,7 @@ def Error(msg: string)
   echohl NONE
 enddef
 
-def vimrc#gyoza#enable()
+export def Enable()
   augroup gyoza
     autocmd!
     autocmd BufEnter * InitForBuffer()
@@ -272,7 +272,7 @@ def vimrc#gyoza#enable()
   augroup END
 enddef
 
-def vimrc#gyoza#disable()
+export def Disable()
   augroup gyoza
     autocmd!
   augroup END

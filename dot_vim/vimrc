@@ -532,7 +532,7 @@ inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
 inoremap <C-l><C-n> <C-x><C-n><C-n>
 inoremap <C-l><C-p> <C-x><C-p><C-p>
-inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#expand()<CR>
+inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#Expand()<CR>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
@@ -690,12 +690,12 @@ def MapTabmove(delta: number)
 enddef
 
 # f F t T ; , declarations {{{
-map <expr> f vimrc#charjump#jump(v:true, v:false)
-map <expr> F vimrc#charjump#jump(v:false, v:false)
-map <expr> t vimrc#charjump#jump(v:true, v:true)
-map <expr> T vimrc#charjump#jump(v:false, v:true)
-noremap ; <Cmd>call vimrc#charjump#repeat(v:false)<CR>
-noremap , <Cmd>call vimrc#charjump#repeat(v:true)<CR>
+map <expr> f vimrc#charjump#Jump(v:true, v:false)
+map <expr> F vimrc#charjump#Jump(v:false, v:false)
+map <expr> t vimrc#charjump#Jump(v:true, v:true)
+map <expr> T vimrc#charjump#Jump(v:false, v:true)
+noremap ; <Cmd>call vimrc#charjump#Repeat(v:false)<CR>
+noremap , <Cmd>call vimrc#charjump#Repeat(v:true)<CR>
 # }}}
 
 def CmdwinEnter()
@@ -714,7 +714,7 @@ def CmdwinEnter()
 
   # Make executing a previous command easier.
   nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
-  vimrc#incsearch#setup()
+  vimrc#incsearch#Setup()
 
   final cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
@@ -795,18 +795,18 @@ command! -bar TcdCurrent tcd %:p:h
 command! -bar FileName echo expand('%:p')
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! -nargs=? CopyToClipboard call setreg('+', getreg(<q-args>, 1))
-command! -bar -nargs=? ClipBuffer call vimrc#clipbuffer(<q-args>)
+command! -bar -nargs=? ClipBuffer call vimrc#Clipbuffer(<q-args>)
 command! ClearMessage execute repeat("echom ''\n", 201)
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call Filter(<bang>0, <f-args>)
 command! -bar Draft call Draft()
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
-command! -bar -nargs=* -complete=file ListTasks call vimrc#list_tasks(<q-args>)
-command! DeleteUndoFiles call vimrc#delete_undofiles()
+command! -bar -nargs=* -complete=file ListTasks call vimrc#ListTasks(<q-args>)
+command! DeleteUndoFiles call vimrc#DeleteUndofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
-command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#git_init_repo(<q-args>)
-command! -bar LocalPackUpdate call vimrc#update_local_packages()
+command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>)
+command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 
 # Thanks to cohama
 command! EditAsUtf8 edit ++enc=utf-8 %
@@ -1522,14 +1522,14 @@ enddef
 # Additional plugins
 # Taking notes
 # autocmd User vimrc_initialize ++once call vimrc#notes#load()
-command! -bar -nargs=* MemoNew call vimrc#notes#memo_new(<q-args>)
-command! -bar -nargs=+ -complete=customlist,vimrc#notes#memo_complete
-      \ MemoDelete call vimrc#notes#memo_delete(<f-args>)
-command! -bar MemoList call vimrc#notes#memo_list()
-command! -bar -nargs=* OtameshiNew call vimrc#notes#otameshi_new(<q-args>)
-command! -bar -nargs=+ -complete=customlist,vimrc#notes#otameshi_complete
-      \ OtameshiDelete call vimrc#notes#otameshi_delete(<f-args>)
-command! -bar OtameshiList call vimrc#notes#otameshi_list()
+command! -bar -nargs=* MemoNew call vimrc#notes#Memo_new(<q-args>)
+command! -bar -nargs=+ -complete=customlist,vimrc#notes#Memo_complete
+      \ MemoDelete call vimrc#notes#Memo_delete(<f-args>)
+command! -bar MemoList call vimrc#notes#Memo_list()
+command! -bar -nargs=* OtameshiNew call vimrc#notes#Otameshi_new(<q-args>)
+command! -bar -nargs=+ -complete=customlist,vimrc#notes#Otameshi_complete
+      \ OtameshiDelete call vimrc#notes#Otameshi_delete(<f-args>)
+command! -bar OtameshiList call vimrc#notes#Otameshi_list()
 
 
 # working-plugin
@@ -1851,15 +1851,15 @@ command! -nargs=? -complete=file GitDiff call GitDiff(<q-args>)
 
 # gyoza
 augroup vimrc_gyoza
-  autocmd User vimrc_initialize ++once vimrc#gyoza#enable()
+  autocmd User vimrc_initialize ++once vimrc#gyoza#Enable()
 augroup END
 
 # splash
-command! Splash call vimrc#splash#show()
+command! Splash call vimrc#splash#Show()
 if !v:vim_did_enter && !(IsMac && has('gui_running'))
   augroup vimrc_splash
     autocmd!
-    autocmd VimEnter * ++once ++nested call vimrc#splash#intro()
+    autocmd VimEnter * ++once ++nested call vimrc#splash#Intro()
     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
   augroup END
 endif

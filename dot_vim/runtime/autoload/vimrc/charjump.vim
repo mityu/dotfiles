@@ -15,7 +15,7 @@ def CharJumpInit()
 enddef
 CharJumpInit()
 
-def vimrc#charjump#jump(forward: bool, exclusive: bool): string
+export def Jump(forward: bool, exclusive: bool): string
   var char = GetChar()
   if char ==# "\<ESC>"
     return "\<ESC>"
@@ -40,7 +40,7 @@ def vimrc#charjump#jump(forward: bool, exclusive: bool): string
   return "\<Plug>(VimrcCharJumpDo)"  # A trick to make this dot-repeatable
 enddef
 
-def vimrc#charjump#repeat(reverse: bool)
+export def Repeat(reverse: bool)
   var forward_save = CharJump.forward
   if reverse
     CharJump.forward = !CharJump.forward
