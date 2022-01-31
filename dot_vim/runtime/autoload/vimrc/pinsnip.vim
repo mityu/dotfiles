@@ -199,7 +199,27 @@ FuzzySnipList['cpp'] = [
   ['template <typename T>'],
 ]
 
-SnipFiletype('vim')->AddSnip(TrySnipFuzzy)
+SnipFiletype('vim')
+  ->AddSnip((comparison: string): bool => {
+    var r = '^\v(leg%[acy]\s*)?(fu%[nction])(!?\s*.*$)'
+    var m = matchlist(comparison, r)
+    if empty(m)
+      return false
+    endif
+
+    var fnlen = strlen(m[2])
+    m[2] = 'function'
+    var col = col('.') - (mode() ==# 'i' ? 1 : 0)
+    if col >= (strlen(m[1]) + fnlen)
+      col += strlen(m[2]) - fnlen
+    endif
+    var snip = join(m[1 :], '')
+    snip = strpart(snip, 0, col) .. '<+CURSOR+>' .. snip[col :]
+    ApplySnip([snip])
+
+    return true
+  })
+  ->AddSnip(TrySnipFuzzy)
 FuzzySnipList['vim'] = [
   [
     'let s:cpoptions_save = &cpoptions',
