@@ -201,6 +201,33 @@ FuzzySnipList['cpp'] = [
 
 SnipFiletype('vim')
   ->AddSnip((comparison: string): bool => {
+    var curidx = col('.') - 1 - (mode() ==# 'i' ? 1 : 0)
+    if curidx < 0 || getline('.')[curidx] !=# '#'
+      return false
+    endif
+
+    var fname = expand('%:p')
+    var strridx = strridx(fname, 'autoload')
+    if fnamemodify(fname, ':e') !=# 'vim' || strridx == -1
+      return false
+    endif
+
+    var autoload_name =
+      fnamemodify(fname, ':r')
+      ->strpart(strridx + 9)  # Skip 'autoload/' or 'autoload\'
+      ->split('[/\\]')
+      ->join('#') .. '#'
+
+    var snip =
+      strpart(getline('.'), 0, curidx) ..
+      autoload_name ..
+      '<+CURSOR+>' ..
+      getline('.')[curidx + 1 :]
+    ApplySnip([snip])
+
+    return true
+  })
+  ->AddSnip((comparison: string): bool => {
     var r = '^\v(leg%[acy]\s*)?(fu%[nction])(!?\s*.*$)'
     var m = matchlist(comparison, r)
     if empty(m)
