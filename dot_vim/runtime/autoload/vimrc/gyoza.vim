@@ -207,9 +207,30 @@ def ManipulateUndoSequence(precurlinenr: number, _: number)
     Error(v:throwpoint)
     Error(v:exception)
   finally
-    append(precurlinenr - 1, lines)
-    setpos('.', curpos)
+    if len(lines) >= 2
+      append(precurlinenr - 1, lines[: -2])
+    endif
+    RestoreCursorLineText(lines[-1], curpos)
   endtry
+enddef
+
+def RestoreCursorLineText(text: string, curpos: list<number>)
+  # Similar to append(curpos[1] - 1, text), but does not break the start of
+  # insert. This difference appears when 'backspace' option contains 'start.'
+  var movecmd = printf(
+    "\<Cmd>call cursor(%d, %d)\<CR>",
+    curpos[1] - 1,
+    col([curpos[1] - 1, '$']))
+  var maincmd =
+        \ "\<Cmd>let b:gyoza_ei_save = &eventignore\<CR>" ..
+        \ "\<Cmd>set eventignore=all\<CR>" ..
+        \ "\<Cmd>let &eventignore = b:gyoza_ei_save\<CR>" ..
+        \ movecmd ..
+        \ "\<CR>\<C-g>U\<C-u>" .. text ..
+        \ "\<Cmd>call setpos('.'," .. string(curpos) .. ")\<CR>" ..
+        \ "\<Cmd>unlet b:gyoza_ei_save\<CR>" ..
+        \ "\<Cmd>call " .. expand('<SID>') .. "UpdateContext()\<CR>"
+  feedkeys(maincmd, 'nti')
 enddef
 
 def CleanManipulateUndoAutocommands()
