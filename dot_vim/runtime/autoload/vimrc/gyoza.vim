@@ -217,20 +217,29 @@ enddef
 def RestoreCursorLineText(text: string, curpos: list<number>)
   # Similar to append(curpos[1] - 1, text), but does not break the start of
   # insert. This difference appears when 'backspace' option contains 'start.'
-  var movecmd = printf(
+  var SID = expand("<SID>")
+  var move_to_prevline_cmd = printf(
     "\<Cmd>call cursor(%d, %d)\<CR>",
     curpos[1] - 1,
     col([curpos[1] - 1, '$']))
-  var maincmd =
-        \ "\<Cmd>let b:gyoza_ei_save = &eventignore\<CR>" ..
-        \ "\<Cmd>set eventignore=all\<CR>" ..
-        \ "\<Cmd>let &eventignore = b:gyoza_ei_save\<CR>" ..
-        \ movecmd ..
-        \ "\<CR>\<C-g>U\<C-u>" .. text ..
-        \ "\<Cmd>call setpos('.'," .. string(curpos) .. ")\<CR>" ..
-        \ "\<Cmd>unlet b:gyoza_ei_save\<CR>" ..
-        \ "\<Cmd>call " .. expand('<SID>') .. "UpdateContext()\<CR>"
+  var restore_text_cmd = printf(
+    "\<Cmd>call %sMayCompleteCursorLineText(%s)\<CR>", SID, string(text))
+  var maincmd = ''
+  maincmd ..= "\<Cmd>let b:gyoza_ei_save = &eventignore\<CR>"
+  maincmd ..= "\<Cmd>set eventignore=all\<CR>"
+  maincmd ..= move_to_prevline_cmd
+  maincmd ..= "\<CR>\<C-g>Ua\<C-h>\<ESC>A" .. restore_text_cmd
+  maincmd ..= "\<Cmd>let &eventignore = b:gyoza_ei_save\<CR>"
+  maincmd ..= "\<Cmd>unlet b:gyoza_ei_save\<CR>"
+  maincmd ..= "\<Cmd>call " .. SID .. "UpdateContext()\<CR>"
   feedkeys(maincmd, 'nti')
+enddef
+
+def MayCompleteCursorLineText(text: string)
+  var indentlen = getline('.')->strlen()
+  if strlen(text) > indentlen
+    feedkeys(text[indentlen :], 'nti')
+  endif
 enddef
 
 def CleanManipulateUndoAutocommands()
