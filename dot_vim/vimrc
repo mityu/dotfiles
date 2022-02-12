@@ -1184,7 +1184,7 @@ if OptPluginExists('asyncomplete.vim')
   enddef
 
   g:asyncomplete_auto_popup = 1
-  g:asyncomplete_preprocessor = [function('s:AsyncompletePreprocessor')]
+  g:asyncomplete_preprocessor = [AsyncompletePreprocessor]
   g:asyncomplete_auto_completeopt = 0
 endif
 if OptPluginExists('vim-lsp')
