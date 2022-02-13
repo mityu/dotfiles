@@ -472,7 +472,7 @@ NewFiletypeRule('c')
     '};',
     ['\=^%(public|private|protected)>\:'])
   ->AddRule(
-    '^switch\s*\(.*\)\s*\{',
+    '^switch\s*\(.*\)\s*\{$',
     '}',
     ['\=^%(case\s*.*\:|default\:)'])
   ->AddRule(
@@ -487,12 +487,17 @@ NewFiletypeRule('c')
 
 NewFiletypeRule('go')
   ->AddRule(
-    '^%(select>|switch\s*\S*\s*)\s*\{',
+    '^%(select>|switch\s*\S*\s*)\s*\{$',
     '}',
     ['\=^%(case\s*.*\:|default\:)'])
   ->AddRule(
     '^%(defer|go)\s+func\s*\([^)]{-}\)\s*\{$',
     '}()')
+
+NewFiletypeRule('rust')
+  ->AddRule(
+    '^%(%(let|return)>|\w+\s*\=.*<%(match|if|loop)>).*\{$',
+    '};')
 
 # bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
 #   if IsInVim9script()
