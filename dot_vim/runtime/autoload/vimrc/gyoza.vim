@@ -224,11 +224,14 @@ def RestoreCursorLineText(text: string, curpos: list<number>)
     col([curpos[1] - 1, '$']))
   var restore_text_cmd = printf(
     "\<Cmd>call %sMayCompleteCursorLineText(%s)\<CR>", SID, string(text))
+  var restore_curpos_cmd = printf(
+    "\<Cmd>call setpos('.', %s)\<CR>", curpos)
   var maincmd = ''
   maincmd ..= "\<Cmd>let b:gyoza_ei_save = &eventignore\<CR>"
   maincmd ..= "\<Cmd>set eventignore=all\<CR>"
   maincmd ..= move_to_prevline_cmd
   maincmd ..= "\<CR>\<C-g>Ua\<C-h>\<ESC>A" .. restore_text_cmd
+  maincmd ..= restore_curpos_cmd
   maincmd ..= "\<Cmd>let &eventignore = b:gyoza_ei_save\<CR>"
   maincmd ..= "\<Cmd>unlet b:gyoza_ei_save\<CR>"
   maincmd ..= "\<Cmd>call " .. SID .. "UpdateContext()\<CR>"
