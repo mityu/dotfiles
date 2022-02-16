@@ -258,3 +258,21 @@ FuzzySnipList['vim'] = [
     'unlet s:cpoptions_save'
   ]
 ]
+
+SnipFiletype('rust')
+  ->AddSnip((comparison: string): bool => {
+    var curpos = getcurpos()
+    var word = ''
+    try
+      normal! h
+      word = expand('<cword>')
+      if word !~? '^r\%[esult]$'
+        return false
+      endif
+    finally
+      setpos('.', curpos)
+    endtry
+    var cmd = repeat("\<C-h>", strchars(word)) .. 'Result<(), String>'
+    feedkeys(cmd, 'ni')
+    return true
+  })
