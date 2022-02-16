@@ -43,6 +43,13 @@ setopt hist_no_store
 # Enable completion
 setopt menu_complete
 
+zshaddhistory() {
+    local line cmd
+    line=${1%%$'\n'}
+    cmd=${line%% *}
+    [[ "$(command -v $cmd)" != '' && $cmd != 'rm' ]]
+}
+
 
 bindkey -d # Reset keybinds
 bindkey -v # Use vi like keybinds
