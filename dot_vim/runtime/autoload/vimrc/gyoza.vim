@@ -495,7 +495,8 @@ NewFiletypeRule('go')
     ['\=^%(case\s*.*\:|default\:)'])
   ->AddRule(
     '^%(defer|go)\s+func\s*\([^)]{-}\)\s*\{$',
-    '}()')
+    '}()',
+    ['\=\m^}\s*('])
 
 NewFiletypeRule('rust')
   ->AddRule(
