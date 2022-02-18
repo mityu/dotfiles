@@ -347,8 +347,7 @@ def AddRule(
     endif
   endfor
 
-  var ref = ft_config
-  ref[pattern] = {
+  ft_config[pattern] = {
     pair: pair,
     no_indented_statements: {literal: literal, regexp: regexp}
   }
