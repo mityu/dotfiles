@@ -291,9 +291,9 @@ def PackRegister()
   minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
 
   # Operator-user plugins
-  minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
   minpac#add('kana/vim-operator-replace', {type: 'opt'})
-  minpac#add('rhysd/vim-operator-surround', {type: 'opt'})
+  minpac#add('machakann/vim-sandwich', {type: 'opt'})
+  minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
   # minpac#add('tyru/caw.vim', {type: 'opt'})
   minpac#add('mityu/caw.vim', {type: 'opt', branch: 'support-vim9script-tmp'})  # tmp
   minpac#add('sgur/vim-operator-openbrowser', {type: 'opt'})
@@ -1362,13 +1362,15 @@ enddef
 if OptPluginExists('vim-operator-replace')
   MapOperator('vim-operator-replace', {lhs: 'ms', rhs: '<Plug>(operator-replace)'})
 endif
-if OptPluginExists('vim-operator-surround')
-  MapOperator('vim-operator-surround',
-      {lhs: 'ma', rhs: '<Plug>(operator-surround-append)'})
-  MapOperator('vim-operator-surround',
-      {lhs: 'md', rhs: '<Plug>(operator-surround-delete)'})
-  MapOperator('vim-operator-surround',
-      {lhs: 'mr', rhs: '<Plug>(operator-surround-replace)'})
+if OptPluginExists('vim-sandwich')
+  g:textobj_sandwich_no_default_key_mappings = 1
+  g:operator_sandwich_no_default_key_mappings = 1
+  MapOperator('vim-sandwich',
+      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
+  MapOperator('vim-sandwich',
+      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'})
+  MapOperator('vim-sandwich',
+      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
 endif
 if OptPluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
