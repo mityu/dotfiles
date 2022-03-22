@@ -901,8 +901,7 @@ if PluginExists('vim-cursorword')
     autocmd ColorScheme * highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
     autocmd ColorScheme * highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
   augroup END
-    highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
-    highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
+  doautocmd vimrc_cursorword ColorScheme
 endif
 if PluginExists('vim-altr')
   command! -bar AlterForward call altr#forward()
