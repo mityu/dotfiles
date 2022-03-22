@@ -1130,8 +1130,8 @@ if PluginExists('vim-quickrun')
     }
   endif
 
-  nnoremap <expr> <C-c> quickrun#is_running() ?
-        \ '<Cmd>call quickrun#sweep_sessions()<CR>' :
+  nnoremap <expr> <C-c> quickrun#session#exists() ?
+        \ '<Cmd>call quickrun#session#sweep()<CR>' :
         \ '<C-c>'
   nmap <Space>r <Plug>(quickrun)
   vmap <Space>r <Plug>(quickrun)
