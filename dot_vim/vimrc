@@ -533,6 +533,9 @@ inoremap <C-l> <C-x>
 inoremap <C-l><C-n> <C-x><C-n><C-n>
 inoremap <C-l><C-p> <C-x><C-p><C-p>
 inoremap <silent> <C-j> <C-r>=vimrc#pinsnip#Expand()<CR>
+# TODO: Check 'paste' value?
+inoremap <C-r>* <Cmd>set paste<CR><C-r>*<Cmd>set nopaste<CR>
+inoremap <C-r>+ <Cmd>set paste<CR><C-r>+<Cmd>set nopaste<CR>
 
 vnoremap g+ g<C-a>
 vnoremap g- g<C-x>
