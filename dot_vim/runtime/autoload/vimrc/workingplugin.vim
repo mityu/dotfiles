@@ -101,7 +101,7 @@ function! vimrc#workingplugin#rm(...) abort "{{{
       continue
     endif
     call s:Vimrc.Echomsg(printf('Delete %s ? [y/n]', plugin))
-    if VimrcFunc('GetcharString')() !~? 'y'
+    if getcharstr() !~? 'y'
       call s:Vimrc.Echomsg('Canceled.')
       continue
     endif

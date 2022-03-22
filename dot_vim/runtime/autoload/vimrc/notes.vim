@@ -45,7 +45,7 @@ def DeleteNote(self: dict<any>, ...notes: list<string>)
       continue
     endif
     Vimrc.EchoQuestion(printf('Delete %s ?', target))
-    if Vimrc.GetCharString() !~? 'y'
+    if getcharstr() !~? 'y'
       Vimrc.Echomsg('Canceled')
       continue
     endif

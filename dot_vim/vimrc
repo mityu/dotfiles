@@ -87,13 +87,9 @@ export def Glob(expr: string, nosuf: bool = false, alllinks: bool = false): list
   return glob(expr, nosuf, true, alllinks)
 enddef
 
-export def GetcharString(...expr: list<number>): any
-  return nr2char(call('getchar', expr))
-enddef
-
 export def Ask(question: string): bool
   EchoQuestion(question)
-  return GetcharString() =~? 'y'
+  return getcharstr() =~? 'y'
 enddef
 
 export def Mkdir(dir: string, ...opt: list<any>): bool
