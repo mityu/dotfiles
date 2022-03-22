@@ -1144,6 +1144,31 @@ if PluginExists('capture.vim')
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
+if PluginExists('open-browser.vim') && !v:vim_did_enter
+  augroup vimrc_openbrowser
+    autocmd SourcePost openbrowser.vim OverwriteOpenBrowserCommand()
+  augroup END
+
+  def OverwriteOpenBrowserCommand()
+    if exists(':OpenBrowser') == 2
+      command! -nargs=* OpenBrowser call OpenBrowser(<q-args>)
+      autocmd! vimrc_openbrowser SourcePost openbrowser.vim
+    endif
+  enddef
+
+  # :OpenBrowser         => Read URL from the default register
+  # :OpenBrowser @*      => Read URL from the specified register
+  # :OpenBrowser {URL}   => Just use {URL}
+  def OpenBrowser(cmdarg: string)
+    var uri = trim(cmdarg)
+    if uri ==# ''
+      uri = getreg(v:register)
+    elseif uri[0] ==# '@' && strlen(uri) == 2
+      uri = getreg(uri[1])
+    endif
+    openbrowser#open(uri)
+  enddef
+endif
 if PluginExists('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
 endif
