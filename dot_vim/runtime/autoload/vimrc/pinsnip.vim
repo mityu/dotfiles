@@ -168,6 +168,9 @@ SnipFiletype('go')
   ->AddSnip((line: string): bool => {
     var r = '^\v((\w|_)+)\s*:\=\s*func\((.{-})\)\s*(\S+|\(%(\s*\S+)+\s*\))?\s*\{\s*$'
     var m = matchlist(line, r)
+    if empty(m)
+      return false
+    endif
     var funcName = m[1]
     var funcArgs = m[3]
     var funcRet  = m[4]
