@@ -78,9 +78,9 @@ enddef
 
 def AddSnip(
   snips: list<func(string): bool>,
-  snip: func(string): bool,
+  Snip: func(string): bool,
 ): list<func(string): bool>
-  snips->add(snip)
+  snips->add(Snip)
   return snips
 enddef
 
