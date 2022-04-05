@@ -231,3 +231,11 @@ function CAPSLOCK() {
         echo "\033[41m\xdotool not found\033[m"
     fi
 }
+
+function stdin() {
+  cmd="$1"
+  shift
+  while read -r stdin; do
+    "$cmd" "$@" "$stdin"
+  done
+}
