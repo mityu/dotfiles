@@ -233,9 +233,10 @@ function CAPSLOCK() {
 }
 
 function stdin() {
-  cmd="$1"
-  shift
-  while read -r stdin; do
-    "$cmd" "$@" "$stdin"
-  done
+    local cmd stdin
+    cmd="$1"
+    shift
+    while read -r stdin; do
+        "$cmd" "$@" "$stdin"
+    done
 }
