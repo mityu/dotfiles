@@ -62,7 +62,4 @@ keymap:
   - name: i3's kill
     remap:
       Super-q:
-        launch:
-          - "i3-msg"
-          - "-q"
-          - "kill"
+        launch: ["i3-msg", "-q", "kill"]
