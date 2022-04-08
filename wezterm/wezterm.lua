@@ -88,5 +88,11 @@ return {
 
         {key = 'x', mods = 'SUPER', action = "ActivateCopyMode"},
         {key = 'z', mods = 'SUPER', action = "TogglePaneZoomState"},
+    },
+    window_padding = {
+      top = 0,
+      bottom = 0,
+      right = 0,
+      left = 0
     }
 }
