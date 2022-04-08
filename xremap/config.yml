@@ -14,7 +14,7 @@ modmap:
 keymap:
   - name: Browser
     application:
-      only: [Firefox, Google-chrome, Chromium, Vivaldi-stable]
+      only: [firefox, Google-chrome, Chromium, Vivaldi-stable]
     remap:
       Super-t: C-t
       Super-Shift-t: C-Shift-t
