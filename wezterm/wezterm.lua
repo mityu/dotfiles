@@ -4,6 +4,9 @@ function string.hasPrefix(str, prefix)
     return string.sub(str, 1, string.len(prefix)) == prefix
 end
 
+local isWindows = string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows')
+local isMac = wezterm.target_triple == 'x86_64-apple-darwin'
+
 local colors = {
     background = '#1f1f1f',
     foreground = '#eaeaea',
@@ -50,6 +53,11 @@ wezterm.on("update-right-status", function(window, pane)
   }));
 end)
 
+local MODKEY = 'SUPER'
+if isWindows then
+  MODKEY = 'ALT'
+end
+
 local config = {
     use_fancy_tab_bar = false,
     show_update_window = false,
@@ -60,16 +68,16 @@ local config = {
     colors = colors,
 
     disable_default_key_bindings = true,
-    leader = {key = 'p', mods = 'SUPER'},
+    leader = {key = 'p', mods = MODKEY},
     keys = {
-        {key = 't', mods = 'SUPER', action = wezterm.action{SpawnTab="CurrentPaneDomain"}},
-        {key = 'w', mods = 'SUPER', action = wezterm.action{CloseCurrentTab={confirm=true}}},
+        {key = 't', mods = MODKEY, action = wezterm.action{SpawnTab="CurrentPaneDomain"}},
+        {key = 'w', mods = MODKEY, action = wezterm.action{CloseCurrentTab={confirm=true}}},
         {key = 'Tab', mods = 'CTRL', action = wezterm.action{ActivateTabRelative = 1}},
         {key = 'Tab', mods = 'CTRL|SHIFT', action = wezterm.action{ActivateTabRelative = -1}},
-        {key = 'f', mods = 'SUPER', action = wezterm.action{Search = {CaseInSensitiveString = ''}}},
-        {key = 'v', mods = 'SUPER', action = wezterm.action{PasteFrom = "Clipboard"}},
-        {key = 'c', mods = 'SUPER', action = wezterm.action{CopyTo = "Clipboard"}},
-        -- {key = 'c', mods = 'SUPER', action = wezterm.action{CompleteSelection = "Clipboard"}},
+        {key = 'f', mods = MODKEY, action = wezterm.action{Search = {CaseInSensitiveString = ''}}},
+        {key = 'v', mods = MODKEY, action = wezterm.action{PasteFrom = "Clipboard"}},
+        {key = 'c', mods = MODKEY, action = wezterm.action{CopyTo = "Clipboard"}},
+        -- {key = 'c', mods = MODKEY, action = wezterm.action{CompleteSelection = "Clipboard"}},
         {key = 's', mods = 'LEADER', action = wezterm.action{SplitHorizontal = {domain = "CurrentPaneDomain"}}},
         {key = 'v', mods = 'LEADER', action = wezterm.action{SplitVertical = {domain = "CurrentPaneDomain"}}},
         {key = 'q', mods = 'LEADER', action = wezterm.action{CloseCurrentPane={confirm=true}}},
@@ -83,8 +91,8 @@ local config = {
         {key = 'L', mods = 'LEADER', action = wezterm.action{AdjustPaneSize = {"Right", 1}}},
         {key = 'Escape', mods = 'LEADER', action = "Nop"},
 
-        {key = 'x', mods = 'SUPER', action = "ActivateCopyMode"},
-        {key = 'z', mods = 'SUPER', action = "TogglePaneZoomState"},
+        {key = 'x', mods = MODKEY, action = "ActivateCopyMode"},
+        {key = 'z', mods = MODKEY, action = "TogglePaneZoomState"},
     },
     window_padding = {
       top = 0,
@@ -94,12 +102,12 @@ local config = {
     }
 }
 
-if string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows') then
+if isWindows then
     config.term = 'win32'
     config.font_size = 13
     config.initial_cols = 170
     config.initial_rows = 40
-elseif wezterm.target_triple == 'x86_64-apple-darwin' then
+elseif isMac then
     config.initial_cols = 170
     config.initial_rows = 40
 end
