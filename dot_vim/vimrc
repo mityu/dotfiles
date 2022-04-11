@@ -172,6 +172,11 @@ if !v:vim_did_enter
     &t_Ce = "\e[4:0m"
   endif
 
+  if IsWindows
+    set termguicolors
+    set mouse=a
+  endif
+
   # disable default plugins
   g:loaded_2html_plugin = 1
   g:loaded_getscriptPlugin = 1
