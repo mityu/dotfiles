@@ -1,10 +1,7 @@
 local wezterm = require('wezterm');
 
-local font_size
-if wezterm.target_triple == 'x86_64-apple-darwin' then
-    font_size = 14  -- TODO: Specify good size
-else
-    font_size = 14
+function string.hasPrefix(str, prefix)
+    return string.sub(str, 1, string.len(prefix)) == prefix
 end
 
 local colors = {
@@ -53,13 +50,13 @@ wezterm.on("update-right-status", function(window, pane)
   }));
 end)
 
-return {
+local config = {
     use_fancy_tab_bar = false,
     show_update_window = false,
     adjust_window_size_when_changing_font_size = false,
     exit_behavior = "Close",
     font = wezterm.font('Cica'),
-    font_size = font_size,
+    font_size = 14,
     colors = colors,
 
     disable_default_key_bindings = true,
@@ -96,3 +93,12 @@ return {
       left = 0
     }
 }
+
+if string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows') then
+    config.term = 'win32'
+    config.font_size = 13
+    config.initial_cols = 170
+    config.initial_rows = 40
+end
+
+return config
