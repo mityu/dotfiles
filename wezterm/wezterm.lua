@@ -99,6 +99,9 @@ if string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows') then
     config.font_size = 13
     config.initial_cols = 170
     config.initial_rows = 40
+elseif wezterm.target_triple == 'x86_64-apple-darwin' then
+    config.initial_cols = 170
+    config.initial_rows = 40
 end
 
 return config
