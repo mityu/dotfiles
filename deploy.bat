@@ -20,3 +20,5 @@ mklink /D %USERPROFILE%\vimfiles %PARENT_DIR%\dot_vim
 
 echo Deploying wezterm
 mklink /D %USERPROFILE%\.config\wezterm %PARENT_DIR%\wezterm
+
+pause
