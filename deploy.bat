@@ -20,6 +20,9 @@
   echo Deploying wezterm...
   mklink /D %USERPROFILE%\.config\wezterm %PARENT_DIR%\wezterm
 
+  echo Deploying alacritty...
+  mklink /D %APPDATA%\alacritty %PARENT_DIR%\alacritty
+
   echo Making shortcuts...
   cscript.exe //nologo //E:JScript "%~f0" %*
 
