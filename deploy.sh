@@ -11,7 +11,7 @@ auto_mkdir (){
 }
 
 
-auto_mkdir $XDG_CONFIG_HOME
+auto_mkdir $CONFIG_DIR
 
 echo "Deploying .zshrc"
 ln -sn ${SCRIPT_DIR}/.zshrc ~/.zshrc
