@@ -27,9 +27,11 @@
   GOTO:EOF
 @end
 
-WshShell = WScript.CreateObject("WScript.shell")
-startMenuPath = WshShell.ExpandEnvironmentStrings("%ProgramData%") + "\\Microsoft\\Windows\\Start Menu\\Programs\\"
 fs = WScript .CreateObject("Scripting.FileSystemObject")
+WshShell = WScript.CreateObject("WScript.shell")
+startMenuPath = fs.BuildPath(
+  WshShell.ExpandEnvironmentStrings("%ProgramData%"),
+  "Microsoft\\Windows\\Start Menu\\Programs")
 parentDirPath = fs.getParentFolderName(WScript.ScriptFullName)
 
 batfiles = ["WSLTerm", "wezterm"]
