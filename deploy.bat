@@ -36,11 +36,12 @@ startMenuPath = fs.BuildPath(
   WshShell.ExpandEnvironmentStrings("%ProgramData%"),
   "Microsoft\\Windows\\Start Menu\\Programs")
 parentDirPath = fs.getParentFolderName(WScript.ScriptFullName)
+batfilesDirPath = fs.BuildPath(parentDirPath, "batfiles")
 
 batfiles = ["WSLTerm", "wezterm"]
 for (i in batfiles) {
   WScript.Echo("Making shortcut of " + batfiles[i] + ".bat...")
-  src = fs.BuildPath(parentDirPath, batfiles[i] + ".bat")
+  src = fs.BuildPath(batfilesDirPath, batfiles[i] + ".bat")
   dest = fs.BuildPath(startMenuPath, batfiles[i] + ".lnk")
   shortcut = WshShell.CreateShortcut(dest)
   shortcut.TargetPath = src
