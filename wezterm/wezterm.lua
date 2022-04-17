@@ -5,7 +5,7 @@ function string.hasPrefix(str, prefix)
 end
 
 local isWindows = string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows')
-local isMac = wezterm.target_triple == 'x86_64-apple-darwin'
+local isMac = wezterm.target_triple == 'x86_64-apple-darwin' or wezterm.target_triple == 'aarch64-apple-darwin'
 
 local colors = {
     background = '#1f1f1f',
