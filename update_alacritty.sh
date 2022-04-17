@@ -1,7 +1,8 @@
 #!/bin/bash -x
 cd $1
+HASH=$(git rev-parse HEAD)
 git fetch
-if [ -n "$(git diff)" ]; then
+if [ $HASH == $(git rev-parse HEAD) ]; then
     echo "Alacritty is already up-to-date."
     exit 0
 fi
