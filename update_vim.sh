@@ -1,3 +1,4 @@
+#!/bin/bash -x
 cd $1
 git fetch
 if [ -n "$(git diff)" ]; then

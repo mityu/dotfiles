@@ -1,3 +1,4 @@
+#!/bin/bash -x
 cd $1
 git fetch
 if [ -n "$(git diff)" ]; then
@@ -7,6 +8,7 @@ fi
 git merge FETCH_HEAD
 make app
 if [ $? -eq 0 ]; then
+    echo 'Replace /Applications/Alacritty.app'
     rm -r /Applications/Alacritty.app
     mv ./target/release/osx/Alacritty.app /Applications/Alacritty.app
 fi
