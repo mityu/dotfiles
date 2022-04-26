@@ -1391,12 +1391,15 @@ endif
 if OptPluginExists('vim-sandwich')
   g:textobj_sandwich_no_default_key_mappings = 1
   g:operator_sandwich_no_default_key_mappings = 1
+  def SandwichConfig()
+    operator#sandwich#set('all', 'all', 'highlight', 0)
+  enddef
   MapOperator('vim-sandwich',
-      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
+      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'}, 'SandwichConfig')
   MapOperator('vim-sandwich',
-      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'})
+      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'}, 'SandwichConfig')
   MapOperator('vim-sandwich',
-      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
+      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'}, 'SandwichConfig')
 endif
 if OptPluginExists('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
