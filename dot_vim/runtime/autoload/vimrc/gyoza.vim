@@ -502,6 +502,16 @@ NewFiletypeRule('rust')
     '^%(%(let|return)>|\w+\s*\=.*<%(match|if|loop)>).*\{$',
     '};')
 
+NewFiletypeRule('tex')
+  ->AddRule(
+    '^\\begin\{\w+\*?}',
+    (prev: dict<any>, next: dict<any>): number => {
+      var groupname = matchstr(prev.trimed, '\v^\\begin\{\zs\w+\*?\ze}')
+      var closer = '\end{' .. groupname .. '}'
+      return CompleteClosingBlock(prev, next, closer)
+    }
+  )
+
 # bracketCompletefunc['vim'] = (prevline: dict<any>, nextline: dict<any>): string => {
 #   if IsInVim9script()
 #     return '}'
