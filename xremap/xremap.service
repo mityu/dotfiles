@@ -3,7 +3,7 @@ Description=xremap
 
 [Service]
 KillMode=process
-ExecStart=/usr/bin/sudo /home/mityu/.cargo/bin/xremap /home/mityu/.config/xremap/config.yml --watch
+ExecStart=/usr/bin/sudo /usr/bin/xremap /home/mityu/.config/xremap/config.yml --watch
 ExecStartPost=-/usr/bin/dunstify -a 'xremapActivation' -t 2000 'xremap is now active.'
 Type=simple
 Restart=always
