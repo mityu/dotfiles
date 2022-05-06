@@ -279,3 +279,26 @@ SnipFiletype('rust')
     feedkeys(cmd, 'ni')
     return true
   })
+
+SnipFiletype('java')
+  ->AddSnip((comparison: string): bool => {
+    var r = '^\v%(public\s+)?class%(\s+\w+\s*\{)?$'
+    if comparison !~# r
+      return false
+    endif
+
+    var snip = 'public class %s {'
+    var fname = expand('%:t:r')
+    if fname ==# ''
+      fname = '<+CURSOR+>'
+    endif
+    snip = printf(snip, fname)
+    ApplySnip([snip])
+
+    return true
+  })
+  ->AddSnip(TrySnipFuzzy)
+
+FuzzySnipList['java'] = [
+  ['public static void main(String[] args) {'],
+]
