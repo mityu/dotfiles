@@ -151,6 +151,8 @@ set $magenta #b48ead
 set $cyan #96b5b4
 set $white #c0c5ce
 
+client.focused #fafafa #fafafa #333333 #ff0000 #00ff00
+
 bar {
     status_command i3blocks
     mode dock
@@ -164,10 +166,11 @@ bar {
         # TODO: better colors
         background $background
         focused_background $background
-        statusline $blue
+        statusline #3f3f3f
         focused_statusline $foreground
         separator $secondary
-        focused_separator $secondary
+        # focused_separator $secondary
+        focused_separator #3f3f3f
 
         # Colors: border, bg, fg
         focused_workspace  $blue $blue $background
