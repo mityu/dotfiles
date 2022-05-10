@@ -109,14 +109,6 @@ export def Input(prompt: string, ...opt: list<any>): string
 enddef
 
 # Global utility functions
-legacy def! VimrcFunc(funcname: string): func
-  return function(SIDPrefix() .. funcname)
-enddef
-
-export def VimrcVar(varname: string): any
-  return eval(varname)
-enddef
-
 export def SetUndoFtplugin(config: string)
   var restorer = 'execute ' .. string(config)
   if exists('b:undo_ftplugin')
