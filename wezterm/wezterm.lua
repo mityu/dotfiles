@@ -71,6 +71,7 @@ local config = {
     leader = {key = 'p', mods = MODKEY},
     keys = {
         {key = 't', mods = MODKEY, action = wezterm.action{SpawnTab="CurrentPaneDomain"}},
+        {key = 'n', mods = MODKEY, action = "SpawnWindow"},
         {key = 'w', mods = MODKEY, action = wezterm.action{CloseCurrentTab={confirm=true}}},
         {key = 'Tab', mods = 'CTRL', action = wezterm.action{ActivateTabRelative = 1}},
         {key = 'Tab', mods = 'CTRL|SHIFT', action = wezterm.action{ActivateTabRelative = -1}},
