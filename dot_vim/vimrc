@@ -438,7 +438,6 @@ elseif executable('ag')
   &grepformat = '%f:%l:%c:%m'
 endif
 augroup vimrc_filetype
-  autocmd FileType c,cpp setlocal foldmethod=indent
   autocmd BufRead .envrc set filetype=sh
 augroup END
 augroup vimrc_mru
