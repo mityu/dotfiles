@@ -1125,6 +1125,34 @@ if PluginExists('vim-quickrun')
     ['hook/eval/template']: 'print(%s)'
   }
 
+  g:quickrun_config.tex = {
+    type: 'tex/platex'
+  }
+
+  {
+    var opencmd: string
+    if IsWindows
+      opencmd = 'explorer'
+    elseif IsMac
+      opencmd = 'open'
+    else
+      opencmd = 'xdg-open'
+    endif
+    var openpdfcmd = printf('%s %%s:p:r.pdf', opencmd)
+
+    var sweepfiles: list<string> =
+      ['.aux', '.log', '.dvi', '.out', '.pdf']
+      ->map((_: number, v: string): string => '%S:p:r' .. v)
+
+    g:quickrun_config['tex/platex'] = {
+      command: 'platex',
+      exec: ['%c %a %s', 'dvipdfmx %s:p:r.dvi', openpdfcmd],
+      tempfile: '%{tempname()}.tex',
+      ['hook/sweep/files']: sweepfiles,
+      ['hook/cd/directory']: '%S:p:h',
+    }
+  }
+
   if IsWSL
     g:quickrun_config.dosbatch = {
       command: 'cmd.exe',
