@@ -1143,7 +1143,7 @@ if PluginExists('vim-quickrun')
     \ call quickrun#module#register({
     \   kind: 'hook',
     \   name: 'vimrc_autoclose_quickfix',
-    \   on_ready: (_, _) => execute('cclose')
+    \   on_success: (_, _) => execute('cclose')
     \ }, true)
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
   augroup END
