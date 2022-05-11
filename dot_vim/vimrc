@@ -1182,10 +1182,18 @@ if PluginExists('open-browser.vim') && !v:vim_did_enter
   # :OpenBrowser {URL}   => Just use {URL}
   def OpenBrowser(cmdarg: string)
     var uri = trim(cmdarg)
+    var reg = ''
     if uri ==# ''
-      uri = getreg(v:register)
+      reg = v:register
     elseif uri[0] ==# '@' && strlen(uri) == 2
-      uri = getreg(uri[1])
+      reg = uri[1]
+    endif
+    if reg !=# ''
+      uri = getreg(reg)
+      if uri ==# ''
+        EchomsgError(printf('Register @%s is empty.', reg))
+        return
+      endif
     endif
     openbrowser#open(uri)
   enddef
