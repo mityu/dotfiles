@@ -1173,15 +1173,9 @@ if PluginExists('capture.vim')
 endif
 if PluginExists('open-browser.vim') && !v:vim_did_enter
   augroup vimrc_openbrowser
-    autocmd SourcePost openbrowser.vim OverwriteOpenBrowserCommand()
+    autocmd SourcePost */plugin/openbrowser.vim
+          \ command! -nargs=* OpenBrowser call OpenBrowser(<q-args>)
   augroup END
-
-  def OverwriteOpenBrowserCommand()
-    if exists(':OpenBrowser') == 2
-      command! -nargs=* OpenBrowser call OpenBrowser(<q-args>)
-      autocmd! vimrc_openbrowser SourcePost openbrowser.vim
-    endif
-  enddef
 
   # :OpenBrowser         => Read URL from the default register
   # :OpenBrowser @*      => Read URL from the specified register
