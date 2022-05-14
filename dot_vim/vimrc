@@ -350,7 +350,15 @@ endif
 if !exists('g:colors_name')  # Don't override colorscheme
   colorscheme domusaurea
 endif
-language C
+try
+  language en_US.UTF-8
+catch /^Vim\%((\a\+)\)\=:E197:/
+  language C
+catch
+  EchomsgError(v:throwpoint)
+  EchomsgError(v:exception)
+  language C
+endtry
 set relativenumber number
 set wrap
 set smartindent autoindent
