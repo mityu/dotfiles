@@ -725,8 +725,11 @@ def CmdwinEnter()
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
     b:completeopt_save = &completeopt
     setlocal completeopt=menu,preview
-    execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
-    normal! G
+    if line('$') >= &cmdwinheight
+      execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
+      # Go to the bottom line, then separate undo sequence.
+      execute "normal! Ga\<C-g>ua\<C-h>\<ESC>"
+    endif
     if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
     endif
