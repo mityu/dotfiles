@@ -22,9 +22,12 @@ function has_cmd() {
 }
 
 if has_cmd vim; then
-    THISFILE="${(%):-%N}"
-    THISFILE=${$(readlink $THISFILE):-$THISFILE}
-    eval 'alias vi="vim -u' $(dirname $THISFILE)'/dot_vim/vimrc_stable"'
+    () {
+        local thisfile
+        thisfile="${(%):-%N}"
+        thisfile=${$(readlink $thisfile):-$thisfile}
+        eval 'alias vi="vim -u' $(dirname $thisfile)'/dot_vim/vimrc_stable"'
+    }
 fi
 
 # Enable smart completion
