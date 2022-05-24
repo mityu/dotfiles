@@ -213,11 +213,16 @@ function update_components(){
         brew cleanup
         brew upgrade --cask
     fi
+    if has_cmd pacman; then
+        if has_cmd yay; then
+            # Prefer using yay to pacman
+            yay -Syyu --noconfirm
+        else
+            sudo pacman -Syyu --noconfirm
+        fi
+    fi
     if has_cmd pip3; then
         pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
-    fi
-    if has_cmd pacman; then
-        sudo pacman -Syyu
     fi
     update_zsh_plugins
 }
