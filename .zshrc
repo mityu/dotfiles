@@ -17,8 +17,11 @@ fi
 
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
+function has_cmd() {
+    which $1 &> /dev/null
+}
 
-if which vim &> /dev/null; then
+if has_cmd vim; then
     THISFILE="${(%):-%N}"
     THISFILE=${$(readlink $THISFILE):-$THISFILE}
     eval 'alias vi="vim -u' $(dirname $THISFILE)'/dot_vim/vimrc_stable"'
@@ -87,7 +90,7 @@ bindkey -M visual '_sa' add-surround
 #         printf '\e]51;["call", "Tapi_edit_line", ["%s", "%s"]]\x07' \
 #             "$BUFFER" "$CURSOR"
 #     }
-# elif [ which vim &> /dev/null ]; then
+# elif has_cmd vim; then
 #     function edit-line-in-vim(){
 #     }
 # else
@@ -98,7 +101,7 @@ bindkey -M visual '_sa' add-surround
 # zle -N edit-line-in-vim
 # bindkey -M vicmd '^o' edit-line-in-vim
 
-if type "vim" > /dev/null 2>&1; then
+if has_cmd vim; then
     export MANPAGER="vim -M +MANPAGER -"
 fi
 
@@ -127,7 +130,7 @@ fi
 DOTZSH=$HOME/.zsh
 
 function install_zsh_plugins() {
-    if [ ! which git &> /dev/null ]; then
+    if ! has_cmd git ; then
         echo -e '\033[41mgit command not found\033[m'
         return 1
     fi
@@ -183,7 +186,7 @@ if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
     source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-if which fzf &> /dev/null; then
+if has_cmd fzf; then
     export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
@@ -202,15 +205,15 @@ if which fzf &> /dev/null; then
 fi
 
 function update_components(){
-    if which brew &> /dev/null; then
+    if has_cmd brew; then
         brew upgrade
         brew cleanup
         brew upgrade --cask
     fi
-    if which pip3 &> /dev/null; then
+    if has_cmd pip3; then
         pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     fi
-    if which pacman &> /dev/null; then
+    if has_cmd pacman; then
         sudo pacman -Syyu
     fi
     update_zsh_plugins
@@ -225,7 +228,7 @@ function gitinit() {
 }
 
 function CAPSLOCK() {
-    if which xdotool &> /dev/null; then
+    if has_cmd xdotool; then
         xdotool key Caps_Lock
     else
         echo "\033[41m\xdotool not found\033[m"
@@ -240,3 +243,5 @@ function stdin() {
         "$cmd" "$@" "$stdin"
     done
 }
+
+unfunction has_cmd
