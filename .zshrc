@@ -60,6 +60,11 @@ zshaddhistory() {
 bindkey -d # Reset keybinds
 bindkey -v # Use vi like keybinds
 
+bindkey '^p' up-line-or-search
+bindkey '^n' down-line-or-search
+bindkey '^f' forward-char
+bindkey '^b' backward-char
+
 # textobjects
 autoload -U select-bracketed
 zle -N select-bracketed
