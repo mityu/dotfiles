@@ -81,12 +81,12 @@ autoload -Uz surround
 zle -N delete-surround surround
 zle -N change-surround surround
 zle -N add-surround surround
-bindkey -M vicmd '_sr' change-surround
-bindkey -M vicmd '_sd' delete-surround
-bindkey -M vicmd '_sa' add-surround
-bindkey -M visual '_sr' change-surround
-bindkey -M visual '_sd' delete-surround
-bindkey -M visual '_sa' add-surround
+bindkey -M vicmd 'mr' change-surround
+bindkey -M vicmd 'md' delete-surround
+bindkey -M vicmd 'ma' add-surround
+bindkey -M visual 'mr' change-surround
+bindkey -M visual 'md' delete-surround
+bindkey -M visual 'ma' add-surround
 
 # if [ -n "$VIM_TERMINAL" ]; then
 #     function edit-line-in-vim(){
