@@ -291,6 +291,8 @@ SnipFiletype('java')
     var fname = expand('%:t:r')
     if fname ==# ''
       fname = '<+CURSOR+>'
+    else
+      snip ..= '<+CURSOR+>'
     endif
     snip = printf(snip, fname)
     ApplySnip([snip])
@@ -300,5 +302,5 @@ SnipFiletype('java')
   ->AddSnip(TrySnipFuzzy)
 
 FuzzySnipList['java'] = [
-  ['public static void main(String[] args) {'],
+  ['public static void main(String[] args) {<+CURSOR+>'],
 ]
