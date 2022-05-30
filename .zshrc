@@ -64,6 +64,8 @@ bindkey '^p' up-line-or-search
 bindkey '^n' down-line-or-search
 bindkey '^f' forward-char
 bindkey '^b' backward-char
+bindkey '^a' beginning-of-line
+bindkey '^e' end-of-line
 
 # textobjects
 autoload -U select-bracketed
