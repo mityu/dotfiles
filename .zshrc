@@ -14,6 +14,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         eval 'export' $path_expr
     done
 fi
+export LANG=en_US.UTF-8
 
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
