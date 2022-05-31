@@ -18,11 +18,11 @@ export LANG=en_US.UTF-8
 
 alias winecmd='wine cmd /k "C:\setenv"'
 # alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
-function has_cmd() {
+function zsh_has_cmd() {
     which $1 &> /dev/null
 }
 
-if has_cmd vim; then
+if zsh_has_cmd vim; then
     () {
         local thisfile
         thisfile="${(%):-%N}"
@@ -101,7 +101,7 @@ bindkey -M visual 'ma' add-surround
 #         printf '\e]51;["call", "Tapi_edit_line", ["%s", "%s"]]\x07' \
 #             "$BUFFER" "$CURSOR"
 #     }
-# elif has_cmd vim; then
+# elif zsh_has_cmd vim; then
 #     function edit-line-in-vim(){
 #     }
 # else
@@ -112,7 +112,7 @@ bindkey -M visual 'ma' add-surround
 # zle -N edit-line-in-vim
 # bindkey -M vicmd '^o' edit-line-in-vim
 
-if has_cmd vim; then
+if zsh_has_cmd vim; then
     export MANPAGER="vim -M +MANPAGER -"
 fi
 
@@ -141,7 +141,7 @@ fi
 DOTZSH=$HOME/.zsh
 
 function install_zsh_plugins() {
-    if ! has_cmd git ; then
+    if ! zsh_has_cmd git ; then
         echo -e '\033[41mgit command not found\033[m'
         return 1
     fi
@@ -197,7 +197,7 @@ if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
     source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-if has_cmd fzf; then
+if zsh_has_cmd fzf; then
     export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
@@ -216,20 +216,20 @@ if has_cmd fzf; then
 fi
 
 function update_components(){
-    if has_cmd brew; then
+    if zsh_has_cmd brew; then
         brew upgrade
         brew cleanup
         brew upgrade --cask
     fi
-    if has_cmd pacman; then
-        if has_cmd yay; then
+    if zsh_has_cmd pacman; then
+        if zsh_has_cmd yay; then
             # Prefer using yay to pacman
             yay -Syyu --noconfirm
         else
             sudo pacman -Syyu --noconfirm
         fi
     fi
-    if has_cmd pip3; then
+    if zsh_has_cmd pip3; then
         pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
     fi
     update_zsh_plugins
@@ -244,7 +244,7 @@ function gitinit() {
 }
 
 function CAPSLOCK() {
-    if has_cmd xdotool; then
+    if zsh_has_cmd xdotool; then
         xdotool key Caps_Lock
     else
         echo "\033[41m\xdotool not found\033[m"
@@ -259,5 +259,3 @@ function stdin() {
         "$cmd" "$@" "$stdin"
     done
 }
-
-unfunction has_cmd
