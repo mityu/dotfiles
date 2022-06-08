@@ -1,5 +1,11 @@
 #!/bin/bash -x
-cd $1
+if [ ! -d "$HOME/.cache" ]; then
+    mkdir ~/.cache
+fi
+if [ ! -d "$HOME/.cache/vimbuild" ]; then
+    git clone https://github.com/vim/vim ~/.cache/vimbuild
+fi
+cd ~/.cache/vimbuild
 HASH=$(git rev-parse HEAD)
 git pull
 if [ $HASH == $(git rev-parse HEAD) ]; then
