@@ -105,8 +105,8 @@ if isWindows then
     config.initial_cols = 170
     config.initial_rows = 40
 elseif isMac then
-    config.initial_cols = 183
-    config.initial_rows = 51
+    config.initial_cols = 206
+    config.initial_rows = 58
 end
 
 return config
