@@ -1,11 +1,7 @@
 local wezterm = require('wezterm');
 
-function string.hasPrefix(str, prefix)
-    return string.sub(str, 1, string.len(prefix)) == prefix
-end
-
-local isWindows = string.hasPrefix(wezterm.target_triple,'x86_64-pc-windows')
-local isMac = wezterm.target_triple == 'x86_64-apple-darwin' or wezterm.target_triple == 'aarch64-apple-darwin'
+local isWindows = string.find(wezterm.target_triple, 'windows', 0, 1)
+local isMac = string.find(wezterm.target_triple, 'apple-darwin', 0, 1)
 
 local colors = {
     background = '#1f1f1f',
