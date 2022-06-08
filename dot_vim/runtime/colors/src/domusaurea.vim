@@ -86,7 +86,7 @@ Gen.Hi('PmenuSbar', '', '#82775a', '')
 Gen.Hi('PmenuThumb', '', '#b6b689', '')
 
 Gen.Hi('DiffAdd', '', '#322705', '')
-Gen.Hi('DiffDelete', '#002a40', '#002a40', '')
+Gen.Hi('DiffDelete', '', '#002a40', '')
 Gen.Hi('DiffChange', '', '#322705', '')
 Gen.Hi('DiffText', '', '#5c4709', '')
 
@@ -100,6 +100,7 @@ Gen.Hi('Ignore', 'NONE', '', '')
 Gen.Hi('SpecialKey', '#bebebe', '', '')
 Gen.Hi('VertSplit', '#fff8dc', '#fff8dc', '')
 Gen.Hi('MatchParen', 'NONE', '#a020f0', '')
+Gen.Hi('ColorColumn', '', '#40250a', '')
 
 var script =<< END
 let g:terminal_ansi_colors = [
