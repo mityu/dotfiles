@@ -1,12 +1,11 @@
 #!/bin/bash -x
 cd $1
 HASH=$(git rev-parse HEAD)
-git fetch
+git pull
 if [ $HASH == $(git rev-parse HEAD) ]; then
     echo "Alacritty is already up-to-date."
     exit 0
 fi
-git merge FETCH_HEAD
 make app
 if [ $? -eq 0 ]; then
     echo 'Replace /Applications/Alacritty.app'
