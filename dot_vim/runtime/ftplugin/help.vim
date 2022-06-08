@@ -5,6 +5,8 @@ scriptencoding utf-8
 " let b:did_ftplugin_after = 1
 
 SetUndoFtplugin delcommand HelpEdit | delcommand HelpView | set spell<
+SetUndoFtplugin nunmap <buffer> <C-n>
+SetUndoFtplugin nunmap <buffer> <C-p>
 
 if &modifiable
   setlocal spell
@@ -120,15 +122,21 @@ else
     endwhile
     return ''
   endfunction
-
-  " function! s:jump_to_tag() abort
-  "   let tag = s:get_text_on_cursor('|\zs[^|]\+\ze|')
-  "   if tag !=# ''
-  "     let pat = escape(tag, '\')
-  "     if !search('\V*\zs' . pat . '*', 'w')
-  "       execute 'help' tag
-  "     endif
-  "   endif
-  " endfunction
-  " nnoremap <buffer> <silent> <C-]> :<C-u>call <SID>jump_to_tag()<CR>
 endif
+
+if !exists('*' .. expand('<SID>') .. 'search_link')
+  function s:search_link(go_up) abort
+    let l:SearchSkip = {->
+          \ synID(line('.'), col('.'), 1)->synIDattr('name') !~#
+          \ '\v^%(helpOption|helpHyperTextJump)$'}
+
+    let flags = 'W'
+    if a:go_up
+      let flags ..= 'b'
+    endif
+    call search('[''|]\zs.', flags, 0, 0, l:SearchSkip)
+  endfunction
+endif
+
+nnoremap <buffer> <C-p> <Cmd>call <SID>search_link(1)<CR>
+nnoremap <buffer> <C-n> <Cmd>call <SID>search_link(0)<CR>
