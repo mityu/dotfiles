@@ -4,9 +4,10 @@ if [ ! -d "$HOME/.cache" ]; then
 fi
 if [ ! -d "$HOME/.cache/macvimbuild" ]; then
     git clone https://github.com/macvim-dev/macvim ~/.cache/macvimbuild
+    HASH=null
 fi
 cd ~/.cache/macvimbuild
-HASH=$(git rev-parse HEAD)
+: "${HASH:=$(git rev-parse HEAD)}"
 git pull
 if [ $HASH == $(git rev-parse HEAD) ]; then
     exit 0
