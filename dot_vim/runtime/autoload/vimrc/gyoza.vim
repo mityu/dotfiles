@@ -415,7 +415,7 @@ NewFiletypeRule('vim')
   ->AddRule('^\s*try>', 'endtry', ['\=^catch>', 'finally'])
   ->AddRule('^\s*echohl\s+%(NONE)@!\S+$', 'echohl NONE', ['\=^ec%[homsg]>', '\=^echon>', '\=^echoe%[rr]>', '\=^echoc%[onsole]'])
   ->AddRule('^\s*augroup\s+%(END)@!\S+$', 'augroup END')
-  ->AddRule('^\s*%(let|var|const|final)\s+\w+\s*\=\<\<\s*%(trim\s+)?\s*\w+$',
+  ->AddRule('^\s*%(let|var|const|final)\s+\w+\s*\=\<\<\s*%(%(trim|eval)\s+)*\s*\w+$',
       (prev: dict<any>, next: dict<any>): number => {
         var curpos = getcurpos()
         try
