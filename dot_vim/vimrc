@@ -498,10 +498,10 @@ noremap k gk
 noremap gj j
 noremap gk k
 
-nnoremap <expr> i getline('.') ==# '' ? "\"_S" : 'i'
-nnoremap <expr> I getline('.') ==# '' ? "\"_S" : 'I'
-nnoremap <expr> a getline('.') ==# '' ? "\"_S" : 'a'
-nnoremap <expr> A getline('.') ==# '' ? "\"_S" : 'A'
+nnoremap <expr> i getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'i'
+nnoremap <expr> I getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'I'
+nnoremap <expr> a getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'a'
+nnoremap <expr> A getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'A'
 nnoremap <CR> o<ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
