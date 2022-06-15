@@ -399,7 +399,7 @@ set virtualedit=block
 set complete=.,i,d,w,b,u
 set noimdisable
 set lazyredraw
-set previewpopup=highlight:Normal
+# set previewpopup=highlight:Normal
 set termwinkey=<C-w>
 set noesckeys
 set nowrapscan
@@ -995,6 +995,12 @@ if PluginExists('vim-findent')
   augroup vimrc_findent
     autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
+endif
+if PluginExists('vim-alith')
+  augroup vimrc_alith
+    autocmd ColorScheme * highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
+  augroup END
+  highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
 if PluginExists('vim-brownie')
   g:brownie_template_dirs =
