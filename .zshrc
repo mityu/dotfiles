@@ -25,10 +25,10 @@ function zsh_has_cmd() {
 if zsh_has_cmd vim; then
     () {
         local thisfile
-        thisfile="${(%):-%N}"
+        thisfile=$1
         thisfile=${$(readlink $thisfile):-$thisfile}
         eval 'alias vi="vim -u' $(dirname $thisfile)'/dot_vim/vimrc_stable"'
-    }
+    } ${(%):-%N}
 fi
 
 # Enable smart completion
