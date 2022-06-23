@@ -16,8 +16,6 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 fi
 export LANG=en_US.UTF-8
 
-alias winecmd='wine cmd /k "C:\setenv"'
-# alias pip3upgrade='pip3 list --outdated --format=legacy | awk '"'"'{print $1}'"'"' | xargs pip3 install -U'
 function zsh_has_cmd() {
     which $1 &> /dev/null
 }
@@ -95,22 +93,6 @@ bindkey -M vicmd 'ma' add-surround
 bindkey -M visual 'mr' change-surround
 bindkey -M visual 'md' delete-surround
 bindkey -M visual 'ma' add-surround
-
-# if [ -n "$VIM_TERMINAL" ]; then
-#     function edit-line-in-vim(){
-#         printf '\e]51;["call", "Tapi_edit_line", ["%s", "%s"]]\x07' \
-#             "$BUFFER" "$CURSOR"
-#     }
-# elif zsh_has_cmd vim; then
-#     function edit-line-in-vim(){
-#     }
-# else
-#     function edit-line-in-vim(){
-#         # Do nothing.
-#     }
-# fi
-# zle -N edit-line-in-vim
-# bindkey -M vicmd '^o' edit-line-in-vim
 
 if zsh_has_cmd vim; then
     export MANPAGER="vim -M +MANPAGER -"
