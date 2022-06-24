@@ -731,8 +731,8 @@ def CmdwinEnter()
     setlocal completeopt=menu,preview
     if line('$') >= &cmdwinheight
       execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
-      # Go to the bottom line, then separate undo sequence.
-      execute "normal! Ga\<C-g>ua\<C-h>\<ESC>"
+      normal! G
+      &undolevels = &undolevels  # Separate undo sequence
     endif
     if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
