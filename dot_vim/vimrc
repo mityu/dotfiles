@@ -592,17 +592,16 @@ def ToggleLocationlist()
   endtry
 enddef
 # }}}
-def TerminalMap(mapcmd: string, lhs: string, rhs: string)
-  execute printf('%s %s%s %s%s',
-        mapcmd, &termwinkey, lhs, &termwinkey, rhs)
-enddef
-TerminalMap('tnoremap', ':', ':<C-f>A')
-TerminalMap('tnoremap', '<Space>:', ':<C-f>k')
-TerminalMap('tnoremap', '<ESC>', 'N')
-TerminalMap('tnoremap', 'p', '""')
-TerminalMap('tnoremap', '<C-r>', '"')
-TerminalMap('tnoremap', 't', '<Cmd>tabnew<CR>')
-TerminalMap('tnoremap', 'n', '<Cmd>botright new<CR>')
+tnoremap <C-w>: <C-w>:<C-f>A
+tnoremap <C-w><Space>: <C-w>:<C-f>k
+tnoremap <C-w>; <C-w>:
+tnoremap <C-w><ESC> <C-w>N
+tnoremap <C-w>p <C-w>""
+tnoremap <C-w><C-r> <C-w>"
+tnoremap <C-w>t <Cmd>tabnew<CR>
+tnoremap <C-w>n <Cmd>botright new<CR>
+tnoremap <C-w>s <Cmd>botright wincmd s<CR><C-w>N
+tnoremap <C-w>v <Cmd>botright wincmd v<CR><C-w>N
 
 # Loop
 def LoopDefine(config: dict<any>)
