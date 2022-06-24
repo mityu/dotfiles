@@ -1455,6 +1455,10 @@ if OptPluginExists('caw.vim')
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
         \ <C-r>=b:caw_oneline_comment<CR>
 
+  def CawLoadFtplugin()
+    execute $'runtime! OPT after/ftplugin/{&filetype}/caw.vim'
+  enddef
+
   def CawMap(): string
     var kind = ''
     if col('.') == 1
@@ -1470,9 +1474,12 @@ if OptPluginExists('caw.vim')
   enddef
   imap <expr> <Plug>(vimrc:caw:map) <SID>CawMap()
 
-  MapOperator('caw.vim', {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
-  MapOperator('caw.vim', {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
-  MapTextModifierPlugin('caw.vim', {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'})
+  MapOperator('caw.vim',
+    {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'}, 'CawLoadFtplugin')
+  MapOperator('caw.vim',
+    {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'}, 'CawLoadFtplugin')
+  MapTextModifierPlugin('caw.vim',
+    {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'}, 'CawLoadFtplugin')
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
