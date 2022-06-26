@@ -785,7 +785,6 @@ endif
   add(map_, ['nnoremap', 'ev', 'edit $MYVIMRC'])
   add(map_, ['nnoremap', 'sv', 'source $MYVIMRC'])
   add(map_, ['nnoremap', 'k', 'call vimrc#mru#start()'])
-  add(map_, ['nnoremap', 'b', 'call gram#sources#buffers#launch()'])
   add(map_, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
   add(map_, ['nnoremap', 'f', 'call vimrc#filore#start()'])
   execute map_->mapnew((_, val): string => [val[0], '<Space>' .. val[1], printf('<Cmd>%s<CR>', val[2])]->join())->join("\n")
@@ -1046,6 +1045,11 @@ if PluginExists('vim-gram')
     gram#custom#map_key('i', '<Del>', '<C-h>')
     gram#custom#map_key('i', '<BS>', '<C-h>')
   enddef
+
+  if PluginExists('vim-gram-sources')
+    nnoremap <Space>b <Cmd>call gram#sources#buffer#launch()<CR>
+    command! -nargs=? -complete=dir Files call gram#sources#file_rec#launch(<q-args>)
+  endif
 endif
 if PluginExists('vim-wispath')
   imap <C-l><C-f> <Plug>(wispath-complete)
