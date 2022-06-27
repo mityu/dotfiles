@@ -603,6 +603,11 @@ tnoremap <C-w>n <Cmd>botright new<CR>
 tnoremap <C-w>s <Cmd>botright wincmd s<CR><C-w>N
 tnoremap <C-w>v <Cmd>botright wincmd v<CR><C-w>N
 
+if IsMac && has('gui_running')
+  noremap <D-[> <ESC>
+  noremap! <D-[> <ESC>
+endif
+
 # Loop
 def LoopDefine(config: dict<any>)
   var prefix = printf('<Plug>(<SID>-loop-%s)', config.id)
