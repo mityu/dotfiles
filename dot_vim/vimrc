@@ -1047,7 +1047,7 @@ if PluginExists('vim-gram')
   enddef
 
   if PluginExists('vim-gram-sources')
-    nnoremap <Space>b <Cmd>call gram#sources#buffer#launch()<CR>
+    nnoremap <Space>b <Cmd>call gram#sources#buffers#launch()<CR>
     command! -nargs=? -complete=dir Files call gram#sources#file_rec#launch(<q-args>)
   endif
 endif
