@@ -14,6 +14,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         eval 'export' $path_expr
     done
 fi
+export PATH=$(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin:$PATH
 export LANG=en_US.UTF-8
 
 function zsh_has_cmd() {
