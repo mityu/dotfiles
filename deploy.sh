@@ -14,7 +14,7 @@ auto_mkdir (){
 auto_mkdir $CONFIG_DIR
 
 echo "Deploying .zshrc"
-ln -sn ${SCRIPT_DIR}/.zshrc ~/.zshrc
+ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
 
 
 echo "Deploying .vim/"
