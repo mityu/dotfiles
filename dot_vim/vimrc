@@ -1145,6 +1145,22 @@ if PluginExists('vim-quickrun')
     ['hook/eval/template']: 'print(%s)'
   }
 
+  if executable('deno')
+    # If deno doesn't exist, use quickrun's default config. It has configs for
+    # other typescript runners.
+    # To use deno without type checking, do :Quickrun typescript/deno.
+    g:quickrun_config.typescript = {
+      type: 'typescript/deno-check'
+    }
+
+    g:quickrun_config['typescript/deno-check'] = {
+      command: 'deno',
+      cmdopt: '--check --allow-all --unstable',
+      tempfile: '%{tempname()}.ts',
+      exec: ['%c run %o %s'],
+    }
+  endif
+
   g:quickrun_config.tex = {
     type: 'tex/platex'
   }
@@ -1194,6 +1210,10 @@ if PluginExists('vim-quickrun')
     \   on_success: (_, _) => execute('cclose')
     \ }, true)
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
+    autocmd FileType quickrun {
+      matchadd('Conceal', '\e[\d\+m', 10, -1, {conceal: ''})
+      setlocal conceallevel=3 concealcursor=nvic
+    }
   augroup END
 endif
 if PluginExists('capture.vim')
