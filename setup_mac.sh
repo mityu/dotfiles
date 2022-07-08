@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # Usage:
-#  - Clone this repository and do `<path/to/repository>/deploy.sh`
+#  - Clone this repository and do `<path/to/repository>/setup_mac.sh`
 #  - `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mityu/dotfiles/master/setup_mac.sh)"`
 
 has_cmd (){
@@ -18,26 +18,12 @@ ask (){
     done
 }
 
-# Installing Homebrew (cask) formula implementation.
-# Usage:
-#   - Install Homebrew formula
-#       install_formula {formula-name}
-#   - Install Homebrew cask formula
-#       install_formula {formula-name} cask
-install_formula (){
-    if brew $2 list $1 &>/dev/null; then
-        echo "Formula already installed. Skip: brew $2 install $1"
-    else
-        brew $2 install $1
-    fi
-}
-
 brew_install (){
-    install_formula $1
-}
-
-brew_cask_install (){
-    install_formula $1 cask
+    if brew list $1 &>/dev/null; then
+        echo "Formula already installed. Skip: $ brew install $1"
+    else
+        brew install $@
+    fi
 }
 
 # Get the user's passward at first for sudo.
@@ -62,17 +48,19 @@ if ! has_cmd brew ; then
     exit 1
 fi
 
-if ( ! has_cmd git ) || ( ask "Install Homebrew's git?" ); then
+if ! has_cmd git; then
     brew_install git
 fi
-brew_cask_install alacritty
+
 brew_install zsh
-if [ -f "/usr/local/bin/zsh" ]; then # Installing zsh successfully.
+if brew list zsh &> /dev/null; then
     echo $password | \
-        sudo -S -- sh -c "echo '/usr/local/bin/zsh' >> /private/etc/shells"
-    chsh -s /usr/local/bin/zsh
+        sudo -S -- sh -c "echo '$(brew --prefix)/bin/zsh' >> /private/etc/shells"
+    chsh -s $(brew --prefix)/bin/zsh
 fi
-brew_install the_silver_searcher
+
+brew_install wezterm
+brew_install ripgrep
 
 DOTFILES=$HOME/dotfiles
 if [ ! -d "$DOTFILES" ]; then
@@ -80,12 +68,4 @@ if [ ! -d "$DOTFILES" ]; then
     git clone --recursive https://github.com/mityu/dotfiles.git $DOTFILES
 fi
 $DOTFILES/deploy.sh
-
-DOTFILES=$HOME/dotfiles
-VIM_NIGHTLY_BUILD_DIR=$HOME/.vim_nightly_build
-if [ ! -d "$VIM_NIGHTLY_BUILD_DIR" ]; then
-    git clone --recursive --depth 1 --single-branch \
-        https://github.com/vim/vim.git $VIM_NIGHTLY_BUILD_DIR
-    make
-    make install
-fi
+$DOTFILES/bin/update-vim.sh
