@@ -30,6 +30,10 @@ if zsh_has_cmd vim; then
     } ${(%):-%N}
 fi
 
+if ! zsh_has_cmd sudoedit; then
+    alias sudoedit='sudo -e'
+fi
+
 # Enable smart completion
 autoload -Uz compinit
 compinit
