@@ -537,7 +537,7 @@ endfunction "}}}
 
 function! s:browse_filter_files() abort
   let cwd_strlen = s:win_get_reference_of_current_items().current_directory
-        \->strlen() + 1
+        \->fnamemodify(':p')->strlen()
   let files = s:win_get_reference_of_current_items().file_list
         \->mapnew({idx, item -> #{word: item.abs[cwd_strlen :], user_data: idx}})
   call gram#select({
