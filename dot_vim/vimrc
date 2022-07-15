@@ -1127,6 +1127,23 @@ if PluginExists('vim-quickrun')
     type: 'cpp',
     cmdopt: '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
   }
+  g:quickrun_config.go = {
+    command: 'go',
+    cmdopt: '-mod=mod',
+    exec: '%c run %s:p:t %a',
+    tempfile: '%{tempname()}.go',
+    ['hook/cd/directory']: '%S:p:h',
+    ['hook/output_encode/encoding']: 'utf-8',
+  }
+  g:quickrun_config['go/full'] = {
+    command: 'go',
+    cmdopt: '-mod=mod',
+    exec: ['%c mod init quickrun%s:p:t:r', '%c mod tidy', '%c run %s:p:t %a'],
+    tempfile: '%{tempname()}.go',
+    ['hook/cd/directory']: '%S:p:h',
+    ['hook/sweep/files']: ['%S:p:h/go.mod', '%S:p:h/go.sum'],
+    ['hook/output_encode/encoding']: 'utf-8',
+  }
   g:quickrun_config.objc = {
     command: 'cc',
     execute: ['%c %s -o %s:p:r -framework Foundation', '%s:p:r %a', 'rm -f %s:p:r'],
