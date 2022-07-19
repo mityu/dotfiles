@@ -136,23 +136,26 @@ enddef
 
 SnipFiletype('go')
   ->AddSnip((comparison: string): bool => {
-    var r = '^\vif(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
+    var r = '^\v(}\s*else\s+)?if(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
 
     var m = matchlist(comparison, r)
     if empty(m)
       return false
     endif
 
-    var snip = ['if' .. m[1] .. ' err != nil {']
-    if m[2] !=# ''
+    var [else_unit, initializer, kind] = m[1 : 3]
+    var snip = [else_unit .. 'if' .. initializer .. ' err != nil {']
+    if kind !=# ''
       var processes = [
         'return err',
         'fmt.Println(err)',
         'log.Fatal(err)',
         'panic(err)',
+        't.Error(err)',
+        't.Fatal(err)',
       ]
       for p in processes
-        if stridx(tolower(p), m[2]) != -1
+        if stridx(tolower(p), kind) != -1
           snip->add("\t" .. p)
           break
         endif
