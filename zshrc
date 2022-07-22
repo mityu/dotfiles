@@ -57,7 +57,7 @@ zshaddhistory() {
     local line cmd
     line=${1%%$'\n'}
     cmd=${line%% *}
-    [[ "$(command -v $cmd)" != '' && $cmd != 'rm' ]]
+    [[ ! ("$(command -v $cmd)" == '' || $cmd == 'rm' || $cmd == 'exit') ]]
 }
 
 
