@@ -1789,6 +1789,7 @@ def StatuslineGenerator(): string
     '[%{<SID>StatuslineGitBranch()}]' ..
     '%{<SID>FilenameLabel(bufnr("%"))}' ..
     '%<%=' ..
+    '[%{&fileencoding == "" ? &encoding : &fileencoding}]' ..
     '[%{pathshorten(getcwd(winnr()))}]'
   return substitute(statusline, '\c<SID>', SIDPrefix(), 'g')
 enddef
