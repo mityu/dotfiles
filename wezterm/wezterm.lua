@@ -100,7 +100,6 @@ local config = {
 }
 
 if isWindows then
-    config.term = 'win32'
     config.font_size = 13
     config.initial_cols = 170
     config.initial_rows = 40
