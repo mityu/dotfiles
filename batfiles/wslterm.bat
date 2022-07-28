@@ -25,4 +25,4 @@ wsl.exe -d Ubuntu-18.04
 goto :EOF
 
 :start
-%~dp0launch-wezterm.bat start -- wsl.exe -d Ubuntu-18.04
+%~dp0launch-wezterm.bat --config default_prog={'wsl.exe','-d','Ubuntu-18.04'} start
