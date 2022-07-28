@@ -22,6 +22,10 @@ auto_mkdir (){
 
 auto_mkdir $CONFIG_DIR
 
+echo "Deploying .bashrc"
+ln -sn $SCRIPT_DIR/bashrc ~/.bashrc
+
+
 echo "Deploying .zshrc"
 ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
 
