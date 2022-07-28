@@ -22,7 +22,7 @@ if which fzf &> /dev/null; then
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
     # FIXME: It seems that fzf doesn't work on MSYS2 bash on Vim's terminal.
-    if [[ ! ($VIM_TERMINAL == "" || $MSYSTEM == '') ]]; then
+    if [[ $VIM_TERMINAL == "" || $MSYSTEM == '' ]]; then
         bind -x '"\C-r": select-history'
     fi
     function select-history() {
