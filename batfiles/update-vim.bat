@@ -33,7 +33,7 @@ if "%1" == "gui" (
     goto :show_usage
 )
 for /f "usebackq" %%A in (`cd`) do set CWD=%%A
-cd %USERPROFILE%\vim\src
+cd %USERPROFILE%\.cache\vimbuild\src
 for /f "usebackq" %%A in (`git rev-parse HEAD`) do set HASH=%%A
 git pull
 for /f "usebackq" %%A in (`git rev-parse HEAD`) do set HASH_AFTER=%%A
