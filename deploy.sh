@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $MSYSTEM != "" ]]; then
-    if ! openfiles > /dev/null; then
+    if ! openfiles &> /dev/null; then
         powershell start-process \"$(cygpath -w /msys2_shell.cmd)\" \
             -Verb runas -ArgumentList ^-mingw64,$(readlink -f $0)
         exit 0
