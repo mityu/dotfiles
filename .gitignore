@@ -4,4 +4,5 @@ dot_vim/runtime/doc/tags
 dot_vim/.netrwhist
 dot_mlterm/ttys*
 dot_mlterm/challenge
+dot_mlterm/msg.log
 !.gitignore
