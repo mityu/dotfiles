@@ -35,12 +35,7 @@ ln -snfv ${SCRIPT_DIR}/dot_vim ~/.vim
 
 
 echo "Deploying .mlterm/"
-auto_mkdir $HOME/.mlterm
-for file in ${SCRIPT_DIR}/dot_mlterm/*
-do
-    ln -snfv $file ${HOME}/.mlterm
-done
-
+ln -snfv $SCRIPT_DIR/dot_mlterm ~/.mlterm
 
 echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
