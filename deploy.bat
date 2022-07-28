@@ -38,7 +38,7 @@ startMenuPath = fs.BuildPath(
 parentDirPath = fs.getParentFolderName(WScript.ScriptFullName)
 batfilesDirPath = fs.BuildPath(parentDirPath, "batfiles")
 
-batfiles = ["WSLTerm", "wezterm", "bash"]
+batfiles = ["WSLTerm", "wezterm", "bashterm"]
 for (i in batfiles) {
   WScript.Echo("Making shortcut of " + batfiles[i] + ".bat...")
   src = fs.BuildPath(batfilesDirPath, batfiles[i] + ".bat")

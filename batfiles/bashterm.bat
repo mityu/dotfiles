@@ -20,8 +20,8 @@ if "%A%" == "%A:/c=%" (
 )
 
 :nostart
-C:\msys64\msys2_shell.cmd -mingw64 -defterm -no-start
+C:\msys64\msys2_shell.cmd -mingw64 -defterm -no-start -use-full-path
 goto :EOF
 
 :start
-%~dp0launch-wezterm.bat start -- C:\msys64\msys2_shell.cmd -mingw64 -defterm -no-start
+%~dp0launch-wezterm.bat --config default_prog={'C:\\msys64\\msys2_shell.cmd','-mingw64','-defterm','-no-start','-use-full-path'} start
