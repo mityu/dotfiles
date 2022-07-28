@@ -1,5 +1,14 @@
 #!/bin/bash
 
+if [[ "$(uname)" =~ ^MSYS || "$(uname)" =~ ^MINGW ]]; then
+    if ! openfiles > /dev/null; then
+        powershell start-process \"$(cygpath -w /msys2_shell.cmd)\" \
+            -Verb runas -ArgumentList ^-mingw64,$(readlink -f $0)
+        exit 0
+    fi
+    export MSYS=winsymlinks:nativestrict
+fi
+
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
 
