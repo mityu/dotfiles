@@ -3,4 +3,4 @@ set GOROOT=C:\msys64\mingw64\lib\go
 set EDITOR=vim
 set GIT_EDITOR=vim
 cd %USERPROFILE%
-start %USERPROFILE%\WezTerm\wezterm-gui
+%~dp0launch-wezterm.bat
