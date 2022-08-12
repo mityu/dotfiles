@@ -1228,6 +1228,8 @@ if PluginExists('vim-quickrun')
     \   on_success: (_, _) => execute('cclose')
     \ }, true)
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
+    autocmd CmdwinEnter *
+    \ noremap <buffer> <Plug>(quickrun) <Cmd>echo ':QuickRun is disabled in cmdwin.'<CR>
     autocmd FileType quickrun {
       matchadd('Conceal', '\e[\d\+m', 10, -1, {conceal: ''})
       setlocal conceallevel=3 concealcursor=nvic
