@@ -1,6 +1,7 @@
 #!/bin/bash -eu
 if [[ "${1:-}" == "" || "$1" == "-h" || "$1" == "--help" ]]; then
     echo "Usage: `basename $0` <version>|--help|-h"
+    echo "            Extract NeoVim package into ./nvim-<version>."
     echo "Examples:"
     echo " - Download v0.4.0:           $ `basename $0` v0.4.0"
     echo " - Download nightly version:  $ `basename $0` nightly"
@@ -19,9 +20,16 @@ if which uname &> /dev/null && [[ "`uname`" == "Darwin" ]]; then
         echo "'xattr' command is required on macOS."
         exit 1
     fi
-    curl -O https://github.com/neovim/neovim/releases/download/$1/nvim-macos.tar.gz
-    xattr -c ./nvim-macos.tar.gz
-    tar xzvf ./nvim-macos.tar.gz
+    OFNAME=./nvim-$1.tar.gz
+    curl -L -o $OFNAME https://github.com/neovim/neovim/releases/download/$1/nvim-macos.tar.gz
+    xattr -c $OFNAME
+    tar xzvf $OFNAME
+    mv $OFNAME ~/.Trash
+    if [ -d "./nvim-osx64" ]; then
+        mv ./nvim-osx64 ./nvim-$1
+    elif [ -d "./nvim-macos" ]; then
+        mv ./nvim-macos ./nvim-$1
+    fi
 else
     echo "Unsupported OS"
 fi
