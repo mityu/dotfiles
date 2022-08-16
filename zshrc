@@ -56,7 +56,14 @@ setopt menu_complete
 zshaddhistory() {
     local line cmd
     line=${1%%$'\n'}
-    cmd=${line%% *}
+    # Skip environmental variable assignments
+    while true; do
+        cmd=${line%% *}
+        line=${line#* }
+        if [[ ${cmd%%=*} == $cmd && ${cmd#*=} == $cmd ]]; then
+            break
+        fi
+    done
     [[ ! ("$(command -v $cmd)" == '' || $cmd == 'rm' || $cmd == 'exit') ]]
 }
 
