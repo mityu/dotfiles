@@ -24,12 +24,23 @@ if which uname &> /dev/null && [[ "`uname`" == "Darwin" ]]; then
     curl -L -o $OFNAME https://github.com/neovim/neovim/releases/download/$1/nvim-macos.tar.gz
     xattr -c $OFNAME
     tar xzvf $OFNAME
-    mv $OFNAME ~/.Trash
+
+    ODIR=./nvim-$1
     if [ -d "./nvim-osx64" ]; then
-        mv ./nvim-osx64 ./nvim-$1
+        mv ./nvim-osx64 $ODiR
     elif [ -d "./nvim-macos" ]; then
-        mv ./nvim-macos ./nvim-$1
+        mv ./nvim-macos $ODIR
     fi
+
+    # Move the archive file to Trash.
+    OFNAME=$(pwd)/$(basename $OFNAME)  # Make it absolute path
+    osascript <<EOF
+    tell application "Finder"
+         move POSIX file "$OFNAME" to trash
+    end tell
+EOF
+
+    echo "Created: $ODIR"
 else
     echo "Unsupported OS"
 fi
