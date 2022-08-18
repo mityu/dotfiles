@@ -173,11 +173,11 @@ bar {
         focused_separator #3f3f3f
 
         # Colors: border, bg, fg
-        focused_workspace  $blue $blue $background
+        focused_workspace  #777777 #777777 $background
         active_workspace $background $background $foreground
         inactive_workspace $background $background $foreground
         urgent_workspace   $red $red $background
-        binding_mode       $blue $blue $background
+        binding_mode       #777777 #777777 $background
     }
 }
 
