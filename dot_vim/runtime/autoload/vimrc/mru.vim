@@ -56,17 +56,6 @@ function! vimrc#mru#start() abort "{{{
         \ 'callback': {item -> execute('edit ' . fnameescape(item.word))},
         \ })
 endfunction "}}}
-function! vimrc#mru#start_sygram() abort "{{{
-  if !s:is_available() | return | endif
-  if s:get_config('auto_delete_unexist_file_history')
-    call vimrc#mru#delete_unexist_file_history()
-  endif
-  call s:load_history()
-  let item = sygram#select(s:history)
-  if item !=# ''
-    edit `=item`
-  endif
-endfunction "}}}
 function! vimrc#mru#try_to_enable() abort "{{{
   let s:is_available = s:try_to_enable_impl()
 endfunction "}}}
