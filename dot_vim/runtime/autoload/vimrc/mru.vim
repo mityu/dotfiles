@@ -39,6 +39,7 @@ function! vimrc#mru#onReadFile() abort "{{{
     return
   endif
   call s:load_history()
+  let file_name = fnamemodify(file_name, ':~')
   let index = index(s:history,file_name)
   if index != -1 | call remove(s:history,index) | endif
   call insert(s:history,file_name)
