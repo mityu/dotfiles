@@ -1107,7 +1107,7 @@ if PluginExists('vim-ambicmd')
     rule += ['.\\{-}' .. substitute(cmd, '.\zs', '.\\{-}', 'g')]
     return rule
   enddef
-  g:ambicmd#build_rule = SIDPrefix() .. 'AmbicmdBuildRule'
+  g:ambicmd#build_rule = AmbicmdBuildRule
 endif
 if PluginExists('vim-quickrun')
   g:quickrun_config = {}
