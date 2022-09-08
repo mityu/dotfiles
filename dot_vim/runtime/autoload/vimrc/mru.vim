@@ -81,7 +81,7 @@ function! s:try_to_enable_impl() abort "{{{
 endfunction "}}}
 function! vimrc#mru#delete_unexist_file_history() abort "{{{
   call s:load_history()
-  call filter(s:history,'filereadable(v:val)')
+  call filter(s:history,'filereadable(expand(v:val))')
   call s:save_history()
 endfunction "}}}
 function! s:is_available() abort "{{{
