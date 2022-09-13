@@ -307,3 +307,31 @@ SnipFiletype('java')
 FuzzySnipList['java'] = [
   ['public static void main(String[] args) {<+CURSOR+>'],
 ]
+
+SnipFiletype('_')
+  ->AddSnip((_: string): bool => {
+    var linestr = getline('.')
+    var pre_cursor = strpart(linestr, 0, col('.') - 1)
+    var reg_wrapper = '\%(^\|\s\)\zs[^([:space:]]*(\ze)>$'
+    var wrapper = matchstr(pre_cursor, reg_wrapper)
+    if wrapper ==# ''
+      return false
+    endif
+    var firstcol = col('.')
+    search('[^([:space:]]\+(\?', 'e', line('.'))
+    if strpart(linestr, col('.') - 1, 1) ==# '('
+      normal! %
+    endif
+    var lastcol = col('.')
+    var target = strpart(linestr, firstcol - 1, lastcol - firstcol + 1)
+    var pre_wrapper =
+          strpart(pre_cursor, 0, strlen(pre_cursor) - strlen(wrapper) - strlen(')>'))
+    var snip =
+          pre_wrapper .. wrapper .. target .. ')<+CURSOR+>' .. linestr[lastcol :]
+    # Restore cursor position in order to make cursor position be restored
+    # properly after undo.
+    cursor(line('.'), firstcol)
+    ApplySnip([snip])
+
+    return true
+  })
