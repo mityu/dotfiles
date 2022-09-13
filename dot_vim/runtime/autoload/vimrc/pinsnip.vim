@@ -11,7 +11,7 @@ export def Expand(): string
     return ''
   endif
 
-  for SnipFunc in get(SnipList, &filetype, [])
+  for SnipFunc in get(SnipList, &filetype, []) + get(SnipList, '_', [])
     if SnipFunc(comparison)
       return ''
     endif
