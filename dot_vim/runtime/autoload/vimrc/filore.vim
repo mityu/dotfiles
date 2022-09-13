@@ -19,7 +19,7 @@ function! s:notify.error(msg) abort "{{{
   call self.notify(a:msg,'Error','echomsg')
 endfunction "}}}
 function! s:notify.warning(msg) abort "{{{
-  call self.notify(a:msg,'Warning','echomsg')
+  call self.notify(a:msg,'WarningMsg','echomsg')
 endfunction "}}}
 
 let s:filesystem = {}
