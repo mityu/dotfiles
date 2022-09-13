@@ -1,3 +1,4 @@
+# To check application names, run `wmctrl -x -l`
 modmap:
   - name: Global
     remap:
@@ -32,7 +33,13 @@ keymap:
 
   - name: macOS like
     application:
-      not: [URxvt, org.wezfurlong.wezterm, Alacritty, Gvim]
+      not: [
+        URxvt,
+        org.wezfurlong.wezterm,
+        org.wezfurlong.wezterm.org.wezfurlong.wezterm,
+        Alacritty,
+        Gvim
+      ]
     remap:
       # Cursor
       C-b: Left
