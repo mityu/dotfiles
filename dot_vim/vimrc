@@ -255,7 +255,8 @@ def PackRegister()
   minpac#add('matze/vim-tex-fold')
   minpac#add('mityu/vim-alith')
   minpac#add('mityu/vim-brownie')
-  minpac#add('mityu/vim-gram')
+  minpac#add('mityu/vim-gram', {branch: 'v2'})
+  minpac#add('mityu/vim-gram-peripherals')
   minpac#add('mityu/vim-gram-sources')
   minpac#add('mityu/vim-vim9context')
   minpac#add('mityu/vim-wispath')
@@ -727,7 +728,9 @@ def CmdwinEnter()
 
   # Make executing a previous command easier.
   if PluginExists('vim-gram')
-    nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+    # nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+    nnoremap <buffer> / <Cmd>call gram#core#setup(#{
+          \sources: [#{name: 'command-history', default_action: 'command-history:select'}]})<CR>
   endif
   vimrc#incsearch#Setup()
 
@@ -759,25 +762,24 @@ def CmdwinCompletion(select_next: bool): string
     return "\<C-x>\<C-v>"
   endif
 enddef
-def CmdwinSelectHistory()
-  var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-  map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
-  reverse(history)
-  gram#select({
-         name: getcmdwintype() .. 'history',
-         items: history,
-         callback: SIDPrefix() .. 'CmdwinSelectHistoryCallback',
-       })
-enddef
-def CmdwinSelectHistoryCallback(item: dict<string>)
-  if getline('$') ==# ''
-    setline('$', item.word)
-  else
-    append('$', item.word)
-  endif
-  noautocmd normal! G$
-enddef
-
+# def CmdwinSelectHistory()
+#   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
+#   map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
+#   reverse(history)
+#   gram#select({
+#          name: getcmdwintype() .. 'history',
+#          items: history,
+#          callback: SIDPrefix() .. 'CmdwinSelectHistoryCallback',
+#        })
+# enddef
+# def CmdwinSelectHistoryCallback(item: dict<string>)
+#   if getline('$') ==# ''
+#     setline('$', item.word)
+#   else
+#     append('$', item.word)
+#   endif
+#   noautocmd normal! G$
+# enddef
 augroup vimrc_mapping
   autocmd CmdWinEnter * call CmdwinEnter()
   autocmd CmdWinLeave * call CmdwinLeave()
@@ -792,7 +794,6 @@ endif
   var map_ = []
   add(map_, ['nnoremap', 'ev', 'edit $MYVIMRC'])
   add(map_, ['nnoremap', 'sv', 'source $MYVIMRC'])
-  add(map_, ['nnoremap', 'k', 'call vimrc#mru#start()'])
   add(map_, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
   add(map_, ['nnoremap', 'f', 'call vimrc#filore#start()'])
   execute map_->mapnew((_, val): string => [val[0], '<Space>' .. val[1], printf('<Cmd>%s<CR>', val[2])]->join())->join("\n")
@@ -1030,6 +1031,12 @@ endif
 if PluginExists('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-first-start ++once InitGramMapping()
+    autocmd User gram-initialize ++once InitGram_v2()
+  augroup END
+
+  augroup vimrc_gram
+    autocmd User gram-start-pre set ambiwidth=single
+    autocmd User gram-quit-pre set ambiwidth=double
   augroup END
 
   def InitGramMapping()
@@ -1054,9 +1061,76 @@ if PluginExists('vim-gram')
     gram#custom#map_key('i', '<BS>', '<C-h>')
   enddef
 
+  def InitGram_v2()
+    gram#custom#map_action('normal', 'i', 'switch-to-insert')
+    gram#custom#map_action('normal', 'q', 'quit')
+    gram#custom#map_action('normal', 'k', 'select-prev-item')
+    gram#custom#map_action('normal', 'j', 'select-next-item')
+    gram#custom#map_action('normal', '<CR>', 'do-default-item-action')
+    gram#custom#map_action('normal', 'p', 'request-preview')
+    gram#custom#map_keys('normal', '<NL>', '<CR>')
+
+    gram#custom#map_action('insert', '<ESC>', 'switch-to-normal')
+    gram#custom#map_action('insert', '<CR>', 'switch-to-normal')
+    gram#custom#map_action('insert', '<C-h>', 'delete-character')
+    gram#custom#map_action('insert', '<BS>', 'delete-character')
+    gram#custom#map_action('insert', '<Del>', 'delete-character')
+    gram#custom#map_action('insert', '<C-u>', 'clear-line')
+    gram#custom#map_action('insert', '<C-f>', 'move-forward')
+    gram#custom#map_action('insert', '<C-b>', 'move-backward')
+    gram#custom#map_action('insert', '<C-j>', 'select-next-item')
+    gram#custom#map_action('insert', '<C-k>', 'select-prev-item')
+    gram#custom#map_action('insert', '<C-n>', 'select-next-item')
+    gram#custom#map_action('insert', '<C-p>', 'select-prev-item')
+    gram#custom#map_keys('insert', '<C-y>', '<CR><CR>')
+
+    gram#option#set_global('UI', 'popup')
+    gram#option#set_global('matcher', 'regexp')
+    gram#option#set_global('preview', 'manual')
+    # gram#option#set_global('preview_delay', 1000)
+    gram#option#set_for_source('mru', 'kinds', ['file'])
+    gram#option#set_for_source('file_rec', 'kinds', ['file'])
+    gram#option#set_for_source('gitfiles', 'kinds', ['file'])
+    gram#option#set_for_source('buffers', 'kinds', ['buffer'])
+    gram#option#set_for_source('terminals', 'kinds', ['buffer'])
+
+    vimrc#mru#register_source()  # TODO: workaround.
+
+    gram#source#register('command-history', {
+      gather_candidates: (C) => {
+        var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
+        map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
+        reverse(history)
+        C.clear()
+        C.add(history)
+      }
+    })
+    gram#item_action#register('command-history', {
+      select: (items) => {
+        var item = items[0]
+        if getline('$') ==# ''
+          setline('$', item.word)
+        else
+          append('$', item.word)
+        endif
+        noautocmd normal! G$
+      }
+    })
+    gram#option#set_for_source('command-history', 'kinds', ['command-history'])
+    gram#option#set_for_source('command-history', 'preview', 'none')
+  enddef
+
+  nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}, #{name: 'gitfiles', default_action: 'file:edit'}]})<CR>
+
   if PluginExists('vim-gram-sources')
     nnoremap <Space>b <Cmd>call gram#sources#buffers#launch()<CR>
     command! -nargs=? -complete=dir Files call gram#sources#file_rec#launch(<q-args>)
+  endif
+
+  if PluginExists('vim-gram-peripherals')
+    nnoremap <Space>j <Cmd>call gram#core#setup(#{sources: [#{name: 'file_rec', default_action: 'file:edit'}]})<CR>
+    nnoremap <Space>b <Cmd>call gram#core#setup(#{sources: [#{name: 'buffers', default_action: 'buffer:edit'}]})<CR>
+    nnoremap <Space>tb <Cmd>call gram#core#setup(#{sources: [#{name: 'terminals', default_action: 'buffer:edit'}]})<CR>
   endif
 endif
 if PluginExists('vim-wispath')

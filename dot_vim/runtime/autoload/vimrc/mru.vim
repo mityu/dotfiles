@@ -45,18 +45,6 @@ function! vimrc#mru#onReadFile() abort "{{{
   call insert(s:history,file_name)
   call s:save_history()
 endfunction "}}}
-function! vimrc#mru#start() abort "{{{
-  if !s:is_available() | return | endif
-  if s:get_config('auto_delete_unexist_file_history')
-    call vimrc#mru#delete_unexist_file_history()
-  endif
-  call s:load_history()
-  call gram#select({
-        \ 'name': 'MRU',
-        \ 'items': s:history,
-        \ 'callback': {item -> execute('edit ' . fnameescape(item.word))},
-        \ })
-endfunction "}}}
 function! vimrc#mru#try_to_enable() abort "{{{
   let s:is_available = s:try_to_enable_impl()
 endfunction "}}}
@@ -99,6 +87,27 @@ function! s:save_history() abort "{{{
   endif
   call writefile(s:history,g:mru_history_file)
 endfunction "}}}
+
+function! s:gram_gather_candidates(Callbacks) abort
+  if !s:is_available() | return | endif
+  if s:get_config('auto_delete_unexist_file_history')
+    call vimrc#mru#delete_unexist_file_history()
+  endif
+  call s:load_history()
+  call a:Callbacks.clear()
+  call a:Callbacks.add(s:history->mapnew('#{word: v:val, action_path: expand(v:val)}'))
+endfunction
+
+function! s:gram_on_request_preview(Previewer, item) abort
+  call a:Previewer.file(expand(a:item.word))
+endfunction
+
+function! vimrc#mru#register_source() abort
+  call gram#source#register('mru', #{
+        \gather_candidates: function('s:gram_gather_candidates'),
+        \on_request_preview: function('s:gram_on_request_preview'),
+        \})
+endfunction
 
 " Editing history
 function! vimrc#mru#edit_history_start(...) abort "{{{
