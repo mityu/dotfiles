@@ -726,7 +726,9 @@ def CmdwinEnter()
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   # Make executing a previous command easier.
-  nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+  if PluginExists('vim-gram')
+    nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
+  endif
   vimrc#incsearch#Setup()
 
   final cmdwin_type = expand('<afile>')
