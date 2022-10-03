@@ -149,9 +149,17 @@ if !v:vim_did_enter
     set langmenu=ja.utf-8
   endif
 
-  if &term =~# '\<256color\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
+  # NOTE: This must be set before 'termguicolors' option is set, or display
+  # will get chaos.
+  if expand('$TERM_PROGRAM') ==# 'WezTerm'
+    &t_Cs = "\e[4:3m"
+    &t_Ce = "\e[4:0m"
+  endif
+
+  if &term =~# '\<\%(256color\|win32\)\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
     set termguicolors  # Use true color if possible.
   endif
+
   if &term =~# '\<xterm\>'
     &t_EI = "\<ESC>[2 q"  # Use Block style cursor in Normal-mode.
     &t_SI = "\<ESC>[6 q"  # Use Bar style cursor in Insert-mode.
@@ -159,14 +167,15 @@ if !v:vim_did_enter
     set mouse=a
   endif
 
-  if expand('$TERM_PROGRAM') ==# 'WezTerm'
-    &t_Cs = "\e[4:3m"
-    &t_Ce = "\e[4:0m"
-  endif
-
-  if IsWindows
-    set termguicolors
+  if &term ==# 'win32'
     set mouse=a
+    # FIXME: It seems that these values aren't reflected well when they're set
+    # just here.
+    autocmd VimEnter * ++once {
+      &t_EI = "\<ESC>[2 q"  # Use Block style cursor in Normal-mode.
+      &t_SI = "\<ESC>[6 q"  # Use Bar style cursor in Insert-mode.
+      &t_SR = "\<ESC>[4 q"  # Use underline style cursor in Replace-mode.
+    }
   endif
 
   # disable default plugins
