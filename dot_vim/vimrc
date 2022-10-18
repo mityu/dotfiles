@@ -1129,7 +1129,11 @@ if PluginExists('vim-gram')
     gram#option#set_for_source('command-history', 'preview', 'none')
   enddef
 
-  nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}, #{name: 'gitfiles', default_action: 'file:edit'}]})<CR>
+  if IsWindows
+    nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}]})<CR>
+  else
+    nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}, #{name: 'gitfiles', default_action: 'file:edit'}]})<CR>
+  endif
 
   if PluginExists('vim-gram-sources')
     nnoremap <Space>b <Cmd>call gram#sources#buffers#launch()<CR>
