@@ -34,6 +34,8 @@ if ! zsh_has_cmd sudoedit; then
     alias sudoedit='sudo -e'
 fi
 
+zsh_has_cmd opam && eval $(opam env)
+
 # Enable smart completion
 autoload -Uz compinit
 compinit
