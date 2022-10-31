@@ -34,6 +34,15 @@ if ! zsh_has_cmd sudoedit; then
     alias sudoedit='sudo -e'
 fi
 
+if ! zsh_has_cmd pbpaste && zsh_has_cmd xsel; then
+    # xsel -p?
+    alias pbpaste='xsel -b'
+fi
+
+if ! zsh_has_cmd pbcopy && zsh_has_cmd xsel; then
+    alias pbcopy='xsel -bi'
+fi
+
 zsh_has_cmd opam && eval $(opam env)
 
 # Enable smart completion
