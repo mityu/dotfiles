@@ -404,6 +404,7 @@ set shortmess& shortmess+=Ic
 set helplang=ja
 set hidden
 set diffopt=internal,algorithm:histogram
+set fileformat=unix
 #set breakindent
 #set virtualedit& virtualedit+=block
 set virtualedit=block
