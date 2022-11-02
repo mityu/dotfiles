@@ -95,7 +95,7 @@ export def SetDigraphForJapanese()
   digraph_set('--', 'ー')
 enddef
 
-export def ListTasks()
+export def ListTasks(args: string)
   var target = '%'
   if args =~# 'rf'
     target = '**/*.' .. expand('%:e')
