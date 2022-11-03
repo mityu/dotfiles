@@ -378,7 +378,7 @@ set backspace=eol,start,indent
 set pumheight=10
 set completeopt=menuone,noselect
 set noequalalways
-set scrolloff=1
+set scrolloff=1 splitkeep=screen
 set colorcolumn=78
 set tabstop=4
 set shiftwidth=4
