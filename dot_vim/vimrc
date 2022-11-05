@@ -1096,6 +1096,7 @@ if PluginExists('vim-gram')
     gram#custom#map_keys('insert', '<C-y>', '<CR><CR>')
 
     gram#option#set_global('UI', 'popup')
+    gram#option#set_global('UI_options', {enable_preview: 1, prompt_text: '>> '})
     gram#option#set_global('matcher', 'regexp')
     gram#option#set_global('preview', 'manual')
     # gram#option#set_global('preview_delay', 1000)
