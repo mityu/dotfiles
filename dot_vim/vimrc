@@ -825,7 +825,7 @@ command! -bar FileName echo expand('%:p')
 command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! -nargs=? CopyToClipboard call setreg('+', getreg(<q-args>, 1))
 command! -bar -nargs=? ClipBuffer call vimrc#Clipbuffer(<q-args>)
-command! ClearMessage execute repeat("echom ''\n", 201)
+command! ClearMessage messages clear
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call Filter(<bang>0, <f-args>)
 command! -bar Draft call Draft()
