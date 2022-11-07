@@ -28,6 +28,9 @@ if zsh_has_cmd vim; then
         thisfile=${$(readlink $thisfile):-$thisfile}
         eval 'alias vi="vim -u' $(dirname $thisfile)'/dot_vim/vimrc_stable"'
     } ${(%):-%N}
+    export MANPAGER="vim -M +MANPAGER -"
+    export EDITOR=vim
+    export GIT_EDITOR=vim
 fi
 
 if ! zsh_has_cmd sudoedit; then
@@ -116,10 +119,6 @@ bindkey -M vicmd 'ma' add-surround
 bindkey -M visual 'mr' change-surround
 bindkey -M visual 'md' delete-surround
 bindkey -M visual 'ma' add-surround
-
-if zsh_has_cmd vim; then
-    export MANPAGER="vim -M +MANPAGER -"
-fi
 
 if [ -n "$VIM_TERMINAL" ]; then
     function drop() {

@@ -17,6 +17,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         eval 'export' $path_expr
     done
 fi
+export PATH=$(cd $(dirname $(readlink ${BASH_SOURCE[0]})); pwd)/bin:$PATH
 export LANG=en_US.UTF-8
 
 function bashrc_has_cmd() {
@@ -78,6 +79,8 @@ fi
 
 if bashrc_has_cmd vim; then
     export MANPAGER="vim -M +MANPAGER -"
+    export EDITOR=vim
+    export GIT_EDITOR=vim
 fi
 
 PROMPT_COMMAND=__bashrc_update_prompt
