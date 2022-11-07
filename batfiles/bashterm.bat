@@ -28,7 +28,6 @@ if "%A%" == "%A:/c=%" (
 
 :usage
 echo Batchfile to launch msys2 bash ^(mingw64^).
-echo
 echo Usage: %0 [start^|new-window^|--help]
 echo   [No arguments]   Start bash here
 echo   start            Start bash in a new window
