@@ -220,7 +220,7 @@ if zsh_has_cmd fzf; then
     bindkey '^r' select-history
 fi
 
-function update_softwares(){
+function update-softwares(){
     if zsh_has_cmd brew; then
         brew upgrade
         brew cleanup
