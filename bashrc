@@ -1,6 +1,48 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+# Set environmental variables (Only when outside of vim.)
+if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
+    cat ~/.envrc | while read path_expr
+    do
+        # Ignore blank line.
+        if [ -z ${path_expr} ]; then
+            continue
+        fi
+
+        # Ignore comment.
+        if [ ${path_expr:0:1} = "#" ]; then
+            continue
+        fi
+        eval 'export' $path_expr
+    done
+fi
+export LANG=en_US.UTF-8
+
+function bashrc_has_cmd() {
+    which $1 &> /dev/null
+}
+
+if ! bashrc_has_cmd sudoedit; then
+    alias sudoedit='sudo -e'
+fi
+
+
+if [ -n "$VIM_TERMINAL" ]; then
+    function drop() {
+        echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
+    }
+fi
+
+function stdin() {
+    local cmd stdin
+    cmd="$1"
+    shift
+    while read -r stdin; do
+        "$cmd" "$@" "$stdin"
+    done
+}
+
 shopt -s nocaseglob
 set -o vi
 bind 'set show-mode-in-prompt on'
@@ -18,7 +60,7 @@ bind '\C-a: beggining-of-line'
 bind '\C-e: end-of-line'
 bind '\C-w: kill-word'
 
-if which fzf &> /dev/null; then
+if bashrc_has_cmd fzf; then
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
     # FIXME: It seems that fzf doesn't work on MSYS2 bash on Vim's terminal.
@@ -32,6 +74,10 @@ if which fzf &> /dev/null; then
             READLINE_POINT=${#cmd}
         fi
     }
+fi
+
+if bashrc_has_cmd vim; then
+    export MANPAGER="vim -M +MANPAGER -"
 fi
 
 PROMPT_COMMAND=__bashrc_update_prompt
