@@ -486,6 +486,10 @@ augroup vimrc_quickfix_window
   autocmd QuickfixCmdPost l* lwindow
 augroup END
 
+augroup vimrc_window
+  autocmd VimResized * wincmd =
+augroup END
+
 # Mapping {{{
 nnoremap : q:A
 vnoremap : q:A
