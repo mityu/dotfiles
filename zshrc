@@ -223,7 +223,9 @@ function update-softwares(){
     if zsh_has_cmd brew; then
         brew upgrade
         brew cleanup
-        brew upgrade --cask
+        if [[ "$(uname)" == "Darwin" ]]; then
+            brew upgrade --cask
+        fi
     fi
     if zsh_has_cmd pacman; then
         if zsh_has_cmd yay; then
