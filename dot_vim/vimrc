@@ -1849,7 +1849,12 @@ augroup END
 # statusline
 if PluginExists('gina.vim')
   augroup vimrc_gina
-    autocmd CursorHold * ++once call gina#component#repo#branch() | redrawstatus
+    autocmd CursorHold * ++once call gina#component#repo#branch()
+    autocmd SourcePost */autoload/gina.vim ++once {
+      autocmd! vimrc_gina CursorHold
+      call gina#component#repo#branch()
+      redrawstatus!
+    }
   augroup END
   def StatuslineGitBranch(): string
     if exists('*gina#component#repo#branch')
