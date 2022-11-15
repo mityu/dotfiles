@@ -515,6 +515,9 @@ noremap k gk
 noremap gj j
 noremap gk k
 
+noremap <C-@> <ESC>
+noremap! <C-@> <ESC>
+
 nnoremap <expr> i getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'i'
 nnoremap <expr> I getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'I'
 nnoremap <expr> a getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'a'
@@ -619,6 +622,7 @@ tnoremap <C-w>t <Cmd>tabnew<CR>
 tnoremap <C-w>n <Cmd>botright new<CR>
 tnoremap <C-w>s <Cmd>botright wincmd s<CR><C-w>N
 tnoremap <C-w>v <Cmd>botright wincmd v<CR><C-w>N
+tnoremap <C-@> <ESC>
 
 if IsMac && has('gui_running')
   noremap <D-[> <ESC>
