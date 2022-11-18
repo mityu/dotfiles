@@ -1450,9 +1450,9 @@ if OptPluginExists('vim-lsp')
 
     # Plugin initializations
     inoremap <expr> <C-n>
-          \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-x>\<C-n>"
+          \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-n>"
     inoremap <expr> <C-p>
-          \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-x>\<C-p>"
+          \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-p>"
     inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
     lsp#enable()
 
