@@ -21,8 +21,9 @@ export def Expand(): string
   return ''
 enddef
 
-def ApplySnip(snip: list<string>)
+def ApplySnip(snip_arg: list<string>)
   final current_indent = getline('.')->matchstr('^\s*')
+  var snip = copy(snip_arg)
   snip->map((_: number, line: string) =>
           current_indent .. substitute(line, "^\t*\t", GetOneIndentString(), 'g'))
   add(snip, current_indent) # Add a new line if there's no `CursorPlaceholder`
