@@ -933,8 +933,7 @@ enddef
 if PluginExists('vim-cursorword')
   g:cursorword_highlight = 0
   augroup vimrc_cursorword
-    autocmd ColorScheme * highlight CursorWord0 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
-    autocmd ColorScheme * highlight CursorWord1 gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
+    autocmd ColorScheme * highlight CursorWord gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
   augroup END
   doautocmd vimrc_cursorword ColorScheme
 endif
