@@ -270,7 +270,7 @@ def UpdateContext()
 enddef
 
 def OnCursorMoved()
-  tryToApply = NeedTry() || tryToApply
+  tryToApply = (NeedTry() || tryToApply) && mode() ==# 'i'
   UpdateContext()
 enddef
 
