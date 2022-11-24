@@ -236,7 +236,9 @@ function update-softwares(){
         fi
     fi
     if zsh_has_cmd pip3; then
-        pip3 list --outdated --format freeze | sed -e 's/==.*//' | xargs pip3 install -U
+        pip3 list --outdated --format json | \
+            python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
+            xargs pip3 install -U
     fi
     update_zsh_plugins
 }
