@@ -235,6 +235,16 @@ function update-softwares(){
             sudo pacman -Syyu --noconfirm
         fi
     fi
+    if zsh_has_cmd go; then
+        pushd ~
+        local gobin=$(go env GOBIN)
+        local gobin=${gobin:-$(go env GOPATH)/bin}
+        print -rl ${gobin}/*(*) | while read file; do
+            local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
+            go install "${pkg}@latest"
+        done
+        popd
+    fi
     if zsh_has_cmd pip3; then
         pip3 list --outdated --format json | \
             python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
