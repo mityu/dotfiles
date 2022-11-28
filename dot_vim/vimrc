@@ -313,8 +313,13 @@ def PackRegister()
   minpac#add('thinca/vim-textobj-between', {type: 'opt'})
 enddef
 def PackInit(): bool
+  var MinpacInit = () => minpac#init({
+    progress_open: "tab",
+    status_open: "vertical",
+    status_auto: true
+  })
   silent! packadd minpac
-  silent! minpac#init()
+  silent! MinpacInit()
   if !exists('*minpac#init()')
     # Download minpac...
     var minpac_path = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
@@ -322,7 +327,7 @@ def PackInit(): bool
     system('git clone https://github.com/k-takata/minpac ' .. minpac_path)
 
     silent! packadd minpac
-    silent! minpac#init()
+    silent! MinpacInit()
     if !exists('*minpac#init()')
       return false
     endif
