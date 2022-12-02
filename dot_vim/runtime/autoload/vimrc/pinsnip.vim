@@ -85,6 +85,11 @@ def AddSnip(
   return snips
 enddef
 
+def MergeSnip(snips: list<func(string): bool>, ftSrc: string): list<func(string): bool>
+  snips->extend(SnipFiletype(ftSrc))
+  return snips
+enddef
+
 def TrySnipFuzzy(comparison: string): bool
   var snip = FindSnipFuzzy(comparison)
   if empty(snip)
@@ -199,7 +204,56 @@ SnipFiletype('go')
     return true
   })
 
-SnipFiletype('cpp')->AddSnip(TrySnipFuzzy)
+SnipFiletype('c')
+  ->AddSnip((comparison: string): bool => {
+    # for (type i; until|  =>  for (type i; i < until; ++i) {
+    var matches = matchlist(
+      comparison,
+      '\v^for\s*\((%(\w+\s*)*)(\w+)\s*;\s*(\w+)%(\s*\))?$'
+    )
+    if empty(matches)
+      return false
+    endif
+    var [type, varName, until] = matches[1 : 3]
+    var snip = printf(
+      'for (%s %s = 0; %s < %s; ++%s) {<+CURSOR+>',
+      trim(type), varName, varName, until, varName
+    )
+    ApplySnip([snip])
+    return true
+  })
+  ->AddSnip((comparison: string): bool => {
+    var matches = matchlist(
+      comparison,
+      '^\vfor\s*\(\s*([^;]+\s*)%(;\s*([^;]+)\s*)?%(;\s*([^;]+\s*))?(\)(\s*[{;])?)?$'
+    )
+    if empty(matches)
+      return false
+    endif
+
+    var [initializer, expr, iterator, suffix] = matches[1 : 4]
+    var varName = matchstr(initializer, '^\v%(\w+\s+)*\zs\w+\ze%(\s*\=\s*\S+)?$')
+    if expr ==# ''
+      expr = printf('%s < <+CURSOR+>', varName)
+    elseif !(expr =~# '\s' || expr =~# '[<>=]')
+      expr = printf('%s < %s', varName, expr)
+    endif
+    if iterator ==# ''
+      iterator = '++' .. varName
+    endif
+    if suffix ==# ''
+      suffix = ') {'
+    endif
+
+    var snip = printf('for (%s; %s; %s%s', initializer, expr, iterator, suffix)
+    if stridx(snip, CursorPlaceholder) == -1
+      snip ..= CursorPlaceholder
+    endif
+    ApplySnip([snip])
+    return true
+  })
+
+SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
 FuzzySnipList['cpp'] = [
   ['std::cout << "<+CURSOR+>" << std::endl;'],
   ['std::cerr << "<+CURSOR+>" << std::endl;'],
@@ -311,6 +365,7 @@ FuzzySnipList['java'] = [
 
 SnipFiletype('_')
   ->AddSnip((_: string): bool => {
+    # foo()>|bar => foo(bar)
     var linestr = getline('.')
     var pre_cursor = strpart(linestr, 0, col('.') - 1)
     var reg_wrapper = '\%(^\|\s\)\zs[^([:space:]]*(\ze)>$'
