@@ -419,7 +419,6 @@ set noimdisable
 set lazyredraw
 # set previewpopup=highlight:Normal
 set termwinkey=<C-w>
-set noesckeys
 set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
