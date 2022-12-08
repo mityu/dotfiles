@@ -28,8 +28,8 @@ keymap:
       Super-f: C-f
       Super-d: C-d
       Super-y: C-h
-      Super-LeftBrace: Super-left
-      Super-RightBrace: Super-right
+      Super-LeftBrace: C-LeftBrace
+      Super-RightBrace: C-RightBrace
 
   - name: macOS like
     application:
