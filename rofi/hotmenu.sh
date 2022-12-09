@@ -3,6 +3,7 @@
 if [ $# -eq 0 ]; then
     cat <<EOF
 wezterm
+firefox
 chromium
 sleep
 shutdown
