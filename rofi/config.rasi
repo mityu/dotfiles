@@ -3,5 +3,6 @@ configuration {
     combi-modi: "hotmenu:~/.config/rofi/hotmenu.sh,i3wm:~/.config/rofi/i3wm.sh,drun,run,window";
     kb-cancel: "Escape,Control+space";
     kb-row-select: "";
+    show-icons:true;
 }
 @theme "gruvbox-light-soft"
