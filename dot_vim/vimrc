@@ -616,6 +616,25 @@ def ToggleLocationlist()
     echoerr v:exception
   endtry
 enddef
+cnoremap <C-x> <C-\>e<SID>CmdlineToggleVeryMagic()<CR>
+def CmdlineToggleVeryMagic(): string
+  if getcmdtype() !~# '[/?]'
+    return ''
+  endif
+
+  var keys = ''
+  var curpos = getcmdpos()
+  var cmdline = getcmdline()
+  if strcharpart(cmdline, 0, 2) ==# '\v'
+    curpos -= 2
+    keys = strpart(cmdline, 2)
+  else
+    curpos += 2
+    keys = '\v' .. cmdline
+  endif
+  setcmdpos(curpos)
+  return keys
+enddef
 # }}}
 tnoremap <C-w>: <C-w>:<C-f>A
 tnoremap <C-w><Space>: <C-w>:<C-f>k
@@ -772,6 +791,9 @@ def CmdwinEnter()
     if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
     endif
+  elseif cmdwin_type =~# '[/?]'
+    inoremap <expr> <buffer> <C-x> <SID>CmdwinToggleVeryMagic()
+    nnoremap <expr> <buffer> <C-x> <SID>CmdwinToggleVeryMagic()
   endif
 enddef
 def CmdwinLeave()
@@ -785,6 +807,34 @@ def CmdwinCompletion(select_next: bool): string
   else
     return "\<C-x>\<C-v>"
   endif
+enddef
+
+def CmdwinToggleVeryMagic(): string
+  var curpos = getcurpos()
+  var mode = mode()
+  var keys = ''
+  if getline('.')->strcharpart(0, 2) ==# '\v'
+    curpos[2] -= 2
+    if mode !=# 'n'
+      keys ..= "\<ESC>"
+    endif
+    keys ..= '0"_x"_x'
+    if mode ==# 'i'
+      keys ..= 'i'
+    endif
+  else
+    curpos[2] += 2
+    if mode ==# 'i'
+      keys ..= "\<C-o>0\\v"
+    elseif mode ==# 'n'
+      keys ..= "I\\v\<ESC>"
+    else
+      keys ..= "\<ESC>I\\v\<ESC>"
+    endif
+  endif
+  keys ..= printf("\<Cmd>call setpos('.', %s)\<CR>", curpos)
+  keys ..= "\<Cmd>let &undolevels = &undolevels\<CR>"  # Separate undo sequence
+  return keys
 enddef
 # def CmdwinSelectHistory()
 #   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
