@@ -409,6 +409,7 @@ NewFiletypeRule('vim')
         endif
         return CompleteClosingBlock(prev, next, 'endfunction')
       })
+  ->AddRule('^\s*%(%(export\s+)?abstruct\s+)?class>', 'endclass')
   ->AddRule('^\s*if>', 'endif', ['else', '\=^elseif>'])
   ->AddRule('^\s*while>', 'endwhile')
   ->AddRule('^\s*for>', 'endfor')
