@@ -245,6 +245,9 @@ function update-softwares(){
         done
         popd
     fi
+    if zsh_has_cmd opam; then
+        opam update && opam upgrade --yes
+    fi
     if zsh_has_cmd pip3; then
         pip3 list --outdated --format json | \
             python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
