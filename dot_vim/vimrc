@@ -711,6 +711,11 @@ SimpleLoopDefine({
   follow_key: 'hjklHJKLq<>-+_|=',
 })
 LoopDefine({
+  id: 'Window',
+  enter_with: '<C-w>',
+  map: [['<C-h>', '<C-w>h'], ['<C-j>', '<C-w>j'], ['<C-k>', '<C-w>k'], ['<C-l>', '<C-w>l']],
+})
+LoopDefine({
   id: 'Tab',
   enter_with: 'g',
   map: [
