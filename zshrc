@@ -33,6 +33,8 @@ if zsh_has_cmd vim; then
     export GIT_EDITOR=vim
 fi
 
+alias zenn='deno run -A npm:zenn-cli@latest'
+
 if ! zsh_has_cmd sudoedit; then
     alias sudoedit='sudo -e'
 fi
