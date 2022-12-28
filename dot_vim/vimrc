@@ -2041,7 +2041,7 @@ def EmphasisIndentEnable()
   EmphasizeIndent()
 enddef
 def EmphasisIndentDisable()
-  w:disable_emphasis_indent = 0
+  w:disable_emphasis_indent = 1
   if exists('w:emphasis_indent_id')
     matchdelete(w:emphasis_indent_id)
     unlet w:emphasis_indent_id
