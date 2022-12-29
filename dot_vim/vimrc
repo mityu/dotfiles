@@ -767,9 +767,9 @@ def CmdwinEnter()
 
   # Return back to the current window from command-line window with
   # inputting <C-c> once.
-  nnoremap <buffer> <C-c> <C-c><C-c>
-  nmap <buffer> q <C-c>
-  imap <buffer> <C-c> <ESC><C-c>
+  nnoremap <buffer> <C-c> <Cmd>quit<CR>
+  nnoremap <buffer> q <Cmd>quit<CR>
+  inoremap <buffer> <C-c> <ESC><Cmd>quit<CR>
 
   inoremap <buffer> <C-l><C-n> <C-x><C-n>
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
@@ -810,7 +810,7 @@ def CmdwinCompletion(select_next: bool): string
   if pumvisible()
     return select_next ? "\<C-n>" : "\<C-p>"
   else
-    return "\<C-x>\<C-v>"
+      return "\<C-x>\<C-v>" .. (select_next ? "" : "\<C-p>\<C-p>")
   endif
 enddef
 
