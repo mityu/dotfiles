@@ -12,7 +12,7 @@ if [[ "$(uname)" == "MINGW"* ]]; then
 fi
 
 ISROOT=false
-if [[ $(id -u) == 0 ]]; then
+if [[ $(id -u) == 0 || "$(uname)" == "MSYS"* ]]; then
     ISROOT=true
 fi
 
