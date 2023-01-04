@@ -12,6 +12,14 @@ fi
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
 
+IS_MAC=false
+IS_LINUX=false
+if [[ $(uname) == Darwin ]]; then
+    IS_MAC=true
+else
+    IS_LINUX=true
+fi
+
 auto_mkdir (){
     if [ ! -d $1 ]; then
         mkdir $1
@@ -40,20 +48,22 @@ ln -snfv $SCRIPT_DIR/dot_mlterm ~/.mlterm
 echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
 
-echo "Deploying i3/"
-ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
-
-echo "Deploying i3blocks/"
-ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
-
 echo "Deploying wezterm/"
 ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 
-echo "Deploying xkeysnail/"
-ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
+if $IS_LINUX; then
+    echo "Deploying i3/"
+    ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
 
-echo "Deploying xremap/"
-ln -snfv ${SCRIPT_DIR}/xremap $CONFIG_DIR/xremap
+    echo "Deploying i3blocks/"
+    ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
 
-echo "Deploygin dunst/"
-ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
+    echo "Deploying xkeysnail/"
+    ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
+
+    echo "Deploying xremap/"
+    ln -snfv ${SCRIPT_DIR}/xremap $CONFIG_DIR/xremap
+
+    echo "Deploygin dunst/"
+    ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
+fi
