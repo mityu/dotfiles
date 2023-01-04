@@ -80,7 +80,7 @@ zshaddhistory() {
 			break
 		fi
 	done
-	[[ ! ("$(command -v $cmd)" == '' || $cmd == 'rm' || $cmd == 'exit') ]]
+	[[ (! ("$(command -v $cmd)" == '' || $cmd == 'rm' || $cmd == 'exit')) || -x $cmd ]]
 }
 
 
