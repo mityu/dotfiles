@@ -1,46 +1,46 @@
 #!/bin/bash -eu
 if [[ "${1:-}" == "" || "$1" == "-h" || "$1" == "--help" ]]; then
-    echo "Usage: `basename $0` <version>|--help|-h"
-    echo "            Extract NeoVim package into ./nvim-<version>."
-    echo "Examples:"
-    echo " - Download v0.4.0:           $ `basename $0` v0.4.0"
-    echo " - Download nightly version:  $ `basename $0` nightly"
-    if [[ "${1:-}" == "" ]]; then
-        exit 1
-    fi
-    exit 0
+	echo "Usage: `basename $0` <version>|--help|-h"
+	echo "			Extract NeoVim package into ./nvim-<version>."
+	echo "Examples:"
+	echo " - Download v0.4.0:		   $ `basename $0` v0.4.0"
+	echo " - Download nightly version:  $ `basename $0` nightly"
+	if [[ "${1:-}" == "" ]]; then
+		exit 1
+	fi
+	exit 0
 fi
 if ! which curl &> /dev/null; then
-    echo "'curl' command is required."
-    exit 1
+	echo "'curl' command is required."
+	exit 1
 fi
 # TODO: Support Linux
 if which uname &> /dev/null && [[ "`uname`" == "Darwin" ]]; then
-    if ! which xattr &> /dev/null ; then
-        echo "'xattr' command is required on macOS."
-        exit 1
-    fi
-    OFNAME=./nvim-$1.tar.gz
-    curl -L -o $OFNAME https://github.com/neovim/neovim/releases/download/$1/nvim-macos.tar.gz
-    xattr -c $OFNAME
-    tar xzvf $OFNAME
+	if ! which xattr &> /dev/null ; then
+		echo "'xattr' command is required on macOS."
+		exit 1
+	fi
+	OFNAME=./nvim-$1.tar.gz
+	curl -L -o $OFNAME https://github.com/neovim/neovim/releases/download/$1/nvim-macos.tar.gz
+	xattr -c $OFNAME
+	tar xzvf $OFNAME
 
-    ODIR=./nvim-$1
-    if [ -d "./nvim-osx64" ]; then
-        mv ./nvim-osx64 $ODiR
-    elif [ -d "./nvim-macos" ]; then
-        mv ./nvim-macos $ODIR
-    fi
+	ODIR=./nvim-$1
+	if [ -d "./nvim-osx64" ]; then
+		mv ./nvim-osx64 $ODiR
+	elif [ -d "./nvim-macos" ]; then
+		mv ./nvim-macos $ODIR
+	fi
 
-    # Move the archive file to Trash.
-    OFNAME=$(pwd)/$(basename $OFNAME)  # Make it absolute path
-    osascript <<EOF
-    tell application "Finder"
-         move POSIX file "$OFNAME" to trash
-    end tell
-EOF
+	# Move the archive file to Trash.
+	OFNAME=$(pwd)/$(basename $OFNAME)  # Make it absolute path
+	osascript <<- EOF
+	tell application "Finder"
+		 move POSIX file "$OFNAME" to trash
+	end tell
+	EOF
 
-    echo "Created: $ODIR"
+	echo "Created: $ODIR"
 else
-    echo "Unsupported OS"
+	echo "Unsupported OS"
 fi
