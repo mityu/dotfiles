@@ -1,13 +1,19 @@
 #!/bin/bash
 
+rm-link () {
+    if [[ -L $1 ]]; then
+        rm $1
+    fi
+}
+
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
-rm ~/.bashrc
-rm ~/.zshrc
-rm ~/.vim
-rm ~/.mlterm
-rm $CONFIG_DIR/alacritty
-rm $CONFIG_DIR/i3
-rm $CONFIG_DIR/wezterm
-rm $CONFIG_DIR/xkeysnail
-rm $CONFIG_DIR/xremap
-rm $CONFIG_DIR/dunst
+rm-link ~/.bashrc
+rm-link ~/.zshrc
+rm-link ~/.vim
+rm-link ~/.mlterm
+rm-link $CONFIG_DIR/alacritty
+rm-link $CONFIG_DIR/i3
+rm-link $CONFIG_DIR/wezterm
+rm-link $CONFIG_DIR/xkeysnail
+rm-link $CONFIG_DIR/xremap
+rm-link $CONFIG_DIR/dunst
