@@ -161,7 +161,7 @@ function install_zsh_plugins() {
     fi
 }
 
-function update_zsh_plugins() {
+function update-zsh-plugins() {
     local dir
     for dir in $(find $DOTZSH/* -maxdepth 0 -type d); do
         echo -e '\033[1mChecking updates: '$(basename $dir)'\033[m'
@@ -222,6 +222,11 @@ if zsh_has_cmd fzf; then
 fi
 
 function update-softwares(){
+    local password=''
+    echo -n "Password:"; read -s password;
+
+    echo $password | update-vim.sh
+
     if zsh_has_cmd brew; then
         brew upgrade
         brew cleanup
@@ -232,9 +237,9 @@ function update-softwares(){
     if zsh_has_cmd pacman; then
         if zsh_has_cmd yay; then
             # Prefer using yay to pacman
-            yay -Syyu --noconfirm
+            echo $password | yay -Syyu --noconfirm --sudoflags -S
         else
-            sudo pacman -Syyu --noconfirm
+            echo $password | sudo -S pacman -Syyu --noconfirm
         fi
     fi
     if zsh_has_cmd go; then
@@ -255,7 +260,7 @@ function update-softwares(){
             python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
             xargs pip3 install -U
     fi
-    update_zsh_plugins
+    update-zsh-plugins
 }
 
 function gitinit() {

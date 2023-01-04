@@ -1,4 +1,8 @@
 #!/bin/bash -x
+if [[ "$(uname)" != "Darwin" ]]; then
+    echo 'Not on macOS. Abort.'
+    exit 0
+fi
 if [ ! -d "$HOME/.cache" ]; then
     mkdir ~/.cache
 fi

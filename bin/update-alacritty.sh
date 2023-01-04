@@ -13,10 +13,8 @@ git pull
 if [ $HASH == $(git rev-parse HEAD) ]; then
     exit 0
 fi
-make app
-if [ $? -eq 0 ]; then
-    if [ -d "/Applications/Alacritty.app" ]; then
-        rm -r /Applications/Alacritty.app
-    fi
-    cp -r ./target/release/osx/Alacritty.app /Applications/Alacritty.app
+if [[ "$(uname)" == "Darwin" ]]; then
+    make app && cp -r ./target/release/osx/Alacritty.app /Applications/
+else
+    cargo build --release && echo 'Built binary is at "target/release/alacritty"'
 fi
