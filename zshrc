@@ -221,6 +221,36 @@ if zsh_has_cmd fzf; then
 	bindkey '^r' select-history
 fi
 
+function update-vim-plugins() {
+	echo 'Updating vim plugins'
+	vim -u ~/.vim/vimrc --noplugins -n -N -e -s -S <(cat <<- EOF
+	function UpdatePlugins()
+		PackInit
+		if !exists("*minpac#init()")
+			call setline(1, split(execute("message"), "\n"))
+			call append("$", "Failed to load minpac")
+			%print
+			cquit!
+		endif
+		let g:minpac#opt.status_auto = v:false
+		call minpac#update("", {"do": "call PostUpdatePlugins()"})
+	endfunction
+	function PostUpdatePlugins()
+		let bufnr = bufnr("%")
+		call minpac#status()
+		let lines = getline(1, "$")
+		wincmd p
+		setlocal modifiable
+		call append("$", lines)
+		setlocal nomodified
+		%print
+		quitall!
+	endfunction
+	autocmd VimEnter * ++once call UpdatePlugins()
+	EOF
+	)
+}
+
 function update-softwares() {
 	local password=''
 	echo -n "Password:"; read -s password;
@@ -261,6 +291,7 @@ function update-softwares() {
 			xargs pip3 install -U
 	fi
 	update-zsh-plugins
+	update-vim-plugins
 }
 
 function gitinit() {
