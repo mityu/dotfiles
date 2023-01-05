@@ -34,7 +34,7 @@ cd ~/.cache/vimbuild
 HASH=$(git rev-parse HEAD)
 git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
-    chmod -R 666 ./src/objects
+    [[ -d ./src/objects ]] && chmod -R 666 ./src/objects
     (! $FORCEBUILD && make -j4) || (make distclean && make -j4) || exit 1
     ($ISROOT && make -j4 install) || (echo $PASSWORD | sudo -S make -j4 install)
 fi
