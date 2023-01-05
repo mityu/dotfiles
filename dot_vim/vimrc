@@ -4,9 +4,10 @@ vim9script noclear
 # Encoding
 if !v:vim_did_enter
   set encoding=utf-8
-  scriptencoding utf-8
   $MYVIMRC = resolve(expand('<sfile>'))
 endif
+
+scriptencoding utf-8
 
 # Local utility functions
 export def SIDPrefix(): string
@@ -53,29 +54,29 @@ def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
 
-def EchomsgWithColor(msg: string, hl_group: string): void
+def EchomsgWithColor(msg: string, hl_group: string)
   execute 'echohl' hl_group
   echomsg GetMsgString(msg)
   echohl NONE
 enddef
 
-export def Echomsg(msg: string): void
+export def Echomsg(msg: string)
   EchomsgWithColor(msg, 'NONE')
 enddef
 
-export def EchomsgError(msg: string): void
+export def EchomsgError(msg: string)
   EchomsgWithColor(msg, 'Error')
 enddef
 
-export def EchomsgWarning(msg: string): void
+export def EchomsgWarning(msg: string)
   EchomsgWithColor(msg, 'WarningMsg')
 enddef
 
-export def Echo(msg: string): void
+export def Echo(msg: string)
   echo GetMsgString(msg)
 enddef
 
-export def EchoQuestion(question: string): void
+export def EchoQuestion(question: string)
   echon GetMsgString(question) .. ' '
   echohl Question
   echon '[Y/N]'
@@ -151,12 +152,12 @@ if !v:vim_did_enter
 
   # NOTE: This must be set before 'termguicolors' option is set, or display
   # will get chaos.
-  if expand('$TERM_PROGRAM') ==# 'WezTerm'
+  if $TERM_PROGRAM ==# 'WezTerm'
     &t_Cs = "\e[4:3m"
     &t_Ce = "\e[4:0m"
   endif
 
-  if &term =~# '\<\%(256color\|win32\)\>' && expand('$TERM_PROGRAM') !=# 'Apple_Terminal'
+  if &term =~# '\<\%(256color\|win32\)\>' && $TERM_PROGRAM !=# 'Apple_Terminal'
     set termguicolors  # Use true color if possible.
   endif
 
@@ -191,14 +192,15 @@ if !v:vim_did_enter
   g:did_install_default_menus = 1
   g:did_install_syntax_menus = 1
   g:skip_loading_mswin = 1
+  g:loaded_logiPat = 1
 
   &runtimepath ..= ',' .. escape(JoinPath($DOT_VIM, 'runtime'), ' \')
 
   # Set environmental variables on gVim.
   {
-    var envrc_ = JoinPath(expand('~'), Rc('envrc'))
-    if has('gui_running') && filereadable(envrc_)
-      var lines = readfile(envrc_)
+    var envrc = JoinPath(expand('~'), Rc('envrc'))
+    if has('gui_running') && filereadable(envrc)
+      var lines = readfile(envrc)
             ->map((_, val): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
             ->filter((_, val): bool => !empty(val))
 
@@ -222,29 +224,40 @@ endif
         ->filter((_, augroup): bool => augroup !=? 'END')
         ->sort()
         ->uniq()
-  for augroup in augroups
-    execute 'augroup ' .. augroup
-      autocmd!
-    execute 'augroup END'
+  for group in augroups
+    execute 'augroup' group
+    autocmd!
   endfor
+  augroup END
 }
 
 # minpac
-var PluginList: list<string>
-var OptPluginList: list<string>
 if &loadplugins
-  PluginList = Glob(JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '*'))
-               ->filter((_, val): bool => isdirectory(val))
-               ->map((_, val): string => fnamemodify(val, ':p:h:t'))
-  OptPluginList = Glob(JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', '*'))
-               ->filter((_, val): bool => isdirectory(val))
-               ->map((_, val): string => fnamemodify(val, ':p:h:t'))
+  var PluginList: dict<bool>
+  var OptPluginList: dict<bool>
+  var minpacDir: string
+
+  minpacDir = JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '')
+  readdir(minpacDir, (e: string): number => {
+    if isdirectory(minpacDir .. e)
+      PluginList[e] = true
+    endif
+    return 0
+  })
+  minpacDir = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', '')
+  readdir(minpacDir, (e: string): number => {
+    if isdirectory(minpacDir .. e)
+      OptPluginList[e] = true
+    endif
+    return 0
+  })
+
   def PluginExists(plugin: string): bool
-    return HasInList(PluginList, plugin)
+    return has_key(PluginList, plugin)
   enddef
 
   def OptPluginExists(plugin: string): bool
-    return HasInList(OptPluginList, plugin)
+    return has_key(OptPluginList, plugin)
   enddef
 else
   def PluginExists(plugin: string): bool
@@ -434,18 +447,18 @@ export final CacheDir = JoinPath(expand('~'), '.cache', 'vimrc')
 Mkdir(CacheDir, 'p')
 
 {
-  final undodir_ = JoinPath(CacheDir, 'undodir')
-  if Mkdir(undodir_, 'p')
+  final undodir = JoinPath(CacheDir, 'undodir')
+  if Mkdir(undodir, 'p')
     set undofile
-    &undodir = undodir_
+    &undodir = undodir
   else
     set noundofile
   endif
 
-  final directory_ = JoinPath(CacheDir, 'swapfile')
-  if Mkdir(directory_, 'p')
+  final swapdir = JoinPath(CacheDir, 'swapfile')
+  if Mkdir(swapdir, 'p')
     set swapfile
-    &directory = JoinPath(fnamemodify(directory_, ':p'), '')
+    &directory = JoinPath(fnamemodify(swapdir, ':p'), '')
   else
     set noswapfile
   endif
@@ -901,7 +914,7 @@ command! -bar -nargs=? ClipBuffer call vimrc#Clipbuffer(<q-args>)
 command! ClearMessage messages clear
 command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call Filter(<bang>0, <f-args>)
-command! -bar Draft call Draft()
+command! -bar Draft setlocal buftype=nofile noswapfile noundofile
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call vimrc#ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#DeleteUndofiles()
@@ -937,10 +950,6 @@ def Filter(bang: bool, pat: string, ...cmd: list<string>)
   else
     echo output
   endif
-enddef
-
-def Draft()
-  setlocal buftype=nofile noswapfile
 enddef
 
 def FindGitroot(arg_target: string = bufname('%')): string
@@ -2090,8 +2099,8 @@ command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 # mru
 g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
 {
-  var dir_ = JoinPath(CacheDir, 'mru')
-  Mkdir(dir_)
+  var dir = JoinPath(CacheDir, 'mru')
+  Mkdir(dir)
 }
 g:mru_ignore_pattern = [
       \ '\.git\>',
@@ -2130,7 +2139,7 @@ def GitDiffGetcmd(arg_target: string): string
           gitroot, target)
 enddef
 
-def GitDiff(arg_target: string): void
+def GitDiff(arg_target: string)
   var target: string
   if arg_target ==# ''
     target = bufname('%')
@@ -2161,7 +2170,7 @@ command! -nargs=? -complete=file GitDiff call GitDiff(<q-args>)
 
 # gyoza
 augroup vimrc_gyoza
-  autocmd User vimrc_initialize ++once vimrc#gyoza#Enable()
+  autocmd InsertEnter * ++once vimrc#gyoza#Enable()
 augroup END
 
 # splash
@@ -2218,12 +2227,11 @@ endif
 
 # lvimrc
 {
-  var lvimrc_ = Rc('lvimrc')
-  lvimrc_ = JoinPath('~', lvimrc_)
+  var lvimrc = JoinPath('~', Rc('lvimrc'))
   execute 'command! -bar -nargs=* LVimrc ' ..
-          'execute <q-args> ?? "edit"' string(lvimrc_)
-  if filereadable(expand(lvimrc_))
-    execute 'source' lvimrc_
+          'execute <q-args> ?? "edit"' string(lvimrc)
+  if filereadable(expand(lvimrc))
+    execute 'source' lvimrc
   endif
 }
 
