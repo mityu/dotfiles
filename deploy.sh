@@ -66,4 +66,8 @@ if $IS_LINUX; then
 
     echo "Deploygin dunst/"
     ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
+
+    echo "Deploying libinput-gestures.conf"
+    ln -snfv $SCRIPT_DIR/libinput-gestures/libinput-gestures.conf \
+        $CONFIG_DIR/libinput-gestures.conf
 fi
