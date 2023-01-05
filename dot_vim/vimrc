@@ -216,7 +216,7 @@ endif
 # Initialize autocmd
 {
   var filename = (expand('<sfile>'))
-  var pattern = '^\s*aug\%[roup]\s\+\zs\S\+\ze\s*'
+  var pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
   var augroups = readfile(filename)
         ->filter((_, line): bool => stridx(line, 'aug') != -1)
         ->filter((_, line): bool => line =~# pattern)
@@ -688,10 +688,9 @@ def LoopDefine(config: dict<any>)
     var commands: list<list<string>>
     [lhs, rhs] =
         mapping->map((_, val): string => substitute(val, '|', '<bar>', 'g'))
-    commands->add([mode .. 'noremap', plug_map.do .. lhs, rhs])
-            ->add([mode .. 'map', enter_with .. lhs, plug_map.main .. lhs])
-            ->add([mode .. 'map', plug_map.main .. lhs, plug_map.do .. lhs .. plug_map.prefix])
-            ->add([mode .. 'map', plug_map.prefix .. lhs, plug_map.main .. lhs])
+    commands->add([mode .. 'noremap', enter_with .. lhs, plug_map.main .. lhs])
+            ->add([mode .. 'noremap', plug_map.main .. lhs, rhs .. plug_map.prefix])
+            ->add([mode .. 'noremap', plug_map.prefix .. lhs, plug_map.main .. lhs])
     execute commands->mapnew('join(v:val)')->join("\n")
   endfor
 
@@ -722,27 +721,35 @@ def SimpleLoopDefine(config: dict<any>)
   LoopDefine(new_config)
 enddef
 
-# Window management
-SimpleLoopDefine({
-  id: 'Window',
-  enter_with: '<C-w>',
-  follow_key: 'hjklHJKLq<>-+_|=',
-})
-LoopDefine({
-  id: 'Window',
-  enter_with: '<C-w>',
-  map: [['<C-h>', '<C-w>h'], ['<C-j>', '<C-w>j'], ['<C-k>', '<C-w>k'], ['<C-l>', '<C-w>l']],
-})
-LoopDefine({
-  id: 'Tab',
-  enter_with: 'g',
-  map: [
-    ['h', 'gT'],
-    ['l', 'gt'],
-    ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
-    ['t', '<Cmd>call <SID>MapTabmove(1)<CR>'],
-  ]
-})
+augroup vimrc_mapping
+  autocmd User vimrc_initialize ++once DefineLoopMappings()
+augroup END
+
+def DefineLoopMappings()
+  SimpleLoopDefine({
+    id: 'Window',
+    enter_with: '<C-w>',
+    follow_key: 'hjklHJKLq<>-+_|=',
+  })
+  LoopDefine({
+    id: 'Window',
+    enter_with: '<C-w>',
+    map: [
+      ['<C-h>', '<C-w>h'], ['<C-j>', '<C-w>j'],
+      ['<C-k>', '<C-w>k'], ['<C-l>', '<C-w>l']
+    ],
+  })
+  LoopDefine({
+    id: 'Tab',
+    enter_with: 'g',
+    map: [
+      ['h', 'gT'],
+      ['l', 'gt'],
+      ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
+      ['t', '<Cmd>call <SID>MapTabmove(1)<CR>'],
+    ]
+  })
+enddef
 
 def MapTabmove(delta: number)
   var tab_count = tabpagenr('$')
@@ -794,7 +801,6 @@ def CmdwinEnter()
 
   # Make executing a previous command easier.
   if PluginExists('vim-gram')
-    # nnoremap <buffer> / <Cmd>call <SID>CmdwinSelectHistory()<CR>
     nnoremap <buffer> / <Cmd>call gram#core#setup(#{
           \sources: [#{name: 'command-history', default_action: 'command-history:select'}]})<CR>
   endif
@@ -859,24 +865,7 @@ def CmdwinToggleVeryMagic(): string
   keys ..= "\<Cmd>let &undolevels = &undolevels\<CR>"  # Separate undo sequence
   return keys
 enddef
-# def CmdwinSelectHistory()
-#   var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-#   map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
-#   reverse(history)
-#   gram#select({
-#          name: getcmdwintype() .. 'history',
-#          items: history,
-#          callback: SIDPrefix() .. 'CmdwinSelectHistoryCallback',
-#        })
-# enddef
-# def CmdwinSelectHistoryCallback(item: dict<string>)
-#   if getline('$') ==# ''
-#     setline('$', item.word)
-#   else
-#     append('$', item.word)
-#   endif
-#   noautocmd normal! G$
-# enddef
+
 augroup vimrc_mapping
   autocmd CmdWinEnter * call CmdwinEnter()
   autocmd CmdWinLeave * call CmdwinLeave()
@@ -1122,8 +1111,7 @@ if PluginExists('vim-brownie')
 endif
 if PluginExists('vim-gram')
   augroup vimrc_gram_init
-    autocmd User gram-first-start ++once InitGramMapping()
-    autocmd User gram-initialize ++once InitGram_v2()
+    autocmd User gram-initialize ++once InitGram()
   augroup END
 
   augroup vimrc_gram
@@ -1131,29 +1119,7 @@ if PluginExists('vim-gram')
     autocmd User gram-quit-pre set ambiwidth=double
   augroup END
 
-  def InitGramMapping()
-    gram#custom#map_action('n', '<CR>', 'select-item')
-    gram#custom#map_action('n', 'q', 'quit')
-    gram#custom#map_action('n', 'j', 'select-next-item')
-    gram#custom#map_action('n', 'k', 'select-prev-item')
-    gram#custom#map_action('n', 'i', 'start-insert')
-    gram#custom#map_action('n', 'p', 'preview')
-    gram#custom#map_action('i', '<ESC>', 'stop-insert')
-    gram#custom#map_action('i', '<CR>', 'stop-insert')
-    gram#custom#map_action('i', '<C-j>', 'stop-insert')
-    gram#custom#map_action('i', '<C-h>', 'delete-char')
-    gram#custom#map_action('i', '<C-w>', 'delete-word')
-    gram#custom#map_action('i', '<C-b>', 'move-to-right')
-    gram#custom#map_action('i', '<C-f>', 'move-to-left')
-    gram#custom#map_action('i', '<C-a>', 'move-to-head')
-    gram#custom#map_action('i', '<C-e>', 'move-to-tail')
-    gram#custom#map_action('i', '<C-u>', 'delete-to-head')
-    gram#custom#map_key('n', '<NL>', '<CR>')
-    gram#custom#map_key('i', '<Del>', '<C-h>')
-    gram#custom#map_key('i', '<BS>', '<C-h>')
-  enddef
-
-  def InitGram_v2()
+  def InitGram()
     gram#custom#map_action('normal', 'i', 'switch-to-insert')
     gram#custom#map_action('normal', 'q', 'quit')
     gram#custom#map_action('normal', 'k', 'select-prev-item')
@@ -2177,7 +2143,6 @@ augroup END
 command! Splash call vimrc#splash#Show()
 if !v:vim_did_enter && !(IsMac && has('gui_running'))
   augroup vimrc_splash
-    autocmd!
     autocmd VimEnter * ++once ++nested call vimrc#splash#Intro()
     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
   augroup END
@@ -2244,7 +2209,15 @@ augroup END
 if v:vim_did_enter
   doautocmd User vimrc_initialize
 else
-  augroup vimrc_initialize
-    autocmd VimEnter * ++once doautocmd User vimrc_initialize
-  augroup END
+  # TODO: Maybe this is not enough for Windows or MacVim (They may takes a
+  # while from VimEnter autocommand to first screen update)
+  # autocmd VimEnter * ++once timer_start(
+  #     \5, (timer) => execute('doautocmd User vimrc_initialize'))
+  var statusLineSave = &statusline
+  def VimrcInitialize(): string
+    &statusline = statusLineSave
+    timer_start(5, (timer) => execute('doautocmd User vimrc_initialize'))
+    return ''
+  enddef
+  &statusline = '%!' .. SIDPrefix() .. 'VimrcInitialize()'
 endif
