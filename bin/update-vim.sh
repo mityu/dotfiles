@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 # Build Vim for MSYS2 bash environment.  Switch to plain MSYS2 environment if
 # current environment is mingw64 or mingw32 on MSYS2 because their compiler
