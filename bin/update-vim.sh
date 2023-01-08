@@ -11,6 +11,14 @@ if [[ "$(uname)" == "MINGW"* ]]; then
     /msys2_shell.cmd -msys -defterm -no-start $0 $* || exit 1 && exit 0
 fi
 
+function auto-sudo() {
+    if $ISROOT; then
+        $*
+    else
+        echo $PASSWORD | sudo -S -- $*
+    fi
+}
+
 ISROOT=false
 if [[ $(id -u) == 0 || "$(uname)" == "MSYS"* ]]; then
     ISROOT=true
@@ -34,7 +42,8 @@ cd ~/.cache/vimbuild
 HASH=$(git rev-parse HEAD)
 git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
-    [[ -d ./src/objects ]] && chmod -R 666 ./src/objects
-    (! $FORCEBUILD && make -j4) || (make distclean && make -j4) || exit 1
-    ($ISROOT && make -j4 install) || (echo $PASSWORD | sudo -S make -j4 install)
+    if ! $FORCEBUILD; then
+        auto-sudo make -j4 && auto-sudo make -j4 install && exit 0
+    fi
+    make distclean && auto-sudo make -j4 && auto-sudo make -j4 install
 fi
