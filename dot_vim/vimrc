@@ -1514,6 +1514,10 @@ if OptPluginExists('vim-lsp')
   g:lsp_diagnostics_float_delay = 10
   g:lsp_diagnostics_float_cursor = 1
   g:lsp_settings_filetype_typescript = ['deno']
+  g:lsp_diagnostics_virtual_text_delay = 10
+  g:lsp_diagnostics_virtual_text_padding_left = 0
+  g:lsp_diagnostics_virtual_text_align = 'right'
+  g:lsp_diagnostics_virtual_text_wrap = 'truncate'
 
   def LspDefineBufferAutocmds()
     LspClearBufferAutocmds()
