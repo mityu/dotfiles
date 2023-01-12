@@ -280,7 +280,7 @@ SnipFiletype('vim')
       ->join('#') .. '#'
 
     var snip =
-      strpart(getline('.'), 0, curidx) ..
+      substitute(strpart(getline('.'), 0, curidx), '^\s*', '', '') ..
       autoload_name ..
       '<+CURSOR+>' ..
       getline('.')[curidx + 1 :]
@@ -367,7 +367,7 @@ SnipFiletype('_')
   ->AddSnip((_: string): bool => {
     # foo()>|bar => foo(bar)
     var linestr = getline('.')
-    var pre_cursor = strpart(linestr, 0, col('.') - 1)
+    var pre_cursor = substitute(strpart(linestr, 0, col('.') - 1), '^\s*', '', '')
     var reg_wrapper = '\%(^\|\s\)\zs[^([:space:]]*(\ze)>$'
     var wrapper = matchstr(pre_cursor, reg_wrapper)
     if wrapper ==# ''
