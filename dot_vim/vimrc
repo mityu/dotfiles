@@ -528,6 +528,8 @@ nnoremap <Space>? q?k
 vnoremap <Space>? q?k
 nnoremap <Space>; :
 vnoremap <Space>; :
+nmap ' :
+vmap ' :
 
 noremap - <C-x>
 noremap + <C-a>
