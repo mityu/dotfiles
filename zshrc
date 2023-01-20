@@ -205,7 +205,7 @@ fi
 
 if zsh_has_cmd fzf; then
 	export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
-	export FZF_DEFAULT_OPTS="--reverse --no-sort"
+	export FZF_DEFAULT_OPTS="--reverse --no-sort --no-separator"
 
 	function select-history(){
 		local bufsave
