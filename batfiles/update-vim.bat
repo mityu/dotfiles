@@ -38,11 +38,11 @@ for /f "usebackq" %%A in (`git rev-parse HEAD`) do set HASH=%%A
 git pull
 for /f "usebackq" %%A in (`git rev-parse HEAD`) do set HASH_AFTER=%%A
 if %FORCE_BUILD% == TRUE (
-    echo make -j2 -f Make_ming.mak GUI=%ENABLE_GUI%
-    make -j2 -f Make_ming.mak GUI=%ENABLE_GUI%
+    echo make -j2 -f Make_ming.mak GUI=%ENABLE_GUI% STATIC_STDCPLUS=yes
+    make -j2 -f Make_ming.mak GUI=%ENABLE_GUI% STATIC_STDCPLUS=yes
 ) else if not %HASH% == %HASH_AFTER% (
-    echo make -j2 -f Make_ming.mak GUI=no
-    make -j2 -f Make_ming.mak GUI=no
+    echo make -j2 -f Make_ming.mak GUI=no STATIC_STDCPLUS=yes
+    make -j2 -f Make_ming.mak GUI=no STATIC_STDCPLUS=yes
 ) else (
     echo Vim is already up-to-date.
 )
