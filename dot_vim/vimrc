@@ -278,6 +278,7 @@ def PackRegister()
   minpac#add('k-takata/minpac', {type: 'opt'})
 
   minpac#add('itchyny/vim-cursorword')
+  minpac#add('itchyny/vim-qfedit')
   minpac#add('kamichidu/vim-textobj-function-go')
   minpac#add('kana/vim-altr')
   minpac#add('kana/vim-operator-user')
