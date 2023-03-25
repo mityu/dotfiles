@@ -688,6 +688,7 @@ def LoopDefine(config: dict<any>)
   endfor
 
   execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
+  execute printf('%snoremap %s<ESC> <Nop>', mode, plug_map.prefix)
   for mapping in config.map
     var lhs: string
     var rhs: string
