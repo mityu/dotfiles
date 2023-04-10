@@ -104,6 +104,7 @@ if isWindows then
     config.font_size = 13
     config.initial_cols = 170
     config.initial_rows = 40
+    config.default_prog = {'cmd.exe', '/k', '%USERPROFILE%\\dotfiles\\batfiles\\setenv.bat'}
 elseif isMac then
     config.initial_cols = 206
     config.initial_rows = 58
