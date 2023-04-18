@@ -48,6 +48,8 @@ if ! zsh_has_cmd pbcopy && zsh_has_cmd xsel; then
 	alias pbcopy='xsel -bi'
 fi
 
+zsh_has_cmd bat && alias cat='bat --style plain --theme ansi'
+
 zsh_has_cmd opam && eval $(opam env)
 
 # Enable smart completion
