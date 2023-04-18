@@ -49,6 +49,7 @@ if ! zsh_has_cmd pbcopy && zsh_has_cmd xsel; then
 fi
 
 zsh_has_cmd bat && alias cat='bat --style plain --theme ansi'
+zsh_has_cmd exa && alias ls='exa --group-directories-first --icons'
 
 zsh_has_cmd opam && eval $(opam env)
 
