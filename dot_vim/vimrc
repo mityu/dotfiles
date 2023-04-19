@@ -677,6 +677,12 @@ if IsMac && has('gui_running')
   noremap! <D-[> <ESC>
 endif
 
+if IsLinux && executable('fcitx5-remote') == 1
+  augroup vimrc-im
+    autocmd InsertLeave * system('fcitx5-remote -c')
+  augroup END
+endif
+
 # Loop
 def LoopDefine(config: dict<any>)
   var prefix = printf('<Plug>(<SID>-loop-%s)', config.id)
