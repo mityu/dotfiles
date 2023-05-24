@@ -185,6 +185,10 @@ if !v:vim_did_enter
     }
   endif
 
+  # disable modifyOtherKeys
+  &t_TI = ''
+  &t_TE = ''
+
   # disable default plugins
   g:loaded_2html_plugin = 1
   g:loaded_getscriptPlugin = 1
@@ -442,6 +446,7 @@ set noimdisable
 set lazyredraw
 # set previewpopup=highlight:Normal
 set termwinkey=<C-w>
+set noesckeys
 set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
