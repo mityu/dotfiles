@@ -2178,6 +2178,7 @@ if has('gui_running')
 
     if IsWindows
       winpos 0 0
+      cd $USERPROFILE
     endif
   endif
   set guioptions& guioptions-=e guioptions-=T guioptions-=m
