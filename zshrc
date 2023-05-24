@@ -49,7 +49,17 @@ if ! zsh_has_cmd pbcopy && zsh_has_cmd xsel; then
 fi
 
 zsh_has_cmd bat && alias cat='bat --style plain --theme ansi'
-zsh_has_cmd exa && alias ls='exa --group-directories-first --icons'
+
+if zsh_has_cmd exa; then
+	function ls() {
+		if [ -t 1 ]; then
+			# When output is terminal.
+			exa --group-directories-first --icons $*
+		else
+			command ls $*
+		fi
+	}
+fi
 
 zsh_has_cmd opam && eval $(opam env)
 
