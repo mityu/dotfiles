@@ -100,7 +100,7 @@ function __bashrc_update_prompt() {
     if [[ $MSYSTEM != '' ]]; then
         PS1+="$purple$MSYSTEM$reset "
     fi
-    PS1+="$yellow\W$reset "
+    PS1+="${purple}bash$reset $yellow\w$reset "
     if [[ $gitbranch != '' ]]; then
         PS1+="$gray$gitbranch$reset "
     fi
