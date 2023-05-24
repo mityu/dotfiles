@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function usage() {
+	echo "Usage: $(basename $0) <command>"
+	echo "    update|pull  Sync dotfiles with remote repository"
+	echo "    cd           Cd to dotfiles directory"
+	echo "    help         Show this help"
+}
+
+THISFILE="$BASH_SOURCE"
+if [[ "$THISFILE" == "" ]]; then
+	THISFILE=$0
+fi
+
+DOTFILES=$(cd $(dirname $(dirname $THISFILE)); pwd)
+
+case $1 in
+	"update" | "pull")
+		git -C $DOTFILES pull;;
+	"cd")
+		cd "$DOTFILES";;
+	"help" | "--help" | "-h")
+		usage;;
+	* )
+		echo "Invalid Option: $*"
+		usage;;
+esac

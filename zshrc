@@ -61,6 +61,8 @@ if zsh_has_cmd exa; then
 	}
 fi
 
+alias dotfiles=". $(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin/dotfiles"
+
 zsh_has_cmd opam && eval $(opam env)
 
 # Enable smart completion

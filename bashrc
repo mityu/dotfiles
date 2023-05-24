@@ -44,6 +44,8 @@ function stdin() {
     done
 }
 
+alias dotfiles=". $(which dotfiles)"
+
 shopt -s nocaseglob
 set -o vi
 bind 'set show-mode-in-prompt on'
