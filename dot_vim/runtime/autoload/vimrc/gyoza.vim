@@ -50,7 +50,6 @@ endclass
 
 var newlineRules: dict<Config>
 
-# var newlineRules: dict<dict<any>>
 var linesCount: number
 var tryToApply: bool
 
@@ -96,7 +95,6 @@ def GetIndentStr(depth: number): string
   return repeat(GetOneIndent(), depth)
 enddef
 
-# NOTE: Conversion any -> object<...> always fails in :def function now.
 def GetNewlineRules(): list<Rule>
   var ft_config_dict = {}
   if has_key(newlineRules, &filetype)
