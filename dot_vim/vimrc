@@ -1550,7 +1550,10 @@ if OptPluginExists('vim-lsp')
     augroup vimrc_lsp_buffer
       autocmd! * <buffer>
     augroup END
-    nunmap <buffer> <Space>i
+
+    if get(maparg('<Space>i', 'n', false, true), 'buffer', false)
+      nunmap <buffer> <Space>i
+    endif
 
     if &filetype ==# 'go'
       augroup vimrc_lsp_buffer_go
