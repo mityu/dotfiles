@@ -68,4 +68,4 @@ if [ ! -d "$DOTFILES" ]; then
     git clone --recursive https://github.com/mityu/dotfiles.git $DOTFILES
 fi
 $DOTFILES/deploy.sh
-echo $password | $DOTFILES/bin/update-vim.sh
+echo $password | $DOTFILES/bin/update-vim

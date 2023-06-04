@@ -277,7 +277,7 @@ function update-softwares() {
 	local password=''
 	echo -n "Password:"; read -s password;
 
-	echo $password | update-vim.sh
+	echo $password | update-vim
 
 	if zsh_has_cmd brew; then
 		brew upgrade
