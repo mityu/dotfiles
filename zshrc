@@ -155,14 +155,14 @@ typeset -A zshrc_prompt_git_info=(
 	stash ''
 )
 typeset -A zshrc_prompt_colors=(
-	yellow '%F{yellow}'
-	green '%F{green}'
-	red '%F{red}'
-	gray '%F{242}'
-	cyan '%F{cyan}'
-	pink '%F{218}'
-	purple '%F{177}'
-	reset '%f'
+	yellow '%{%F{yellow}%}'
+	green  '%{%F{green}%}'
+	red    '%{%F{red}%}'
+	gray   '%{%F{242}%}'
+	cyan   '%{%F{cyan}%}'
+	pink   '%{%F{218}%}'
+	purple '%{%F{177}%}'
+	reset  '%{%f%}'
 )
 readonly zshrc_prompt_colors
 
@@ -180,7 +180,7 @@ function zshrc_init_prompt() {
 }
 
 function zshrc_build_prompt() {
-	local ps1='\n'
+	local ps1
 
 	ps1+='${zshrc_prompt_keymap}'
 
@@ -241,6 +241,7 @@ function zshrc_prompt_precmd() {
 			async_job zshrc_prompt_async_worker zshrc_prompt_git_stash
 		fi
 	fi
+	print
 }
 
 function zshrc_prompt_git_dirty() {
@@ -260,6 +261,27 @@ function zshrc_prompt_git_stash() {
 	fi
 }
 
+function zshrc_prompt_vim_mode() {
+	if [[ $REGION_ACTIVE != 0 ]]; then
+		local modestr='UNKNOWN'
+		if [[ $REGION_ACTIVE == 1 ]]; then
+			modestr='VISUAL'
+		elif [[ $REGION_ACTIVE == 2 ]]; then
+			modestr='V-LINE'
+		fi
+		zshrc_prompt_keymap="${zshrc_prompt_colors[red]} ${modestr} ${zshrc_prompt_colors[reset]}"
+	else
+		case $KEYMAP in
+			vicmd)
+				zshrc_prompt_keymap="${zshrc_prompt_colors[green]} NORMAL ${zshrc_prompt_colors[reset]}"
+				;;
+			main|viins)
+				zshrc_prompt_keymap="${zshrc_prompt_colors[cyan]} INSERT ${zshrc_prompt_colors[reset]}"
+				;;
+		esac
+	fi
+}
+
 function zshrc_prompt_async_callback() {
 	local job=$1
 	case $job in
@@ -273,20 +295,19 @@ function zshrc_prompt_async_callback() {
 	zle reset-prompt
 }
 
-function zle-line-pre-redraw zle-keymap-select zle-line-init {
-	if [[ $REGION_ACTIVE != 0 ]]; then
-		zshrc_prompt_keymap="${zshrc_prompt_colors[red]} VISUAL ${zshrc_prompt_colors[reset]}"
-	else
-		case $KEYMAP in
-			vicmd)
-				zshrc_prompt_keymap="${zshrc_prompt_colors[green]} NORMAL ${zshrc_prompt_colors[reset]}"
-				;;
-			main|viins)
-				zshrc_prompt_keymap="${zshrc_prompt_colors[cyan]} INSERT ${zshrc_prompt_colors[reset]}"
-				;;
-		esac
-	fi
-	zle reset-prompt
+function zle-keymap-select zle-line-init {
+	local keymap_save="$zshrc_prompt_keymap"
+	zshrc_prompt_vim_mode
+	[[ "$keymap_save" != "$zshrc_prompt_keymap" ]] && zle reset-prompt
+}
+
+function zle-line-pre-redraw {
+	local keymap_save="$zshrc_prompt_keymap"
+	zshrc_prompt_vim_mode
+	[[ "$keymap_save" != "$zshrc_prompt_keymap" ]] && print '\e[1F' && zle reset-prompt
+
+	# A hack to enable zsh-syntax-highlighting. (but dirty...)
+	zsh_has_cmd	_zsh_highlight__zle-line-pre-redraw && _zsh_highlight__zle-line-pre-redraw
 }
 
 if [ -n "$VIM_TERMINAL" ]; then
