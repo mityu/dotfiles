@@ -157,7 +157,7 @@ typeset -A zshrc_prompt_colors=(
 )
 readonly zshrc_prompt_colors
 
-zshrc_init_prompt() {
+function zshrc_init_prompt() {
 	PROMPT="$(zshrc_build_prompt)"
 
 	# Show the number of background jobs
@@ -170,7 +170,7 @@ zshrc_init_prompt() {
 	add-zsh-hook precmd zshrc_prompt_precmd
 }
 
-zshrc_build_prompt() {
+function zshrc_build_prompt() {
 	local ps1='\n'
 
 	ps1+='${zshrc_prompt_keymap}'
@@ -210,7 +210,7 @@ zshrc_build_prompt() {
 	echo $ps1
 }
 
-zshrc_prompt_precmd() {
+function zshrc_prompt_precmd() {
 	local has_async=false
 	zsh_has_cmd async && has_async=true
 
@@ -234,7 +234,7 @@ zshrc_prompt_precmd() {
 	fi
 }
 
-zshrc_prompt_git_dirty() {
+function zshrc_prompt_git_dirty() {
 	setopt localoptions noshwordsplit
 
 	# Prevent e.g. `git status` from refreshing the index as a side effect.
@@ -245,13 +245,13 @@ zshrc_prompt_git_dirty() {
 	fi
 }
 
-zshrc_prompt_git_stash() {
+function zshrc_prompt_git_stash() {
 	if git rev-list --walk-reflogs --count refs/stash &> /dev/null; then
 		echo "${zshrc_prompt_colors[cyan]}≡${zshrc_prompt_colors[reset]}"
 	fi
 }
 
-zshrc_prompt_async_callback() {
+function zshrc_prompt_async_callback() {
 	local job=$1
 	case $job in
 		zshrc_prompt_git_*)
