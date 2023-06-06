@@ -140,29 +140,37 @@ bindkey -M visual 'ma' add-surround
 # Prompt
 setopt prompt_subst
 typeset zshrc_prompt_keymap
-zshrc_prompt_precmd() {
+typeset -A zshrc_prompt_git_info=(
+	branch ''
+	dirty ''
+	stash ''
+)
+typeset -A zshrc_prompt_colors=(
+	yellow '%F{yellow}'
+	green '%F{green}'
+	red '%F{red}'
+	gray '%F{242}'
+	cyan '%F{cyan}'
+	pink '%F{218}'
+	purple '%F{177}'
+	reset '%f'
+)
+readonly zshrc_prompt_colors
+
+zshrc_init_prompt() {
 	PROMPT="$(zshrc_build_prompt)"
 
-	if zsh_has_cmd async; then
-		async_stop_worker zshrc_prompt_async_worker
-		async_start_worker zshrc_prompt_async_worker -n
-		async_register_callback \
-			zshrc_prompt_async_worker zshrc_prompt_async_callback
-		async_job zshrc_prompt_async_worker zshrc_prompt_async_prompt
-	fi
+	# Show the number of background jobs
+	RPROMPT='%(1j.[%j].)'
+
+	zle -N zle-line-init
+	zle -N zle-keymap-select
+	zle -N zle-line-pre-redraw
+	autoload -Uz add-zsh-hook
+	add-zsh-hook precmd zshrc_prompt_precmd
 }
 
 zshrc_build_prompt() {
-	local yellow='%F{yellow}'
-	local green='%F{green}'
-	local red='%F{red}'
-	local gray='%F{242}'
-	local cyan='%F{cyan}'
-	local magenta='%F{218}'
-	local purple='%F{177}'
-	local reset='%f'
-
-	local build_full=${1-false}
 	local ps1='\n'
 
 	ps1+='${zshrc_prompt_keymap}'
@@ -173,29 +181,20 @@ zshrc_build_prompt() {
 		if [ -f '/etc/arch-release' ]; then
 			distrib='Arch'
 		fi
-		ps1+="${purple}${distrib}${reset} "
+		ps1+="${zshrc_prompt_colors[purple]}${distrib}${zshrc_prompt_colors[reset]} "
 	fi
 
 	# Exit code
-	ps1+='%{%(?.%F{green}.%F{red})%}#$?%f '
-	ps1+="$yellow%~$reset "
+	ps1+="%{%(?.${zshrc_prompt_colors[green]}.${zshrc_prompt_colors[red]})%}"
+	ps1+='#$?'
+	ps1+="${zshrc_prompt_colors[reset]} "
+
+	# Current working directory
+	ps1+="${zshrc_prompt_colors[yellow]}%~${zshrc_prompt_colors[reset]} "
 
 	# Git status
-	if git rev-parse 2> /dev/null; then
-		# When inside git repository.
-		ps1+="$gray$(git branch --show-current)$reset"
-		if $build_full; then
-			if zshrc_prompt_git_dirty; then
-				# There're modified files or untracked files
-				ps1+="$magenta*$reset"
-			fi
-			# TODO: Fetch/push
-			if git rev-list --walk-reflogs --count refs/stash &> /dev/null; then
-				ps1+=" $cyan≡$reset"
-			fi
-		fi
-		ps1+=' '
-	fi
+	ps1+='${zshrc_prompt_git_info[branch]}${zshrc_prompt_git_info[dirty]} '
+	ps1+='${zshrc_prompt_git_info[stash]}'
 
 	if ! zsh_has_cmd async; then
 		ps1+='(no-async)'
@@ -211,13 +210,28 @@ zshrc_build_prompt() {
 	echo $ps1
 }
 
-zshrc_prompt_async_prompt() {
-	zshrc_build_prompt true  # Generate prompt with full information
-}
+zshrc_prompt_precmd() {
+	local has_async=false
+	zsh_has_cmd async && has_async=true
 
-zshrc_prompt_async_callback() {
-	PROMPT="$3"
-	zle reset-prompt
+	if $has_async; then
+		async_stop_worker zshrc_prompt_async_worker
+		async_start_worker zshrc_prompt_async_worker -n
+		async_register_callback \
+			zshrc_prompt_async_worker zshrc_prompt_async_callback
+	fi
+
+	for key in ${(k)zshrc_prompt_git_info}; do
+		zshrc_prompt_git_info[${key}]=''
+	done
+
+	if git rev-parse 2> /dev/null; then
+		zshrc_prompt_git_info[branch]="${zshrc_prompt_colors[gray]}$(git branch --show-current)${zshrc_prompt_colors[reset]}"
+		if $has_async; then
+			async_job zshrc_prompt_async_worker zshrc_prompt_git_dirty
+			async_job zshrc_prompt_async_worker zshrc_prompt_git_stash
+		fi
+	fi
 }
 
 zshrc_prompt_git_dirty() {
@@ -226,34 +240,45 @@ zshrc_prompt_git_dirty() {
 	# Prevent e.g. `git status` from refreshing the index as a side effect.
 	# Ref: https://github.com/sindresorhus/pure
 	export GIT_OPTIONAL_LOCKS=0
-	test -n "$(git status --porcelain --untracked-files=normal --no-renames)"
+	if [ -n "$(git status --porcelain --untracked-files=normal --no-renames)" ]; then
+		echo "${zshrc_prompt_colors[pink]}*${zshrc_prompt_colors[reset]}"
+	fi
+}
+
+zshrc_prompt_git_stash() {
+	if git rev-list --walk-reflogs --count refs/stash &> /dev/null; then
+		echo "${zshrc_prompt_colors[cyan]}≡${zshrc_prompt_colors[reset]}"
+	fi
+}
+
+zshrc_prompt_async_callback() {
+	local job=$1
+	case $job in
+		zshrc_prompt_git_*)
+			zshrc_prompt_git_info[${job##zshrc_prompt_git_}]="$3"
+			;;
+		*)
+			return
+			;;
+	esac
+	zle reset-prompt
 }
 
 function zle-line-pre-redraw zle-keymap-select zle-line-init {
 	if [[ $REGION_ACTIVE != 0 ]]; then
-		zshrc_prompt_keymap='%F{red} VISUAL %f'
+		zshrc_prompt_keymap="${zshrc_prompt_colors[red]} VISUAL ${zshrc_prompt_colors[reset]}"
 	else
 		case $KEYMAP in
 			vicmd)
-				zshrc_prompt_keymap='%F{green} NORMAL %f'
+				zshrc_prompt_keymap="${zshrc_prompt_colors[green]} NORMAL ${zshrc_prompt_colors[reset]}"
 				;;
 			main|viins)
-				zshrc_prompt_keymap='%F{cyan} INSERT %f'
+				zshrc_prompt_keymap="${zshrc_prompt_colors[cyan]} INSERT ${zshrc_prompt_colors[reset]}"
 				;;
 		esac
 	fi
 	zle reset-prompt
 }
-
-# Show the number of background jobs
-RPROMPT='%(1j.[%j].)'
-
-zle -N zle-line-init
-zle -N zle-keymap-select
-zle -N zle-line-pre-redraw
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd zshrc_prompt_precmd
-
 
 if [ -n "$VIM_TERMINAL" ]; then
 	function drop() {
@@ -337,6 +362,7 @@ function() {
 # fi
 
 [ -d "$DOTZSH/zsh-async" ] && autoload -Uz async && async
+zshrc_init_prompt  # Must build PROMPT string after "async" library is loaded.
 
 if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
 	source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
