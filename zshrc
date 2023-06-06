@@ -137,6 +137,124 @@ bindkey -M visual 'mr' change-surround
 bindkey -M visual 'md' delete-surround
 bindkey -M visual 'ma' add-surround
 
+# Prompt
+setopt prompt_subst
+typeset zshrc_prompt_keymap
+zshrc_prompt_precmd() {
+	PROMPT="$(zshrc_build_prompt)"
+
+	if zsh_has_cmd async; then
+		async_stop_worker zshrc_prompt_async_worker
+		async_start_worker zshrc_prompt_async_worker -n
+		async_register_callback \
+			zshrc_prompt_async_worker zshrc_prompt_async_callback
+		async_job zshrc_prompt_async_worker zshrc_prompt_async_prompt
+	fi
+}
+
+zshrc_build_prompt() {
+	local yellow='%F{yellow}'
+	local green='%F{green}'
+	local red='%F{red}'
+	local gray='%F{242}'
+	local cyan='%F{cyan}'
+	local magenta='%F{218}'
+	local purple='%F{177}'
+	local reset='%f'
+
+	local build_full=${1-false}
+	local ps1='\n'
+
+	ps1+='${zshrc_prompt_keymap}'
+
+	# Show Linux distribution on WSL2
+	if [[ $(uname) == "Linux" && $(uname -r) == *"microsoft"* ]]; then
+		local distrib='Unknown'
+		if [ -f '/etc/arch-release' ]; then
+			distrib='Arch'
+		fi
+		ps1+="${purple}${distrib}${reset} "
+	fi
+
+	# Exit code
+	ps1+='%{%(?.%F{green}.%F{red})%}#$?%f '
+	ps1+="$yellow%~$reset "
+
+	# Git status
+	if git rev-parse 2> /dev/null; then
+		# When inside git repository.
+		ps1+="$gray$(git branch --show-current)$reset"
+		if $build_full; then
+			if zshrc_prompt_git_dirty; then
+				# There're modified files or untracked files
+				ps1+="$magenta*$reset"
+			fi
+			# TODO: Fetch/push
+			if git rev-list --walk-reflogs --count refs/stash &> /dev/null; then
+				ps1+=" $cyan≡$reset"
+			fi
+		fi
+		ps1+=' '
+	fi
+
+	if ! zsh_has_cmd async; then
+		ps1+='(no-async)'
+	fi
+
+	ps1+=$'\n'
+	if [[ $(id -u) == 0 ]]; then
+		ps1+='# '
+	else
+		ps1+='$ '
+	fi
+
+	echo $ps1
+}
+
+zshrc_prompt_async_prompt() {
+	zshrc_build_prompt true  # Generate prompt with full information
+}
+
+zshrc_prompt_async_callback() {
+	PROMPT="$3"
+	zle reset-prompt
+}
+
+zshrc_prompt_git_dirty() {
+	setopt localoptions noshwordsplit
+
+	# Prevent e.g. `git status` from refreshing the index as a side effect.
+	# Ref: https://github.com/sindresorhus/pure
+	export GIT_OPTIONAL_LOCKS=0
+	test -n "$(git status --porcelain --untracked-files=normal --no-renames)"
+}
+
+function zle-line-pre-redraw zle-keymap-select zle-line-init {
+	if [[ $REGION_ACTIVE != 0 ]]; then
+		zshrc_prompt_keymap='%F{red} VISUAL %f'
+	else
+		case $KEYMAP in
+			vicmd)
+				zshrc_prompt_keymap='%F{green} NORMAL %f'
+				;;
+			main|viins)
+				zshrc_prompt_keymap='%F{cyan} INSERT %f'
+				;;
+		esac
+	fi
+	zle reset-prompt
+}
+
+# Show the number of background jobs
+RPROMPT='%(1j.[%j].)'
+
+zle -N zle-line-init
+zle -N zle-keymap-select
+zle -N zle-line-pre-redraw
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd zshrc_prompt_precmd
+
+
 if [ -n "$VIM_TERMINAL" ]; then
 	function drop() {
 		echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
@@ -178,8 +296,8 @@ function install_zsh_plugins() {
 			$DOTZSH/zsh-syntax-highlighting
 	fi
 
-	if [ ! -d "$DOTZSH/pure" ]; then
-		git clone https://github.com/sindresorhus/pure $DOTZSH/pure
+	if [ ! -d "$DOTZSH/zsh-async"]; then
+		git clone https://github.com/mafredri/zsh-async $DOTZSH/zsh-async
 	fi
 }
 
@@ -207,19 +325,18 @@ function() {
 	done
 }
 
-if [ -d "$DOTZSH/pure" ]; then
-	autoload -U promptinit; promptinit
-	zstyle ':prompt:pure:git:stash' show yes
-	zstyle ':prompt:pure:path' color yellow
-	zstyle ':prompt:pure:prompt:*' color default
-	prompt pure
+# if [ -d "$DOTZSH/pure" ]; then
+# 	autoload -U promptinit; promptinit
+# 	zstyle ':prompt:pure:git:stash' show yes
+# 	zstyle ':prompt:pure:path' color yellow
+# 	zstyle ':prompt:pure:prompt:*' color default
+# 	prompt pure
+# 
+# 	# Show $? value with color (green=succeeded, red=failed)
+# 	prompt_newline=$' %{%(?.%F{green}.%F{red})%}$?%f\n%{\r%}'
+# fi
 
-	# Show $? value with color (green=succeeded, red=failed)
-	prompt_newline=$' %{%(?.%F{green}.%F{red})%}$?%f\n%{\r%}'
-else
-	PROMPT='%c $ '
-	RPROMPT='[%~]'
-fi
+[ -d "$DOTZSH/zsh-async" ] && autoload -Uz async && async
 
 if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
 	source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
