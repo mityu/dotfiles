@@ -17,8 +17,17 @@ fi
 export PATH=$(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin:$PATH
 export LANG=en_US.UTF-8
 
+function zshrc_in_git_repo() {
+	git rev-parse 2> /dev/null
+}
+
 function zsh_has_cmd() {
 	which $1 &> /dev/null
+}
+
+function zshrc_ask_yesno() {
+	echo -n "$1 [y/N]: "
+	read -q
 }
 
 if zsh_has_cmd vim; then
@@ -225,7 +234,7 @@ function zshrc_prompt_precmd() {
 		zshrc_prompt_git_info[${key}]=''
 	done
 
-	if git rev-parse 2> /dev/null; then
+	if zshrc_in_git_repo; then
 		zshrc_prompt_git_info[branch]="${zshrc_prompt_colors[gray]}$(git branch --show-current)${zshrc_prompt_colors[reset]}"
 		if $has_async; then
 			async_job zshrc_prompt_async_worker zshrc_prompt_git_dirty
@@ -335,8 +344,7 @@ function update-zsh-plugins() {
 }
 
 if [ ! -d "$DOTZSH" ]; then
-	printf "Install plugins? [y/N]: "
-	if read -q; then
+	if zshrc_ask_yesno "Install plugins?"; then
 		mkdir -p $DOTZSH
 		install_zsh_plugins
 	fi
@@ -460,11 +468,11 @@ function update-softwares() {
 }
 
 function gitinit() {
-	if ! [ -d "./.git" ]; then
-		git init
-		git branch -m main
-		git commit --allow-empty -m "Initial commit"
+	if zshrc_in_git_repo; then
+		zshrc_ask_yesno 'In a git repository. continue?' || return 1
 	fi
+	git init --initial-branch main
+	git commit --allow-empty -m "Initial commit"
 }
 
 function CAPSLOCK() {
