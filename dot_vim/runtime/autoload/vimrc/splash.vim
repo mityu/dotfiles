@@ -6,13 +6,13 @@ final ASCIIART =<< END
 
         ∩ ∩
        ('･ω･)
-   ____|⊃ ／(____
+   ____|⊃ ／(_____
   /    *--(______/
   ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
 
 やる気はまだない。
 
-    ⊂⌒／`-..____
+    ⊂⌒／`-.._____
    /⊂_/_________/
 
 
@@ -116,12 +116,10 @@ export def Show()
 
   RestoreSettings = (t_ve: string): void => {
     &t_ve = t_ve
-    setcellwidths([])
     redraw  # Reflect t_ve
   }->function([&t_ve])
 
   set t_ve= # Hide cursor
-  setcellwidths([0x3c9, 0x2229]->mapnew('[v:val, v:val, 1]'))
   matchadd('SpecialKey', '<.\{-}>', 10, -1, {window: popupID})
 
   # It seems that popup-callback isn't called when quitting.

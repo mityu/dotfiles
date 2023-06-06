@@ -481,7 +481,7 @@ if has('kaoriya')
   set ambiwidth=auto
 else
   set fileencodings=utf-8,euc-jp,cp932,sjis
-  set ambiwidth=double
+  set ambiwidth=single
 endif
 if IsUnix
   set path& path+=/usr/local/include
@@ -1123,11 +1123,6 @@ endif
 if PluginExists('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-initialize ++once InitGram()
-  augroup END
-
-  augroup vimrc_gram
-    autocmd User gram-start-pre set ambiwidth=single
-    autocmd User gram-quit-pre set ambiwidth=double
   augroup END
 
   def InitGram()
