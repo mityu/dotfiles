@@ -367,6 +367,10 @@ def PackInit(): bool
 enddef
 def PackUpdate()
   if PackInit()
+    var info = minpac#getpluginfo('vimdoc-ja')
+    if !empty(info)
+      system(printf('git -C %s reset --hard', shellescape(info.dir)))
+    endif
     minpac#update()
   endif
 enddef
