@@ -45,6 +45,8 @@ If ($versionRemote -ne $versionLocal) {
             Rename-Item -Force -Path "$HOME\$extractDirName" -NewName $HOME\WezTerm
         }
     }
+} else {
+    Write-Output "Already up-to-date."
 }
 PAUSE
 # vim: set filetype=ps1:
