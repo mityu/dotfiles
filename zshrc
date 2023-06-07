@@ -189,6 +189,11 @@ function zshrc_build_prompt() {
 		local distrib='Unknown'
 		if [ -f '/etc/arch-release' ]; then
 			distrib='Arch'
+		elif [ -f '/etc/lsb-release' ]; then
+			local id="$(cat /etc/lsb-release | grep DISTRIB_ID | sed 's/^DISTRIB_ID=//')"
+			if [[ $id == Ubuntu ]]; then
+				distrib='Ubuntu'
+			fi
 		fi
 		ps1+="${zshrc_prompt_colors[purple]}${distrib}${zshrc_prompt_colors[reset]} "
 	fi
