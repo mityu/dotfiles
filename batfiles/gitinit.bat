@@ -1,6 +1,5 @@
 @echo off
 if not exist ".\.git" (
-    git init
-    git branch -m main
+    git init --initial-branch main
     git commit --allow-empty -m "Initial commit"
 )
