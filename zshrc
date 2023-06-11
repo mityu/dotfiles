@@ -161,6 +161,7 @@ typeset -A zshrc_prompt_git_info=(
 	branch ''
 	dirty ''
 	stash ''
+	push_pull ''
 )
 typeset -A zshrc_prompt_colors=(
 	yellow '%{%F{yellow}%}'
@@ -216,7 +217,7 @@ function zshrc_build_prompt() {
 
 	# Git status
 	ps1+='${zshrc_prompt_git_info[branch]}${zshrc_prompt_git_info[dirty]} '
-	ps1+='${zshrc_prompt_git_info[stash]}'
+	ps1+='${zshrc_prompt_git_info[stash]} ${zshrc_prompt_git_info[push_pull]}'
 
 	if ! zsh_has_cmd async; then
 		ps1+='(no-async)'
@@ -252,6 +253,7 @@ function zshrc_prompt_precmd() {
 		if $has_async; then
 			async_job zshrc_prompt_async_worker zshrc_prompt_git_dirty
 			async_job zshrc_prompt_async_worker zshrc_prompt_git_stash
+			async_job zshrc_prompt_async_worker zshrc_prompt_git_push_pull
 		fi
 	fi
 	print
@@ -272,6 +274,100 @@ function zshrc_prompt_git_stash() {
 	if git rev-list --walk-reflogs --count refs/stash &> /dev/null; then
 		echo "${zshrc_prompt_colors[cyan]}≡${zshrc_prompt_colors[reset]}"
 	fi
+}
+
+# This code is based on pure.zsh. Thanks!
+# https://github.com/sindresorhus/pure/blob/2f13dea466466dde1ba844ba5211e7556f4ae2db/pure.zsh#L317
+function zshrc_prompt_git_fetch() {
+	setopt localoptions noshwordsplit
+
+	local only_upstream=${1:-0}
+
+	# Sets `GIT_TERMINAL_PROMPT=0` to disable authentication prompt for Git fetch (Git 2.3+).
+	export GIT_TERMINAL_PROMPT=0
+	# Set SSH `BachMode` to disable all interactive SSH password prompting.
+	export GIT_SSH_COMMAND="${GIT_SSH_COMMAND:-"ssh"} -o BatchMode=yes"
+
+	# If gpg-agent is set to handle SSH keys for `git fetch`, make
+	# sure it doesn't corrupt the parent TTY.
+	# Setting an empty GPG_TTY forces pinentry-curses to close immediately rather
+	# than stall indefinitely waiting for user input.
+	export GPG_TTY=
+
+	local -a remote
+	if ((only_upstream)); then
+		local ref
+		ref=$(command git symbolic-ref -q HEAD)
+		# Set remote to only fetch information for the current branch.
+		remote=($(command git for-each-ref --format='%(upstream:remotename) %(refname)' $ref))
+		if [[ -z $remote[1] ]]; then
+			# No remote specified for this branch, skip fetch.
+			return 97
+		fi
+	fi
+
+	# Default return code, which indicates Git fetch failure.
+	local fail_code=99
+
+	# Guard against all forms of password prompts. By setting the shell into
+	# MONITOR mode we can notice when a child process prompts for user input
+	# because it will be suspended. Since we are inside an async worker, we
+	# have no way of transmitting the password and the only option is to
+	# kill it. If we don't do it this way, the process will corrupt with the
+	# async worker.
+	setopt localtraps monitor
+
+	# Make sure local HUP trap is unset to allow for signal propagation when
+	# the async worker is flushed.
+	trap - HUP
+
+	trap '
+		# Unset trap to prevent infinite loop
+		trap - CHLD
+		if [[ $jobstates = suspended* ]]; then
+			# Set fail code to password prompt and kill the fetch.
+			fail_code=98
+			kill %%
+		fi
+	' CHLD
+
+	# Do git fetch and avoid fetching tags or
+	# submodules to speed up the process.
+	command git -c gc.auto=0 fetch \
+		--quiet \
+		--no-tags \
+		--recurse-submodules=no \
+		$remote &>/dev/null &
+	wait $! || return $fail_code
+
+	unsetopt monitor
+}
+
+function zshrc_prompt_git_push_pull() {
+	setopt localoptions noshwordsplit
+	if [[ "$(git remote)" == "" ]]; then
+		echo '(no-remote)'
+		return 0
+	fi
+
+	zshrc_prompt_git_fetch
+	case $? in
+		0)
+			local arrows
+			local -a output
+			output=$(git rev-list --left-right --count HEAD...@'{u}')
+			(( output[(w)2] > 0)) && arrows+='⇣'
+			(( output[(w)1] > 0)) && arrows+='⇡'
+			echo "${zshrc_prompt_colors[cyan]}$arrows${zshrc_prompt_colors[reset]}"
+			;;
+		97)
+			echo '(no-remote)'
+			;;
+		99|98)  # git fetch failed
+			echo "${zshrc_prompt_colors[red]}x${zshrc_prompt_colors[reset]}"
+			;;
+		*) echo '(err)' ;;  # Do nothing
+	esac
 }
 
 function zshrc_prompt_vim_mode() {
