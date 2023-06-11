@@ -78,6 +78,14 @@ zsh_has_cmd opam && eval $(opam env)
 autoload -Uz compinit
 compinit
 
+export CLICOLOR=auto
+function() {
+	local -a color_config=(
+		gx ex fx dx cx ah ad ac ag ac ad
+	)
+	export LSCOLORS="${(j..)color_config}"
+}
+
 # The file to save history
 export HISTFILE=${HOME}/.zhistory
 # How many zsh records history to memory.
