@@ -535,6 +535,10 @@ function update-vim-plugins() {
 			%print
 			cquit!
 		endif
+		let info = minpac#getpluginfo("vimdoc-ja")
+		if !empty(info)
+			call system(printf('git -C %s reset --hard', shellescape(info.dir)))
+		fi
 		let g:minpac#opt.status_auto = v:false
 		call minpac#update("", {"do": "call PostUpdatePlugins()"})
 	endfunction
