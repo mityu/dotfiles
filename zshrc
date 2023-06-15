@@ -499,7 +499,7 @@ function() {
 # 	prompt_newline=$' %{%(?.%F{green}.%F{red})%}$?%f\n%{\r%}'
 # fi
 
-[ -d "$DOTZSH/zsh-async" ] && autoload -Uz async && async
+[ -d "$DOTZSH/zsh-async" ] && source $DOTZSH/zsh-async/async.zsh && async
 zshrc_init_prompt  # Must build PROMPT string after "async" library is loaded.
 
 if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
