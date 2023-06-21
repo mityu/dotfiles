@@ -15,7 +15,7 @@
   if not Exist %USERPROFILE%\.config mkdir %USERPROFILE%\.config
 
   echo Deploying .vim...
-  mklink /D %USERPROFILE%\vimfiles %PARENT_DIR%\dot_vim
+  mklink /D %USERPROFILE%\vimfiles %PARENT_DIR%\vim
 
   echo Deploying wezterm...
   mklink /D %USERPROFILE%\.config\wezterm %PARENT_DIR%\wezterm

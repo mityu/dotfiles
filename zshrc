@@ -35,7 +35,7 @@ if zsh_has_cmd vim; then
 		local thisfile
 		thisfile=$1
 		thisfile=${$(readlink $thisfile):-$thisfile}
-		eval 'alias vi="vim -u' $(dirname $thisfile)'/dot_vim/vimrc_stable"'
+		eval 'alias vi="vim -u' $(dirname $thisfile)'/vim/vimrc_stable"'
 	} ${(%):-%N}
 	export MANPAGER="vim -M +MANPAGER -"
 	export EDITOR=vim
