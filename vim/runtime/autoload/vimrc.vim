@@ -144,9 +144,10 @@ export def UpdateLocalPackages()
     Vimrc.EchomsgError('No git')
     return
   endif
+  var packDir = Vimrc.JoinPath(Vimrc.Stdpath.cache, 'pack')
   var dirs: list<string>
-  dirs = Vimrc.JoinPath($DOT_VIM, 'pack', 'local', 'start', '*', '.git')->glob(true, true)
-  dirs += Vimrc.JoinPath($DOT_VIM, 'pack', 'local', 'opt', '*', '.git')->glob(true, true)
+  dirs = Vimrc.JoinPath(packDir, 'local', 'start', '*', '.git')->glob(true, true)
+  dirs += Vimrc.JoinPath(packDir, 'local', 'opt', '*', '.git')->glob(true, true)
   var cmds: list<string>
   for dir in dirs
     cmds->add('git -C ' .. dir->fnamemodify(':h')->shellescape() .. ' pull')

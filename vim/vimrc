@@ -97,7 +97,7 @@ export def Mkdir(dir: string, ...opt: list<any>): bool
   if isdirectory(dir)
     return true
   endif
-  return call('mkdir', [dir] + opt) ? true : false
+  return !!call('mkdir', [dir] + opt)
 enddef
 
 export def Input(prompt: string, ...opt: list<any>): string
@@ -134,6 +134,7 @@ final IsUnix = IsLinux || IsMac
 final IsWSL = IsLinux && system('uname -r') =~? 'microsoft'
 
 export var Filesystem: dict<string>
+export var Stdpath: dict<string>
 if IsWindows
   $DOT_VIM = expand('~\vimfiles')
   Filesystem = {
@@ -141,12 +142,18 @@ if IsWindows
     path_separator: ';',
     rcfile_prefix: '_'
   }
+  Stdpath = {
+    cache: expand('~\.cache\vim')
+  }
 else
   $DOT_VIM = expand('~/.vim')
   Filesystem = {
     slash: '/',
     path_separator: ':',
     rcfile_prefix: '.'
+  }
+  Stdpath = {
+    cache: expand('~/.cache/vim')
   }
 endif
 
@@ -205,6 +212,7 @@ if !v:vim_did_enter
   g:loaded_logiPat = 1
 
   &runtimepath ..= ',' .. escape(JoinPath($DOT_VIM, 'runtime'), ' \')
+  &packpath = Stdpath.cache .. ',' .. &packpath
 
   # Set environmental variables on gVim.
   {
@@ -245,22 +253,26 @@ endif
 if &loadplugins
   var PluginList: dict<bool>
   var OptPluginList: dict<bool>
-  var minpacDir: string
+  var minpacDir = JoinPath(Stdpath.cache, 'pack', 'minpac')
 
-  minpacDir = JoinPath($DOT_VIM, 'pack', 'minpac', 'start', '')
-  readdir(minpacDir, (e: string): number => {
-    if isdirectory(minpacDir .. e)
-      PluginList[e] = true
-    endif
-    return 0
-  })
-  minpacDir = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', '')
-  readdir(minpacDir, (e: string): number => {
-    if isdirectory(minpacDir .. e)
-      OptPluginList[e] = true
-    endif
-    return 0
-  })
+  var startDir = JoinPath(minpacDir, 'start', '')
+  if isdirectory(startDir)
+    readdir(startDir, (e: string): number => {
+      if isdirectory(startDir .. e)
+        PluginList[e] = true
+      endif
+      return 0
+    })
+  endif
+  var optDir = JoinPath(minpacDir, 'opt', '')
+  if isdirectory(optDir)
+    readdir(optDir, (e: string): number => {
+      if isdirectory(optDir .. e)
+        OptPluginList[e] = true
+      endif
+      return 0
+    })
+  endif
 
   def PluginExists(plugin: string): bool
     return has_key(PluginList, plugin)
@@ -350,9 +362,10 @@ def PackInit(): bool
   silent! MinpacInit()
   if !exists('*minpac#init()')
     # Download minpac...
-    var minpac_path = JoinPath($DOT_VIM, 'pack', 'minpac', 'opt', 'minpac')
+    var minpacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt', 'minpac')
+    Mkdir(fnamemodify(minpacPath, ':h'))
     Echomsg('Downloading minpac...')
-    system('git clone https://github.com/k-takata/minpac ' .. minpac_path)
+    system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
 
     silent! packadd minpac
     silent! MinpacInit()
