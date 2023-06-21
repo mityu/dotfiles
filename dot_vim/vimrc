@@ -916,7 +916,6 @@ command! -nargs=1 -complete=file Rename file <args>|call delete(expand('#'))
 command! -nargs=? CopyToClipboard call setreg('+', getreg(<q-args>, 1))
 command! -bar -nargs=? ClipBuffer call vimrc#Clipbuffer(<q-args>)
 command! ClearMessage messages clear
-command! Helptags helptags ALL
 command! -bang -nargs=+ -complete=command Filter call Filter(<bang>0, <f-args>)
 command! -bar Draft setlocal buftype=nofile noswapfile noundofile
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
@@ -926,6 +925,7 @@ command! -nargs=? -complete=dir Gof call Gof(<q-args>)
 command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
 command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>)
 command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
+command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
 
 # Thanks to cohama
 command! EditAsUtf8 edit ++enc=utf-8 %
