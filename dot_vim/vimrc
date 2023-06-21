@@ -892,12 +892,12 @@ endif
 
 # Mapping for commands
 {
-  var map_ = []
-  add(map_, ['nnoremap', 'ev', 'edit $MYVIMRC'])
-  add(map_, ['nnoremap', 'sv', 'source $MYVIMRC'])
-  add(map_, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
-  add(map_, ['nnoremap', 'f', 'call vimrc#filore#start()'])
-  execute map_->mapnew((_, val): string => [val[0], '<Space>' .. val[1], printf('<Cmd>%s<CR>', val[2])]->join())->join("\n")
+  var map: list<list<string>>
+  add(map, ['nnoremap', 'ev', 'edit $MYVIMRC'])
+  add(map, ['nnoremap', 'sv', 'source $MYVIMRC'])
+  add(map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
+  add(map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
+  execute map->mapnew((_, val: list<string>): string => printf('%s <Space>%s <Cmd>%s<CR>', val[0], val[1], val[2]))->join("\n")
 }
 
 # Abbreviates
