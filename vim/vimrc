@@ -1852,15 +1852,6 @@ command! -bar -nargs=+ -complete=customlist,vimrc#notes#Otameshi_complete
 command! -bar OtameshiList call vimrc#notes#Otameshi_list()
 
 
-# working-plugin
-command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
-      \ WorkingPluginLoad call vimrc#workingplugin#load(<f-args>)
-command! -bar -bang -nargs=1 -complete=customlist,vimrc#workingplugin#complete
-      \ WorkingPluginCd call vimrc#workingplugin#cd(<bang>0, <q-args>)
-command! -bar -nargs=+ WorkingPluginClone call vimrc#workingplugin#clone(<f-args>)
-command! -bar -nargs=+ WorkingPluginNew call vimrc#workingplugin#new(<f-args>)
-command! -bar -nargs=+ -complete=customlist,vimrc#workingplugin#complete
-      \ WorkingPluginRm call vimrc#workingplugin#rm(<f-args>)
 # Sessions
 final SessionDir = JoinPath(CacheDir, 'sessions')
 {

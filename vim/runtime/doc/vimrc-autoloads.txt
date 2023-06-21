@@ -118,29 +118,5 @@ vimrc							*vimrc-mityu*
 ------------------------------------------------------------------------------
 COMMANDS						*vimrc-commands*
 
-NOTE: Following :WorkingPlugin* commands are applied for a directory,
-/path/to/.vim/workplace/{plugin-name} .
-NOTE: In the following, $WORKPLACE means the directory,
-/path/to/.vim/workplace .
-
-:WorkingPluginLoad {plugin-name} ...			*:WorkingPluginLoad*
-	Load plugins, like |:packadd|, but before loading plugins,
-	this command deletes load-guard variables.
-
-:WorkingPluginCd[!] {plugin-name}			*:WorkingPluginCd*
-	Execute `:cd $WORKPLACE/{plugin-name}` .
-	However, if ! is provided, it uses |:lcd| instead of |:cd|.
-
-:WorkingPluginClone {repository} [{plugin-name}]	*:WorkingPluginClone*
-	Clone {repository} into $WORKPLACE/{plugin-name} .
-	{repository} is a github.com's repository URL, but not a full URL. You
-	should use URL begin with user name, like plugin managers.
-	If {plugin-name} doesn't provided, {plugin-name} is created from
-	{repository} like raw `git clone` command.
-
-:WorkiingpluginRm {plugin-name} ...			*:WorkingPluginRm*
-	Delete $WORKPLACE/{plugin-name} .
-
-
 ==============================================================================
 vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl:nosta:noet
