@@ -1,7 +1,7 @@
-dot_vim/pack
-dot_vim/workplace
-dot_vim/runtime/doc/tags
-dot_vim/.netrwhist
+vim/pack
+vim/workplace
+vim/runtime/doc/tags
+vim/.netrwhist
 mlterm/ttys*
 mlterm/challenge
 mlterm/msg.log

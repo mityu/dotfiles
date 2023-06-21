@@ -39,11 +39,11 @@ ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
 
 
 echo "Deploying .vim/"
-ln -snfv ${SCRIPT_DIR}/dot_vim ~/.vim
+ln -snfv ${SCRIPT_DIR}/vim ~/.vim
 
 
 echo "Deploying .mlterm/"
-ln -snfv $SCRIPT_DIR/dot_mlterm ~/.mlterm
+ln -snfv $SCRIPT_DIR/mlterm ~/.mlterm
 
 echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
