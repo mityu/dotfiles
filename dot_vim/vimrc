@@ -558,10 +558,10 @@ noremap gk k
 noremap <C-@> <ESC>
 noremap! <C-@> <ESC>
 
-nnoremap <expr> i getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'i'
-nnoremap <expr> I getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'I'
-nnoremap <expr> a getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'a'
-nnoremap <expr> A getline('.') ==# '' && &buftype !=# 'terminal' ? "\"_S" : 'A'
+nnoremap <expr> i getline('.') ==# '' && &l:modifiable ? "\"_S" : 'i'
+nnoremap <expr> I getline('.') ==# '' && &l:modifiable ? "\"_S" : 'I'
+nnoremap <expr> a getline('.') ==# '' && &l:modifiable ? "\"_S" : 'a'
+nnoremap <expr> A getline('.') ==# '' && &l:modifiable ? "\"_S" : 'A'
 nnoremap <CR> o<ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
