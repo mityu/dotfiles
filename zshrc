@@ -460,7 +460,7 @@ function install_zsh_plugins() {
 			$DOTZSH/zsh-syntax-highlighting
 	fi
 
-	if [ ! -d "$DOTZSH/zsh-async"]; then
+	if [ ! -d "$DOTZSH/zsh-async" ]; then
 		git clone https://github.com/mafredri/zsh-async $DOTZSH/zsh-async
 	fi
 }
