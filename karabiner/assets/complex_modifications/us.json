@@ -1,0 +1,98 @@
+{
+  "title": "US Keyboard",
+  "rules": [
+    {
+      "description": "Send command/lang2 on left command",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "left_gui",
+            "modifiers": {
+              "optional": ["any"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_gui"
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "lang2"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    },
+    {
+      "description": "Send option/lang2 on left option",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "left_option"
+          },
+          "to": [
+            {
+              "key_code": "left_option"
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "lang2"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    },
+    {
+      "description": "Send command/lang1 on right command",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "right_gui",
+            "modifiers": {
+              "optional": ["any"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_gui"
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "lang1"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    },
+    {
+      "description": "Send option/lang1 on right option",
+      "manipulators": [
+        {
+          "from": {
+            "key_code": "right_option",
+            "modifiers": {
+              "optional": ["any"]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_option"
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "lang1"
+            }
+          ],
+          "type": "basic"
+        }
+      ]
+    }
+  ]
+}

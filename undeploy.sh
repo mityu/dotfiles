@@ -18,3 +18,4 @@ rm-link $CONFIG_DIR/xkeysnail
 rm-link $CONFIG_DIR/xremap
 rm-link $CONFIG_DIR/dunst
 rm-link $CONFIG_DIR/libinput-gestures.conf
+rm-link $CONFIG_DIR/karabiner
