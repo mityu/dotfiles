@@ -1829,19 +1829,6 @@ def OnOpenReadingVimrcBuffer()
 enddef
 
 # Additional plugins
-# Taking notes
-# autocmd User vimrc_initialize ++once call vimrc#notes#load()
-command! -bar -nargs=* MemoNew call vimrc#notes#Memo_new(<q-args>)
-command! -bar -nargs=+ -complete=customlist,vimrc#notes#Memo_complete
-      \ MemoDelete call vimrc#notes#Memo_delete(<f-args>)
-command! -bar MemoList call vimrc#notes#Memo_list()
-command! -bar -nargs=* OtameshiNew call vimrc#notes#Otameshi_new(<q-args>)
-command! -bar -nargs=+ -complete=customlist,vimrc#notes#Otameshi_complete
-      \ OtameshiDelete call vimrc#notes#Otameshi_delete(<f-args>)
-command! -bar OtameshiList call vimrc#notes#Otameshi_list()
-
-
-# Sessions
 final SessionDir = JoinPath(CacheDir, 'sessions')
 {
   Mkdir(SessionDir)
