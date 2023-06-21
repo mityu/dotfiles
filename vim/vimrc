@@ -14,6 +14,7 @@ export def SIDPrefix(): string
   # Returns "<SNR>{script-ID}_"
   return expand('<SID>')
 enddef
+
 def SNR(): string
   return matchstr(SIDPrefix(), '<SNR>\zs\d\+\ze_$')
 enddef
@@ -24,18 +25,6 @@ enddef
 
 export def JoinPath(...arg: list<any>): string
   return join(arg, Filesystem.slash)
-enddef
-
-export def Has(object: any, to_search: any): bool
-  var obj_type = type(object)
-  if obj_type == v:t_string
-    return HasInString(object, to_search)
-  elseif obj_type == v:t_list
-    return HasInList(object, to_search)
-  elseif obj_type == v:t_dict
-    return HasInDict(object, to_search)
-  endif
-  return false
 enddef
 
 export def HasInString(object: string, to_search: string): bool
