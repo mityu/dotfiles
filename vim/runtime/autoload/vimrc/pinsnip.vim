@@ -168,7 +168,7 @@ SnipFiletype('go')
       endfor
     endif
     if len(snip) == 1
-      snip->add("\t<+CURSOR+>")
+      snip->add("\t" .. CursorPlaceholder)
     endif
     snip->add('}')
     ApplySnip(snip)
@@ -198,7 +198,7 @@ SnipFiletype('go')
     if funcRet !=# ''
       funcDecl ..= ' ' .. funcRet
     endif
-    funcDecl ..= ' {<+CURSOR+>'
+    funcDecl ..= ' {' .. CursorPlaceholder
 
     ApplySnip([funcVarDecl, funcDecl])
     return true
@@ -216,7 +216,7 @@ SnipFiletype('c')
     endif
     var [type, varName, until] = matches[1 : 3]
     var snip = printf(
-      'for (%s %s = 0; %s < %s; ++%s) {<+CURSOR+>',
+      'for (%s %s = 0; %s < %s; ++%s) {' .. CursorPlaceholder,
       trim(type), varName, varName, until, varName
     )
     ApplySnip([snip])
@@ -234,7 +234,7 @@ SnipFiletype('c')
     var [initializer, expr, iterator, suffix] = matches[1 : 4]
     var varName = matchstr(initializer, '^\v%(\w+\s+)*\zs\w+\ze%(\s*\=\s*\S+)?$')
     if expr ==# ''
-      expr = printf('%s < <+CURSOR+>', varName)
+      expr = $'{varName} < {CursorPlaceholder}'
     elseif !(expr =~# '\s' || expr =~# '[<>=]')
       expr = printf('%s < %s', varName, expr)
     endif
@@ -255,8 +255,8 @@ SnipFiletype('c')
 
 SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
 FuzzySnipList['cpp'] = [
-  ['std::cout << "<+CURSOR+>" << std::endl;'],
-  ['std::cerr << "<+CURSOR+>" << std::endl;'],
+  [$'std::cout << "{CursorPlaceholder}" << std::endl;'],
+  [$'std::cerr << "{CursorPlaceholder}" << std::endl;'],
   ['template <typename T>'],
 ]
 
@@ -282,7 +282,7 @@ SnipFiletype('vim')
     var snip =
       substitute(strpart(getline('.'), 0, curidx), '^\s*', '', '') ..
       autoload_name ..
-      '<+CURSOR+>' ..
+      CursorPlaceholder ..
       getline('.')[curidx + 1 :]
     ApplySnip([snip])
 
@@ -302,7 +302,7 @@ SnipFiletype('vim')
       col += strlen(m[2]) - fnlen
     endif
     var snip = join(m[1 :], '')
-    snip = strpart(snip, 0, col) .. '<+CURSOR+>' .. snip[col :]
+    snip = strpart(snip, 0, col) .. CursorPlaceholder .. snip[col :]
     ApplySnip([snip])
 
     return true
@@ -313,7 +313,7 @@ FuzzySnipList['vim'] = [
     'let s:cpoptions_save = &cpoptions',
     'set cpoptions&vim',
     '',
-    '<+CURSOR+>',
+    CursorPlaceholder,
     '',
     'let &cpoptions = s:cpoptions_save',
     'unlet s:cpoptions_save'
@@ -348,9 +348,9 @@ SnipFiletype('java')
     var snip = 'public class %s {'
     var fname = expand('%:t:r')
     if fname ==# ''
-      fname = '<+CURSOR+>'
+      fname = CursorPlaceholder
     else
-      snip ..= '<+CURSOR+>'
+      snip ..= CursorPlaceholder
     endif
     snip = printf(snip, fname)
     ApplySnip([snip])
@@ -360,7 +360,7 @@ SnipFiletype('java')
   ->AddSnip(TrySnipFuzzy)
 
 FuzzySnipList['java'] = [
-  ['public static void main(String[] args) {<+CURSOR+>'],
+  ['public static void main(String[] args) {' .. CursorPlaceholder],
 ]
 
 SnipFiletype('_')
@@ -383,7 +383,7 @@ SnipFiletype('_')
     var pre_wrapper =
           strpart(pre_cursor, 0, strlen(pre_cursor) - strlen(wrapper) - strlen(')>'))
     var snip =
-          pre_wrapper .. wrapper .. target .. ')<+CURSOR+>' .. linestr[lastcol :]
+          pre_wrapper .. wrapper .. target .. ')' .. CursorPlaceholder .. linestr[lastcol :]
     # Restore cursor position in order to make cursor position be restored
     # properly after undo.
     cursor(line('.'), firstcol)
