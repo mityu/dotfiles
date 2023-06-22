@@ -252,6 +252,47 @@ SnipFiletype('c')
     ApplySnip([snip])
     return true
   })
+  ->AddSnip((comparison: string): bool => {
+    var fname = bufname('%')->fnamemodify(':t')
+    if fname ==# '' || fnamemodify(fname, ':e') !~? '^h'
+      # No filename or non header file.  Do not apply.
+      return false
+    endif
+    var guardian = fname->toupper()->tr('.-', '__') .. '_'  # Include guard
+    var snip = [
+      $'#ifndef {guardian}',
+      $'#define {guardian}',
+      '',
+      CursorPlaceholder,
+      '',
+      $'#endif  // {guardian}'
+    ]
+    if stridx(snip[0], comparison) == -1
+      return false
+    endif
+    ApplySnip(snip)
+    return true
+  })
+  ->AddSnip((comparison: string): bool => {
+    # This snippet works like a template; apply this only when the cursor line
+    # is modified.
+    if !(prevnonblank(line('.') - 1) == 0 && nextnonblank(line('.') + 1) == 0)
+      return false
+    endif
+    var snip = [
+      '#include <stdio.h>',
+      '',
+      'int main(void) {',
+      "\tputs(\"Hello\");" .. CursorPlaceholder,
+      '}'
+    ]
+
+    if stridx(snip[0], comparison) == -1
+      return false
+    endif
+    ApplySnip(snip)
+    return true
+  })
 
 SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
 FuzzySnipList['cpp'] = [
