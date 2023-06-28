@@ -8,7 +8,7 @@ if [[ "$(uname)" == "MINGW"* ]]; then
         echo '/msys2_shell.cmd not found. Abort.'
         exit 1
     fi
-    /msys2_shell.cmd -msys -defterm -no-start $0 $* || exit 1 && exit 0
+    /msys2_shell.cmd -msys -defterm -no-start $0 $* && exit 0 || exit 1
 fi
 
 function auto-sudo() {
@@ -17,6 +17,12 @@ function auto-sudo() {
     else
         echo $PASSWORD | sudo -S -- $*
     fi
+}
+
+function build-vim() {
+    auto-sudo make -j4 && \
+        ([[ "$(uname)" == "MSYS"* ]] && make uninstall) && \
+        auto-sudo make -j4 install
 }
 
 ISROOT=false
@@ -43,7 +49,7 @@ HASH=$(git rev-parse HEAD)
 git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
     if ! $FORCEBUILD; then
-        auto-sudo make -j4 && auto-sudo make -j4 install && exit 0
+        build-vim && exit 0
     fi
-    make distclean && auto-sudo make -j4 && auto-sudo make -j4 install
+    make distclean && build-vim
 fi
