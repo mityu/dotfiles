@@ -328,6 +328,7 @@ def PackRegister()
   # Operator-user plugins
   minpac#add('kana/vim-operator-replace', {type: 'opt'})
   minpac#add('machakann/vim-sandwich', {type: 'opt'})
+  minpac#add('osyo-manga/vim-operator-jump_side', {type: 'opt'})
   minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
   # minpac#add('tyru/caw.vim', {type: 'opt'})
   minpac#add('mityu/caw.vim', {type: 'opt', branch: 'support-vim9script-tmp'})  # tmp
@@ -1722,6 +1723,10 @@ endif
 if OptPluginExists('vim-operator-swap')
   MapOperator('vim-operator-swap', {lhs: 'my', rhs: '<Plug>(operator-swap-marking)'})
   MapOperator('vim-operator-swap', {lhs: 'mp', rhs: '<Plug>(operator-swap)'})
+endif
+if OptPluginExists('vim-operator-jump_side')
+  MapOperator('vim-operator-jump_side', {lhs: '<C-p>', rhs: '<Plug>(operator-jump-head)'})
+  MapOperator('vim-operator-jump_side', {lhs: '<C-n>', rhs: '<Plug>(operator-jump-tail)'})
 endif
 if OptPluginExists('vim-textobj-entire')
   MapTextobj('vim-textobj-entire', {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'})
