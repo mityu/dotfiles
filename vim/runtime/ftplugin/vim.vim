@@ -10,7 +10,7 @@ setbufvar('%', 'textobj_function_select', function('vimrc#textobj_vim#Select'))
 &l:foldexpr = expand('<SID>') .. 'FoldExpr()'
 
 def FoldIsBlockOpen(line: string): bool
-  if line =~# '\v^<%(%(export\s+|legacy\s+)?%(fu%[nction]|def)|if|for|while|try)>' ||
+  if line =~# '\v^<%(%(export\s+|legacy\s+|static\s+)?%(fu%[nction]|def|class)|if|for|while|try)>' ||
      line =~# '\v^augroup\s+%(<\cEND>)@!' ||
      line =~# '\V' .. split(&l:foldmarker, ',')[0] .. '\d\*\s\*\$'
     return true
@@ -19,7 +19,7 @@ def FoldIsBlockOpen(line: string): bool
 enddef
 
 def FoldIsBlockClose(line: string): bool
-  if line =~# '\v^<end%(func%[tion]|def|if|for|while|try)>' ||
+  if line =~# '\v^<end%(func%[tion]|def|endclass|if|for|while|try)>' ||
      line =~# '\v^augroup\s+<\cEND>' ||
      line =~# '\V' .. split(&l:foldmarker, ',')[1] .. '\d\*\s\*\$'
     return true
