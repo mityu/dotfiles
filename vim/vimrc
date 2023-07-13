@@ -522,6 +522,23 @@ if executable('chmod')
     endif
   enddef
 endif
+# From: https://zenn.dev/vim_jp/articles/f02adb4f325e51   Thanks!
+augroup vimrc_validate_filename
+  autocmd BufWritePre * ValidateFilename(expand('<afile>:p'))
+augroup END
+def ValidateFilename(filename: string)
+  const invalid_chars = '!&()[]{}<>^*=+:;''",`~?|'
+  for char in invalid_chars
+    if stridx(filename, char) >= 0
+      throw 'Filename has invalid char: ' .. filename
+    endif
+  endfor
+
+  const valid_pattern = '\.\?[[:alnum:]]\+$'
+  if filename !~? valid_pattern
+    throw 'Filename is invalid format: ' .. filename
+  endif
+enddef
 augroup vimrc_quickfix_window
   autocmd QuickfixCmdPost [^l]* cwindow
   autocmd QuickfixCmdPost l* lwindow
