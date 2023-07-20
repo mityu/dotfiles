@@ -74,6 +74,19 @@ alias dotfiles=". $(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin/dotfiles"
 
 zsh_has_cmd opam && eval $(opam env)
 
+if zsh_has_cmd xcrun && zsh_has_cmd brew; then
+	export SDKROOT=$(xcrun --show-sdk-path)
+	export CPATH=$CPATH:$SDKROOT/usr/include
+	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
+	if [ -d "$(brew --prefix)/opt/llvm" ]; then
+		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
+	fi
+	if [ -d "$(brew --prefix)/opt/gcc" ]; then
+		alias gcc="$(ls $(brew --prefix)/bin | grep '^gcc-\d\+')"
+		alias g++="$(ls $(brew --prefix)/bin | grep '^g++-\d\+')"
+	fi
+fi
+
 # Enable smart completion
 autoload -Uz compinit
 compinit
