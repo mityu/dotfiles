@@ -9,9 +9,12 @@ $res = curl.exe --silent "https://api.github.com/repos/wez/wezterm/releases/late
 $res = [String]$res
 $releaseInfo = ConvertFrom-Json -InputObject $res
 $versionRemote = $releaseInfo.name
-$versionLocal = (cmd.exe /C "%USERPROFILE%\WezTerm\wezterm-gui.exe --version").split(" ")[1]
+$versionLocal = (cmd.exe /C "%USERPROFILE%\WezTerm\wezterm.exe --version").split(" ")[1]
 
 If ($versionRemote -ne $versionLocal) {
+    Write-Output "Update found"
+    Write-Output "Current version: $versionLocal"
+    Write-Output "Latest version:  $versionRemote"
     $weztermProcList = Get-Process -Name wezterm*
     $weztermProcCount = ($weztermProcList | Measure-Object -Line).Lines
     if ($weztermProcCount -ne 0) {
@@ -20,7 +23,12 @@ If ($versionRemote -ne $versionLocal) {
         $toStop = Stop-Process -InputObject $weztermProcList -Confirm -PassThru
         if ($toStop -ne $null) {
             Wait-Process -InputObject $toStop
-            Start-Sleep -Milliseconds 10
+            for ($i = 0; $i -lt 300; $i++) {
+                Start-Sleep -Milliseconds 10
+                if ((Get-Process -Name wezterm* | Measure-Object -Line).Lines -eq 0) {
+                    break
+                }
+            }
         }
         if ((Get-Process -Name wezterm* | Measure-Object -Line).Lines -ne 0) {
             Write-Output "Re-run after shutdown all WezTerm process."
