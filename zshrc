@@ -42,6 +42,7 @@ if zsh_has_cmd vim; then
 	export GIT_EDITOR=vim
 fi
 
+# Update zenn-cli with $ deno cache --reload npm:zenn-cli@latest
 alias zenn='deno run -A npm:zenn-cli@latest'
 
 if ! zsh_has_cmd sudoedit; then
@@ -78,6 +79,7 @@ if zsh_has_cmd xcrun && zsh_has_cmd brew; then
 	export SDKROOT=$(xcrun --show-sdk-path)
 	export CPATH=$CPATH:$SDKROOT/usr/include
 	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
+	# TODO: How can I set framework search path?
 	if [ -d "$(brew --prefix)/opt/llvm" ]; then
 		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
 	fi
