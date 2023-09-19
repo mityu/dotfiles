@@ -607,6 +607,8 @@ nnoremap <C-j> 7gj
 # Avoid textobj-function calls appearing on command history
 nnoremap <silent> . .
 nnoremap * *N
+nnoremap <expr> n 'Nn'[v:searchforward]
+nnoremap <expr> N 'nN'[v:searchforward]
 
 nnoremap m <Nop>
 vnoremap m <Nop>
