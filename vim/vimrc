@@ -110,6 +110,15 @@ enddef
 command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
+legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
+  var cwd = arglist[0]
+  var filepath = arglist[1]
+  if !isabsolutepath(filepath)
+    filepath = JoinPath(cwd, filepath)
+  endif
+  execute 'split' filepath
+enddef
+
 legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
   var cwd = call('getcwd', arglist)
   var channel = term_getjob(bufnr)->job_getchannel()
