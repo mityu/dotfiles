@@ -54,8 +54,7 @@ fi
 
 brew_install zsh
 if brew list zsh &> /dev/null; then
-    echo $password | \
-        sudo -S -- sh -c "echo '$(brew --prefix)/bin/zsh' >> /private/etc/shells"
+    sudo -S -- sh -c "echo '$(brew --prefix)/bin/zsh' >> /private/etc/shells" <<< $password
     chsh -s $(brew --prefix)/bin/zsh
 fi
 

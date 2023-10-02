@@ -579,7 +579,7 @@ function update-softwares() {
 	local password=''
 	echo -n "Password:"; read -s password;
 
-	echo $password | update-vim
+	update-vim <<< $password
 
 	if zsh_has_cmd brew; then
 		brew upgrade
@@ -591,9 +591,9 @@ function update-softwares() {
 	if zsh_has_cmd pacman; then
 		if zsh_has_cmd yay; then
 			# Prefer using yay to pacman
-			echo $password | yay -Syyu --noconfirm --sudoflags -S
+			yay -Syyu --noconfirm --sudoflags -S <<< $password
 		else
-			echo $password | sudo -S pacman -Syyu --noconfirm
+			sudo -S pacman -Syyu --noconfirm <<< $password
 		fi
 	fi
 	if zsh_has_cmd go; then
