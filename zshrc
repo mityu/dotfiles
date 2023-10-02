@@ -271,7 +271,6 @@ function zshrc_prompt_precmd() {
 			async_job zshrc_prompt_async_worker zshrc_prompt_git_push_pull
 		fi
 	fi
-	print
 }
 
 function zshrc_prompt_git_dirty() {
@@ -416,7 +415,10 @@ function zshrc_prompt_async_callback() {
 			return
 			;;
 	esac
-	zle reset-prompt
+	# FIXME: This may hide previous output line, so prohibit redrawing prompt
+	# here as a workaround.  As a side effect of this workaround, git repository
+	# status is not automatically updated.
+	# zle reset-prompt
 }
 
 function zle-keymap-select zle-line-init {
@@ -428,7 +430,7 @@ function zle-keymap-select zle-line-init {
 function zle-line-pre-redraw {
 	local keymap_save="$zshrc_prompt_keymap"
 	zshrc_prompt_vim_mode
-	[[ "$keymap_save" != "$zshrc_prompt_keymap" ]] && print '\e[1F' && zle reset-prompt
+	[[ "$keymap_save" != "$zshrc_prompt_keymap" ]] && zle reset-prompt
 
 	# A hack to enable zsh-syntax-highlighting. (but dirty...)
 	zsh_has_cmd	_zsh_highlight__zle-line-pre-redraw && _zsh_highlight__zle-line-pre-redraw
