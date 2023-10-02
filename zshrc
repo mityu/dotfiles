@@ -60,11 +60,11 @@ fi
 
 zsh_has_cmd bat && alias cat='bat --style plain --theme ansi'
 
-if zsh_has_cmd exa; then
+if zsh_has_cmd eza; then
 	function ls() {
 		if [ -t 1 ]; then
 			# When output is terminal.
-			exa --group-directories-first --icons $*
+			eza --group-directories-first --icons $*
 		else
 			command ls $*
 		fi
