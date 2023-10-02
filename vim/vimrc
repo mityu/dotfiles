@@ -2052,6 +2052,7 @@ def EmphasizeIndent()
   endif
   if exists('w:emphasis_indent_id')
     matchdelete(w:emphasis_indent_id)
+    unlet w:emphasis_indent_id
   endif
 
   var pat = '\v%%(^%%(%s)*)@<=%s'
@@ -2079,7 +2080,10 @@ command! EmphasisIndentEnable call EmphasisIndentEnable()
 # WarningSpace
 highlight link WarningSpace Error
 augroup vimrc_warningspace
-  autocmd WinEnter * WarningSpace()
+  # Call WarningSpace() function on TerminalWinOpen event to disable warning
+  # space emphasis; it seems WinEnter event triggered on the previous window
+  # when opening terminal window.
+  autocmd WinEnter,TerminalWinOpen * WarningSpace()
   autocmd OptionSet * WarningSpace()  # TODO: specify option?
   autocmd User vimrc_initialize ++once WarningSpace()
 augroup END
@@ -2094,7 +2098,7 @@ def WarningSpace()
     unlet w:end_of_line_space_id
   endif
 
-  if &buftype !=# '' || !&modifiable
+  if &l:buftype !=# '' || !&l:modifiable
     return
   endif
 
