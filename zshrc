@@ -42,8 +42,8 @@ if zsh_has_cmd vim; then
 	export GIT_EDITOR=vim
 fi
 
-# Update zenn-cli with $ deno cache --reload npm:zenn-cli@latest
 alias zenn='deno run -A npm:zenn-cli@latest'
+alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 
 if ! zsh_has_cmd sudoedit; then
 	alias sudoedit='sudo -e'
