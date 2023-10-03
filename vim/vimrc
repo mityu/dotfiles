@@ -116,7 +116,7 @@ legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
   if !isabsolutepath(filepath)
     filepath = JoinPath(cwd, filepath)
   endif
-  execute 'split' filepath
+  execute 'drop' fnameescape(filepath)
 enddef
 
 legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
