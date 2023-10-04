@@ -581,7 +581,13 @@ function update-vim-plugins() {
 
 function update-softwares() {
 	local password=''
-	echo -n "Password:"; read -s password;
+	sudo -k  # Reset sudo credential cache
+	echo -n 'Password:'; read -s password;
+	while ! sudo -Svp '' &> /dev/null <<< $password; do
+			echo
+			echo 'Sorry, try again.'
+			echo -n 'Password:'; read -s password;
+	done
 
 	update-vim <<< $password
 

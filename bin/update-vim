@@ -31,7 +31,15 @@ if [[ $(id -u) == 0 || "$(uname)" == "MSYS"* ]]; then
 fi
 
 # Password is for "make install", necessary when not a root user.
-$ISROOT || read -sp "Password:" PASSWORD
+if ! $ISROOT; then
+    sudo -k  # Reset sudo credential cache
+    read -sp 'Password:' PASSWORD
+    while ! sudo -Svp '' &> /dev/null <<< $PASSWORD; do
+        echo
+        echo 'Sorry, try again.'
+        read -sp 'Password:' PASSWORD
+    done
+fi
 
 FORCEBUILD=false
 if [[ "$1" == "--force" || "$1" == "-f" ]]; then
