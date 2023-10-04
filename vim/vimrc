@@ -116,7 +116,11 @@ legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
   if !isabsolutepath(filepath)
     filepath = JoinPath(cwd, filepath)
   endif
-  execute 'drop' fnameescape(filepath)
+  var opencmd = 'drop'
+  if bufwinnr(bufnr(filepath)) == -1
+    opencmd = 'split'
+  endif
+  execute opencmd fnameescape(filepath)
 enddef
 
 legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
