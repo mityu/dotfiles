@@ -114,7 +114,7 @@ legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
   var cwd = arglist[0]
   var filepath = arglist[1]
   if !isabsolutepath(filepath)
-    filepath = JoinPath(cwd, filepath)
+    filepath = fnamemodify(cwd, ':p') .. filepath
   endif
   var opencmd = 'drop'
   if bufwinnr(bufnr(filepath)) == -1
