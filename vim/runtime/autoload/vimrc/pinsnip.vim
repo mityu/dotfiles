@@ -140,6 +140,17 @@ def FindSnipFuzzy(comparison: string): list<string>
 enddef
 
 
+# Returns getline('.')->trimleft()->split_at_cursor_pos()
+# Note that this function must be called in insert mode.
+def GetlineDividedByCursor(): list<string>
+  var col = col('.') - 1
+  var line = getline('.')
+  var div = [strpart(line, 0, col), line[col :]]
+  div[0] = trim(div[0], " \t", 1)
+  return div
+enddef
+
+
 SnipFiletype('go')
   ->AddSnip((comparison: string): bool => {
     var r = '^\v(}\s*else\s+)?if(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
@@ -270,6 +281,20 @@ SnipFiletype('c')
     if stridx(snip[0], comparison) == -1
       return false
     endif
+    ApplySnip(snip)
+    return true
+  })
+  ->AddSnip((comparison: string): bool => {
+    # Complete closing #endif for current #if, #ifdef, or #ifndef.
+    if comparison !~# '\v^#\s*if%(n?def)?>'
+      return false
+    endif
+    var padding = matchstr(comparison, '\v^#\zs\s*\zeif%(n?def)?')
+    var [pre, suf] = GetlineDividedByCursor()
+    var snip = [
+      $'{pre}{CursorPlaceholder}{suf}',
+      $'#{padding}endif',
+    ]
     ApplySnip(snip)
     return true
   })

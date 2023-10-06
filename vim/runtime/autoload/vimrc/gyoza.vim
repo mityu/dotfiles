@@ -502,16 +502,6 @@ NewFiletypeRule('c')
     '^switch\s*\(.*\)\s*\{$',
     '}',
     ['\=^%(case\s*.*\:|default\:)'])
-NewFiletypeRule('c')
-  .AddRule(
-    '#\s*if%[def]',
-    (prev: dict<any>, next: dict<any>): number => {
-      if next.trimed =~# '^#\s*\w\+'
-        return RuleUnnecessary
-      endif
-      var closer = '#' .. matchstr(prev.trimed, '^#\zs\s*\ze\w\+') .. 'endif'
-      return CompleteClosingBlock(prev, next, closer)
-    })
 
 NewFiletypeRule('go')
   .AddRule(
