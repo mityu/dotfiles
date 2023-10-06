@@ -294,6 +294,27 @@ SnipFiletype('c')
     return true
   })
 
+SnipFiletype('cpp')
+  ->AddSnip((comparison: string): bool => {
+    # This snippet works like a template; apply this only when the cursor line
+    # is modified.
+    if !(prevnonblank(line('.') - 1) == 0 && nextnonblank(line('.') + 1) == 0)
+      return false
+    endif
+    var snip = [
+      '#include <iostream>',
+      '',
+      'int main() {',
+      "\tstd::cout << \"Hello" .. CursorPlaceholder .. '" << std::endl;',
+      '}'
+    ]
+
+    if stridx(snip[0], comparison) == -1
+      return false
+    endif
+    ApplySnip(snip)
+    return true
+  })
 SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
 FuzzySnipList['cpp'] = [
   [$'std::cout << "{CursorPlaceholder}" << std::endl;'],
