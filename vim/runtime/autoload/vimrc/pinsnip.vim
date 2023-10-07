@@ -340,6 +340,57 @@ SnipFiletype('cpp')
     ApplySnip(snip)
     return true
   })
+  ->AddSnip((comparison: string): bool => {
+    # std::vec -> std::vector<>, vec -> std::vector<>, e.g.
+    const types = ['vector', 'pair', 'set']
+    var [pre, suf] = GetlineDividedByCursor()
+    var target = matchstr(pre, '\w\+$')
+    if target ==# ''
+      return false
+    endif
+
+    var completion = ''
+    for t in types
+      if stridx(t, target) == 0
+        completion = t
+        break
+      endif
+    endfor
+    if completion ==# ''
+      return false
+    endif
+
+    pre = pre[: -(strlen(target) + 1)]  # std::vec -> std::
+    if pre[-2 :] !=# '::'  # Only check for '::' to accept 'foolib::vector' like STL.
+      pre ..= 'std::'
+    endif
+    ApplySnip([$'{pre}{completion}<{CursorPlaceholder}>{suf}'])
+    return true
+  })
+  ->AddSnip((comarison: string): bool => {
+    # Insert '::' after certan namespaces e.g.
+    # 'std' -> 'std::', 'stdstring' -> 'std::string'
+    const namespaces = ['std']
+    var [pre, suf] = GetlineDividedByCursor()
+    var target = matchstr(pre, '\w\+$')
+    if target ==# ''
+      return false
+    endif
+
+    var ns = ''
+    for n in namespaces
+      if stridx(target, n) == 0
+        ns = n
+        break
+      endif
+    endfor
+    if ns ==# ''
+      return false
+    endif
+    pre = pre[: -(strlen(target) + 1)]
+    ApplySnip([$'{pre}{ns}::{target[strlen(ns) :]}{CursorPlaceholder}{suf}'])
+    return true
+  })
 SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
 FuzzySnipList['cpp'] = [
   [$'std::cout << "{CursorPlaceholder}" << std::endl;'],
