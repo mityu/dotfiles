@@ -472,6 +472,7 @@ set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
 set spelllang& spelllang+=cjk
+set termwintype=conpty
 # }}}
 
 export final CacheDir = JoinPath(expand('~'), '.cache', 'vimrc')
