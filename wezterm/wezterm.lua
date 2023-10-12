@@ -17,6 +17,11 @@ local colors = {
     brights = {'#666666', '#ff3334', '#9ec400', '#e7c547', '#7aa6da', '#b77ee0', '#54ced6', '#ffffff'}
 }
 
+wezterm.on("gui-startup", function(cmd)
+  local _, _, window = wezterm.mux.spawn_window(cmd or {})
+  window:gui_window():maximize()
+end)
+
 wezterm.on("update-right-status", function(window, pane)
   local bat = ""
   local bat_color = colors.foreground
@@ -102,8 +107,6 @@ local config = {
 
 if isWindows then
     config.font_size = 13
-    config.initial_cols = 170
-    config.initial_rows = 40
     config.default_prog = {'cmd.exe', '/k', '%USERPROFILE%\\dotfiles\\batfiles\\setenv.bat'}
 elseif isMac then
     config.initial_cols = 206
