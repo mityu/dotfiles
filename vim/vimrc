@@ -496,6 +496,52 @@ Mkdir(CacheDir, 'p')
   set nobackup nowritebackup
 }
 
+# IM control
+if !has('gui_running')
+  if IsWSL || IsWindows
+    const exepath = JoinPath(Stdpath.cache, 'disableim.exe')
+    if !executable(exepath)  # Build disableim.exe
+      var csc = 'C:\Windows\Microsoft.Net\Framework64\v4.0.30319\csc.exe'
+      var srcpath = JoinPath(fnamemodify($MYVIMRC, ':h'), 'misc', 'disableim.cs')
+      var cmdopts = ['/optimize+', '/debug-', '/nologo',
+        $'/out:{shellescape(exepath)}', '/target:winexe']
+      if IsWSL
+        csc = $'$(wslpath -u {shellescape(csc)})'
+        srcpath = $'$(wslpath -w {shellescape(srcpath)})'
+        cmdopts->add('/utf8output')
+      else
+        srcpath = shellescape(srcpath)
+      endif
+      var cmd = join([csc] + cmdopts + [srcpath])
+      Echomsg('Building disableim.exe...')
+      Echomsg(cmd)
+      var output = system(cmd)
+      if v:shell_error != 0
+        EchomsgError('Compilation failed')
+        EchomsgError(output)
+      endif
+      if IsWSL
+        output = system($'chmod u+x {shellescape(exepath)}')
+        if v:shell_error != 0
+          EchomsgError('chmod failed')
+          EchomsgError(output)
+        endif
+      endif
+    endif
+    if executable(exepath)
+      augroup vimrc-auto-disableim
+        execute $'autocmd InsertLeave * system({shellescape(exepath)})'
+      augroup END
+    endif
+  endif
+endif
+if IsLinux && executable('fcitx5-remote') == 1
+  augroup vimrc-auto-disableim
+    autocmd InsertLeave * system('fcitx5-remote -c')
+  augroup END
+endif
+
+
 if has('kaoriya')
   set fileencodings=guess,utf-8
   set ambiwidth=auto
@@ -720,12 +766,6 @@ endfor
 if IsMac && has('gui_running')
   noremap <D-[> <ESC>
   noremap! <D-[> <ESC>
-endif
-
-if IsLinux && executable('fcitx5-remote') == 1
-  augroup vimrc-im
-    autocmd InsertLeave * system('fcitx5-remote -c')
-  augroup END
 endif
 
 # Loop
