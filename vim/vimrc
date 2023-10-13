@@ -530,7 +530,7 @@ if !has('gui_running')
     endif
     if executable(exepath)
       augroup vimrc-auto-disableim
-        execute $'autocmd InsertLeave * system({shellescape(exepath)})'
+        execute $'autocmd InsertLeave * system({string(shellescape(exepath))})'
       augroup END
     endif
   endif
