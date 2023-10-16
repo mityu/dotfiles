@@ -454,18 +454,11 @@ if [ -n "$VIM_TERMINAL" ]; then
 fi
 
 # WSL2
-if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]; then
-	LOCAL_IP=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}')
-	export DISPLAY=$LOCAL_IP:0
-	if [ -n "$APPDATA" ]; then
-		export SUMATRAPDF=$(dirname $APPDATA)/Local/SumatraPDF/SumatraPDF.exe
-	else
-		echo "\033[41m\$APPDATA is empty\033[m"
-	fi
-	cd ~
+if [[ $(uname) == "Linux" && $(uname -r) == *"microsoft"* ]]; then
 	function open() {
 		cmd.exe /c start $(wslpath -w $1)
 	}
+	cd ~
 fi
 
 # Plugins

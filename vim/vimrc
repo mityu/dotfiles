@@ -2254,7 +2254,11 @@ endif
 # gvimrc
 if has('gui_running')
   if !v:vim_did_enter
-    if IsLinux && executable('i3')
+    if IsWSL
+      # Avoid too large window.
+      set lines=35
+      set columns=100
+    elseif IsLinux && executable('i3')
       # It seems that too large window on i3 does not work properly.
       set lines=50
       set columns=200
