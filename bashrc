@@ -17,7 +17,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         eval 'export' $path_expr
     done
 fi
-export PATH=$(cd $(dirname $(readlink ${BASH_SOURCE[0]})); pwd)/bin:$PATH
+export PATH=$(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)/bin:$PATH
 export LANG=en_US.UTF-8
 
 function bashrc_has_cmd() {
