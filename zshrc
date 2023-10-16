@@ -1,3 +1,8 @@
+function dotfiles-path() {
+	local thisfile=$(whence -v $0 | awk '{print $NF}')
+	echo $(cd $(dirname $(readlink -f $thisfile)); pwd)
+}
+
 # Set environmental variables (Only when outside of vim.)
 if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 	cat ~/.envrc | while read path_expr
@@ -14,7 +19,7 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 		eval 'export' $path_expr
 	done
 fi
-export PATH=$(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin:$PATH
+export PATH=$(dotfiles-path)/bin:$PATH
 export LANG=en_US.UTF-8
 
 function zshrc_in_git_repo() {
@@ -31,13 +36,9 @@ function zshrc_ask_yesno() {
 }
 
 if zsh_has_cmd vim; then
-	() {
-		local thisfile
-		thisfile=$1
-		thisfile=${$(readlink $thisfile):-$thisfile}
-		eval 'alias vi="vim -u' $(dirname $thisfile)'/vim/vimrc_stable"'
-	} ${(%):-%N}
-	export MANPAGER="vim -M +MANPAGER -"
+	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
+	alias vim-stable='vi'
+	export MANPAGER='vim -M +MANPAGER -'
 	export EDITOR=vim
 	export GIT_EDITOR=vim
 fi
@@ -71,7 +72,7 @@ if zsh_has_cmd eza; then
 	}
 fi
 
-alias dotfiles=". $(cd $(dirname $(readlink ${(%):-%N})); pwd)/bin/dotfiles"
+alias dotfiles=". $(dotfiles-path)/bin/dotfiles"
 
 zsh_has_cmd opam && eval $(opam env)
 
@@ -540,7 +541,7 @@ fi
 
 function update-vim-plugins() {
 	echo 'Updating vim plugins'
-	vim -u ~/.vim/vimrc --noplugins -n -N -e -s -S <(cat <<- EOF
+	vim -u "$(dotfiles-path)/vim/vimrc" --noplugins -n -N -e -s -S <(cat <<- EOF
 	function UpdatePlugins()
 		PackInit
 		if !exists("*minpac#init()")
