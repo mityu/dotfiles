@@ -153,7 +153,7 @@ enddef
 
 SnipFiletype('go')
   ->AddSnip((comparison: string): bool => {
-    var r = '^\v(}\s*else\s+)?if(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
+    const r = '^\v(}\s*else\s+)?if(\s*.{-};)?\s*%(e%[rr]\s*%(!=\s*nil\s*)?(\S+)?)'
 
     var m = matchlist(comparison, r)
     if empty(m)
@@ -186,7 +186,7 @@ SnipFiletype('go')
     return true
   })
   ->AddSnip((line: string): bool => {
-    var r = '^\v((\w|_)+)\s*:\=\s*func\((.{-})\)\s*(\S+|\(%(\s*\S+)+\s*\))?\s*\{\s*$'
+    const r = '^\v((\w|_)+)\s*:\=\s*func\((.{-})\)\s*(\S+|\(%(\s*\S+)+\s*\))?\s*\{\s*$'
     var m = matchlist(line, r)
     if empty(m)
       return false
@@ -342,7 +342,7 @@ SnipFiletype('cpp')
   })
   ->AddSnip((comparison: string): bool => {
     # std::vec -> std::vector<>, vec -> std::vector<>, e.g.
-    const types = ['vector', 'pair', 'set']
+    const types = ['vector', 'pair', 'set', 'map']
     var [pre, suf] = GetlineDividedByCursor()
     var target = matchstr(pre, '\w\+$')
     if target ==# ''
