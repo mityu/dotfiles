@@ -21,7 +21,7 @@ function auto-sudo() {
 
 function build-vim() {
     auto-sudo make -j4 && \
-        ([[ "$(uname)" == "MSYS"* ]] && make uninstall) && \
+        ([[ "$(uname)" != "MSYS"* ]] || make uninstall) && \
         auto-sudo make -j4 install
 }
 
@@ -56,8 +56,9 @@ cd ~/.cache/vimbuild
 HASH=$(git rev-parse HEAD)
 git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
+    export CONF_OPT_COMPBY="--with-compiledby=mityu"
     if ! $FORCEBUILD; then
         build-vim && exit 0
     fi
-    make distclean && build-vim
+    auto-sudo make distclean && build-vim
 fi
