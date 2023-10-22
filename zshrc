@@ -541,7 +541,7 @@ fi
 
 function update-vim-plugins() {
 	echo 'Updating vim plugins'
-	vim -u "$(dotfiles-path)/vim/vimrc" --noplugins -n -N -e -s -S <(cat <<- EOF
+	vim -u "$(dotfiles-path)/vim/vimrc" -i NONE --noplugins -n -N -e -s -S <(cat <<- EOF
 	function UpdatePlugins()
 		PackInit
 		if !exists("*minpac#init()")
