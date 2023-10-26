@@ -1358,11 +1358,11 @@ if PluginExists('vim-quickrun')
   }
 
   g:quickrun_config.cpp = {
-    cmdopt: '-std=c++17'
+    cmdopt: '-std=c++20'
   }
   g:quickrun_config['cpp/sfml'] = {
     type: 'cpp',
-    cmdopt: '-std=c++17 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
+    cmdopt: '-std=c++20 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
   }
   g:quickrun_config.go = {
     command: 'go',
