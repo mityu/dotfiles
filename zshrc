@@ -26,7 +26,7 @@ function zshrc_in_git_repo() {
 	git rev-parse 2> /dev/null
 }
 
-function zsh_has_cmd() {
+function zshrc_has_cmd() {
 	which $1 &> /dev/null
 }
 
@@ -35,7 +35,7 @@ function zshrc_ask_yesno() {
 	read -q
 }
 
-if zsh_has_cmd vim; then
+if zshrc_has_cmd vim; then
 	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
 	alias vim-stable='vi'
 	export MANPAGER='vim -M +MANPAGER -'
@@ -46,22 +46,22 @@ fi
 alias zenn='deno run -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 
-if ! zsh_has_cmd sudoedit; then
+if ! zshrc_has_cmd sudoedit; then
 	alias sudoedit='sudo -e'
 fi
 
-if ! zsh_has_cmd pbpaste && zsh_has_cmd xsel; then
+if ! zshrc_has_cmd pbpaste && zshrc_has_cmd xsel; then
 	# xsel -p?
 	alias pbpaste='xsel -b'
 fi
 
-if ! zsh_has_cmd pbcopy && zsh_has_cmd xsel; then
+if ! zshrc_has_cmd pbcopy && zshrc_has_cmd xsel; then
 	alias pbcopy='xsel -bi'
 fi
 
-zsh_has_cmd bat && alias cat='bat --style plain --theme ansi'
+zshrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
 
-if zsh_has_cmd eza; then
+if zshrc_has_cmd eza; then
 	function ls() {
 		if [ -t 1 ]; then
 			# When output is terminal.
@@ -74,9 +74,9 @@ fi
 
 alias dotfiles=". $(dotfiles-path)/bin/dotfiles"
 
-zsh_has_cmd opam && eval $(opam env)
+zshrc_has_cmd opam && eval $(opam env)
 
-if zsh_has_cmd xcrun && zsh_has_cmd brew; then
+if zshrc_has_cmd xcrun && zshrc_has_cmd brew; then
 	export SDKROOT=$(xcrun --show-sdk-path)
 	export CPATH=$CPATH:$SDKROOT/usr/include
 	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
@@ -235,7 +235,7 @@ function zshrc_build_prompt() {
 	ps1+='${zshrc_prompt_git_info[branch]}${zshrc_prompt_git_info[dirty]} '
 	ps1+='${zshrc_prompt_git_info[stash]} ${zshrc_prompt_git_info[push_pull]}'
 
-	if ! zsh_has_cmd async; then
+	if ! zshrc_has_cmd async; then
 		ps1+='(no-async)'
 	fi
 
@@ -251,7 +251,7 @@ function zshrc_build_prompt() {
 
 function zshrc_prompt_precmd() {
 	local has_async=false
-	zsh_has_cmd async && has_async=true
+	zshrc_has_cmd async && has_async=true
 
 	if $has_async; then
 		async_stop_worker zshrc_prompt_async_worker
@@ -438,7 +438,7 @@ function zle-line-pre-redraw {
 	[[ "$keymap_save" != "$zshrc_prompt_keymap" ]] && zle .reset-prompt
 
 	# A hack to enable zsh-syntax-highlighting. (but dirty...)
-	zsh_has_cmd	_zsh_highlight__zle-line-pre-redraw && _zsh_highlight__zle-line-pre-redraw
+	zshrc_has_cmd	_zsh_highlight__zle-line-pre-redraw && _zsh_highlight__zle-line-pre-redraw
 }
 
 if [ -n "$VIM_TERMINAL" ]; then
@@ -466,7 +466,7 @@ fi
 DOTZSH=$HOME/.zsh
 
 function install_zsh_plugins() {
-	if ! zsh_has_cmd git ; then
+	if ! zshrc_has_cmd git ; then
 		echo -e '\033[41mgit command not found\033[m'
 		return 1
 	fi
@@ -521,7 +521,7 @@ if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
 	source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
-if zsh_has_cmd fzf; then
+if zshrc_has_cmd fzf; then
 	export FZF_DEFAULT_COMMANDS="files -a \`pwd\`"
 	export FZF_DEFAULT_OPTS="--reverse --no-sort --no-separator"
 
@@ -585,22 +585,22 @@ function update-softwares() {
 
 	update-vim <<< $password
 
-	if zsh_has_cmd brew; then
+	if zshrc_has_cmd brew; then
 		brew upgrade
 		brew cleanup
 		if [[ "$(uname)" == "Darwin" ]]; then
 			brew upgrade --cask
 		fi
 	fi
-	if zsh_has_cmd pacman; then
-		if zsh_has_cmd yay; then
+	if zshrc_has_cmd pacman; then
+		if zshrc_has_cmd yay; then
 			# Prefer using yay to pacman
 			yay -Syyu --noconfirm --sudoflags -S <<< $password
 		else
 			sudo -S pacman -Syyu --noconfirm <<< $password
 		fi
 	fi
-	if zsh_has_cmd go; then
+	if zshrc_has_cmd go; then
 		pushd ~
 		local gobin=$(go env GOBIN)
 		local gobin=${gobin:-$(go env GOPATH)/bin}
@@ -610,10 +610,10 @@ function update-softwares() {
 		done
 		popd
 	fi
-	if zsh_has_cmd opam; then
+	if zshrc_has_cmd opam; then
 		opam update && opam upgrade --yes
 	fi
-	if zsh_has_cmd pip3; then
+	if zshrc_has_cmd pip3; then
 		pip3 list --outdated --format json | \
 			python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
 			xargs pip3 install -U
@@ -631,7 +631,7 @@ function gitinit() {
 }
 
 function CAPSLOCK() {
-	if zsh_has_cmd xdotool; then
+	if zshrc_has_cmd xdotool; then
 		xdotool key Caps_Lock
 	else
 		echo "\033[41m\xdotool not found\033[m"
