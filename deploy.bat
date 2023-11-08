@@ -95,7 +95,25 @@ function makeShortcuts() {
     shortcut.TargetPath = src
     if (fs.FileExists(icon)) {
       shortcut.IconLocation = icon
+    } else if (file === 'WSLTerm') {
+      shortcut.IconLocation = 'wsl.exe, 0'
     }
+    shortcut.Save()
+  }
+
+  {  // Create shortcut for open cmd.exe with unix-like commands in msys2 enabled.
+    var dst = fs.BuildPath(dstDir, 'cmdterm.lnk')
+    var setenv = fs.BuildPath(srcDir, 'setenv.bat')
+    var home = fs.getParentFolderName(wsh.SpecialFolders('Desktop'))
+    var args = formatString('/k "{} && title %ComSpec% - with msys2"', setenv)
+
+    WScript.Echo(formatString('cmd.exe {}', args), '->', dst)
+
+    var shortcut = wsh.CreateShortcut(dst)
+    shortcut.TargetPath = 'cmd.exe'
+    shortcut.Arguments = args
+    shortcut.IconLocation = 'cmd.exe, 0'
+    shortcut.WorkingDirectory = home
     shortcut.Save()
   }
 }
