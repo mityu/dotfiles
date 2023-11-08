@@ -492,7 +492,14 @@ Mkdir(Stdpath.cache, 'p')
   else
     set noswapfile
   endif
-  set nobackup nowritebackup
+
+  final backupdir = JoinPath(Stdpath.cache, 'backup')
+  if Mkdir(backupdir, 'p')
+    set backup writebackup
+    &backupdir = backupdir
+  else
+    set nobackup nowritebackup
+  endif
 }
 
 # IM control
