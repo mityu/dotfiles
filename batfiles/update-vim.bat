@@ -25,7 +25,8 @@ for /f "usebackq" %%A in (`git rev-parse HEAD`) do set HASH_AFTER=%%A
 if not %HASH% == %HASH_AFTER% set DO_BUILD=TRUE
 
 if %DO_BUILD% == TRUE (
-    make -j4 -f Make_ming.mak GUI=yes VIMDLL=yes STATIC_STDCPLUS=yes
+    make -j4 -f Make_ming.mak GUI=yes VIMDLL=yes STATIC_STDCPLUS=yes ^
+        USERNAME=mityu USERDOMAIN=
 ) else (
     echo Vim is already up-to-date.
 )
