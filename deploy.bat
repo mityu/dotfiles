@@ -30,20 +30,75 @@
   GOTO:EOF
 @end
 
-fs = WScript .CreateObject("Scripting.FileSystemObject")
-WshShell = WScript.CreateObject("WScript.shell")
-startMenuPath = fs.BuildPath(
-  WshShell.ExpandEnvironmentStrings("%ProgramData%"),
-  "Microsoft\\Windows\\Start Menu\\Programs")
-parentDirPath = fs.getParentFolderName(WScript.ScriptFullName)
-batfilesDirPath = fs.BuildPath(parentDirPath, "batfiles")
+var fs = WScript.CreateObject('Scripting.FileSystemObject')
+var wsh = WScript.CreateObject('WScript.shell')
 
-batfiles = ["WSLTerm", "wezterm", "bashterm", "archlinux", "ubuntu"]
-for (i in batfiles) {
-  WScript.Echo("Making shortcut of " + batfiles[i] + ".bat...")
-  src = fs.BuildPath(batfilesDirPath, batfiles[i] + ".bat")
-  dest = fs.BuildPath(startMenuPath, batfiles[i] + ".lnk")
-  shortcut = WshShell.CreateShortcut(dest)
-  shortcut.TargetPath = src
-  shortcut.Save()
+function formatString(fmt) {
+  var regex = new RegExp('{}', '')
+  for (var i = 1; i < arguments.length; ++i) {
+    fmt = fmt.replace(regex, arguments[i])
+  }
+  return fmt
 }
+
+function joinPath() {
+  var path = ''
+  for (var i = 0; i < arguments.length; ++i) {
+    path = fs.BuildPath(path, arguments[i])
+  }
+  return path
+}
+
+function downloadFile(url, dst) {
+  var cmd = formatString('curl.exe --silent "{}" -o "{}"', url, dst)
+  WScript.Echo(cmd)
+  wsh.Run(cmd, 0, true)
+}
+
+function getIconDir() {
+  var home = fs.getParentFolderName(wsh.SpecialFolders('Desktop'))
+  return joinPath(home, '.cache', 'shortcut-icons')
+}
+
+function prepareIcons() {
+  var icons = [
+    ['https://www.archlinux.jp/images/favicon.ico', 'archlinux.ico'],
+    ['https://raw.githubusercontent.com/wez/wezterm/main/assets/windows/terminal.ico', 'wezterm.ico'],
+    ['https://raw.githubusercontent.com/msys2/msys2.github.io/source/web/favicon.ico', 'bashterm.ico'],
+    ['https://jp.ubuntu.com/static/files/favicon.ico', 'ubuntu.ico'],
+  ]
+  var iconDir = getIconDir()
+  if (!fs.FolderExists(iconDir)) {
+    fs.CreateFolder(iconDir)
+  }
+  for (var i in icons) {
+    var icon = icons[i]
+    var dst = fs.BuildPath(iconDir, icon[1])
+    downloadFile(icon[0], dst)
+  }
+}
+
+function makeShortcuts() {
+  var files = ['WSLTerm', 'wezterm', 'bashterm', 'archlinux', 'ubuntu']
+  var dstDir = wsh.SpecialFolders('Programs')  // Path to start menu
+  var srcDir = fs.BuildPath(fs.getParentFolderName(WScript.ScriptFullName), 'batfiles')
+  var iconDir = getIconDir()
+  for (var i in files) {
+    var file = files[i]
+    var src = fs.BuildPath(srcDir, file + '.bat')
+    var dst = fs.BuildPath(dstDir, file + '.lnk')
+    var icon = fs.BuildPath(iconDir, file + '.ico')
+
+    WScript.Echo(src, '->', dst)
+
+    var shortcut = wsh.CreateShortcut(dst)
+    shortcut.TargetPath = src
+    if (fs.FileExists(icon)) {
+      shortcut.IconLocation = icon
+    }
+    shortcut.Save()
+  }
+}
+
+prepareIcons()
+makeShortcuts()
