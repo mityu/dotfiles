@@ -525,8 +525,7 @@ if !has('gui_running')
       if v:shell_error != 0
         EchomsgError('Compilation failed')
         EchomsgError(output)
-      endif
-      if IsWSL
+      elseif IsWSL
         output = system($'chmod u+x {shellescape(exepath)}')
         if v:shell_error != 0
           EchomsgError('chmod failed')
