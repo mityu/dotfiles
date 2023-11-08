@@ -474,11 +474,10 @@ set isfname-==
 set spelllang& spelllang+=cjk
 # }}}
 
-export final CacheDir = JoinPath(expand('~'), '.cache', 'vimrc')
-Mkdir(CacheDir, 'p')
+Mkdir(Stdpath.cache, 'p')
 
 {
-  final undodir = JoinPath(CacheDir, 'undodir')
+  final undodir = JoinPath(Stdpath.cache, 'undo')
   if Mkdir(undodir, 'p')
     set undofile
     &undodir = undodir
@@ -486,7 +485,7 @@ Mkdir(CacheDir, 'p')
     set noundofile
   endif
 
-  final swapdir = JoinPath(CacheDir, 'swapfile')
+  final swapdir = JoinPath(Stdpath.cache, 'swap')
   if Mkdir(swapdir, 'p')
     set swapfile
     &directory = JoinPath(fnamemodify(swapdir, ':p'), '')
@@ -1919,7 +1918,7 @@ def OnOpenReadingVimrcBuffer()
 enddef
 
 # Additional plugins
-final SessionDir = JoinPath(CacheDir, 'sessions')
+final SessionDir = JoinPath(Stdpath.cache, 'sessions')
 {
   Mkdir(SessionDir)
   command! MkSession call vimrc#session#make()
@@ -2166,9 +2165,9 @@ command! ReplaceTwobyteSpace keeppatterns :%s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 
 # mru
-g:mru_history_file = JoinPath(CacheDir, 'mru', 'history')
+g:mru_history_file = JoinPath(Stdpath.cache, 'mru', 'history')
 {
-  var dir = JoinPath(CacheDir, 'mru')
+  var dir = JoinPath(Stdpath.cache, 'mru')
   Mkdir(dir)
 }
 g:mru_ignore_pattern = [
