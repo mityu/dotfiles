@@ -366,7 +366,7 @@ def PackInit(): bool
   if !exists('*minpac#init()')
     # Download minpac...
     var minpacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt', 'minpac')
-    Mkdir(fnamemodify(minpacPath, ':h'))
+    Mkdir(fnamemodify(minpacPath, ':h'), 'p')
     Echomsg('Downloading minpac...')
     system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
 
@@ -1926,7 +1926,7 @@ enddef
 # Additional plugins
 final SessionDir = JoinPath(Stdpath.cache, 'sessions')
 {
-  Mkdir(SessionDir)
+  Mkdir(SessionDir, 'p')
   command! MkSession call vimrc#session#make()
   command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
        \ call vimrc#session#delete(1, <f-args>)
@@ -2174,7 +2174,7 @@ command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 g:mru_history_file = JoinPath(Stdpath.cache, 'mru', 'history')
 {
   var dir = JoinPath(Stdpath.cache, 'mru')
-  Mkdir(dir)
+  Mkdir(dir, 'p')
 }
 g:mru_ignore_pattern = [
       \ '\.git\>',
