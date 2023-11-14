@@ -505,21 +505,30 @@ Mkdir(Stdpath.cache, 'p')
 
 # IM control
 if !has('gui_running')
-  if IsWSL || IsWindows
+  if IsWSL || IsWindows || IsWinUnix
     const exepath = JoinPath(Stdpath.cache, 'disableim.exe')
     if !executable(exepath)  # Build disableim.exe
       var csc = 'C:\Windows\Microsoft.Net\Framework64\v4.0.30319\csc.exe'
       var srcpath = JoinPath(fnamemodify($MYVIMRC, ':h'), 'misc', 'disableim.cs')
-      var cmdopts = ['/optimize+', '/debug-', '/nologo',
-        $'/out:{shellescape(exepath)}', '/target:winexe']
+      var outpath = $'{shellescape(exepath)}'  # Check with Unix path, compile with Windows path.
+      var cmdopts = ['/optimize+', '/debug-', '/nologo', '/target:winexe']
       if IsWSL
         csc = $'$(wslpath -u {shellescape(csc)})'
         srcpath = $'$(wslpath -w {shellescape(srcpath)})'
         cmdopts->add('/utf8output')
+      elseif IsWinUnix
+        csc = string(csc)
+        srcpath = $'$(cygpath -w {shellescape(srcpath)})'
+        outpath = $'$(cygpath -w {shellescape(exepath)})'
       else
         srcpath = shellescape(srcpath)
       endif
-      var cmd = join([csc] + cmdopts + [srcpath])
+      var cmd = join([csc] + cmdopts + [$'/out:{outpath}', srcpath])
+      if IsWinUnix
+        # Do not let MSYS2 to convert option argument (e.g. /nologo) into
+        # Windows style path (e.g. C:\msys64\nologo)
+        cmd = $'MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" {cmd}'
+      endif
       Echomsg('Building disableim.exe...')
       Echomsg(cmd)
       var output = system(cmd)
