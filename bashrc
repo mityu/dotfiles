@@ -24,6 +24,12 @@ function bashrc_has_cmd() {
     which $1 &> /dev/null
 }
 
+if bashrc_has_cmd vim && \
+    [[ ($(uname) == "MSYS"*) && ($(which vim) == "$(cygpath $USERPROFILE)"*) ]]; then
+    export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
+fi
+
+
 if ! bashrc_has_cmd sudoedit; then
     alias sudoedit='sudo -e'
 fi
