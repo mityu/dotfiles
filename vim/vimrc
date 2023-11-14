@@ -130,6 +130,7 @@ legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
 enddef
 
 final IsWindows = has('win32')
+final IsWinUnix = has('win32unix')
 final IsLinux = has('linux')
 final IsMac = has('mac')
 final IsUnix = IsLinux || IsMac
@@ -1011,7 +1012,7 @@ command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '
   var cmd: string
   if IsMac && executable('open')
     cmd = 'open'
-  elseif (IsWindows || IsWSL) && executable('explorer')
+  elseif (IsWindows || IsWSL || IsWinUnix) && executable('explorer')
     cmd = 'explorer'
   endif
   if cmd !=# ''
