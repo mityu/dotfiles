@@ -11,35 +11,11 @@ if [[ "$(uname)" == "MINGW"* ]]; then
     /msys2_shell.cmd -msys -defterm -no-start $0 $* && exit 0 || exit 1
 fi
 
-function auto-sudo() {
-    if $ISROOT; then
-        $*
-    else
-        sudo -S -- $* <<< $PASSWORD
-    fi
-}
-
 function build-vim() {
-    auto-sudo make -j4 && \
+    make -j4 && \
         ([[ "$(uname)" != "MSYS"* ]] || make uninstall) && \
-        auto-sudo make -j4 install
+        make -j4 install
 }
-
-ISROOT=false
-if [[ $(id -u) == 0 || "$(uname)" == "MSYS"* ]]; then
-    ISROOT=true
-fi
-
-# Password is for "make install", necessary when not a root user.
-if ! $ISROOT; then
-    sudo -k  # Reset sudo credential cache
-    read -sp 'Password:' PASSWORD
-    while ! sudo -Svp '' &> /dev/null <<< $PASSWORD; do
-        echo
-        echo 'Sorry, try again.'
-        read -sp 'Password:' PASSWORD
-    done
-fi
 
 FORCEBUILD=false
 if [[ "$1" == "--force" || "$1" == "-f" ]]; then
@@ -52,13 +28,17 @@ if [ ! -d "$HOME/.cache/vimbuild" ]; then
     git clone https://github.com/vim/vim ~/.cache/vimbuild
     FORCEBUILD=true
 fi
+if [ ! -d "$HOME/.local" ]; then
+    mkdir ~/.local
+fi
 cd ~/.cache/vimbuild
 HASH=$(git rev-parse HEAD)
 git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
     export CONF_OPT_COMPBY="--with-compiledby=mityu"
+    export CONF_ARGS1="--prefix=$HOME/.local"
     if ! $FORCEBUILD; then
         build-vim && exit 0
     fi
-    auto-sudo make distclean && build-vim
+    make distclean && build-vim
 fi
