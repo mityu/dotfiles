@@ -19,6 +19,9 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 		eval 'export' $path_expr
 	done
 fi
+if [[ ! $PATH =~ "$HOME/.local/bin" ]]; then
+	export PATH=$HOME/.local/bin:$PATH
+fi
 export PATH=$(dotfiles-path)/bin:$PATH
 export LANG=en_US.UTF-8
 
