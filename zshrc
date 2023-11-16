@@ -575,15 +575,19 @@ function update-vim-plugins() {
 
 function update-softwares() {
 	local password=''
-	sudo -k  # Reset sudo credential cache
-	echo -n 'Password:'; read -s password;
-	while ! sudo -Svp '' &> /dev/null <<< $password; do
-			echo
-			echo 'Sorry, try again.'
-			echo -n 'Password:'; read -s password;
-	done
+	local need_password=(zshrc_has_cmd pacman)
 
-	update-vim <<< $password
+	if $need_password; then
+		sudo -k  # Reset sudo credential cache
+		echo -n 'Password:'; read -s password;
+		while ! sudo -Svp '' &> /dev/null <<< $password; do
+				echo
+				echo 'Sorry, try again.'
+				echo -n 'Password:'; read -s password;
+		done
+	fi
+
+	update-vim
 
 	if zshrc_has_cmd brew; then
 		brew upgrade
