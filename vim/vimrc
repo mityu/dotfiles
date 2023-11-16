@@ -1695,6 +1695,41 @@ if OptPluginExists('vim-lsp')
     autocmd User lsp_buffer_disabled call LspDisableForBuffer()
   augroup END
 endif
+if OptPluginExists('vim-lsp-settings')
+  def LspUpdateAllServers()
+    if !exists('g:loaded_lsp_settings')
+      packadd vim-lsp-settings
+    endif
+    const ToDict = (l: list<string>): dict<string> => {
+      var d: dict<string>
+      for e in l
+        d[e] = ''
+      endfor
+      return d
+    }
+    var installedServers = lsp_settings#installed_servers()
+      ->map('v:val.name')
+      ->ToDict()
+    if installedServers->empty()
+      Echomsg('No servers are installed.')
+      return
+    endif
+    tabnew
+    for [ft, servers] in lsp_settings#settings()->items()
+      for server in servers
+        if has_key(installedServers, server.command)
+          installedServers[server.command] = ft
+        endif
+      endfor
+    endfor
+    for [server, ft] in installedServers->items()
+      lsp_settings#install_server(ft, server)
+    endfor
+    Echomsg('Finished updating.')
+  enddef
+
+  command! -bar LspUpdateAllServers LspUpdateAllServers()
+endif
 # Textobj/Operator-user plugins
 # @param
 # - plugin_name: the name of plugin
