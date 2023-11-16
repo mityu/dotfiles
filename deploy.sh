@@ -1,15 +1,38 @@
 #!/bin/bash
 
-if [[ $MSYSTEM != "" ]]; then
+if [[ $(uname -o) == Msys ]]; then
     if ! openfiles &> /dev/null; then
         powershell start-process \"$(cygpath -w /msys2_shell.cmd)\" \
             -Verb runas -ArgumentList ^-mingw64,$(readlink -f $0)
         exit 0
     fi
-    export MSYS=winsymlinks:nativestrict
+    # export MSYS=winsymlinks:nativestrict
 fi
 
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
+
+if [[ $(uname -o) == Msys ]]; then
+    $SCRIPT_DIR/deploy.bat
+    invoke-cmd () {
+        MSYS2_ARG_CONV_EXCL="*" cmd /C $*
+    }
+    link-file () {
+        local src=$(cygpath -w $1)
+        local dst=$(cygpath -w $2)
+        invoke-cmd mklink $dst $src
+    }
+    link-dir () {
+        local src=$(cygpath -w $1)
+        local dst=$(cygpath -w $2)
+        invoke-cmd mklink /D $dst $src
+    }
+    link-file $SCRIPT_DIR/bashrc $HOME/.bashrc
+    link-file $SCRIPT_DIR/zshrc $HOME/.zshrc
+    link-dir $SCRIPT_DIR/vim $HOME/.vim
+    read  # Key wait...
+    exit 0
+fi
+
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
 
 IS_MAC=false
@@ -33,17 +56,11 @@ auto_mkdir $CONFIG_DIR
 echo "Deploying .bashrc"
 ln -sn $SCRIPT_DIR/bashrc ~/.bashrc
 
-
 echo "Deploying .zshrc"
 ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
 
-
 echo "Deploying .vim/"
 ln -snfv ${SCRIPT_DIR}/vim ~/.vim
-
-
-echo "Deploying .mlterm/"
-ln -snfv $SCRIPT_DIR/mlterm ~/.mlterm
 
 echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
@@ -54,6 +71,9 @@ ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 if $IS_MAC; then
     echo "Deploying karabiner/"
     ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner
+
+    echo "Deploying .mlterm/"
+    ln -snfv $SCRIPT_DIR/mlterm ~/.mlterm
 fi
 
 if $IS_LINUX; then
