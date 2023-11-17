@@ -37,6 +37,7 @@ git pull
 if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
     export CONF_OPT_COMPBY="--with-compiledby=mityu"
     export CONF_ARGS1="--prefix=$HOME/.local"
+    export CONF_OPT_PYTHON3="--enable-python3interp=dynamic"
     if ! $FORCEBUILD; then
         build-vim && exit 0
     fi
