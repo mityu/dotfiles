@@ -212,6 +212,11 @@ function zshrc_build_prompt() {
 
 	ps1+='${zshrc_prompt_keymap}'
 
+	# Show hostname on SSH
+	if [[ -n "$SSH_CONNECTION" ]]; then
+		ps1+="${zshrc_prompt_colors[purple]}SSH:${HOSTNAME}${zshrc_prompt_colors[reset]} "
+	fi
+
 	# Show Linux distribution on WSL2
 	if [[ $(uname) == "Linux" && $(uname -r) == *"microsoft"* ]]; then
 		local distrib='Unknown'
