@@ -330,6 +330,7 @@ def PackRegister()
   minpac#add('vim-jp/vimdoc-ja')
   minpac#add('vim-jp/vital.vim')
   minpac#add('vim-scripts/autodate.vim')
+  minpac#add('whonore/Coqtail')
 
   minpac#add('lambdalisue/suda.vim', {type: 'opt'})
   minpac#add('mattn/vim-lsp-settings', {type: 'opt'})
