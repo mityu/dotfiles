@@ -1411,10 +1411,6 @@ if PluginExists('vim-quickrun')
     command: 'python3',
     ['hook/eval/template']: 'print(%s)'
   }
-  g:quickrun_config.python2 = {
-    command: 'python',
-    ['hook/eval/template']: 'print(%s)'
-  }
 
   if executable('deno')
     # If deno doesn't exist, use quickrun's default config. It has configs for
