@@ -10,6 +10,10 @@ if [ ! -d "$HOME/.cache/macvimbuild" ]; then
     git clone https://github.com/macvim-dev/macvim ~/.cache/macvimbuild
     HASH=null
 fi
+if [[ "$1" == "--force" || "$1" == "-f" ]]; then
+    # Forcely rebuild
+    HASH=null
+fi
 cd ~/.cache/macvimbuild
 : "${HASH:=$(git rev-parse HEAD)}"
 git pull
