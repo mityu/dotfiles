@@ -503,6 +503,12 @@ NewFiletypeRule('c')
     '}',
     ['\=^%(case\s*.*\:|default\:)'])
 
+NewFiletypeRule('objc')
+  .AddRule(
+    '^\@%(interface|implementation)>',
+    '@end',
+    ['\=^[-+}]'])
+
 NewFiletypeRule('go')
   .AddRule(
     '^%(select>|switch\s*\S*\s*)\s*\{$',
@@ -529,6 +535,9 @@ NewFiletypeRule('tex')
   )
 
 MergeRule('c', 'cpp')
+MergeRule('cpp', 'objcpp')
+MergeRule('objc', 'objcpp')
+MergeRule('c', 'objc')
 MergeRule('vim', 'vimspec')
 MergeRule('sh', 'zsh')
 MergeRule('sh', 'bash')
