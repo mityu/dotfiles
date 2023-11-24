@@ -26,7 +26,7 @@ function! s:option_to_view()
 endfunction
 
 function! s:option_to_edit()
-  setlocal buftype= modifiable noreadonly
+  setlocal buftype= modifiable noreadonly noexpandtab
   setlocal list textwidth=78
   if exists('+colorcolumn')
     setlocal colorcolumn=+1
