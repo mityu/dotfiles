@@ -88,17 +88,35 @@ else
 
     let contents_pos = getpos('.')
 
-    let lines = []
+    let captions = []
     while search('^\([=-]\)\1\{77}$', 'W')
       let prefix = getline('.') =~# '=' ? '' : '  '
       .+1
       let caption = matchlist(getline('.'), '^\(\%(\u\|-\)*\)\s\+\*\(\S*\)\*$')
       if !empty(caption)
-        let [title, tag] = caption[1 : 2]
-        let margin = repeat(' ', 30 - strlen(prefix . title))
-        call add(lines, printf('%s%s%s|%s|', prefix, title, margin, tag))
+        let caption = caption[1 : 2]
+        let caption[0] = prefix . caption[0]
+        call add(captions, caption)
       endif
     endwhile
+
+    let max_tag_length = captions
+          \->mapnew('strdisplaywidth(v:val[1])')
+          \->max()
+    let tag_column = &l:textwidth - max_tag_length
+    let tag_column -= tag_column % shiftwidth()
+    let lines = []
+    for [title, tag] in captions
+      let title_len = strdisplaywidth(title)
+      if &l:expandtab
+        let margin = repeat(' ', tag_column - title_len)
+      else
+        let sw = shiftwidth()
+        let charcount = tag_column / sw - title_len / sw
+        let margin = repeat("\t", charcount)
+      endif
+      call add(lines, printf('%s%s|%s|', title, margin, tag))
+    endfor
 
     call setpos('.', contents_pos)
 
