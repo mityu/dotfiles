@@ -1255,6 +1255,7 @@ if PluginExists('vim-gram')
     gram#custom#map_keys('normal', '<NL>', '<CR>')
 
     gram#custom#map_action('insert', '<ESC>', 'switch-to-normal')
+    gram#custom#map_action('insert', '<C-@>', 'switch-to-normal')
     gram#custom#map_action('insert', '<CR>', 'switch-to-normal')
     gram#custom#map_action('insert', '<C-h>', 'delete-character')
     gram#custom#map_action('insert', '<BS>', 'delete-character')
