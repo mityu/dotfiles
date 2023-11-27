@@ -44,6 +44,11 @@ if [ -n "$VIM_TERMINAL" ]; then
     }
 fi
 
+if [[ $(uname -o) == "Msys" ]]; then
+    alias pbpaste='cat /dev/clipboard'
+    alias pbcopy='cat > /dev/clipboard'
+fi
+
 function stdin() {
     local cmd stdin
     cmd="$1"
