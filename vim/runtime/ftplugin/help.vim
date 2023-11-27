@@ -65,8 +65,10 @@ else
   SetUndoFtplugin setlocal buftype< tabstop< textwidth<
   SetUndoFtplugin setlocal conceallevel< expandtab< softtabstop<
   SetUndoFtplugin delcommand GenerateContents
+  SetUndoFtplugin delcommand TOC
 
   command! -buffer -bar GenerateContents call s:generate_contents()
+  command! -buffer -bar TOC call s:generate_contents()
   function! s:generate_contents()
     let cursor = getpos('.')
 
@@ -92,7 +94,7 @@ else
     while search('^\([=-]\)\1\{77}$', 'W')
       let prefix = getline('.') =~# '=' ? '' : '  '
       .+1
-      let caption = matchlist(getline('.'), '^\(\%(\u\|-\)*\)\s\+\*\(\S*\)\*$')
+      let caption = matchlist(getline('.'), '^\(\%(\u\|-\| \)*\)\s\+\*\(\S*\)\*$')
       if !empty(caption)
         let caption = caption[1 : 2]
         let caption[0] = prefix . caption[0]
