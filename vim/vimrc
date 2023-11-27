@@ -307,6 +307,7 @@ def PackRegister()
   minpac#add('lambdalisue/vim-gista')
   minpac#add('matze/vim-tex-fold')
   minpac#add('mityu/vim-alith')
+  minpac#add('mityu/vim-cmdhistory')
   minpac#add('mityu/vim-gram')
   minpac#add('mityu/vim-gram-peripherals')
   minpac#add('mityu/vim-vim9context')
@@ -715,6 +716,7 @@ cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
+cnoremap <C-o> <Cmd>call cmdhistory#Select()<CR>
 
 nnoremap <C-w>, <Cmd>call <SID>ToggleQuickfix()<CR>
 def ToggleQuickfix()
@@ -906,10 +908,10 @@ def CmdwinEnter()
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   # Make executing a previous command easier.
-  if PluginExists('vim-gram')
-    nnoremap <buffer> / <Cmd>call gram#core#setup(#{
-          \sources: [#{name: 'command-history', default_action: 'command-history:select'}]})<CR>
+  if PluginExists('vim-cmdhistory')
+    nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   endif
+  nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   vimrc#incsearch#Setup()
 
   final cmdwin_type = expand('<afile>')
@@ -1209,6 +1211,16 @@ if PluginExists('vim-alith')
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
+if PluginExists('vim-cmdhistory') || true
+  augroup vimrc-cmdhistory
+    autocmd User cmdhistory-initialize SetupCmdhistory()
+  augroup END
+  def SetupCmdhistory()
+    cmdhistory#SetDefaultMappings()
+    cmdhistory#MapAction('<ESC>', ['no-operation'])
+    cmdhistory#MapAction('<C-@>', ['no-operation'])
+  enddef
+endif
 if PluginExists('vim-brownie')
   g:brownie_template_dirs =
         [JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
@@ -1268,29 +1280,6 @@ if PluginExists('vim-gram')
     gram#option#set_for_source('terminals', 'kinds', ['buffer'])
 
     vimrc#mru#register_source()  # TODO: workaround.
-
-    gram#source#register('command-history', {
-      gather_candidates: (C) => {
-        var history = split(execute('history ' .. getcmdwintype()), "\n")[1 :]
-        map(history, (_, val) => matchstr(val, '^>\?\s*\d\+\s\+\zs.\+$'))
-        reverse(history)
-        C.clear()
-        C.add(history)
-      }
-    })
-    gram#item_action#register('command-history', {
-      select: (items) => {
-        var item = items[0]
-        if getline('$') ==# ''
-          setline('$', item.word)
-        else
-          append('$', item.word)
-        endif
-        noautocmd normal! G$
-      }
-    })
-    gram#option#set_for_source('command-history', 'kinds', ['command-history'])
-    gram#option#set_for_source('command-history', 'preview', 'none')
   enddef
 
   if IsWindows
