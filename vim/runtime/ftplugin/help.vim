@@ -40,7 +40,7 @@ command! -buffer -bar HelpEdit call s:option_to_edit()
 command! -buffer -bar HelpView call s:option_to_view()
 
 function! s:resize()
-  " Resize only when window isn't splited vertically and there's one help
+  " Resize only when window isn't split vertically and there's one help
   " window.
   if (&l:textwidth * 2) <= winwidth(0) &&
         \ len(filter(range(1,winnr('$')),
@@ -83,9 +83,12 @@ else
       put =''
     else
       keeppatterns /^License:\|Maintainer:/+1
-      let header = printf('%s%s*%s-contents*', (ja ? "目次" : 'CONTENTS'),
-      \             repeat(' ', 50), plug_name)
-      silent put =[repeat('=', 78), header, '']
+      let caption = ja ? "目次" : 'CONTENTS'
+      let tag = printf('*%s-contents*', plug_name)
+      let tag_column = &l:textwidth - strdisplaywidth(tag)
+      let tabcount = tag_column / &l:tabstop - strdisplaywidth(caption) / &l:tabstop
+      let header = caption . repeat("\t", tabcount) . tag
+      silent put =[repeat('=', &l:textwidth), header, '']
     endif
 
     let contents_pos = getpos('.')
@@ -106,15 +109,14 @@ else
           \->mapnew('strdisplaywidth(v:val[1])')
           \->max()
     let tag_column = &l:textwidth - max_tag_length
-    let tag_column -= tag_column % shiftwidth()
+    let tag_column -= tag_column % &l:tabstop
     let lines = []
     for [title, tag] in captions
       let title_len = strdisplaywidth(title)
       if &l:expandtab
         let margin = repeat(' ', tag_column - title_len)
       else
-        let sw = shiftwidth()
-        let charcount = tag_column / sw - title_len / sw
+        let charcount = tag_column / &l:tabstop - title_len / &l:tabstop
         let margin = repeat("\t", charcount)
       endif
       call add(lines, printf('%s%s|%s|', title, margin, tag))
