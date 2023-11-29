@@ -370,25 +370,13 @@ SnipFiletype('cpp')
   ->AddSnip((comarison: string): bool => {
     # Insert '::' after certan namespaces e.g.
     # 'std' -> 'std::', 'stdstring' -> 'std::string'
-    const namespaces = ['std']
+    const regex = '\v^(.*<%(std|boost))%(::)@<!(\w*)$'
     var [pre, suf] = GetlineDividedByCursor()
-    var target = matchstr(pre, '\w\+$')
-    if target ==# ''
+    if pre !~# regex
       return false
     endif
-
-    var ns = ''
-    for n in namespaces
-      if stridx(target, n) == 0
-        ns = n
-        break
-      endif
-    endfor
-    if ns ==# ''
-      return false
-    endif
-    pre = pre[: -(strlen(target) + 1)]
-    ApplySnip([$'{pre}{ns}::{target[strlen(ns) :]}{CursorPlaceholder}{suf}'])
+    pre = substitute(pre, regex, '\1::\2', '')
+    ApplySnip([pre .. CursorPlaceholder .. suf])
     return true
   })
 SnipFiletype('cpp')->MergeSnip('c')->AddSnip(TrySnipFuzzy)
