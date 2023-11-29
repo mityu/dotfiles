@@ -82,7 +82,7 @@ else
       .-1
       put =''
     else
-      keeppatterns /^License:\|Maintainer:/+1
+      keeppatterns /^License:\|Maintainer:\|Author:/+1
       let caption = ja ? "目次" : 'CONTENTS'
       let tag = printf('*%s-contents*', plug_name)
       let tag_column = &l:textwidth - strdisplaywidth(tag)
