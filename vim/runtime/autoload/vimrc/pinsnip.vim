@@ -489,6 +489,32 @@ FuzzySnipList['java'] = [
   ['public static void main(String[] args) {' .. CursorPlaceholder],
 ]
 
+SnipFiletype('help')
+  ->AddSnip((_: string): bool => {
+    # Add modeline text when there's no modeline and cursor is at the EOF.
+    const lastline = line('$')
+    const no_modeline =
+      (getline(1, &modelines) + getline(lastline - &modelines, lastline))
+      ->filter((_: number, line: string): bool => line =~? '\v^\s*%(vim?|ex):')
+      ->empty()
+    if !no_modeline
+      return false
+    elseif !getline('.', '$')->filter('trim(v:val) ==# ""')->empty()
+      # Not at the tail of file.
+      return false
+    endif
+    ApplySnip(['vim:tw=78:fo=tcq2mM:ts=8:ft=help:norl' .. CursorPlaceholder])
+    return true
+  })
+  ->AddSnip((_: string): bool => {
+    if getline('.') !~# '^[-=]*$'
+      return false
+    endif
+    const c = getline('.')[0]
+    ApplySnip([repeat(c, &l:textwidth) .. CursorPlaceholder])
+    return true
+  })
+
 SnipFiletype('_')
   ->AddSnip((_: string): bool => {
     # foo()>|bar => foo(bar)
