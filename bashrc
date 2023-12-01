@@ -40,7 +40,14 @@ fi
 
 if [ -n "$VIM_TERMINAL" ]; then
     function drop() {
-        echo "\e]51;[\"drop\", \"$(pwd)/$1\"]\x07"
+        echo "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
+    }
+
+    function synccwd() {
+      local cwd
+      echo "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
+      read cwd
+      cd "$cwd"
     }
 fi
 
