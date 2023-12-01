@@ -95,4 +95,6 @@ if $IS_LINUX; then
     echo "Deploying libinput-gestures.conf"
     ln -snfv $SCRIPT_DIR/libinput-gestures/libinput-gestures.conf \
         $CONFIG_DIR/libinput-gestures.conf
+
+    ln -snfv $SCRIPT_DIR/rofi $CONFIG_DIR/rofi
 fi
