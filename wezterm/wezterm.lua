@@ -107,6 +107,10 @@ local config = {
 
 if isWindows then
     config.font_size = 13
+    config.default_prog = {
+      "C:/msys64/msys2_shell.cmd", "-mingw64",
+      "-defterm", "-no-start", "-use-full-path"
+    }
 elseif isMac then
     config.initial_cols = 206
     config.initial_rows = 58
