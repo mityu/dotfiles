@@ -37,6 +37,7 @@ keymap:
         URxvt,
         org.wezfurlong.wezterm,
         org.wezfurlong.wezterm.org.wezfurlong.wezterm,
+        gnome-terminal-server.Gnome-terminal,
         Alacritty,
         Gvim
       ]
