@@ -2307,7 +2307,7 @@ if has('gui_running')
     if IsWindows
       winpos 0 0
       cd $USERPROFILE
-      if executable('C:/msys64/usr/bin/bash.exe')
+      if &shell =~? 'cmd\.exe' && executable('C:/msys64/usr/bin/bash.exe')
         # Set MSYS2 MinGW64 related environmental variables.
         if executable('C:/msys64/msys2_shell.cmd')
           eval systemlist('C:/msys64/msys2_shell.cmd -mingw64 -defterm -no-start -c env')
@@ -2337,7 +2337,7 @@ if has('gui_running')
   elseif has('mac')
     set guifont=Cica:h14,Osaka-Mono:h14
   elseif has('xfontset')
-    #for unix (use xfontset)
+    # for unix (use xfontset)
     set guifont=a14,r14,k14
   elseif has('linux')
     set guifont=Cica\ 14,DejaVu\ Sans\ Mono\ 14
