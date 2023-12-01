@@ -1,14 +1,8 @@
 #!/bin/bash -xe
 
-# Build Vim for MSYS2 bash environment.  Switch to plain MSYS2 environment if
-# current environment is mingw64 or mingw32 on MSYS2 because their compiler
-# will build Vim for Windows-native environment, not for MSYS2 bash.
+# Use build script on native Windows when building Vim for MinGW on MSYS2.
 if [[ "$(uname)" == "MINGW"* ]]; then
-    if [ ! -f "/msys2_shell.cmd" ]; then
-        echo '/msys2_shell.cmd not found. Abort.'
-        exit 1
-    fi
-    /msys2_shell.cmd -msys -defterm -no-start $0 $* && exit 0 || exit 1
+    update-vim.bat $* && exit 0 || exit 1
 fi
 
 function build-vim() {
