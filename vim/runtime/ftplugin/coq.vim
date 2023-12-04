@@ -40,3 +40,29 @@ for target in abbrevs
   execute $'inoreabbrev <expr> <buffer> {target} Abbrev({string(target)})'
   execute $'SetUndoFtplugin iunabbrev <buffer> {target}'
 endfor
+
+# Omni completion: just a simple tactics completion
+const tactics =<< trim END
+intros
+simpl
+reflexivity
+destruct
+induction
+discriminate
+rewrite
+replace
+apply
+END
+
+def Omnifunc(findstart: number, base: string): any
+  if !!findstart
+    const cword = getline('.')[: col('.') - 1]->matchstr('\S*$')
+    return col('.') - 1 - strlen(cword)
+  endif
+  return tactics
+    ->copy()
+    ->filter((_: number, v: string): bool => stridx(v, base) == 0)
+enddef
+
+set omnifunc=<SID>Omnifunc
+SetUndoFtplugin set omnifunc&
