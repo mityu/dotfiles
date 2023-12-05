@@ -111,10 +111,7 @@ bind '\C-w: kill-word'
 if bashrc_has_cmd fzf; then
     export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
-    # FIXME: It seems that fzf doesn't work on MSYS2 bash on Vim's terminal.
-    if [[ $VIM_TERMINAL == "" || $MSYSTEM == '' ]]; then
-        bind -x '"\C-r": select-history'
-    fi
+    bind -x '"\C-r": select-history'
     function select-history() {
         local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | fzf --tac +m)
         if [[ $cmd != "" ]]; then
