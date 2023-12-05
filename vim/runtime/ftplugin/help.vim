@@ -51,7 +51,10 @@ function! s:resize()
 endfunction
 
 if &buftype ==# 'help'
+  SetUndoFtplugin nunmap <buffer> <C-\>
+  SetUndoFtplugin nunmap <buffer> q
   nnoremap <buffer> <silent> q :<C-u>quit<CR>
+  nnoremap <buffer> <C-\> <C-]>
 
   call s:resize()
   augroup vimrc_ftplugin_vim
