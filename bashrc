@@ -1,6 +1,20 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+function bashrc_is_msys() {
+    [[ $(uname -o) == "Msys" ]]
+}
+
+function bashrc_prepend_PATH() {
+    if [[ $1 != "" && ! $PATH =~ "$1" ]]; then
+        export PATH=$1:$PATH
+    fi
+}
+
+function bashrc_has_cmd() {
+    which $1 &> /dev/null
+}
+
 # Set environmental variables (Only when outside of vim.)
 if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
     cat ~/.envrc | while read path_expr
@@ -17,18 +31,28 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
         eval 'export' $path_expr
     done
 fi
-if [[ ! $PATH =~ "$HOME/.local/bin" ]]; then
-	export PATH=$HOME/.local/bin:$PATH
-fi
-export PATH=$(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)/bin:$PATH
-export LANG=en_US.UTF-8
 
-function bashrc_has_cmd() {
-    which $1 &> /dev/null
-}
+export LANG=en_US.UTF-8
+bashrc_prepend_PATH "$(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)/bin"
+bashrc_prepend_PATH "$HOME/.local/bin"
+if bashrc_has_cmd cargo; then
+    bashrc_prepend_PATH "$HOME/.cargo/bin"
+fi
+if bashrc_has_cmd go; then
+    function bashrc_get_gobin() {
+        local gobin
+        gobin=$(go env GOBIN)
+        gobin=${gobin:-$(go env GOPATH)/bin}
+        if bashrc_is_msys; then
+            gobin=$(cygpath -u $gobin)
+        fi
+        echo $gobin
+    }
+    bashrc_prepend_PATH $(bashrc_get_gobin)
+fi
 
 if bashrc_has_cmd vim && \
-    [[ ($(uname) == "MSYS"*) && ($(which vim) == "$(cygpath $USERPROFILE)"*) ]]; then
+    [[ (bashrc_is_msys) && ($(which vim) == "$(cygpath $USERPROFILE)"*) ]]; then
     export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
 fi
 
@@ -51,7 +75,7 @@ if [ -n "$VIM_TERMINAL" ]; then
     }
 fi
 
-if [[ $(uname -o) == "Msys" ]]; then
+if bashrc_is_msys; then
     alias pbpaste='cat /dev/clipboard'
     alias pbcopy='cat > /dev/clipboard'
 fi
