@@ -3,6 +3,10 @@ function dotfiles-path() {
 	echo $(cd $(dirname $(readlink -f $thisfile)); pwd)
 }
 
+function gobin-path() {
+	echo ${$(go env GOBIN):-$(go env GOPATH)/bin}
+}
+
 # Set environmental variables (Only when outside of vim.)
 if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 	cat ~/.envrc | while read path_expr
@@ -19,10 +23,6 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 		eval 'export' $path_expr
 	done
 fi
-if [[ ! $PATH =~ "$HOME/.local/bin" ]]; then
-	export PATH=$HOME/.local/bin:$PATH
-fi
-export PATH=$(dotfiles-path)/bin:$PATH
 export LANG=en_US.UTF-8
 
 function zshrc_in_git_repo() {
@@ -37,6 +37,17 @@ function zshrc_ask_yesno() {
 	echo -n "$1 [y/N]: "
 	read -q
 }
+
+function zshrc_prepend_PATH() {
+	if [[ $1 != "" && ! $PATH =~ "$1" ]]; then
+		export PATH=$1:$PATH
+	fi
+}
+
+zshrc_prepend_PATH $HOME/.local/bin
+zshrc_prepend_PATH $(dotfiles-path)/bin
+zshrc_has_cmd go && zshrc_prepend_PATH $(gobin-path)
+zshrc_has_cmd cargo && zshrc_prepend_PATH $HOME/.cargo/bin
 
 if zshrc_has_cmd vim; then
 	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
@@ -614,9 +625,7 @@ function update-softwares() {
 	fi
 	if zshrc_has_cmd go; then
 		pushd ~
-		local gobin=$(go env GOBIN)
-		local gobin=${gobin:-$(go env GOPATH)/bin}
-		print -rl ${gobin}/*(*) | while read file; do
+		print -rl $(gobin-path)/*(*) | while read file; do
 			local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
 			go install "${pkg}@latest"
 		done
