@@ -720,7 +720,7 @@ cnoremap <C-o> <Cmd>call cmdhistory#Select()<CR>
 
 nnoremap <C-w>, <Cmd>call <SID>ToggleQuickfix()<CR>
 def ToggleQuickfix()
-  var wincount = winnr('$')
+  const wincount = winnr('$')
   try
     cclose
     if wincount == winnr('$')
@@ -749,25 +749,6 @@ def ToggleLocationlist()
   catch
     echoerr v:exception
   endtry
-enddef
-cnoremap <C-x> <C-\>e<SID>CmdlineToggleVeryMagic()<CR>
-def CmdlineToggleVeryMagic(): string
-  if getcmdtype() !~# '[/?]'
-    return ''
-  endif
-
-  var keys = ''
-  var curpos = getcmdpos()
-  var cmdline = getcmdline()
-  if strcharpart(cmdline, 0, 2) ==# '\v'
-    curpos -= 2
-    keys = strpart(cmdline, 2)
-  else
-    curpos += 2
-    keys = '\v' .. cmdline
-  endif
-  setcmdpos(curpos)
-  return keys
 enddef
 # }}}
 tnoremap <C-w>: <C-w>:<C-f>A
@@ -864,7 +845,7 @@ def MapTabmove(delta: number)
   if tab_count == 1
     return
   endif
-  var current = tabpagenr() - 1
+  const current = tabpagenr() - 1
   var move_to = current + delta
   if move_to < 0
     while move_to < 0
@@ -874,7 +855,7 @@ def MapTabmove(delta: number)
   if move_to >= tab_count
     move_to = move_to % tab_count
   endif
-  var movement = move_to - current
+  const movement = move_to - current
   var movecmd = 'tabmove '
   if movement < 0
     movecmd ..= string(movement)
@@ -913,7 +894,7 @@ def CmdwinEnter()
   endif
   vimrc#incsearch#Setup()
 
-  final cmdwin_type = expand('<afile>')
+  const cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
@@ -927,9 +908,6 @@ def CmdwinEnter()
     if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
     endif
-  elseif cmdwin_type =~# '[/?]'
-    inoremap <expr> <buffer> <C-x> <SID>CmdwinToggleVeryMagic()
-    nnoremap <expr> <buffer> <C-x> <SID>CmdwinToggleVeryMagic()
   endif
 enddef
 def CmdwinLeave()
@@ -943,34 +921,6 @@ def CmdwinCompletion(select_next: bool): string
   else
       return "\<C-x>\<C-v>" .. (select_next ? "" : "\<C-p>\<C-p>")
   endif
-enddef
-
-def CmdwinToggleVeryMagic(): string
-  var curpos = getcurpos()
-  var mode = mode()
-  var keys = ''
-  if getline('.')->strcharpart(0, 2) ==# '\v'
-    curpos[2] -= 2
-    if mode !=# 'n'
-      keys ..= "\<ESC>"
-    endif
-    keys ..= '0"_x"_x'
-    if mode ==# 'i'
-      keys ..= 'i'
-    endif
-  else
-    curpos[2] += 2
-    if mode ==# 'i'
-      keys ..= "\<C-o>0\\v"
-    elseif mode ==# 'n'
-      keys ..= "I\\v\<ESC>"
-    else
-      keys ..= "\<ESC>I\\v\<ESC>"
-    endif
-  endif
-  keys ..= printf("\<Cmd>call setpos('.', %s)\<CR>", curpos)
-  keys ..= "\<Cmd>let &undolevels = &undolevels\<CR>"  # Separate undo sequence
-  return keys
 enddef
 
 augroup vimrc_mapping
@@ -989,7 +939,7 @@ endif
   add(map, ['nnoremap', 'sv', 'source $MYVIMRC'])
   add(map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
   add(map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
-  execute map->mapnew((_, val: list<string>): string => printf('%s <Space>%s <Cmd>%s<CR>', val[0], val[1], val[2]))->join("\n")
+  execute map->mapnew((_, val: list<string>): string => $'{val[0]} <Space>{val[1]} <Cmd>{val[2]}<CR>')->join("\n")
 }
 
 # Abbreviates
@@ -1050,7 +1000,7 @@ command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
 command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
 def Filter(bang: bool, pat: string, ...cmd: list<string>)
-  var output = execute(join(cmd, ' '))
+  const output = execute(join(cmd, ' '))
                 ->split("\n")
                 ->filter((_: number, val: string): bool => val =~? pat)
                 ->join("\n")
@@ -1062,8 +1012,8 @@ def Filter(bang: bool, pat: string, ...cmd: list<string>)
 enddef
 
 def FindGitroot(arg_target: string = bufname('%')): string
-  var target: string = resolve(arg_target)
-  var git_dir: string = finddir('.git', target .. ';')
+  const target: string = resolve(arg_target)
+  const git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
     EchomsgWarning('Not a git repository: ' .. target)
     return ''
@@ -1180,10 +1130,9 @@ if PluginExists('gina.vim')
     if filename ==# ''
       return
     endif
-    var gitroot = fnamemodify(gina#core#get().repository, ':h')
-    var cmd = 'git -C ' .. gitroot ..
-            ' --no-pager diff --no-color ' .. filename
-    var bufnr = term_start(cmd, {
+    const gitroot = fnamemodify(gina#core#get().repository, ':h')
+    const cmd = $'git -C {gitroot} --no-pager diff --no-color {filename}'
+    const bufnr = term_start(cmd, {
             term_name: '[gina diff] ' .. filename,
             norestore: 1,
             })
@@ -1210,7 +1159,7 @@ if PluginExists('vim-alith')
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
-if PluginExists('vim-cmdhistory') || true
+if PluginExists('vim-cmdhistory')
   augroup vimrc-cmdhistory
     autocmd User cmdhistory-initialize SetupCmdhistory()
   augroup END
@@ -1609,10 +1558,10 @@ if OptPluginExists('vim-lsp')
   g:lsp_completion_documentation_delay = 0
   g:lsp_diagnostics_enabled = 1
   g:lsp_diagnostics_signs_enabled = 1
-  g:lsp_diagnostics_signs_error = {'text': '>>'}
-  g:lsp_diagnostics_signs_warning = {'text': '--'}
-  g:lsp_diagnostics_signs_information = {'text': '--'}
-  g:lsp_diagnostics_signs_hint = {'text': '!?'}
+  g:lsp_diagnostics_signs_error = {text: '>>'}
+  g:lsp_diagnostics_signs_warning = {text: '--'}
+  g:lsp_diagnostics_signs_information = {text: '--'}
+  g:lsp_diagnostics_signs_hint = {text: '!?'}
   g:lsp_diagnostics_delay_hint = 0
   g:lsp_diagnostics_float_cursor = 1
   g:lsp_diagnostics_float_delay = 0
@@ -1929,7 +1878,7 @@ def ReadingVimrc()
 enddef
 
 def OnOpenReadingVimrcBuffer()
-  var bufname = expand('<amatch>')->matchstr('readingvimrc://\zs.*')
+  const bufname = expand('<amatch>')->matchstr('readingvimrc://\zs.*')
   if bufname ==# 'next'
     if winnr('$') == 1
       return
@@ -1967,7 +1916,7 @@ final SessionDir = JoinPath(Stdpath.cache, 'sessions')
 
 # Showmode
 def ShowmodeInit()
-  var colors = {
+  const colors = {
     normal: [['22', '148'], ['#005f00', '#afdf00']],
     insert: [['23', '117'], ['#005f5f', '#87dfff']],
     visual: [['88', '208'], ['#870000', '#ff8700']],
@@ -2235,13 +2184,12 @@ augroup END
 
 # git
 def GitDiffGetcmd(arg_target: string): string
-  var target: string = resolve(arg_target)
-  var gitroot: string = FindGitroot(target)
+  const target: string = resolve(arg_target)
+  const gitroot: string = FindGitroot(target)
   if gitroot ==# ''
     return ''
   endif
-  return printf('git -C %s --no-pager diff --no-color %s',
-          gitroot, target)
+  return $'git -C {gitroot} --no-pager diff --no-color {target}'
 enddef
 
 def GitDiff(arg_target: string)
@@ -2256,7 +2204,7 @@ def GitDiff(arg_target: string)
     EchomsgError('File or directory does not exists: ' .. target)
     return
   endif
-  var cmd: string = GitDiffGetcmd(target)
+  const cmd = GitDiffGetcmd(target)
   if cmd ==# ''
     return
   endif
