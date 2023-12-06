@@ -98,7 +98,7 @@ enddef
 command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
-legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
+def g:Tapi_drop(bufnr: number, arglist: list<any>)
   const cwd = arglist[0]
   var filepath = arglist[1]
   if !isabsolutepath(filepath)
@@ -111,7 +111,7 @@ legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
   execute opencmd fnameescape(filepath)
 enddef
 
-legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
+def g:Tapi_getcwd(bufnr: number, arglist: list<any>)
   const cwd = call('getcwd', arglist)
   const channel = term_getjob(bufnr)->job_getchannel()
   ch_sendraw(channel, cwd .. "\n")
@@ -1123,7 +1123,7 @@ def GofForMapping()
   Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
 enddef
 
-legacy def! Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
+def g:Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
   const winid = win_getid(winnr('#'))
   const buftype = getwinvar(winid, '&buftype')
   var open_cmd = 'edit'
