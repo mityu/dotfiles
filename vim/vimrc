@@ -2163,6 +2163,7 @@ augroup vimrc_emphasize_indent
   autocmd WinEnter * EmphasizeIndent()
   autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth EmphasizeIndent()
   autocmd User vimrc_initialize ++once EmphasizeIndent()
+  autocmd ColorScheme * highlight link VimrcEmphasisIndent CursorLine
 augroup END
 def EmphasizeIndent()
   if exists('w:disable_emphasis_indent') && <bool>w:disable_emphasis_indent
@@ -2204,6 +2205,7 @@ augroup vimrc_warningspace
   autocmd WinEnter,TerminalWinOpen * WarningSpace()
   autocmd OptionSet * WarningSpace()  # TODO: specify option?
   autocmd User vimrc_initialize ++once WarningSpace()
+  autocmd ColorScheme * highlight link WarningSpace Error
 augroup END
 def WarningSpace()
   # Clean up.
