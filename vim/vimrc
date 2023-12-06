@@ -1747,6 +1747,14 @@ if Pacpack.Tap('vim-lsp-settings')
 
   command! -bar LspUpdateAllServers LspUpdateAllServers()
 endif
+if Pacpack.Tap('suda.vim')
+  if !Pacpack.plugin.IsLoaded()
+    command! -nargs=? -complete=file SudaRead
+          \ Pacpack.Load('suda.vim')|SudaRead <args>
+    command! -nargs=? -complete=file SudaWrite
+          \ Pacpack.Load('suda.vim')|SudaWrite <args>
+  endif
+endif
 # Textobj/Operator-user plugins
 # @param
 # - plugin_name: the name of plugin
