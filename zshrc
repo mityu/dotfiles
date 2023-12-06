@@ -573,17 +573,10 @@ function update-vim-plugins() {
 		if !empty(info)
 			call system(printf('git -C %s reset --hard', shellescape(info.dir)))
 		endif
-		let g:minpac#opt.status_auto = v:false
+		let g:minpac#opt.status_auto = v:true
 		call minpac#update("", {"do": "call PostUpdatePlugins()"})
 	endfunction
 	function PostUpdatePlugins()
-		let bufnr = bufnr("%")
-		call minpac#status()
-		let lines = getline(1, "$")
-		wincmd p
-		setlocal modifiable
-		call append("$", lines)
-		setlocal nomodified
 		%print
 		quitall!
 	endfunction
