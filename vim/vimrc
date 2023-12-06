@@ -241,168 +241,265 @@ endif
 }
 
 # minpac
-if &loadplugins
-  var PluginList: dict<bool>
-  var OptPluginList: dict<bool>
-  var minpacDir = JoinPath(Stdpath.cache, 'pack', 'minpac')
+export const PacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
 
-  var startDir = JoinPath(minpacDir, 'start', '')
-  if isdirectory(startDir)
-    readdir(startDir, (e: string): number => {
-      if isdirectory(startDir .. e)
-        PluginList[e] = true
-      endif
-      return 0
-    })
-  endif
-  var optDir = JoinPath(minpacDir, 'opt', '')
-  if isdirectory(optDir)
-    readdir(optDir, (e: string): number => {
-      if isdirectory(optDir .. e)
-        OptPluginList[e] = true
-      endif
-      return 0
-    })
-  endif
-
-  def PluginExists(plugin: string): bool
-    return has_key(PluginList, plugin)
-  enddef
-
-  def OptPluginExists(plugin: string): bool
-    return has_key(OptPluginList, plugin)
-  enddef
-else
-  def PluginExists(plugin: string): bool
-    return false
-  enddef
-
-  def OptPluginExists(plugin: string): bool
-    return false
-  enddef
-endif
-def PackRegister()
-  minpac#add('k-takata/minpac', {type: 'opt'})
-
-  minpac#add('itchyny/vim-cursorword')
-  minpac#add('itchyny/vim-qfedit')
-  minpac#add('kamichidu/vim-textobj-function-go')
-  minpac#add('kana/vim-altr')
-  minpac#add('kana/vim-operator-user')
-  minpac#add('kana/vim-textobj-user')
-  minpac#add('lambdalisue/gina.vim')
-  minpac#add('lambdalisue/vim-findent')
-  minpac#add('lambdalisue/vim-gista')
-  minpac#add('matze/vim-tex-fold')
-  minpac#add('mityu/vim-alith')
-  minpac#add('mityu/vim-cmdhistory')
-  minpac#add('mityu/vim-gram')
-  minpac#add('mityu/vim-gram-peripherals')
-  minpac#add('mityu/vim-vim9context')
-  minpac#add('mityu/vim-wispath')
-  minpac#add('osyo-manga/vim-jplus')
-  minpac#add('previm/previm')
-  minpac#add('seroqn/foldmaker.vim')
-  minpac#add('skanehira/gh.vim')
-  minpac#add('thinca/vim-ambicmd')
-  minpac#add('thinca/vim-ft-help_fold')
-  minpac#add('thinca/vim-partedit')
-  minpac#add('thinca/vim-prettyprint')
-  minpac#add('thinca/vim-qfreplace')
-  minpac#add('thinca/vim-quickrun')
-  minpac#add('thinca/vim-themis')
-  minpac#add('tikhomirov/vim-glsl')
-  minpac#add('tyru/capture.vim')
-  # minpac#add('tyru/eskk.vim')
-  minpac#add('tyru/open-browser.vim')
-  minpac#add('vim-jp/autofmt')
-  minpac#add('vim-jp/vimdoc-ja')
-  minpac#add('vim-jp/vital.vim')
-  minpac#add('vim-scripts/autodate.vim')
-  minpac#add('whonore/Coqtail')
-
-  minpac#add('lambdalisue/suda.vim', {type: 'opt'})
-  minpac#add('mattn/vim-lsp-settings', {type: 'opt'})
-  minpac#add('prabirshrestha/asyncomplete-lsp.vim', {type: 'opt'})
-  minpac#add('prabirshrestha/asyncomplete.vim', {type: 'opt'})
-  minpac#add('prabirshrestha/vim-lsp', {type: 'opt'})
-  minpac#add('tweekmonster/helpful.vim', {type: 'opt'})
-  minpac#add('y0za/vim-reading-vimrc', {type: 'opt'})
-
-  # Operator-user plugins
-  minpac#add('kana/vim-operator-replace', {type: 'opt'})
-  minpac#add('machakann/vim-sandwich', {type: 'opt'})
-  minpac#add('osyo-manga/vim-operator-jump_side', {type: 'opt'})
-  minpac#add('osyo-manga/vim-operator-swap', {type: 'opt'})
-  # minpac#add('tyru/caw.vim', {type: 'opt'})
-  minpac#add('mityu/caw.vim', {type: 'opt', branch: 'support-vim9script-tmp'})  # tmp
-  minpac#add('sgur/vim-operator-openbrowser', {type: 'opt'})
-
-  # Textobj-user plugins
-  minpac#add('kana/vim-textobj-entire', {type: 'opt'})
-  minpac#add('kana/vim-textobj-function', {type: 'opt'})
-  minpac#add('kana/vim-textobj-indent', {type: 'opt'})
-  minpac#add('kana/vim-textobj-line', {type: 'opt'})
-  minpac#add('mityu/vim-textobj-commentblock', {type: 'opt'})
-  minpac#add('thinca/vim-textobj-between', {type: 'opt'})
+def ListInstalledPlugins(): dict<bool>
+  var d: dict<bool> = {}
+  const F = (e: dict<any>): number => {
+    if e.type ==# 'dir'
+      d[e.name] = true
+    endif
+    return 0
+  }
+  PacPath->readdirex(F, {sort: 'none'})
+  return d
 enddef
-def PackInit(): bool
-  var MinpacInit = () => minpac#init({
-    progress_open: "tab",
-    status_open: "vertical",
-    status_auto: true
-  })
-  silent! packadd minpac
-  silent! MinpacInit()
-  if !exists('*minpac#init()')
-    # Download minpac...
-    var minpacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt', 'minpac')
-    Mkdir(fnamemodify(minpacPath, ':h'), 'p')
-    Echomsg('Downloading minpac...')
-    system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
 
+class Plugin
+  # Treat plugins as not installed when 'loadplugins' option is off.
+  static _installedPlugins: dict<bool> =
+        \ &loadplugins ? ListInstalledPlugins() : {}
+
+  this.name: string
+  this.path: string
+  this.uri: string
+  this.config: dict<any>
+  this.isLazy: bool
+  this.isLocal: bool
+  this.isExists: bool
+  this.OnLoad: func(): void
+
+  def new(name: string, uri: string, config: dict<any>, isLazy: bool)
+    this.name = name
+    this.path = JoinPath(Pacpack.pacPath, name)
+    this.uri = uri
+    this.isLazy = isLazy
+    this.config = config
+    this.isLocal = this.uri =~# '^file://'
+    this.isExists = _installedPlugins->has_key(name)
+    this.OnLoad = null_function
+    if this.isLocal
+      this.uri = this.uri[strlen('file://') :]
+    endif
+  enddef
+
+  def SetHookOnLoad(F: func(): void)
+    if !this.isLazy
+      EchomsgError('HookOnLoad is only valid for lazy plugins: {this.name}')
+    endif
+    this.OnLoad = F
+  enddef
+
+  def InvokeHookOnLoad()
+    if this.OnLoad != null_function
+      call(this.OnLoad, [])
+    endif
+  enddef
+
+  def IsLoaded(): bool
+    const idx = &runtimepath->stridx(this.path)
+    const ridx = idx + this.path->strlen()
+    if idx == -1 ||
+        !(idx == 0 || &runtimepath->strpart(idx - 1, 1) ==# ',') ||
+        !(ridx == &runtimepath->strlen() || &runtimepath->strpart(ridx, 1) ==# ',')
+      return false
+    endif
+    return true
+  enddef
+endclass
+
+export class Pacpack
+  static pacPath: string = PacPath
+  static pluginList: dict<Plugin> = {}
+  static plugin: Plugin  # Valid after calling Tap()
+
+  static def _add(uri: string, config: dict<any>, isLazy: bool)
+    const name = uri->matchstr('/\zs[^/]\+$')
+    const p = Plugin.new(name, uri, config, isLazy)
+    if pluginList->has_key(name)
+      echoerr 'Duplicate plugin name:' name
+    endif
+    pluginList[name] = p
+  enddef
+
+  static def Add(uri: string, config: dict<any> = {})
+    _add(uri, config, false)
+  enddef
+
+  static def AddLazy(uri: string, config: dict<any> = {})
+    _add(uri, config, true)
+  enddef
+
+  # Override already tapped plugin.  E.g. use development version
+  static def Override(target: string, uri: string, config: dict<any> = {})
+    pluginList->remove(target)
+    Add(uri, config)
+  enddef
+
+  static def LoadNonLazyPlugins()
+    for p in values(pluginList)
+      if !p.isLazy && p.isExists
+        execute 'packadd!' p.name
+      endif
+    endfor
+    syntax on
+    filetype plugin indent on
+  enddef
+
+  # Load a plugin.  If the plugins is already loaded, this function does nothing.
+  static def Load(name: string)
+    const p: Plugin = pluginList->get(name, null_object)
+    if p == null_object
+      echoerr 'Plugin not found:' name
+    elseif !p.IsLoaded()
+      execute 'packadd' name
+      p.InvokeHookOnLoad()
+    endif
+  enddef
+
+  static def Tap(name: string): bool
+    plugin = pluginList->get(name, null_object)
+    return plugin != null_object && plugin.isExists
+  enddef
+
+  static def IsLoaded(name: string): bool
+    const p: Plugin = pluginList->get(name, null_object)
+    return p != null_object && p.IsLoaded()
+  enddef
+
+  static def GetPlugin(name: string): Plugin
+    return pluginList->get(name, null_object)
+  enddef
+
+  # minpac integrations.
+  static def _initMinpac(): bool
+    var MinpacInit = () => minpac#init({
+      progress_open: "tab",
+      status_open: "vertical",
+      status_auto: true
+    })
     silent! packadd minpac
     silent! MinpacInit()
     if !exists('*minpac#init()')
-      return false
-    endif
-  endif
+      # Download minpac...
+      const minpacPath = JoinPath(pacPath, 'minpac')
+      Mkdir(fnamemodify(minpacPath, ':h'), 'p')
+      Echomsg('Downloading minpac...')
+      system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
 
-  PackRegister()
-
-  return true
-enddef
-def PackUpdate()
-  if PackInit()
-    var info = minpac#getpluginfo('vimdoc-ja')
-    if !empty(info)
-      system(printf('git -C %s reset --hard', shellescape(info.dir)))
+      silent! packadd minpac
+      silent! MinpacInit()
+      if !exists('*minpac#init()')
+        return false
+      endif
     endif
-    minpac#update()
-  endif
-enddef
-def PackClean()
-  if PackInit()
-    minpac#clean()
-  endif
-enddef
-def PackStatus()
-  if exists('*minpac#status')
-    minpac#status()
-  else
-    EchomsgError('minpac isn''t loaded yet.')
-  endif
-enddef
-command! -bar PackInit   call PackInit()
-command! -bar PackUpdate call PackUpdate()
-command! -bar PackClean  call PackClean()
-command! -bar PackStatus call PackStatus()
+
+    for p in values(pluginList)
+      if p.isLocal
+        continue
+      endif
+
+      var config = p.config->copy()
+      config.type = 'opt'
+      minpac#add(p.uri, config)
+    endfor
+
+    return true
+  enddef
+
+  static def Update()
+    if _initMinpac()
+      const info = minpac#getpluginfo('vimdoc-ja')
+      if !empty(info)
+        system(printf('git -C %s reset --hard', shellescape(info.dir)))
+      endif
+      minpac#update()
+    endif
+  enddef
+
+  static def Clean()
+    if _initMinpac()
+      minpac#clean()
+    endif
+  enddef
+
+  static def Status()
+    if exists('*minpac#status')
+      minpac#status()
+    else
+      EchomsgError('minpac isn''t loaded yet.')
+    endif
+  enddef
+endclass
+
+command! -bar PackUpdate Pacpack.Update()
+command! -bar PackClean  Pacpack.Clean()
+command! -bar PackStatus Pacpack.Status()
+
+Pacpack.AddLazy('k-takata/minpac')
+Pacpack.Add('itchyny/vim-cursorword')
+Pacpack.Add('itchyny/vim-qfedit')
+Pacpack.Add('kamichidu/vim-textobj-function-go')
+Pacpack.Add('kana/vim-altr')
+Pacpack.Add('kana/vim-operator-user')
+Pacpack.Add('kana/vim-textobj-user')
+Pacpack.Add('lambdalisue/gina.vim')
+Pacpack.Add('lambdalisue/vim-findent')
+Pacpack.Add('lambdalisue/vim-gista')
+Pacpack.Add('matze/vim-tex-fold')
+Pacpack.Add('mityu/vim-alith')
+Pacpack.Add('mityu/vim-cmdhistory')
+Pacpack.Add('mityu/vim-gram')
+Pacpack.Add('mityu/vim-gram-peripherals')
+Pacpack.Add('mityu/vim-vim9context')
+Pacpack.Add('mityu/vim-wispath')
+Pacpack.Add('osyo-manga/vim-jplus')
+Pacpack.Add('previm/previm')
+Pacpack.Add('seroqn/foldmaker.vim')
+Pacpack.Add('skanehira/gh.vim')
+Pacpack.Add('thinca/vim-ambicmd')
+Pacpack.Add('thinca/vim-ft-help_fold')
+Pacpack.Add('thinca/vim-partedit')
+Pacpack.Add('thinca/vim-prettyprint')
+Pacpack.Add('thinca/vim-qfreplace')
+Pacpack.Add('thinca/vim-quickrun')
+Pacpack.Add('thinca/vim-themis')
+Pacpack.Add('tikhomirov/vim-glsl')
+Pacpack.Add('tyru/capture.vim')
+# Pacpack.Add('tyru/eskk.vim')
+Pacpack.Add('tyru/open-browser.vim')
+Pacpack.Add('vim-jp/autofmt')
+Pacpack.Add('vim-jp/vimdoc-ja')
+Pacpack.Add('vim-jp/vital.vim')
+Pacpack.Add('vim-scripts/autodate.vim')
+Pacpack.Add('whonore/Coqtail')
+
+Pacpack.AddLazy('lambdalisue/suda.vim')
+Pacpack.AddLazy('mattn/vim-lsp-settings')
+Pacpack.AddLazy('prabirshrestha/asyncomplete-lsp.vim')
+Pacpack.AddLazy('prabirshrestha/asyncomplete.vim')
+Pacpack.AddLazy('prabirshrestha/vim-lsp')
+Pacpack.AddLazy('tweekmonster/helpful.vim')
+Pacpack.AddLazy('y0za/vim-reading-vimrc')
+
+# Operator-user plugins
+Pacpack.AddLazy('kana/vim-operator-replace')
+Pacpack.AddLazy('machakann/vim-sandwich')
+Pacpack.AddLazy('osyo-manga/vim-operator-jump_side')
+Pacpack.AddLazy('osyo-manga/vim-operator-swap')
+# Pacpack.AddLazy('tyru/caw.vim')
+Pacpack.AddLazy('mityu/caw.vim', {branch: 'support-vim9script-tmp'})  # tmp
+Pacpack.AddLazy('sgur/vim-operator-openbrowser')
+
+# Textobj-user plugins
+Pacpack.AddLazy('kana/vim-textobj-entire')
+Pacpack.AddLazy('kana/vim-textobj-function')
+Pacpack.AddLazy('kana/vim-textobj-indent')
+Pacpack.AddLazy('kana/vim-textobj-line')
+Pacpack.AddLazy('mityu/vim-textobj-commentblock')
+Pacpack.AddLazy('thinca/vim-textobj-between')
 
 # Options {{{
-if !v:vim_did_enter
-  syntax on
-  filetype plugin indent on
-endif
 if !exists('g:colors_name')  # Don't override colorscheme
   colorscheme domusaurea
 endif
@@ -877,7 +974,7 @@ def CmdwinEnter()
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
   # Make executing a previous command easier.
-  if PluginExists('vim-cmdhistory')
+  if Pacpack.Tap('vim-cmdhistory')
     nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   endif
   vimrc#incsearch#Setup()
@@ -1050,18 +1147,18 @@ def SwapBackslashAndBar()
 enddef
 
 # Installed plugins
-if PluginExists('vim-cursorword')
+if Pacpack.Tap('vim-cursorword')
   g:cursorword_highlight = 0
   augroup vimrc_cursorword
     autocmd ColorScheme * highlight CursorWord gui=underline cterm=underline term=underline guibg=NONE ctermbg=NONE
   augroup END
   doautocmd vimrc_cursorword ColorScheme
 endif
-if PluginExists('vim-altr')
+if Pacpack.Tap('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
-if PluginExists('gina.vim')
+if Pacpack.Tap('gina.vim')
   g:gina#action#mark_sign_text = '*'
   g:gina#core#console#enable_message_history = 1
 
@@ -1136,18 +1233,18 @@ if PluginExists('gina.vim')
   augroup END
   nnoremap <Space>g <Cmd>Gina status<CR>
 endif
-if PluginExists('vim-findent')
+if Pacpack.Tap('vim-findent')
   augroup vimrc_findent
     autocmd FileType * if &l:modifiable | execute 'Findent' | endif
   augroup END
 endif
-if PluginExists('vim-alith')
+if Pacpack.Tap('vim-alith')
   augroup vimrc_alith
     autocmd ColorScheme * highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
-if PluginExists('vim-cmdhistory')
+if Pacpack.Tap('vim-cmdhistory')
   augroup vimrc-cmdhistory
     autocmd User cmdhistory-initialize SetupCmdhistory()
   augroup END
@@ -1157,7 +1254,7 @@ if PluginExists('vim-cmdhistory')
     cmdhistory#MapAction('<C-@>', ['no-operation'])
   enddef
 endif
-if PluginExists('vim-brownie')
+if Pacpack.Tap('vim-brownie')
   g:brownie_template_dirs =
         [JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
   g:brownie_extra_imports = {
@@ -1176,7 +1273,7 @@ if PluginExists('vim-brownie')
   command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
         \ call brownie#extract(BrownieFiletype(), 'template', <q-args>)
 endif
-if PluginExists('vim-gram')
+if Pacpack.Tap('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-initialize ++once InitGram()
   augroup END
@@ -1225,31 +1322,31 @@ if PluginExists('vim-gram')
     nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}, #{name: 'gitfiles', default_action: 'file:edit'}]})<CR>
   endif
 
-  if PluginExists('vim-gram-sources')
+  if Pacpack.Tap('vim-gram-sources')
     nnoremap <Space>b <Cmd>call gram#sources#buffers#launch()<CR>
     command! -nargs=? -complete=dir Files call gram#sources#file_rec#launch(<q-args>)
   endif
 
-  if PluginExists('vim-gram-peripherals')
+  if Pacpack.Tap('vim-gram-peripherals')
     nnoremap <Space>j <Cmd>call gram#core#setup(#{sources: [#{name: 'file_rec', default_action: 'file:edit'}]})<CR>
     nnoremap <Space>b <Cmd>call gram#core#setup(#{sources: [#{name: 'buffers', default_action: 'buffer:edit'}]})<CR>
     nnoremap <Space>tb <Cmd>call gram#core#setup(#{sources: [#{name: 'terminals', default_action: 'buffer:edit'}]})<CR>
   endif
 endif
-if PluginExists('vim-wispath')
+if Pacpack.Tap('vim-wispath')
   imap <C-l><C-f> <Plug>(wispath-complete)
 endif
-if PluginExists('vim-jplus')
+if Pacpack.Tap('vim-jplus')
   map J <Plug>(jplus)
 endif
-if PluginExists('previm')
+if Pacpack.Tap('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
   if IsWSL
     g:previm_open_cmd = '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe'
   endif
 endif
-if PluginExists('vim-ambicmd')
+if Pacpack.Tap('vim-ambicmd')
   def AmbicmdExpand(key: string): string
     var expander = ambicmd#expand(key)
     return (expander ==# key ? '' : "\<C-g>u") .. expander
@@ -1288,7 +1385,7 @@ if PluginExists('vim-ambicmd')
   enddef
   g:ambicmd#build_rule = AmbicmdBuildRule
 endif
-if PluginExists('vim-quickrun')
+if Pacpack.Tap('vim-quickrun')
   g:quickrun_config = {}
   g:quickrun_config['_'] = {
     ['outputter']: 'multi',
@@ -1411,12 +1508,12 @@ if PluginExists('vim-quickrun')
     }
   augroup END
 endif
-if PluginExists('capture.vim')
+if Pacpack.Tap('capture.vim')
   augroup vimrc_filetype
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
-if PluginExists('open-browser.vim') && !v:vim_did_enter
+if Pacpack.Tap('open-browser.vim') && !v:vim_did_enter
   augroup vimrc_openbrowser
     autocmd SourcePost */plugin/openbrowser.vim
           \ command! -nargs=* OpenBrowser call OpenBrowser(<q-args>)
@@ -1443,10 +1540,10 @@ if PluginExists('open-browser.vim') && !v:vim_did_enter
     openbrowser#open(uri)
   enddef
 endif
-if PluginExists('autofmt')
+if Pacpack.Tap('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
 endif
-if OptPluginExists('asyncomplete.vim')
+if Pacpack.Tap('asyncomplete.vim')
   def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
     var base = tolower(context.base)
     var completions: list<dict<any>>
@@ -1488,7 +1585,7 @@ if OptPluginExists('asyncomplete.vim')
   g:asyncomplete_preprocessor = [AsyncompletePreprocessor]
   g:asyncomplete_auto_completeopt = 0
 endif
-if OptPluginExists('vim-lsp')
+if Pacpack.Tap('vim-lsp')
   # Lazy-loading
   augroup vimrc_lsp_lazyload
     autocmd BufReadPre * LoadLspPlugins()
@@ -1509,16 +1606,16 @@ if OptPluginExists('vim-lsp')
 
   def LoadLspPlugins()
     # Load completion plugin first.
-    if OptPluginExists('asyncomplete.vim')
+    if Pacpack.Tap('asyncomplete.vim')
       # asyncomplete-lsp.vim must be loaded before asyncomplete.vim
-      if OptPluginExists('asyncomplete-lsp.vim')
-        packadd asyncomplete-lsp.vim
+      if Pacpack.Tap('asyncomplete-lsp.vim')
+        Pacpack.Load('asyncomplete-lsp.vim')
       endif
       packadd asyncomplete.vim
     endif
 
     # vim-lsp-settings must be loaded before vim-lsp
-    if OptPluginExists('vim-lsp-settings')
+    if Pacpack.Tap('vim-lsp-settings')
       packadd vim-lsp-settings
     endif
     packadd vim-lsp
@@ -1618,7 +1715,7 @@ if OptPluginExists('vim-lsp')
     autocmd User lsp_buffer_disabled call LspDisableForBuffer()
   augroup END
 endif
-if OptPluginExists('vim-lsp-settings')
+if Pacpack.Tap('vim-lsp-settings')
   def LspUpdateAllServers()
     if !exists('g:loaded_lsp_settings')
       packadd vim-lsp-settings
@@ -1660,23 +1757,21 @@ endif
 #   - rhs (string)
 #   - lhs (string)
 #   - modes (string)
-# - on_load: the hook fired just after loading plugin
-# TODO: Support Funcref as on_load?
-def MapOperator(plugin_name: string, info_arg: dict<string>, on_load: string = '')
+def MapOperator(plugin_name: string, info_arg: dict<string>)
   var info = extend(info_arg, {modes: 'nxo'}, 'keep')
-  MapTextModifierPlugin(plugin_name, info, on_load)
+  MapTextModifierPlugin(plugin_name, info)
 enddef
 
-def MapTextobj(plugin_name: string, info_arg: dict<string>, on_load: string = '')
+def MapTextobj(plugin_name: string, info_arg: dict<string>)
   var info = extend(info_arg, {modes: 'xo'}, 'keep')
-  MapTextModifierPlugin(plugin_name, info, on_load)
+  MapTextModifierPlugin(plugin_name, info)
 enddef
 
 def MapTextModifierPlugin(
-      plugin_name: string, info: dict<string>, on_load: string = '')
+      plugin_name: string, info: dict<string>)
   # When the plugin is already loaded, do not use loader mapping. This load
   # guard is mainly for vimrc-reloading
-  if HasInString(&runtimepath, plugin_name)
+  if Pacpack.IsLoaded(plugin_name)
     return
   endif
 
@@ -1687,21 +1782,15 @@ def MapTextModifierPlugin(
     endif
   endfor
 
-  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s, "%s")',
-            plugin_name, string(info)->substitute('<', '<lt>', 'g'), on_load)
+  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s)',
+            plugin_name, string(info)->substitute('<', '<lt>', 'g'))
   for mode in info.modes
     execute mode .. 'map <expr>' info.lhs loadermap
   endfor
 enddef
 
-def LoadTextModifierPlugin(plugin: string, info: dict<string>, on_load: string): string
-  if !(HasInString(&runtimepath, plugin .. ',') || &runtimepath[-len(plugin) :] == plugin)
-    execute 'packadd' plugin
-
-    if on_load !=# ''
-      call(on_load, [])
-    endif
-  endif
+def LoadTextModifierPlugin(plugin: string, info: dict<string>): string
+  Pacpack.Load(plugin)
 
   # "\<Plug>" -> '<Plug>'
   var rhs = info.rhs->substitute("\\C\<Plug>", '<Plug>', 'g')
@@ -1713,23 +1802,24 @@ def LoadTextModifierPlugin(plugin: string, info: dict<string>, on_load: string):
   return info.rhs->substitute('\c<Plug>', "\<Plug>", 'g')
 enddef
 
-if OptPluginExists('vim-operator-replace')
+if Pacpack.Tap('vim-operator-replace')
   MapOperator('vim-operator-replace', {lhs: 'ms', rhs: '<Plug>(operator-replace)'})
 endif
-if OptPluginExists('vim-sandwich')
+if Pacpack.Tap('vim-sandwich')
   g:textobj_sandwich_no_default_key_mappings = 1
   g:operator_sandwich_no_default_key_mappings = 1
   def SandwichConfig()
     operator#sandwich#set('all', 'all', 'highlight', 0)
   enddef
+  Pacpack.plugin.SetHookOnLoad(SandwichConfig)
   MapOperator('vim-sandwich',
-      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'}, 'SandwichConfig')
+      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
   MapOperator('vim-sandwich',
-      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'}, 'SandwichConfig')
+      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'})
   MapOperator('vim-sandwich',
-      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'}, 'SandwichConfig')
+      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
 endif
-if OptPluginExists('caw.vim')
+if Pacpack.Tap('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
         \ <C-r>=b:caw_oneline_comment<CR>
@@ -1737,6 +1827,8 @@ if OptPluginExists('caw.vim')
   def CawLoadFtplugin()
     execute $'runtime! OPT after/ftplugin/{&filetype}/caw.vim'
   enddef
+
+  Pacpack.plugin.SetHookOnLoad(CawLoadFtplugin)
 
   def CawMap(): string
     var kind = ''
@@ -1754,31 +1846,31 @@ if OptPluginExists('caw.vim')
   imap <expr> <Plug>(vimrc:caw:map) <SID>CawMap()
 
   MapOperator('caw.vim',
-    {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'}, 'CawLoadFtplugin')
+    {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
   MapOperator('caw.vim',
-    {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'}, 'CawLoadFtplugin')
+    {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
   MapTextModifierPlugin('caw.vim',
-    {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'}, 'CawLoadFtplugin')
+    {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'})
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
   g:caw_hatpos_sp = ' '
   g:caw_zeropos_sp = ' '
 endif
-if OptPluginExists('vim-operator-swap')
+if Pacpack.Tap('vim-operator-swap')
   MapOperator('vim-operator-swap', {lhs: 'my', rhs: '<Plug>(operator-swap-marking)'})
   MapOperator('vim-operator-swap', {lhs: 'mp', rhs: '<Plug>(operator-swap)'})
 endif
-if OptPluginExists('vim-operator-jump_side')
+if Pacpack.Tap('vim-operator-jump_side')
   MapOperator('vim-operator-jump_side', {lhs: '<C-p>', rhs: '<Plug>(operator-jump-head)'})
   MapOperator('vim-operator-jump_side', {lhs: '<C-n>', rhs: '<Plug>(operator-jump-tail)'})
 endif
-if OptPluginExists('vim-textobj-entire')
+if Pacpack.Tap('vim-textobj-entire')
   MapTextobj('vim-textobj-entire', {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'})
   MapTextobj('vim-textobj-entire', {lhs: 'ia', rhs: '<Plug>(textobj-entire-i)'})
   g:textobj_entire_no_default_key_mappings = 1
 endif
-if OptPluginExists('vim-textobj-function')
+if Pacpack.Tap('vim-textobj-function')
   augroup vim_textobj_function
     autocmd Filetype c,java,vim ++once {
       packadd vim-textobj-function
@@ -1790,34 +1882,40 @@ if OptPluginExists('vim-textobj-function')
       autocmd!
     augroup END
   enddef
+  Pacpack.plugin.SetHookOnLoad(CleanTextobjFunctionAutocmd)
+
   MapTextobj('vim-textobj-function',
-    {lhs: 'af', rhs: '<Plug>(textobj-function-a)'},
-    'CleanTextobjFunctionAutocmd')
+    {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
   MapTextobj('vim-textobj-function',
-    {lhs: 'if', rhs: '<Plug>(textobj-function-i)'},
-    'CleanTextobjFunctionAutocmd')
+    {lhs: 'if', rhs: '<Plug>(textobj-function-i)'})
   g:textobj_function_no_default_key_mappings = 1
 endif
-if OptPluginExists('vim-textobj-indent')
+if Pacpack.Tap('vim-textobj-indent')
   MapTextobj('vim-textobj-indent', {lhs: 'ai', rhs: '<Plug>(textobj-indent-a)'})
   MapTextobj('vim-textobj-indent', {lhs: 'aI', rhs: '<Plug>(textobj-indent-same-a)'})
   MapTextobj('vim-textobj-indent', {lhs: 'ii', rhs: '<Plug>(textobj-indent-i)'})
   MapTextobj('vim-textobj-indent', {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'})
   g:textobj_indent_no_default_key_mappings = 1
 endif
-if OptPluginExists('vim-textobj-line')
+if Pacpack.Tap('vim-textobj-line')
   MapTextobj('vim-textobj-line', {lhs: 'al', rhs: '<Plug>(textobj-line-a)'})
   MapTextobj('vim-textobj-line', {lhs: 'il', rhs: '<Plug>(textobj-line-i)'})
   g:textobj_line_no_default_key_mappings = 1
 endif
-if OptPluginExists('vim-textobj-commentblock')
+if Pacpack.Tap('vim-textobj-commentblock')
   MapTextobj('vim-textobj-commentblock',
-        {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'},
-        'OnLoadingTextobjCommentblock')
+        {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'})
   MapTextobj('vim-textobj-commentblock',
-        {lhs: 'ic', rhs: '<Plug>(textobj-commentblock-i)'},
-        'OnLoadingTextobjCommentblock')
+        {lhs: 'ic', rhs: '<Plug>(textobj-commentblock-i)'})
   g:textobj_commentblock_no_default_key_mapings = 1
+
+  def TextobjCommentblockPickerCaw()
+    if exists('g:loaded_caw')
+      textobj#commentblock#pick#caw()
+    else
+      textobj#commentblock#pick#commentblock()
+    endif
+  enddef
 
   def OnLoadingTextobjCommentblock()
     augroup vimrc_textobj_commentblock
@@ -1827,15 +1925,9 @@ if OptPluginExists('vim-textobj-commentblock')
     TextobjCommentblockPickerCaw()
   enddef
 
-  def TextobjCommentblockPickerCaw()
-    if exists('g:loaded_caw')
-      textobj#commentblock#pick#caw()
-    else
-      textobj#commentblock#pick#commentblock()
-    endif
-  enddef
+  Pacpack.plugin.SetHookOnLoad(OnLoadingTextobjCommentblock)
 endif
-if OptPluginExists('vim-textobj-between')
+if Pacpack.Tap('vim-textobj-between')
   MapTextobj('vim-textobj-between', {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'})
   MapTextobj('vim-textobj-between', {lhs: 'id', rhs: '<Plug>(textobj-between-i)'})
   g:textobj_between_no_default_key_mappings = 1
@@ -1962,7 +2054,7 @@ augroup vimrc_showmode
 augroup END
 
 # statusline
-if PluginExists('gina.vim')
+if Pacpack.Tap('gina.vim')
   augroup vimrc_gina
     autocmd CursorHold * ++once call gina#component#repo#branch()
     autocmd SourcePost */autoload/gina.vim ++once {
@@ -2295,6 +2387,11 @@ endif
     execute 'source' lvimrc
   endif
 }
+
+# Load plugins
+if !v:vim_did_enter
+  Pacpack.LoadNonLazyPlugins()
+endif
 
 # Initialize when loading this file.
 augroup vimrc_initialize_dummy
