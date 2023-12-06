@@ -560,6 +560,7 @@ set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
 set spelllang& spelllang+=cjk
+&packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
 # }}}
 
 Mkdir(Stdpath.cache, 'p')
