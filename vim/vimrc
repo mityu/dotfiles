@@ -1755,6 +1755,12 @@ if Pacpack.Tap('suda.vim')
           \ Pacpack.Load('suda.vim')|SudaWrite <args>
   endif
 endif
+if Pacpack.Tap('helpful.vim')
+  if !Pacpack.plugin.IsLoaded()
+    command! -nargs=+ -complete=help HelpfulVersion
+          \ Pacpack.Load('helpful.vim')|HelpfulVersion <args>
+  endif
+endif
 # Textobj/Operator-user plugins
 # @param
 # - plugin_name: the name of plugin
