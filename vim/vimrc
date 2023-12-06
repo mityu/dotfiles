@@ -1994,16 +1994,6 @@ def OnOpenReadingVimrcBuffer()
   endif
 enddef
 
-# Additional plugins
-final SessionDir = JoinPath(Stdpath.cache, 'sessions')
-{
-  Mkdir(SessionDir, 'p')
-  command! MkSession call vimrc#session#make()
-  command! -nargs=+ -complete=custom,vimrc#session#complete DelSession
-       \ call vimrc#session#delete(1, <f-args>)
-  command! -nargs=1 -complete=custom,vimrc#session#complete RestoreSession
-       \ call vimrc#session#restore(<q-args>)
-}
 
 # Showmode
 def ShowmodeInit()
