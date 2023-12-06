@@ -88,7 +88,7 @@ enddef
 
 # Global utility functions
 export def SetUndoFtplugin(config: string)
-  var restorer = 'execute ' .. string(config)
+  const restorer = 'execute ' .. string(config)
   if exists('b:undo_ftplugin')
     b:undo_ftplugin = restorer .. '|' .. b:undo_ftplugin
   else
@@ -99,7 +99,7 @@ command! -nargs=1 -complete=command SetUndoFtplugin
       \ call SetUndoFtplugin(<q-args>)
 
 legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
-  var cwd = arglist[0]
+  const cwd = arglist[0]
   var filepath = arglist[1]
   if !isabsolutepath(filepath)
     filepath = fnamemodify(cwd, ':p') .. filepath
@@ -112,8 +112,8 @@ legacy def! Tapi_drop(bufnr: number, arglist: list<any>)
 enddef
 
 legacy def! Tapi_getcwd(bufnr: number, arglist: list<any>)
-  var cwd = call('getcwd', arglist)
-  var channel = term_getjob(bufnr)->job_getchannel()
+  const cwd = call('getcwd', arglist)
+  const channel = term_getjob(bufnr)->job_getchannel()
   ch_sendraw(channel, cwd .. "\n")
 enddef
 
@@ -207,16 +207,14 @@ if !v:vim_did_enter
 
   # Set environmental variables on gVim.
   {
-    var envrc = JoinPath(expand('~'), Rc('envrc'))
+    const envrc = JoinPath(expand('~'), Rc('envrc'))
     if has('gui_running') && filereadable(envrc)
-      var lines = readfile(envrc)
+      const lines = readfile(envrc)
             ->map((_, val): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
             ->filter((_, val): bool => !empty(val))
 
       for line in lines
-        var name: string
-        var value: string
-        [name, value] = line->split('=')
+        const [name, value] = line->split('=')
         execute '$' .. name .. ' = ' .. value->expand()->string()
       endfor
     endif
@@ -224,9 +222,9 @@ if !v:vim_did_enter
 endif
 # Initialize autocmd
 {
-  var filename = (expand('<sfile>'))
-  var pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
-  var augroups = readfile(filename)
+  const filename = (expand('<sfile>'))
+  const pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
+  const augroups = readfile(filename)
         ->filter((_, line): bool => stridx(line, 'aug') != -1)
         ->filter((_, line): bool => line =~# pattern)
         ->map((_, line): string => matchstr(line, pattern))
@@ -373,7 +371,7 @@ export class Pacpack
 
   # minpac integrations.
   static def _initMinpac(): bool
-    var MinpacInit = () => minpac#init({
+    const MinpacInit = () => minpac#init({
       progress_open: "tab",
       status_open: "vertical",
       status_auto: true
@@ -678,7 +676,7 @@ if executable('chmod')
   augroup END
 
   def AddPermissionX()
-    var file = expand('%:p')
+    const file = expand('%:p')
     if stridx(getline(1), '#!') == 0 && !executable(file)
       silent! call system('chmod a+x ' .. shellescape(file))
     endif
@@ -822,7 +820,7 @@ enddef
 
 nnoremap <C-w>. <Cmd>call <SID>ToggleLocationlist()<CR>
 def ToggleLocationlist()
-  var wincount = winnr('$')
+  const wincount = winnr('$')
   try
     lclose
     if wincount == winnr('$')
@@ -866,10 +864,8 @@ def LoopDefine(config: dict<any>)
   execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
   execute printf('%snoremap %s<ESC> <Nop>', mode, plug_map.prefix)
   for mapping in config.map
-    var lhs: string
-    var rhs: string
     var commands: list<list<string>>
-    [lhs, rhs] =
+    const [lhs, rhs] =
         mapping->map((_, val): string => substitute(val, '|', '<bar>', 'g'))
     commands->add([mode .. 'noremap', enter_with .. lhs, plug_map.main .. lhs])
             ->add([mode .. 'noremap', plug_map.main .. lhs, rhs .. plug_map.prefix])
@@ -927,7 +923,7 @@ def DefineLoopMappings()
 enddef
 
 def MapTabmove(delta: number)
-  var tab_count = tabpagenr('$')
+  const tab_count = tabpagenr('$')
   if tab_count == 1
     return
   endif
@@ -1116,8 +1112,8 @@ def Gof(path: string)
   if !empty(path)
     gofcmd ..= ' -d ' .. path
   endif
-  var minwidth = min([&columns, 100])
-  var minheight = min([&lines, 40])
+  const minwidth = min([&columns, 100])
+  const minheight = min([&lines, 40])
   popup_create(term_start(gofcmd, {hidden: 1, term_finish: 'close'}),
         \ {minwidth: minwidth, minheight: minheight})
 enddef
@@ -1128,8 +1124,8 @@ def GofForMapping()
 enddef
 
 legacy def! Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
-  var winid = win_getid(winnr('#'))
-  var buftype = getwinvar(winid, '&buftype')
+  const winid = win_getid(winnr('#'))
+  const buftype = getwinvar(winid, '&buftype')
   var open_cmd = 'edit'
   if !(buftype ==# 'nofile' || buftype ==# '')
     open_cmd = 'split'
@@ -1185,7 +1181,7 @@ if Pacpack.Tap('gina.vim')
     Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
 
     # Jump between unadded files with n/p ..
-    var rhs_base = printf(
+    const rhs_base = printf(
             '<Cmd>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
             SIDPrefix())
     Gina_nnoremap('status', 'n', printf(rhs_base, 'v:false'))
@@ -1349,7 +1345,7 @@ if Pacpack.Tap('previm')
 endif
 if Pacpack.Tap('vim-ambicmd')
   def AmbicmdExpand(key: string): string
-    var expander = ambicmd#expand(key)
+    const expander = ambicmd#expand(key)
     return (expander ==# key ? '' : "\<C-g>u") .. expander
   enddef
   augroup vimrc_ambicmd
@@ -1374,9 +1370,9 @@ if Pacpack.Tap('vim-ambicmd')
     rule += ['\c^' .. cmd]
 
     for len in range(1, strlen(cmd))
-      var prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '.\\{-}', 'g')
-      var suffix = cmd[len :]
-      var matcher = '\C^' .. prefix .. suffix
+      const prefix = strpart(cmd, 0, len)->toupper()->substitute('.\zs', '.\\{-}', 'g')
+      const suffix = cmd[len :]
+      const matcher = '\C^' .. prefix .. suffix
       rule += [matcher .. '$', matcher]
     endfor
 
@@ -1465,9 +1461,9 @@ if Pacpack.Tap('vim-quickrun')
     else
       opencmd = 'xdg-open'
     endif
-    var openpdfcmd = printf('%s %%s:p:r.pdf', opencmd)
+    const openpdfcmd = printf('%s %%s:p:r.pdf', opencmd)
 
-    var sweepfiles: list<string> =
+    const sweepfiles: list<string> =
       ['.aux', '.log', '.dvi', '.out', '.pdf']
       ->map((_: number, v: string): string => '%S:p:r' .. v)
 
@@ -1759,12 +1755,12 @@ endif
 #   - lhs (string)
 #   - modes (string)
 def MapOperator(plugin_name: string, info_arg: dict<string>)
-  var info = extend(info_arg, {modes: 'nxo'}, 'keep')
+  const info = extend(info_arg, {modes: 'nxo'}, 'keep')
   MapTextModifierPlugin(plugin_name, info)
 enddef
 
 def MapTextobj(plugin_name: string, info_arg: dict<string>)
-  var info = extend(info_arg, {modes: 'xo'}, 'keep')
+  const info = extend(info_arg, {modes: 'xo'}, 'keep')
   MapTextModifierPlugin(plugin_name, info)
 enddef
 
@@ -1783,7 +1779,7 @@ def MapTextModifierPlugin(
     endif
   endfor
 
-  var loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s)',
+  const loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s)',
             plugin_name, string(info)->substitute('<', '<lt>', 'g'))
   for mode in info.modes
     execute mode .. 'map <expr>' info.lhs loadermap
@@ -1794,7 +1790,7 @@ def LoadTextModifierPlugin(plugin: string, info: dict<string>): string
   Pacpack.Load(plugin)
 
   # "\<Plug>" -> '<Plug>'
-  var rhs = info.rhs->substitute("\\C\<Plug>", '<Plug>', 'g')
+  const rhs = info.rhs->substitute("\\C\<Plug>", '<Plug>', 'g')
   for mode in info.modes
     execute mode .. 'map' info.lhs rhs
   endfor
@@ -1965,7 +1961,7 @@ def OnOpenReadingVimrcBuffer()
       return
     endif
 
-    var curwinnr = winnr()
+    const curwinnr = winnr()
     for winnr in range(1, winnr('$'))
       if winnr == curwinnr
         continue
@@ -2011,7 +2007,7 @@ def ShowmodeInit()
 enddef
 def ShowmodeMode(): string
   ShowmodeHighlight()
-  var map = {
+  const map = {
     n: 'NORMAL',
     i: 'INSERT',
     R: 'REPLACE',
@@ -2032,7 +2028,7 @@ def ShowmodeMode(): string
   return get(map, mode(), 'UNKNOWN')
 enddef
 def ShowmodeHighlight()
-  var type = get({
+  const type = get({
      i: 'insert',
      t: 'insert',
      R: 'replace',
@@ -2066,19 +2062,19 @@ if Pacpack.Tap('gina.vim')
   augroup END
   def StatuslineGitBranch(): string
     if exists('*gina#component#repo#branch')
-      var branch = gina#component#repo#branch()
+      const branch = gina#component#repo#branch()
       if branch ==# ''
         return 'no-git'
       else
-        var ahead: any = gina#component#traffic#ahead()
-        var behind: any = gina#component#traffic#behind()
-        var staged = !!gina#component#status#staged()->str2nr()
-        var unstaged = !!gina#component#status#unstaged()->str2nr()
+        const ahead: any = gina#component#traffic#ahead()
+        const behind: any = gina#component#traffic#behind()
+        const staged = !!gina#component#status#staged()->str2nr()
+        const unstaged = !!gina#component#status#unstaged()->str2nr()
 
-        var icon_modified = (staged || unstaged) ? '*' : ''
-        var icon_ahead =
+        const icon_modified = (staged || unstaged) ? '*' : ''
+        const icon_ahead =
               ahead->type() == v:t_number && !!ahead ? '↑' : ''
-        var icon_behind =
+        const icon_behind =
               behind->type() == v:t_number && !!behind ? '↓' : ''
         return branch .. icon_modified .. icon_ahead .. icon_behind
       endif
@@ -2092,7 +2088,7 @@ else
   enddef
 endif
 def StatuslineGenerator(): string
-  var statusline =
+  const statusline =
     '%m' ..
     ShowmodeLabel() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
@@ -2106,8 +2102,8 @@ def StatuslineGenerator(): string
   return substitute(statusline, '\c<SID>', SIDPrefix(), 'g')
 enddef
 def FilenameLabel(bufnr: number): string
-  var buftype = getbufvar(bufnr, '&buftype')
-  var bufname = bufname(bufnr)
+  const buftype = getbufvar(bufnr, '&buftype')
+  const bufname = bufname(bufnr)
   if buftype ==# 'help'
     return fnamemodify(bufname, ':t')
   elseif buftype ==# 'quickfix'
@@ -2136,7 +2132,7 @@ def GenerateTabinfo(tabnr: number): string
 enddef
 def Tabline(): string
   var tabline = '%#TabLine#|'
-  var t = tabpagenr()
+  const t = tabpagenr()
 
   for n in range(1, tabpagenr('$'))
     tabline ..= '%' .. n .. 'T'
@@ -2234,11 +2230,8 @@ command! ReplaceTwobyteSpace keeppatterns :%s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 
 # mru
+Mkdir(JoinPath(Stdpath.cache, 'mru'), 'p')
 g:mru_history_file = JoinPath(Stdpath.cache, 'mru', 'history')
-{
-  var dir = JoinPath(Stdpath.cache, 'mru')
-  Mkdir(dir, 'p')
-}
 g:mru_ignore_pattern = [
       \ '\.git\>',
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
@@ -2246,7 +2239,7 @@ g:mru_ignore_pattern = [
 
 # filore
 def FiloreMapping()
-  var mapping: list<any> = [
+  const mapping = [
    ['q', 'exit'],
    ['o', 'toggle-directory-folding'],
    ['l', 'enter-directory'],
@@ -2291,7 +2284,7 @@ def GitDiff(arg_target: string)
   if cmd ==# ''
     return
   endif
-  var bufnr = term_start(cmd, {
+  const bufnr = term_start(cmd, {
           term_name: '[git diff] ' .. fnamemodify(target, ':~:.'),
           norestore: 1,
         })
@@ -2383,7 +2376,7 @@ endif
 
 # lvimrc
 {
-  var lvimrc = JoinPath('~', Rc('lvimrc'))
+  const lvimrc = JoinPath('~', Rc('lvimrc'))
   execute 'command! -bar -nargs=* LVimrc ' ..
           'execute <q-args> ?? "edit"' string(lvimrc)
   if filereadable(expand(lvimrc))
@@ -2409,7 +2402,7 @@ else
   # while from VimEnter autocommand to first screen update)
   # autocmd VimEnter * ++once timer_start(
   #     \5, (timer) => execute('doautocmd User vimrc_initialize'))
-  var statusLineSave = &statusline
+  const statusLineSave = &statusline
   def VimrcInitialize(): string
     &statusline = statusLineSave
     timer_start(5, (timer) => execute('doautocmd User vimrc_initialize'))
