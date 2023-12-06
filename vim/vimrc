@@ -911,7 +911,6 @@ def CmdwinEnter()
   if PluginExists('vim-cmdhistory')
     nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   endif
-  nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   vimrc#incsearch#Setup()
 
   final cmdwin_type = expand('<afile>')
