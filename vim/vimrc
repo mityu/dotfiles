@@ -31,14 +31,6 @@ export def HasInString(object: string, to_search: string): bool
   return stridx(object, to_search) != -1
 enddef
 
-export def HasInList(object: list<any>, to_search: any): bool
-  return index(object, to_search) != -1
-enddef
-
-export def HasInDict(object: dict<any>, to_search: string): bool
-  return has_key(object, to_search)
-enddef
-
 def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
@@ -71,10 +63,6 @@ export def EchoQuestion(question: string)
   echon '[Y/N]'
   echohl NONE
   echon "\n"
-enddef
-
-export def Glob(expr: string, nosuf: bool = false, alllinks: bool = false): list<string>
-  return glob(expr, nosuf, true, alllinks)
 enddef
 
 export def Ask(question: string): bool
