@@ -651,7 +651,7 @@ else
   set ambiwidth=single
 endif
 if IsUnix
-  set path& path+=/usr/local/include
+  set path& path+=/usr/local/include,/opt/homebrew/include
 endif
 if executable('rg')
   &grepprg = 'rg --vimgrep'
