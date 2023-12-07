@@ -202,6 +202,8 @@ if !v:vim_did_enter
   g:skip_loading_mswin = 1
   g:loaded_logiPat = 1
 
+  &runtimepath = &runtimepath->split(',')->filter('isdirectory(v:val)')->join(',')
+  &packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
   &runtimepath ..= ',' .. escape(JoinPath($DOT_VIM, 'runtime'), ' \')
   &packpath = Stdpath.cache .. ',' .. &packpath
 
@@ -210,8 +212,8 @@ if !v:vim_did_enter
     const envrc = JoinPath(expand('~'), Rc('envrc'))
     if has('gui_running') && filereadable(envrc)
       const lines = readfile(envrc)
-            ->map((_, val): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
-            ->filter((_, val): bool => !empty(val))
+            ->map((_: number, val: string): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
+            ->filter((_: number, val: string): bool => !empty(val))
 
       for line in lines
         const [name, value] = line->split('=')
@@ -225,10 +227,9 @@ endif
   const filename = (expand('<sfile>'))
   const pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
   const augroups = readfile(filename)
-        ->filter((_, line): bool => stridx(line, 'aug') != -1)
-        ->filter((_, line): bool => line =~# pattern)
-        ->map((_, line): string => matchstr(line, pattern))
-        ->filter((_, augroup): bool => augroup !=? 'END')
+        ->filter((_: number, line: string): bool => stridx(line, 'aug') != -1)
+        ->map((_: number, line: string): string => matchstr(line, pattern))
+        ->filter((_: number, augroup: string): bool => augroup !=# '' && augroup !=? 'END')
         ->sort()
         ->uniq()
   for group in augroups
@@ -243,13 +244,13 @@ export const PacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
 
 def ListInstalledPlugins(): dict<bool>
   var d: dict<bool> = {}
-  const F = (e: dict<any>): number => {
-    if e.type ==# 'dir'
-      d[e.name] = true
+  const F = (e: string): number => {
+    if isdirectory(e)
+      d[e] = true
     endif
     return 0
   }
-  PacPath->readdirex(F, {sort: 'none'})
+  PacPath->readdir(F, {sort: 'none'})
   return d
 enddef
 
@@ -269,7 +270,7 @@ class Plugin
 
   def new(name: string, uri: string, config: dict<any>, isLazy: bool)
     this.name = name
-    this.path = JoinPath(Pacpack.pacPath, name)
+    this.path = JoinPath(PacPath, name)
     this.uri = uri
     this.isLazy = isLazy
     this.config = config
@@ -558,7 +559,6 @@ set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
 set spelllang& spelllang+=cjk
-&packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
 # }}}
 
 Mkdir(Stdpath.cache, 'p')
