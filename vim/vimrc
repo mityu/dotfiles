@@ -242,15 +242,15 @@ endif
 # minpac
 export const PacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
 
-def ListInstalledPlugins(): dict<bool>
+export def ListInstalledPlugins(): dict<bool>
   var d: dict<bool> = {}
-  const F = (e: string): number => {
-    if isdirectory(e)
-      d[e] = true
+  const F = (e: dict<any>): number => {
+    if e.type ==# 'dir'
+      d[e.name] = true
     endif
     return 0
   }
-  PacPath->readdir(F, {sort: 'none'})
+  PacPath->readdirex(F, {sort: 'none'})
   return d
 enddef
 
@@ -258,6 +258,7 @@ class Plugin
   # Treat plugins as not installed when 'loadplugins' option is off.
   static _installedPlugins: dict<bool> =
         \ &loadplugins ? ListInstalledPlugins() : {}
+  static _fileSchemaLen = strlen('file://')
 
   this.name: string
   this.path: string
@@ -270,15 +271,17 @@ class Plugin
 
   def new(name: string, uri: string, config: dict<any>, isLazy: bool)
     this.name = name
-    this.path = JoinPath(PacPath, name)
     this.uri = uri
     this.isLazy = isLazy
     this.config = config
-    this.isLocal = this.uri =~# '^file://'
-    this.isExists = _installedPlugins->has_key(name)
     this.OnLoad = null_function
+    this.isLocal = this.uri[: _fileSchemaLen - 1] ==# 'file://'
     if this.isLocal
-      this.uri = this.uri[strlen('file://') :]
+      this.path = this.uri[_fileSchemaLen :]->expand()
+      this.isExists = this.path->isdirectory()
+    else
+      this.path = JoinPath(PacPath, name)
+      this.isExists = _installedPlugins->has_key(name)
     endif
   enddef
 
