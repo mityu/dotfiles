@@ -344,8 +344,10 @@ export class Pacpack
         execute 'packadd!' p.name
       endif
     endfor
-    syntax on
+
+    # Enable ftplugin and syntax highlighting.  Note that this order does matter.
     filetype plugin indent on
+    syntax enable
   enddef
 
   # Load a plugin.  If the plugins is already loaded, this function does nothing.
