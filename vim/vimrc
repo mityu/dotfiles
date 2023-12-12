@@ -458,6 +458,7 @@ Pacpack.Add('mityu/vim-cmdhistory')
 Pacpack.Add('mityu/vim-gram')
 Pacpack.Add('mityu/vim-gram-peripherals')
 Pacpack.Add('mityu/vim-vim9context')
+Pacpack.Add('mityu/vim-winc')
 Pacpack.Add('mityu/vim-wispath')
 Pacpack.Add('osyo-manga/vim-jplus')
 Pacpack.Add('previm/previm')
@@ -981,7 +982,11 @@ def CmdwinEnter()
   if Pacpack.Tap('vim-cmdhistory')
     nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   endif
-  vimrc#incsearch#Setup()
+  if Pacpack.Tap('vim-winc')
+    winc#Setup()
+  else
+    vimrc#incsearch#Setup()
+  endif
 
   const cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
