@@ -52,6 +52,15 @@ discriminate
 rewrite
 replace
 apply
+injection
+split
+left
+right
+unfold
+exfalso
+forall
+exists
+symmetry
 END
 
 def Omnifunc(findstart: number, base: string): any
