@@ -32,6 +32,8 @@ nnoremap gl gt
 nnoremap gh gT
 nnoremap ZZ <Nop>
 nnoremap ZQ <Nop>
+nnoremap <Space>w :<C-u>update<CR>
+nnoremap <Space>q <C-w>q
 inoremap <C-l> <C-x>
 cnoremap <C-l> <C-f>
 cnoremap <C-f> <Right>
