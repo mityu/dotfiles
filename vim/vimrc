@@ -376,7 +376,7 @@ export class Pacpack
   enddef
 
   # minpac integrations.
-  static def _initMinpac(): bool
+  static def InitMinpac(): bool
     const MinpacInit = () => minpac#init({
       progress_open: "tab",
       status_open: "vertical",
@@ -412,7 +412,7 @@ export class Pacpack
   enddef
 
   static def Update()
-    if _initMinpac()
+    if InitMinpac()
       const info = minpac#getpluginfo('vimdoc-ja')
       if !empty(info)
         system(printf('git -C %s reset --hard', shellescape(info.dir)))
@@ -422,7 +422,7 @@ export class Pacpack
   enddef
 
   static def Clean()
-    if _initMinpac()
+    if InitMinpac()
       minpac#clean()
     endif
   enddef
@@ -436,6 +436,7 @@ export class Pacpack
   enddef
 endclass
 
+command! -bar PackInit   Pacpack.InitMinpac()
 command! -bar PackUpdate Pacpack.Update()
 command! -bar PackClean  Pacpack.Clean()
 command! -bar PackStatus Pacpack.Status()
