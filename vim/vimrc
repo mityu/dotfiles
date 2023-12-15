@@ -1628,14 +1628,14 @@ if Pacpack.Tap('vim-lsp')
       if Pacpack.Tap('asyncomplete-lsp.vim')
         Pacpack.Load('asyncomplete-lsp.vim')
       endif
-      packadd asyncomplete.vim
+      Pacpack.Load('asyncomplete.vim')
     endif
 
     # vim-lsp-settings must be loaded before vim-lsp
     if Pacpack.Tap('vim-lsp-settings')
-      packadd vim-lsp-settings
+      Pacpack.Load('vim-lsp-settings')
     endif
-    packadd vim-lsp
+    Pacpack.Load('vim-lsp')
 
     # Plugin initializations
     inoremap <expr> <C-n>
