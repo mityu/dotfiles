@@ -2,10 +2,10 @@ vim9script
 # TODO: Separate as a plugin when vim9script is fully implemented
 
 class Rule
-  this.pattern: string
-  this.pair: any
-  this.cancel_if_on_next_literal: list<string>
-  this.cancel_if_on_next_regexp: list<string>
+  var pattern: string
+  var pair: any
+  var cancel_if_on_next_literal: list<string>
+  var cancel_if_on_next_regexp: list<string>
 
   def new(pattern: string, pair: any, cancel_literal: list<string>, cancel_regexp: list<string>)
     this.pattern = pattern
@@ -16,7 +16,7 @@ class Rule
 endclass
 
 class Config
-  this.config: dict<Rule>
+  var config: dict<Rule>
 
   def new()
     this.config = {}

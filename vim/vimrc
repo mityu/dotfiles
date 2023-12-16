@@ -256,25 +256,25 @@ enddef
 
 class Plugin
   # Treat plugins as not installed when 'loadplugins' option is off.
-  static _installedPlugins: dict<bool> =
+  static var _installedPlugins: dict<bool> =
         \ &loadplugins ? ListInstalledPlugins() : {}
-  static _fileSchemaLen = strlen('file://')
+  static var _fileSchemaLen = strlen('file://')
 
-  this.name: string
-  this.path: string
-  this.uri: string
-  this.config: dict<any>
-  this.isLazy: bool
-  this.isLocal: bool
-  this.isExists: bool
-  this.OnLoad: func(): void
+  var name: string
+  var path: string
+  var uri: string
+  var config: dict<any>
+  var isLazy: bool
+  var isLocal: bool
+  var isExists: bool
+  var hooksOnLoad: list<func(): void>
 
   def new(name: string, uri: string, config: dict<any>, isLazy: bool)
     this.name = name
     this.uri = uri
     this.isLazy = isLazy
     this.config = config
-    this.OnLoad = null_function
+    this.hooksOnLoad = []
     this.isLocal = this.uri[: _fileSchemaLen - 1] ==# 'file://'
     if this.isLocal
       this.path = this.uri[_fileSchemaLen :]->expand()
@@ -285,17 +285,17 @@ class Plugin
     endif
   enddef
 
-  def SetHookOnLoad(F: func(): void)
+  def AddHookOnLoad(F: func(): void)
     if !this.isLazy
       EchomsgError('HookOnLoad is only valid for lazy plugins: {this.name}')
     endif
-    this.OnLoad = F
+    this.hooksOnLoad->add(F)
   enddef
 
   def InvokeHookOnLoad()
-    if this.OnLoad != null_function
-      call(this.OnLoad, [])
-    endif
+    for F in this.hooksOnLoad
+      call(F, [])
+    endfor
   enddef
 
   def IsLoaded(): bool
@@ -311,9 +311,9 @@ class Plugin
 endclass
 
 export class Pacpack
-  static pacPath: string = PacPath
-  static pluginList: dict<Plugin> = {}
-  static plugin: Plugin  # Valid after calling Tap()
+  static var pacPath: string = PacPath
+  static var pluginList: dict<Plugin> = {}
+  static var plugin: Plugin  # Valid after calling Tap()
 
   static def _add(uri: string, config: dict<any>, isLazy: bool)
     const name = uri->matchstr('/\zs[^/]\+$')
@@ -1842,7 +1842,7 @@ if Pacpack.Tap('vim-sandwich')
   def SandwichConfig()
     operator#sandwich#set('all', 'all', 'highlight', 0)
   enddef
-  Pacpack.plugin.SetHookOnLoad(SandwichConfig)
+  Pacpack.plugin.AddHookOnLoad(SandwichConfig)
   MapOperator('vim-sandwich',
       {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
   MapOperator('vim-sandwich',
@@ -1859,7 +1859,7 @@ if Pacpack.Tap('caw.vim')
     execute $'runtime! OPT after/ftplugin/{&filetype}/caw.vim'
   enddef
 
-  Pacpack.plugin.SetHookOnLoad(CawLoadFtplugin)
+  Pacpack.plugin.AddHookOnLoad(CawLoadFtplugin)
 
   def CawMap(): string
     var kind = ''
@@ -1913,7 +1913,7 @@ if Pacpack.Tap('vim-textobj-function')
       autocmd!
     augroup END
   enddef
-  Pacpack.plugin.SetHookOnLoad(CleanTextobjFunctionAutocmd)
+  Pacpack.plugin.AddHookOnLoad(CleanTextobjFunctionAutocmd)
 
   MapTextobj('vim-textobj-function',
     {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
@@ -1956,7 +1956,7 @@ if Pacpack.Tap('vim-textobj-commentblock')
     TextobjCommentblockPickerCaw()
   enddef
 
-  Pacpack.plugin.SetHookOnLoad(OnLoadingTextobjCommentblock)
+  Pacpack.plugin.AddHookOnLoad(OnLoadingTextobjCommentblock)
 endif
 if Pacpack.Tap('vim-textobj-between')
   MapTextobj('vim-textobj-between', {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'})
