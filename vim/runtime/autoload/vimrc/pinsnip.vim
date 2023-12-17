@@ -179,7 +179,7 @@ SnipFiletype('go')
       endfor
     endif
     if len(snip) == 1
-      snip->add("\t" .. CursorPlaceholder)
+      snip->add("\treturn " .. CursorPlaceholder)
     endif
     snip->add('}')
     ApplySnip(snip)
