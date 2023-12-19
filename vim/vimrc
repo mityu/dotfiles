@@ -224,7 +224,7 @@ if !v:vim_did_enter
 endif
 # Initialize autocmd
 {
-  const filename = (expand('<sfile>'))
+  const filename = expand('<sfile>')
   const pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
   const augroups = readfile(filename)
         ->filter((_: number, line: string): bool => stridx(line, 'aug') != -1)
