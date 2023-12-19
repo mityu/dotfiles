@@ -160,3 +160,28 @@ export def UpdateLocalPackages()
     exit_cb: (_, _) => delete(fname)
   })
 enddef
+
+export def DefineOpenCommand()
+  var cmd = ''
+  if has('mac')
+    if executable('open')
+      cmd = 'open'
+    endif
+  elseif has('win32') || has('win32unix') || (has('linux') && system('uname -r') =~? 'microsoft')
+    if executable('explorer')
+      cmd = 'explorer'
+    endif
+  elseif has('linux')
+    if executable('xdg-open')
+      cmd = 'xdg-open'
+    endif
+  endif
+
+  if cmd ==# ''
+    command! -bar -nargs=* -complete=dir Open
+          \ Vimrc.EchomsgWarning(':Open command is not supported on this platform.')
+  else
+    execute 'command! -bar -nargs=+ -complete=dir Open ' ..
+      $'call system("{cmd} " .. shellescape(<q-args>))'
+  endif
+enddef

@@ -1065,18 +1065,7 @@ command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>
 command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
 command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '' : 'setfiletype <args>')
-{
-  var cmd: string
-  if IsMac && executable('open')
-    cmd = 'open'
-  elseif (IsWindows || IsWSL || IsWinUnix) && executable('explorer')
-    cmd = 'explorer'
-  endif
-  if cmd !=# ''
-    execute 'command! -bar -nargs=+ -complete=dir Open ' ..
-      $'call system("{cmd} " .. shellescape(<q-args>))'
-  endif
-}
+command! -bar -nargs=+ -complete=dir Open vimrc#DefineOpenCommand()|Open <args>
 
 # Thanks to cohama
 command! EditAsUtf8 edit ++enc=utf-8 %
