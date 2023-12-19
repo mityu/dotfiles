@@ -255,3 +255,32 @@ def Color(r: number, g: number, b: number): number
     return RGB(x, y, z)
   endif
 enddef
+
+export def BlendColor(baseCode: string, overlayCode: string, alphaRate: float): string
+  const base = ParseColorcode(baseCode)
+  const overlay = ParseColorcode(overlayCode)
+
+  if alphaRate < 0.0 || alphaRate > 1.0
+    echoerr 'Alpha must be in [0.0, 1.0]:' alphaRate
+    return ''
+  endif
+
+  const alpha = float2nr(round(255 * alphaRate))
+  const factorBase = 255 - alpha
+  const factorOverlay = alpha
+  var blended: list<number> = []
+  for i in range(3)
+    const c = (base[i] * factorBase + overlay[i] * factorOverlay) / 255
+    blended->add(c)
+  endfor
+  blended->map('float2nr(round(v:val))')
+  return printf('#%02x%02x%02x', blended[0], blended[1], blended[2])
+enddef
+
+def ParseColorcode(code: string): list<number>
+  if code !~# '^#[0-9a-f]\{6}'
+    echoerr 'Invalid color code:' code
+    return []
+  endif
+  return code[1 :]->split('..\zs')->mapnew('str2nr(v:val, 16)')
+enddef
