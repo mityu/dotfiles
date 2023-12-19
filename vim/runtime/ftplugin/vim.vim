@@ -30,6 +30,13 @@ enddef
 def FoldExpr(): any
   var line = getline(v:lnum)
   if line =~# '^\s'
+    # :def functions in class
+    line = trim(line)
+    if line =~# '\v^%(static\s+)?def>'
+      return '>2'
+    elseif line ==# 'enddef' && (v:lnum + 1) == nextnonblank(v:lnum + 1)
+      return '<2'
+    endif
     return '='
   elseif FoldIsBlockOpen(line)
     return '>1'
@@ -40,6 +47,11 @@ def FoldExpr(): any
       return '='
     endif
     return 0
+  elseif getline(prevnonblank(v:lnum - 1)) =~# '^\s\+enddef\s*$' # :enddef in class
+    if getline(v:lnum) ==# '' && (v:lnum - 1) == prevnonblank(v:lnum - 1)
+      return '='
+    endif
+    return '<2'
   endif
   return '='
 enddef
