@@ -779,6 +779,10 @@ nnoremap <silent> . .
 nnoremap * *N
 nnoremap <expr> n 'Nn'[v:searchforward]
 nnoremap <expr> N 'nN'[v:searchforward]
+nnoremap <Space>ev <Cmd>edit $MYVIMRC<CR>
+nnoremap <Space>sv <Cmd>source $MYVIMRC<CR>
+nnoremap <Space>j <Cmd>call <SID>GofForMapping<CR>
+nnoremap <Space>f <Cmd>call vimrc#filore#start()<CR>
 
 nnoremap m <Nop>
 vnoremap m <Nop>
@@ -1028,16 +1032,6 @@ if IsMac
   g:mapleader = '_'
 endif
 
-# Mapping for commands
-{
-  var map: list<list<string>>
-  add(map, ['nnoremap', 'ev', 'edit $MYVIMRC'])
-  add(map, ['nnoremap', 'sv', 'source $MYVIMRC'])
-  add(map, ['nnoremap', 'j', 'call <SID>GofForMapping()'])
-  add(map, ['nnoremap', 'f', 'call vimrc#filore#start()'])
-  execute map->mapnew((_, val: list<string>): string => $'{val[0]} <Space>{val[1]} <Cmd>{val[2]}<CR>')->join("\n")
-}
-
 # Abbreviates
 inoreabbrev todo: TODO:
 inoreabbrev fixme: FIXME:
@@ -1060,7 +1054,6 @@ command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call vimrc#ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#DeleteUndofiles()
 command! -nargs=? -complete=dir Gof call Gof(<q-args>)
-command! -bar SwapBackslashAndBar call SwapBackslashAndBar()
 command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>)
 command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
@@ -1134,16 +1127,6 @@ def g:Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
     open_cmd = 'split'
   endif
   win_execute(winid, open_cmd .. ' ' .. fnameescape(file_info.fullpath))
-enddef
-
-def SwapBackslashAndBar()
-  if maparg('\', 'i') ==# "\<Nop>"
-    inoremap \ _
-    inoremap _ \
-  else
-    iunmap \
-    iunmap _
-  endif
 enddef
 
 # Installed plugins
