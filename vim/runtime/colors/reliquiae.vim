@@ -13,7 +13,7 @@ highlight Normal         guifg=#d6d1b0 guibg=#232526 ctermfg=187  ctermbg=234  g
 highlight Comment        guifg=#908a7c guibg=NONE    ctermfg=102  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
 highlight Todo           guifg=#ff6347 guibg=NONE    ctermfg=202  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
 highlight Number         guifg=#ADCC22 guibg=NONE    ctermfg=148  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
-highlight String         guifg=#c9c590 guibg=NONE    ctermfg=186  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
+highlight String         guifg=#ddd58c guibg=NONE    ctermfg=186  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
 highlight Character      guifg=#E6DB74 guibg=NONE    ctermfg=186  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
 highlight PreProc        guifg=#C4BE89 guibg=NONE    ctermfg=180  ctermbg=NONE gui=NONE      cterm=NONE      term=NONE
 highlight Define         guifg=#66D9EF guibg=NONE    ctermfg=81   ctermbg=NONE gui=NONE      cterm=NONE      term=NONE

@@ -23,7 +23,7 @@ Gen.HiLink('Question', 'Number')
 Gen.HiLink('MoreMsg', 'Number')
 Gen.HiLink('Directory', 'Number')
 
-Gen.Hi('String', '#c9c590', '')
+Gen.Hi('String', '#ddd58c', '')
 Gen.HiLink('Title', 'String')
 Gen.HiLink('CursorLineNr', 'String')
 Gen.HiLink('helpExample', 'String')
