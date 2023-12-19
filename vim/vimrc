@@ -122,7 +122,7 @@ final IsWinUnix = has('win32unix')
 final IsLinux = has('linux')
 final IsMac = has('mac')
 final IsUnix = IsLinux || IsMac
-final IsWSL = IsLinux && system('uname -r') =~? 'microsoft'
+final IsWSL = IsLinux && getftype('/proc/sys/fs/binfmt_misc/WSLInterop') !=# ''
 
 export var Filesystem: dict<string>
 export var Stdpath: dict<string>
@@ -646,7 +646,7 @@ if !has('gui_running')
     endif
   endif
 endif
-if IsLinux && executable('fcitx5-remote') == 1
+if (IsLinux && !IsWSL) && executable('fcitx5-remote') == 1
   augroup vimrc-auto-disableim
     autocmd InsertLeave * system('fcitx5-remote -c')
   augroup END
