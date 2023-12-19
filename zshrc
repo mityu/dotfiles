@@ -52,6 +52,7 @@ zshrc_has_cmd cargo && zshrc_prepend_PATH $HOME/.cargo/bin
 if zshrc_has_cmd vim; then
 	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
 	alias vim-stable='vi'
+	alias profile-vimrc="vim --cmd 'source $(dotfiles-path)/vim/misc/profile_vimrc.vim'"
 	export MANPAGER='vim -M +MANPAGER -'
 	export EDITOR=vim
 	export GIT_EDITOR=vim
