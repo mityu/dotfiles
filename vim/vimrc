@@ -1552,7 +1552,7 @@ if Pacpack.Tap('open-browser.vim') && !v:vim_did_enter
   enddef
 endif
 if Pacpack.Tap('vim-vim9skk')
-  if exists('g:vim9skk')
+  if !exists('g:vim9skk')
     g:vim9skk = {}
   endif
   g:vim9skk.disable_default_mappings = true
