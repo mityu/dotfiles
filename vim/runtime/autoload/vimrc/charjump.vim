@@ -1,10 +1,6 @@
 " NOTE: This script doesn't consider 'selection'
 vim9script
 
-nnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-onoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-xnoremap <Plug>(VimrcCharJumpDo) <Cmd>call <SID>CharJumpDo()<CR>
-
 var CharJump: dict<any>
 def CharJumpInit()
   CharJump = {
@@ -37,7 +33,7 @@ export def Jump(forward: bool, exclusive: bool): string
   CharJump.forward = forward
   CharJump.exclusive = exclusive
   CharJump.char = char
-  return "\<Plug>(VimrcCharJumpDo)"  # A trick to make this dot-repeatable
+  return $"\<Cmd>call {expand('<SID>')}CharJumpDo()\<CR>"  # A trick to make this dot-repeatable
 enddef
 
 export def Repeat(reverse: bool)
