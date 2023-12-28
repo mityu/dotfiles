@@ -195,6 +195,11 @@ export def ShowHighlightGroup()
     hlgroup = execute($'highlight {hlgroup}')->trim()->matchstr('\<links\s\+to\>\s\+\zs\w\+$')
   endwhile
 
+  if empty(groupChain)
+    echo 'No highlight groups'
+    return
+  endif
+
   for group in groupChain
     execute 'highlight' group
   endfor
