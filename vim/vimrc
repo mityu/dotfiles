@@ -1059,6 +1059,7 @@ command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
 command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '' : 'setfiletype <args>')
 command! -bar -nargs=+ -complete=dir Open vimrc#DefineOpenCommand()|Open <args>
+command! -bar Hlgroup vimrc#ShowHighlightGroup()
 
 # Thanks to cohama
 command! EditAsUtf8 edit ++enc=utf-8 %

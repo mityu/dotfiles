@@ -185,3 +185,17 @@ export def DefineOpenCommand()
       $'call system("{cmd} " .. shellescape(<q-args>))'
   endif
 enddef
+
+export def ShowHighlightGroup()
+  var hlgroup = synIDattr(synID(line('.'), col('.'), 1), 'name')
+  var groupChain: list<string> = []
+
+  while hlgroup !=# ''
+    groupChain->add(hlgroup)
+    hlgroup = execute($'highlight {hlgroup}')->trim()->matchstr('\<links\s\+to\>\s\+\zs\w\+$')
+  endwhile
+
+  for group in groupChain
+    execute 'highlight' group
+  endfor
+enddef
