@@ -51,8 +51,8 @@ if bashrc_has_cmd go; then
     bashrc_prepend_PATH $(bashrc_get_gobin)
 fi
 
-if bashrc_has_cmd vim && \
-    [[ (bashrc_is_msys) && ($(which vim) == "$(cygpath $USERPROFILE)"*) ]]; then
+if bashrc_has_cmd vim && bashrc_is_msys && \
+    [[ $(which vim) == "$(cygpath $USERPROFILE)"* ]]; then
     export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
 fi
 
