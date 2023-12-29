@@ -313,6 +313,7 @@ endclass
 export class Pacpack
   static var pacPath: string = PacPath
   static var pluginList: dict<Plugin> = {}
+  static var overriddenPluginList: dict<string> = {}
   static var plugin: Plugin  # Valid after calling Tap()
 
   static def _add(uri: string, config: dict<any>, isLazy: bool)
@@ -336,6 +337,7 @@ export class Pacpack
   static def Override(target: string, uri: string, config: dict<any> = {})
     pluginList->remove(target)
     Add(uri, config)
+    overriddenPluginList[target] = uri->matchstr('/\zs[^/]\+$')
   enddef
 
   static def LoadNonLazyPlugins()
@@ -361,7 +363,8 @@ export class Pacpack
     endif
   enddef
 
-  static def Tap(name: string): bool
+  static def Tap(nameGiven: string): bool
+    const name = overriddenPluginList->get(nameGiven, nameGiven)
     plugin = pluginList->get(name, null_object)
     return plugin != null_object && plugin.isExists
   enddef
