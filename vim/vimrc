@@ -1969,6 +1969,7 @@ if Pacpack.Tap('ddu.vim')
   def DduConfig()
     g:ddu_source_lsp_clientName = 'vim-lsp'
     ddu#custom#alias('source', 'file_git', 'file_external')
+    ddu#custom#action('kind', 'file', 'open-or-narrow', DduCustomActionFileOpenOrNarrow)
     ddu#custom#patch_global({
       ui: 'ff',
       uiParams: {
@@ -2005,7 +2006,7 @@ if Pacpack.Tap('ddu.vim')
       },
       kindOptions: {
         action: {defaultAction: 'do'},
-        file: {defaultAction: 'open'},
+        file: {defaultAction: 'open-or-narrow'},
         help: {defaultAction: 'open'},
         lsp: {defaultAction: 'open'},
         lsp_codeAction: {defaultAction: 'apply'},
@@ -2051,6 +2052,20 @@ if Pacpack.Tap('ddu.vim')
       }],
       uiParams: {ff: {displayTree: true}},
     })
+  enddef
+
+  def DduCustomActionFileOpenOrNarrow(args: dict<any>): number
+    if args.items[0].action.isDirectory
+      ddu#start({sources: [{name: 'file', options: {path: args.items[0].action.path}}]})
+      return 0
+    endif
+
+    ddu#ui_sync_action(args.options.name, 'itemAction', {
+      name: 'open',
+      items: args.items,
+      params: args.actionParams,
+    })
+    return 8
   enddef
 
   def DduMapFF()
@@ -2119,6 +2134,7 @@ if Pacpack.Tap('ddu.vim')
 
   nnoremap <Space>k <Cmd>call <SID>DduMru()<CR>
   nnoremap <Space>j <Cmd>call <SID>DduFiles()<CR>
+  nnoremap <Space>l <Cmd>call ddu#start(#{sources: [#{name: 'line'}]})<CR>
   nnoremap <Space>b <Cmd>call ddu#start({'name': 'buffer'})<CR>
   command! PackFiles call ddu#start({'name': 'plugin-files'})
   command! PluginFiles PackFiles
