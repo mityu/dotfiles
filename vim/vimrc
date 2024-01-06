@@ -511,6 +511,28 @@ Pacpack.AddLazy('kana/vim-textobj-line')
 Pacpack.AddLazy('mityu/vim-textobj-commentblock')
 Pacpack.AddLazy('thinca/vim-textobj-between')
 
+# Ddu plugins
+Pacpack.Add('vim-denops/denops.vim')
+Pacpack.Add('lambdalisue/mr.vim')
+Pacpack.Add('Shougo/ddu.vim')
+Pacpack.Add('Shougo/ddu-commands.vim')
+Pacpack.Add('Shougo/ddu-ui-ff')
+Pacpack.Add('Shougo/ddu-filter-matcher_substring')
+Pacpack.Add('Shougo/ddu-kind-file')
+Pacpack.Add('Shougo/ddu-source-action')
+Pacpack.Add('Shougo/ddu-source-file')
+Pacpack.Add('Shougo/ddu-source-file_rec')
+Pacpack.Add('Shougo/ddu-source-line')
+Pacpack.Add('kuuote/ddu-source-mr')
+Pacpack.Add('matsui54/ddu-source-file_external')
+Pacpack.Add('matsui54/ddu-source-help')
+Pacpack.Add('matsui54/ddu-source-man')
+Pacpack.Add('shun/ddu-source-buffer')
+Pacpack.Add('shun/ddu-source-rg')
+Pacpack.Add('https://github.com/tennashi/ddu-source-git')
+Pacpack.Add('https://github.com/uga-rosa/ddu-source-lsp')
+Pacpack.Add('https://github.com/kyoh86/ddu-filter-converter_hl_dir')
+
 # Options {{{
 if !exists('g:colors_name')  # Don't override colorscheme
   colorscheme domusaurea
@@ -1943,6 +1965,181 @@ if Pacpack.Tap('vim-textobj-between')
   omap a/ ad/
   vmap i/ id/
   vmap a/ ad/
+endif
+if Pacpack.Tap('ddu.vim')
+  def DduConfig()
+    g:ddu_source_lsp_clientName = 'vim-lsp'
+    ddu#custom#alias('source', 'file_git', 'file_external')
+    ddu#custom#patch_global({
+      ui: 'ff',
+      uiParams: {
+        ff: {
+          split: 'no',
+          filterSplitDirection: 'belowright',
+          prompt: '> ',
+        },
+      },
+      sourceOptions: {
+        _: {
+          matchers: ['matcher_substring'],
+          ignoreCase: true,
+        },
+        file: {converters: [{name: 'converter_hl_dir'}]},
+        file_rec: {converters: [{name: 'converter_hl_dir'}]},
+        mr: {converters: [{name: 'converter_hl_dir'}]},
+      },
+      sourceParams: {
+        file_rec: {
+          ignoreDirectories: ["node_modules", ".git", "dist", ".vscode"],
+        },
+        rg: {
+          args: ['--json'],
+          highlights: {
+            path: 'Preproc',
+            lineNr: 'Normal',
+            word: 'Special',
+          },
+        },
+        file_git: {
+          cmd: ['git', 'ls-files'],
+        },
+      },
+      kindOptions: {
+        action: {defaultAction: 'do'},
+        file: {defaultAction: 'open'},
+        help: {defaultAction: 'open'},
+        lsp: {defaultAction: 'open'},
+        lsp_codeAction: {defaultAction: 'apply'},
+      },
+      filterParams: {
+        matcher_substring: {highlightMatched: 'Special'},
+        converter_hl_dir: {hlGroup: 'PreProc'},
+      },
+    })
+    ddu#custom#patch_local('live-grep', {
+      sources: [{
+        name: 'rg',
+        options: {
+          matchers: [],
+          volatile: true,
+        },
+      }],
+      uiParams: {ff: {startFilter: true}},
+    })
+    ddu#custom#patch_local('file-rec', 'sources', [{name: 'file_rec'}])
+    ddu#custom#patch_local('plugin-files', {
+      sources: [
+        {name: 'file_rec', options: {path: PacPath}},
+        {name: 'file_rec', options: {path: JoinPath(Stdpath.cache, 'pack', 'local', 'start')}},
+        {name: 'file_rec', options: {path: JoinPath(Stdpath.cache, 'pack', 'local', 'opt')}},
+      ],
+      sourceOptions: {file_rec: {columns: [{name: 'pluginfiles'}]}},
+      columnParams: {pluginfiles: {hlGroup: 'LineNr'}},
+    })
+    ddu#custom#patch_local('buffer', 'sources', [{name: 'buffer'}])
+    ddu#custom#patch_local('lsp-workspaceSymbol', {
+      sources: [{name: 'lsp_workspaceSymbol'}],
+      sourceOptions: {lsp: {volatile: true}},
+    })
+    ddu#custom#patch_local('lsp-documentSymbol', {
+      sources: [{name: 'lsp_documentSymbol'}],
+      uiParams: {ff: {displayTree: true}},
+    })
+    ddu#custom#patch_local('lsp-callHierarchy', {
+      sources: [{
+        name: 'lsp_callHierarchy',
+        params: {method: 'callHierarchy/outgoingCalls'},
+      }],
+      uiParams: {ff: {displayTree: true}},
+    })
+  enddef
+
+  def DduMapFF()
+    nnoremap <buffer> q <Cmd>call ddu#ui#do_action('quit')<CR>
+    nnoremap <buffer> <C-o> <Cmd>call ddu#ui#do_action('quit')<CR>
+    nnoremap <buffer> <CR> <Cmd>call ddu#ui#do_action('itemAction')<CR>
+    nnoremap <buffer> i <Cmd>call ddu#ui#do_action('openFilterWindow')<CR>
+    nnoremap <buffer> p <Cmd>call ddu#ui#do_action('previewPath')<CR>
+    nnoremap <buffer> P <Cmd>call ddu#ui#do_action('togglePreview')<CR>
+    nnoremap <buffer> <Tab> <Cmd>call ddu#ui#do_action('chooseAction')<CR>
+    nnoremap <buffer> <C-l> <Cmd>call ddu#ui#do_action('refreshItems')<CR>
+    nnoremap <buffer> <C-p>
+          \ <Cmd>call ddu#ui#do_action('previewExecute',
+          \ {command: 'execute "normal! \<C-y>"'})<CR>
+    nnoremap <buffer> <C-n>
+          \ <Cmd>call ddu#ui#do_action('previewExecute',
+          \ {command: 'execute "normal! \<C-e>"'})<CR>
+    nnoremap <buffer> <Space>j <Cmd>call ddu#ui#do_action('quit')<CR><Cmd>call <SID>DduFiles()<CR>
+  enddef
+
+  def DduMapFFFilter()
+    inoremap <buffer> <CR> <ESC><Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
+    nnoremap <buffer> q <Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
+    nnoremap <buffer> <C-l> <Cmd>call ddu#ui#do_action('refreshItems')<CR>
+  enddef
+
+  def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
+    if pathGiven ==# ''
+      return FindGitroot() ?? getcwd(winnr())
+    endif
+
+    const path = pathGiven->expand()
+    if !path->isdirectory()
+      if !silent
+        EchomsgError($'Directory not found: {path}')
+      endif
+      return ''
+    endif
+
+    return path
+  enddef
+
+  def DduLiveGrep(pathGiven: string = '')
+    const path = DduGetSearchRootPath(pathGiven)
+    if path !=# ''
+      ddu#start({name: 'live-grep', sourceOptions: {rg: {path: path}}})
+    endif
+  enddef
+
+  def DduFiles(pathGiven: string = '')
+    const path = DduGetSearchRootPath(pathGiven)
+    if path !=# ''
+      ddu#start({name: 'file-rec', sourceOptions: {file_rec: {path: path}}})
+    endif
+  enddef
+
+  def DduMru()
+    ddu#start({
+      name: 'mru',
+      sources: [
+        {name: 'mr'},
+        {name: 'file', options: {path: DduGetSearchRootPath('')}}
+      ],
+    })
+  enddef
+
+  nnoremap <Space>k <Cmd>call <SID>DduMru()<CR>
+  nnoremap <Space>j <Cmd>call <SID>DduFiles()<CR>
+  nnoremap <Space>b <Cmd>call ddu#start({'name': 'buffer'})<CR>
+  command! PackFiles call ddu#start({'name': 'plugin-files'})
+  command! PluginFiles PackFiles
+  command! -nargs=? -complete=dir Files DduFiles(<q-args>)
+
+  augroup vimrc-ddu
+    autocmd FileType ddu-ff DduMapFF()
+    autocmd FileType ddu-ff-filter DduMapFFFilter()
+    autocmd SourcePost */plugin/ddu_rg.vim ++once
+          \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
+  augroup END
+
+  if !v:vim_did_enter
+    autocmd vimrc-ddu VimEnter * ++once DduConfig()
+  endif
+endif
+if Pacpack.Tap('mr.vim')
+  g:mr#mru#predicates = [
+    (filename: string): bool => filename !~# '\.git\%([\/]\%(config\|hooks\)\>\)\@!\>'
+  ]
 endif
 
 # ReadingVimrc
