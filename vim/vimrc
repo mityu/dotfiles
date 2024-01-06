@@ -806,7 +806,7 @@ nnoremap <expr> n 'Nn'[v:searchforward]
 nnoremap <expr> N 'nN'[v:searchforward]
 nnoremap <Space>ev <Cmd>edit $MYVIMRC<CR>
 nnoremap <Space>sv <Cmd>source $MYVIMRC<CR>
-nnoremap <Space>j <Cmd>call <SID>GofForMapping<CR>
+nnoremap <Space>j <Cmd>call <SID>GofForMapping()<CR>
 nnoremap <Space>f <Cmd>call vimrc#filore#start()<CR>
 
 nnoremap m <Nop>
@@ -1141,8 +1141,7 @@ def Gof(path: string)
 enddef
 
 def GofForMapping()
-  var git_root = FindGitroot()
-  Gof(git_root ==# '' ? getcwd(winnr()) : git_root)
+  Gof(FindGitroot() ?? getcwd(winnr()))
 enddef
 
 def g:Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
