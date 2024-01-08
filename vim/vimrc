@@ -452,6 +452,7 @@ Pacpack.Add('kana/vim-altr')
 Pacpack.Add('kana/vim-operator-user')
 Pacpack.Add('kana/vim-textobj-user')
 Pacpack.Add('kyoh86/vim-ripgrep')
+Pacpack.Add('lambdalisue/fern.vim')
 Pacpack.Add('lambdalisue/gina.vim')
 Pacpack.Add('lambdalisue/vim-findent')
 Pacpack.Add('lambdalisue/vim-gista')
@@ -1127,7 +1128,7 @@ enddef
 
 def Gof(path: string)
   if !executable('gof')
-    echo '"gof" command not found.'
+    Echo('"gof" command not found.')
     return
   endif
   var gofcmd = 'gof -f -tf "Tapi_gof"'
