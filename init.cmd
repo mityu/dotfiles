@@ -10,7 +10,7 @@ doskey pwd=echo %CD%
 if "%LOADED_INIT_CMD%" neq "" goto :eof
 set LOADED_INIT_CMD=1
 
-set PATH=%USERPROFILE%\dotfiles\batfiles;%USERPROFILE%\.cache\vimbuild\src;%USERPROFILE%\go\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\msys64\usr\local\bin;%PATH%;
+set PATH=%USERPROFILE%\dotfiles\batfiles;%USERPROFILE%\.cache\vimbuild\src;%USERPROFILE%\.local\bin;%USERPROFILE%\go\bin;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\msys64\usr\local\bin;%PATH%;
 set GOROOT=C:\msys64\mingw64\lib\go
 set EDITOR=vim
 set GIT_EDITOR=vim
