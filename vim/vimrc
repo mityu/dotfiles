@@ -1086,6 +1086,7 @@ command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim
 command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '' : 'setfiletype <args>')
 command! -bar -nargs=+ -complete=dir Open vimrc#DefineOpenCommand()|Open <args>
 command! -bar Hlgroup vimrc#ShowHighlightGroup()
+command! -bar HighlightGroup Hlgroup
 
 # Thanks to cohama
 command! EditAsUtf8 edit ++enc=utf-8 %
