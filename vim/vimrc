@@ -2113,6 +2113,11 @@ if Pacpack.Tap('ddu.vim')
       sourceOptions: {file_rec: {columns: [{name: 'pluginfiles'}]}},
       columnParams: {pluginfiles: {hlGroup: 'LineNr'}},
     })
+    ddu#custom#patch_local('dotfiles', {
+      sources: [
+        {name: 'file_rec', options: {path: fnamemodify($MYVIMRC, ':h:h')}}
+      ],
+    })
     ddu#custom#patch_local('buffer', 'sources', [{name: 'buffer'}])
     ddu#custom#patch_local('lsp-workspaceSymbol', {
       sources: [{name: 'lsp_workspaceSymbol'}],
@@ -2220,7 +2225,7 @@ if Pacpack.Tap('ddu.vim')
   nnoremap <Space>l <Cmd>call ddu#start(#{sources: [#{name: 'line'}]})<CR>
   nnoremap <Space>b <Cmd>call ddu#start({'name': 'buffer'})<CR>
   command! PackFiles call ddu#start({'name': 'plugin-files'})
-  command! PluginFiles PackFiles
+  command! Dotfiles call ddu#start({'name': 'dotfiles'})
   command! -nargs=? -complete=dir Files DduFiles(<q-args>)
 
   augroup vimrc-ddu
