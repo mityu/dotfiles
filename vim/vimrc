@@ -1169,6 +1169,73 @@ if Pacpack.Tap('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
+if Pacpack.Tap('fern.vim')
+  g:fern#disable_default_mappings = 1
+  g:fern#default_exclude = '.DS_Store'
+
+  def FernOnOpen()
+    nnoremap <buffer> <expr> o fern#smart#leaf(
+          \ '<Nop>',
+          \ '<Plug>(fern-action-expand:stay)',
+          \ '<Plug>(fern-action-collapse)'
+          \ )
+    nnoremap <buffer> h <Plug>(fern-action-leave)
+    nnoremap <buffer> l <Plug>(fern-action-enter)
+    nnoremap <buffer> <CR> <Plug>(fern-action-open:edit-or-error)
+    nnoremap <buffer> x <Plug>(fern-action-hidden:toggle)
+    nnoremap <buffer> m <Plug>(fern-action-mark:toggle)
+    nnoremap <buffer> <Tab> <Plug>(fern-action-choice)
+    nnoremap <buffer> <C-l> <Plug>(fern-action-reload:all)
+    nnoremap <buffer> <expr> <silent> <C-g> fern#smart#scheme('<C-g>',
+          \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
+    # nnoremap <buffer> q <Cmd>call <SID>FernClose()<CR>
+
+    # TODO: Improve
+    # if !exists('w:vimrc_fern_altbuf')
+    #   var altbuf = bufnr('#')
+    #   var altwin = bufwinid(altbuf)
+    #   if altbuf == bufnr('%')
+    #     altbuf = -1
+    #   elseif bufname(altbuf) =~# '^fern://' && altwin != -1
+    #     altbuf = getwinvar(altwin, 'vimrc_fern_altbuf', -1)
+    #   endif
+    #   w:vimrc_fern_altbuf = altbuf
+    # endif
+  enddef
+
+  def FernOnHighlight()
+    highlight link FernLeafSymbol Title
+    highlight link FernBranchSymbol Title
+    highlight link FernBranchText PreProc
+    highlight link FernRootText Normal
+  enddef
+
+  # def FernClose()
+  #   const altbuf = bufnr('#')
+  #   if exists('w:vimrc_fern_altbuf')
+  #     if bufexists(w:vimrc_fern_altbuf)
+  #       execute 'buffer' w:vimrc_fern_altbuf
+  #     else
+  #       enew
+  #     endif
+  #   elseif altbuf != -1  # TODO: Check buffer name? (e.g. ensure not a fern buffer)
+  #     execute 'buffer' altbuf
+  #   else
+  #     enew
+  #   endif
+  # enddef
+
+  def FernShowRootPath(helper: dict<any>)
+    call helper.sync.echo('[fern] ' .. helper.fern.root._path)
+  enddef
+
+  augroup vimrc-fern
+    autocmd FileType fern FernOnOpen()
+    autocmd User FernHighlight FernOnHighlight()
+  augroup END
+
+  nnoremap <Space>f <Cmd>Fern -reveal=% .<CR>
+endif
 if Pacpack.Tap('gina.vim')
   g:gina#action#mark_sign_text = '*'
   g:gina#core#console#enable_message_history = 1
