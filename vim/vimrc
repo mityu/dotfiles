@@ -1979,6 +1979,10 @@ if Pacpack.Tap('ddu.vim')
           split: 'no',
           filterSplitDirection: 'belowright',
           prompt: '> ',
+          highlights: {
+            prompt: 'Normal',
+            selected: 'Number',
+          },
         },
       },
       sourceOptions: {
@@ -2030,11 +2034,14 @@ if Pacpack.Tap('ddu.vim')
     })
     ddu#custom#patch_local('file-rec', 'sources', [{name: 'file_rec'}])
     ddu#custom#patch_local('plugin-files', {
-      sources: [
-        {name: 'file_rec', options: {path: PacPath}},
-        {name: 'file_rec', options: {path: JoinPath(Stdpath.cache, 'pack', 'local', 'start')}},
-        {name: 'file_rec', options: {path: JoinPath(Stdpath.cache, 'pack', 'local', 'opt')}},
-      ],
+      sources:
+        [
+          PacPath,
+          JoinPath(Stdpath.cache, 'pack', 'local', 'start'),
+          JoinPath(Stdpath.cache, 'pack', 'local', 'opt'),
+        ]
+        ->filter('isdirectory(v:val)')
+        ->mapnew('{"name": "file_rec", "options": {"path": v:val}}'),
       sourceOptions: {file_rec: {columns: [{name: 'pluginfiles'}]}},
       columnParams: {pluginfiles: {hlGroup: 'LineNr'}},
     })
@@ -2075,17 +2082,23 @@ if Pacpack.Tap('ddu.vim')
     nnoremap <buffer> <C-o> <Cmd>call ddu#ui#do_action('quit')<CR>
     nnoremap <buffer> <CR> <Cmd>call ddu#ui#do_action('itemAction')<CR>
     nnoremap <buffer> i <Cmd>call ddu#ui#do_action('openFilterWindow')<CR>
-    nnoremap <buffer> p <Cmd>call ddu#ui#do_action('previewPath')<CR>
-    nnoremap <buffer> P <Cmd>call ddu#ui#do_action('togglePreview')<CR>
+    nnoremap <buffer> p <Cmd>call ddu#ui#do_action('togglePreview')<CR>
+    nnoremap <buffer> P <Cmd>call ddu#ui#do_action('previewPath')<CR>
     nnoremap <buffer> <Tab> <Cmd>call ddu#ui#do_action('chooseAction')<CR>
+    nnoremap <buffer> a <Cmd>call ddu#ui#do_action('chooseAction')<CR>
     nnoremap <buffer> <C-l> <Cmd>call ddu#ui#do_action('refreshItems')<CR>
+    nnoremap <buffer> m <Cmd>call ddu#ui#do_action('toggleSelectItem')<CR>
+    nnoremap <buffer> * <Cmd>call ddu#ui#do_action('toggleAllItems')<CR>
+    nnoremap <buffer> >>
+          \ <Cmd>call ddu#ui#do_action('itemAction', {'name': 'quickfix'})<CR>
     nnoremap <buffer> <C-p>
           \ <Cmd>call ddu#ui#do_action('previewExecute',
-          \ {command: 'execute "normal! \<C-y>"'})<CR>
+          \ {'command': 'execute "normal! \<C-y>"'})<CR>
     nnoremap <buffer> <C-n>
           \ <Cmd>call ddu#ui#do_action('previewExecute',
-          \ {command: 'execute "normal! \<C-e>"'})<CR>
-    nnoremap <buffer> <Space>j <Cmd>call ddu#ui#do_action('quit')<CR><Cmd>call <SID>DduFiles()<CR>
+          \ {'command': 'execute "normal! \<C-e>"'})<CR>
+    nnoremap <buffer> <Space>j
+          \ <Cmd>call ddu#ui#do_action('quit')<CR><Cmd>call <SID>DduFiles()<CR>
   enddef
 
   def DduMapFFFilter()
