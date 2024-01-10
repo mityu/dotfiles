@@ -1986,9 +1986,9 @@ if Pacpack.Tap('ddu.vim')
           matchers: ['matcher_substring'],
           ignoreCase: true,
         },
-        file: {converters: [{name: 'converter_hl_dir'}]},
-        file_rec: {converters: [{name: 'converter_hl_dir'}]},
-        mr: {converters: [{name: 'converter_hl_dir'}]},
+        # file: {converters: [{name: 'converter_hl_dir'}]},
+        # file_rec: {converters: [{name: 'converter_hl_dir'}]},
+        # mr: {converters: [{name: 'converter_hl_dir'}]},
       },
       sourceParams: {
         file_rec: {
