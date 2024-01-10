@@ -109,6 +109,8 @@ Gen.Hi('VertSplit', '#fff8dc', '#fff8dc', '')
 Gen.Hi('MatchParen', 'NONE', '#a020f0', '')
 Gen.Hi('ColorColumn', '', '#40250a', '')
 
+Gen.Hi('vimStringUrlGithub', '#b28214', '', '')  # Gen.BlendColor('#ffa500', '#003344', 0.3)
+
 var script =<< END
 let g:terminal_ansi_colors = [
 \      '#000000',
