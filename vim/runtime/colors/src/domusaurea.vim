@@ -97,6 +97,10 @@ Gen.Hi('DiffDelete', DiffDeleteFg, DiffDeleteBg, '')
 Gen.Hi('DiffChange', '', DiffChangeBg, '')
 Gen.Hi('DiffText', '', DiffTextBg, '')
 
+Gen.HiLink('Added', 'Identifier')
+Gen.HiLink('Changed', 'PreProc')
+Gen.HiLink('Removed', 'Special')
+
 Gen.Hi('SpellBad', '', '#650000', '')
 Gen.HiLink('SpellCap', 'SpellBad')
 Gen.HiLink('SpellLocal', 'SpellBad')
