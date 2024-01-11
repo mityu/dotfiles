@@ -2505,7 +2505,7 @@ augroup vimrc_warningspace
   # space emphasis; it seems WinEnter event triggered on the previous window
   # when opening terminal window.
   autocmd WinEnter,TerminalWinOpen * WarningSpace()
-  autocmd OptionSet * WarningSpace()  # TODO: specify option?
+  autocmd OptionSet buftype,modifiable WarningSpace()
   autocmd User vimrc_initialize ++once WarningSpace()
   autocmd ColorScheme * highlight link WarningSpace Error
 augroup END
