@@ -2135,8 +2135,11 @@ if Pacpack.Tap('ddu.vim')
   enddef
 
   def DduCustomActionFileOpenOrNarrow(args: dict<any>): number
-    if args.items[0].action.isDirectory
-      ddu#start({sources: [{name: 'file', options: {path: args.items[0].action.path}}]})
+    const action = args.items[0].action
+    const path = action->get('path', '')
+    const isDirectory = action->get('isDirectory', false)
+    if isDirectory && path !=# ''
+      ddu#start({sources: [{name: 'file', options: {path: path}}]})
       return 0
     endif
 
@@ -2174,6 +2177,7 @@ if Pacpack.Tap('ddu.vim')
 
   def DduMapFFFilter()
     inoremap <buffer> <CR> <ESC><Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
+    nnoremap <buffer> <CR> <Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
     nnoremap <buffer> q <Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
     nnoremap <buffer> <C-l> <Cmd>call ddu#ui#do_action('refreshItems')<CR>
   enddef
@@ -2229,9 +2233,12 @@ if Pacpack.Tap('ddu.vim')
   augroup vimrc-ddu
     autocmd FileType ddu-ff DduMapFF()
     autocmd FileType ddu-ff-filter DduMapFFFilter()
-    autocmd SourcePost */plugin/ddu_rg.vim ++once
-          \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
   augroup END
+
+  if !exists(':DduRg')
+    autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once
+          \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
+  endif
 
   if !v:vim_did_enter
     autocmd vimrc-ddu VimEnter * ++once DduConfig()
