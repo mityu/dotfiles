@@ -287,7 +287,7 @@ class Plugin
 
   def AddHookOnLoad(F: func(): void)
     if !this.isLazy
-      EchomsgError('HookOnLoad is only valid for lazy plugins: {this.name}')
+      EchomsgError($'HookOnLoad is only valid for lazy plugins: {this.name}')
     endif
     this.hooksOnLoad->add(F)
   enddef
@@ -312,7 +312,8 @@ endclass
 
 export class Pacpack
   static var pacPath: string = PacPath
-  static var pluginList: dict<Plugin> = {}
+  static var pluginList: dict<Plugin> = {}  # List of enabled plugins.
+  static var minpacPluginList: list<Plugin> = []  # List of plugins that are not local.
   static var overriddenPluginList: dict<string> = {}
   static var plugin: Plugin  # Valid after calling Tap()
 
@@ -323,6 +324,9 @@ export class Pacpack
       echoerr 'Duplicate plugin name:' name
     endif
     pluginList[name] = p
+    if !p.isLocal
+      minpacPluginList->add(p)
+    endif
   enddef
 
   static def Add(uri: string, config: dict<any> = {})
@@ -347,7 +351,7 @@ export class Pacpack
       endif
     endfor
 
-    # Enable ftplugin and syntax highlighting.  Note that this order does matter.
+    # Enable ftplugin and syntax highlighting.  Note that this order DOES MATTER.
     filetype plugin indent on
     syntax enable
   enddef
@@ -401,11 +405,7 @@ export class Pacpack
       endif
     endif
 
-    for p in values(pluginList)
-      if p.isLocal
-        continue
-      endif
-
+    for p in minpacPluginList
       var config = p.config->copy()
       config.type = 'opt'
       minpac#add(p.uri, config)
