@@ -2078,6 +2078,10 @@ if Pacpack.Tap('ddu.vim')
           matchers: ['matcher_substring'],
           ignoreCase: true,
         },
+        mr: {
+          matchers: ['converter_tr_homepath', 'matcher_substring'],
+          ignoreCase: true,
+        },
         # file: {converters: [{name: 'converter_hl_dir'}]},
         # file_rec: {converters: [{name: 'converter_hl_dir'}]},
         # mr: {converters: [{name: 'converter_hl_dir'}]},
