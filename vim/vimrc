@@ -1634,7 +1634,19 @@ if Pacpack.Tap('vim-vim9skk')
   if !exists('g:vim9skk')
     g:vim9skk = {}
   endif
+  if !g:vim9skk->has_key('keymap')
+    g:vim9skk.keymap = {}
+  endif
   g:vim9skk.disable_default_mappings = true
+  g:vim9skk.keymap = {
+    toggle: '<C-e>',
+    next: '<C-n>',
+    prev: '<C-p>',
+    complete: ['<C-y>', '<C-j>', '<CR>'],
+    cancel: '<C-e>',
+    select: ['<C-n>', '<Space>'],
+  }
+  g:vim9skk.recent = 0
 endif
 if Pacpack.Tap('autofmt')
   set formatexpr=autofmt#japanese#formatexpr()
