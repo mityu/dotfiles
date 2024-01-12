@@ -1830,7 +1830,6 @@ if Pacpack.Tap('vim-lsp-settings')
       Echomsg('No servers are installed.')
       return
     endif
-    tabnew
     for [ft, servers] in lsp_settings#settings()->items()
       for server in servers
         if has_key(installedServers, server.command)
@@ -1838,10 +1837,19 @@ if Pacpack.Tap('vim-lsp-settings')
         endif
       endfor
     endfor
+    tabnew
+    var shouldCloseNormalBuffer = true
     for [server, ft] in installedServers->items()
       lsp_settings#install_server(ft, server)
+      if shouldCloseNormalBuffer
+        only
+        shouldCloseNormalBuffer = false
+      else
+        wincmd =
+      endif
+      # TODO: Check if enough spaces are left.
     endfor
-    Echomsg('Finished updating.')
+    Echomsg('Finished trigger updates.')
   enddef
 
   command! -bar LspUpdateAllServers LspUpdateAllServers()
