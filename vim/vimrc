@@ -1216,6 +1216,16 @@ if Pacpack.Tap('fern.vim')
     endif
   enddef
 
+  def FernUnsetAltbufOnLeave()
+    # BufWinLeave is also happens when entering another directory.  Postpone
+    # unletting w:vimrc_fern_altbuf by the next BufEnter autocmd.
+    autocmd vimrc-fern BufEnter * ++once {
+      if exists('w:vimrc_fern_altbuf') && bufname() !~# '^fern://'
+        unlet w:vimrc_fern_altbuf
+      endif
+    }
+  enddef
+
   def FernClose()
     if exists('w:vimrc_fern_altbuf') &&
         bufexists(w:vimrc_fern_altbuf) &&
@@ -1230,6 +1240,13 @@ if Pacpack.Tap('fern.vim')
     call helper.sync.echo('[fern] ' .. helper.fern.root._path)
   enddef
 
+  def FernGetLaunchPath(): string
+    if expand('%') !=# ''
+      return expand('%:h')
+    endif
+    return getcwd(winnr())
+  enddef
+
   augroup vimrc-fern
     # User configuration.
     autocmd FileType fern FernOnOpen()
@@ -1240,14 +1257,10 @@ if Pacpack.Tap('fern.vim')
     # FileType autocmd for fern.
     autocmd WinNew fern://* FernSetAltbufOnClone()
     autocmd FileType fern FernSetAltbufOnOpen()
-    autocmd BufWinLeave fern://* {
-      if exists('w:vimrc_fern_altbuf')
-        unlet w:vimrc_fern_altbuf
-      endif
-    }
+    autocmd BufWinLeave fern//* FernUnsetAltbufOnLeave()
   augroup END
 
-  nnoremap <Space>f <Cmd>Fern -reveal=% .<CR>
+  nnoremap <Space>f <Cmd>Fern -reveal=% `=<SID>FernGetLaunchPath()`<CR>
 endif
 if Pacpack.Tap('gina.vim')
   g:gina#action#mark_sign_text = '*'
