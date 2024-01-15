@@ -2156,8 +2156,8 @@ if Pacpack.Tap('ddu.vim')
         ]
         ->filter('isdirectory(v:val)')
         ->mapnew('{"name": "file_rec", "options": {"path": v:val}}'),
-      sourceOptions: {file_rec: {columns: [{name: 'pluginfiles'}]}},
-      columnParams: {pluginfiles: {hlGroup: 'LineNr'}},
+      sourceOptions: {file_rec: {converters: [{name: 'converter_packpath'}]}},
+      filterParams: {converter_packpath: {hlGroup: 'LineNr'}},
     })
     ddu#custom#patch_local('dotfiles', {
       sources: [
