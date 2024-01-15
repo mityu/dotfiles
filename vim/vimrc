@@ -531,7 +531,6 @@ Pacpack.Add('https://github.com/shun/ddu-source-buffer')
 Pacpack.Add('https://github.com/shun/ddu-source-rg')
 Pacpack.Add('https://github.com/tennashi/ddu-source-git')
 Pacpack.Add('https://github.com/uga-rosa/ddu-source-lsp')
-Pacpack.Add('https://github.com/kyoh86/ddu-filter-converter_hl_dir')
 
 # Options {{{
 if !exists('g:colors_name')  # Don't override colorscheme
@@ -2108,9 +2107,6 @@ if Pacpack.Tap('ddu.vim')
           matchers: ['converter_tr_homepath', 'matcher_substring'],
           ignoreCase: true,
         },
-        # file: {converters: [{name: 'converter_hl_dir'}]},
-        # file_rec: {converters: [{name: 'converter_hl_dir'}]},
-        # mr: {converters: [{name: 'converter_hl_dir'}]},
       },
       sourceParams: {
         file_rec: {
