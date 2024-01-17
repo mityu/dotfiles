@@ -601,6 +601,7 @@ function update-softwares() {
 	fi
 
 	update-vim
+	update-macvim
 
 	if zshrc_has_cmd brew; then
 		brew upgrade
