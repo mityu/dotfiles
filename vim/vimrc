@@ -1240,7 +1240,7 @@ if Pacpack.Tap('fern.vim')
   enddef
 
   def FernGetLaunchPath(): string
-    if expand('%') !=# ''
+    if expand('%') !=# '' && &buftype ==# '' && &buflisted
       return expand('%:h')
     endif
     return getcwd(winnr())
