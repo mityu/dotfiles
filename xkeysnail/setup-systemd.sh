@@ -8,7 +8,7 @@ echo 'KERNEL=="uinput", GROUP="uinput"' > /etc/udev/rules.d/70-uinput.rules
 
 # Make ~/.config/systemd/user/xkeysnail.service
 if [ ! -d ~/.config/systemd/user ]; then
-    mkdir -p ~/.config/systemd/user
+	mkdir -p ~/.config/systemd/user
 fi
 cp $(cd $(dirname $0);pwd)/xkeysnail.service ~/.config/systemd/user/
 systemctl --user enable xkeysnail

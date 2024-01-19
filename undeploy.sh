@@ -1,9 +1,9 @@
 #!/bin/bash
 
 rm-link () {
-    if [[ -L $1 ]]; then
-        rm $1
-    fi
+	if [[ -L $1 ]]; then
+		rm $1
+	fi
 }
 
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}

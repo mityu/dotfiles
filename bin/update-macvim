@@ -1,32 +1,33 @@
 #!/bin/bash -x
 if [[ "$(uname)" != "Darwin" ]]; then
-    echo 'Not on macOS. Abort.'
-    exit 0
+	echo 'Not on macOS. Abort.'
+	exit 0
 fi
 if [ ! -d "$HOME/.cache" ]; then
-    mkdir ~/.cache
+	mkdir ~/.cache
 fi
 if [ ! -d "$HOME/.cache/macvimbuild" ]; then
-    git clone https://github.com/macvim-dev/macvim ~/.cache/macvimbuild
-    HASH=null
+	git clone https://github.com/macvim-dev/macvim ~/.cache/macvimbuild
+	HASH=null
 fi
 if [[ "$1" == "--force" || "$1" == "-f" ]]; then
-    # Forcely rebuild
-    HASH=null
+	# Forcely rebuild
+	HASH=null
 fi
 cd ~/.cache/macvimbuild
 : "${HASH:=$(git rev-parse HEAD)}"
 git pull
 if [ $HASH == $(git rev-parse HEAD) ]; then
-    exit 0
+	exit 0
 fi
+export CONF_OPT_COMPBY="--with-compiledby=mityu"
 make -j4
 if [ $? -ne 0 ]; then
-    make distclean && make -j4
+	make distclean && make -j4
 fi
 if [ $? -eq 0 ]; then
-    if [ -d "/Applications/MacVim.app" ]; then
-        rm -r /Applications/MacVim.app
-    fi
-    cp -r ./src/MacVim/build/Release/MacVim.app /Applications/MacVim.app
+	if [ -d "/Applications/MacVim.app" ]; then
+		rm -r /Applications/MacVim.app
+	fi
+	cp -r ./src/MacVim/build/Release/MacVim.app /Applications/MacVim.app
 fi

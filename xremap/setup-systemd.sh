@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ ! -d ~/.config/systemd/user ]; then
-    mkdir -p ~/.config/systemd/user
+	mkdir -p ~/.config/systemd/user
 fi
 cp $(cd $(dirname $0);pwd)/xremap.service ~/.config/systemd/user/
 systemctl --user daemon-reload
