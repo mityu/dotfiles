@@ -2289,7 +2289,7 @@ if Pacpack.Tap('ddu.vim')
   endif
 
   if !v:vim_did_enter
-    autocmd vimrc-ddu VimEnter * ++once DduConfig()
+    autocmd vimrc-ddu User vimrc_initialize ++once DduConfig()
   endif
 endif
 if Pacpack.Tap('mr.vim')
