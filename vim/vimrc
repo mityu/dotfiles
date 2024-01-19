@@ -1539,7 +1539,7 @@ if Pacpack.Tap('vim-quickrun')
   }
   if Pacpack.Tap('vim-vim9context')
     g:quickrun_config.vim = {
-      ['hook/vimrc_auto_vim9script/enable']: 1
+      ['hook/vimrc_auto_vim9scriptize/enable']: 1
     }
   endif
 
@@ -1610,7 +1610,7 @@ if Pacpack.Tap('vim-quickrun')
     if Pacpack.Tap('vim-vim9context')
       var hook = quickrun#hook#eval#new()
       hook.kind = 'hook'
-      hook.name = 'vimrc_auto_vim9script'
+      hook.name = 'vimrc_auto_vim9scriptize'
       hook.config.template = "vim9script\n%s"
       hook.config.enable = 0
       hook.init = QuickrunHookAutoVim9scriptInit
