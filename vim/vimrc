@@ -1535,8 +1535,13 @@ if Pacpack.Tap('vim-quickrun')
   }
   g:quickrun_config.python = {
     command: 'python3',
-    ['hook/eval/template']: 'print(%s)'
+    ['hook/eval/template']: 'print(%s)',
   }
+  if Pacpack.Tap('vim-vim9context')
+    g:quickrun_config.vim = {
+      ['hook/vimrc_auto_vim9script/enable']: 1
+    }
+  endif
 
   if executable('deno')
     # If deno doesn't exist, use quickrun's default config. It has configs for
@@ -1595,13 +1600,54 @@ if Pacpack.Tap('vim-quickrun')
   nmap <Space>r <Plug>(quickrun)
   vmap <Space>r <Plug>(quickrun)
 
+  def QuickrunSetupHook()
+    quickrun#module#register({
+      kind: 'hook',
+      name: 'vimrc_autoclose_quickfix',
+      on_success: (_, _) => execute('cclose')
+    }, true)
+
+    if Pacpack.Tap('vim-vim9context')
+      var hook = quickrun#hook#eval#new()
+      hook.kind = 'hook'
+      hook.name = 'vimrc_auto_vim9script'
+      hook.config.template = "vim9script\n%s"
+      hook.config.enable = 0
+      hook.init = QuickrunHookAutoVim9scriptInit
+      quickrun#module#register(hook, true)
+    endif
+  enddef
+
+  function QuickrunHookAutoVim9scriptInit(session) abort dict
+    let region = get(a:session.config, 'region', {})
+    if get(a:session.config, 'runner', '') !=# 'vimscript' || empty(region)
+      let self.config.enable = 0
+      return
+    endif
+
+    let line = region.first[0]
+    let stopline = region.last[0]
+    while v:true
+      if line > stopline || getline(line) =~# '^\s*vim9s\%[cript]\>'
+        " Disable this hook when there're only legacy comments or the first
+        " command is :vim9s[cript].
+        let self.config.enable = 0
+        return
+      elseif getline(line) =~# '^\s*"'
+        " Skip legacy comment lines.
+        let line += 1
+      else
+        " Neither :vim9script line or legacy comment line. Break.
+        break
+      endif
+    endwhile
+    if vim9context#get_context_pos(region.first[0], 1) == g:vim9context#CONTEXT_VIM9_SCRIPT
+      let self.config.enable = 1
+    endif
+  endfunction
+
   augroup vimrc_quickrun
-    autocmd SourcePost */autoload/quickrun.vim ++once
-    \ call quickrun#module#register({
-    \   kind: 'hook',
-    \   name: 'vimrc_autoclose_quickfix',
-    \   on_success: (_, _) => execute('cclose')
-    \ }, true)
+    autocmd SourcePost */autoload/quickrun.vim ++once QuickrunSetupHook()
     autocmd FileType quickrun nnoremap <buffer> q <C-w>q
     autocmd CmdwinEnter *
     \ noremap <buffer> <Plug>(quickrun) <Cmd>echo ':QuickRun is disabled in cmdwin.'<CR>
