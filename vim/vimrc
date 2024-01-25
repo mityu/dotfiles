@@ -512,8 +512,11 @@ Pacpack.AddLazy('https://github.com/kana/vim-textobj-line')
 Pacpack.AddLazy('https://github.com/mityu/vim-textobj-commentblock')
 Pacpack.AddLazy('https://github.com/thinca/vim-textobj-between')
 
-# Ddu plugins
+# Denops plugins
 Pacpack.Add('https://github.com/vim-denops/denops.vim')
+# Pacpack.AddLazy('https://github.com/4513ECHO/parade.vim')
+
+# Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/mr.vim')
 Pacpack.Add('https://github.com/Shougo/ddu.vim')
 Pacpack.Add('https://github.com/Shougo/ddu-commands.vim')
@@ -1540,7 +1543,7 @@ if Pacpack.Tap('vim-quickrun')
   }
   if Pacpack.Tap('vim-vim9context')
     g:quickrun_config.vim = {
-      ['hook/vimrc_auto_vim9scriptize/enable']: 1
+      ['hook/vimrc_auto_vim9scriptize/enable']: 1,
     }
   endif
 
@@ -2340,9 +2343,17 @@ if Pacpack.Tap('ddu.vim')
   endif
 endif
 if Pacpack.Tap('mr.vim')
-  g:mr#mru#predicates = [
-    (filename: string): bool => filename !~# '\.git\%([\/]\%(config\|hooks\)\>\)\@!\>'
-  ]
+  def MrPredicate(filename: string): bool
+    if filename =~# '\.git\%([\/]\%(config\|hooks\)\>\)\@!\>'
+      return false
+    endif
+    if resolve(expand('%:p')) == filename && &l:buftype !=# ''
+      return false
+    endif
+    return true
+  enddef
+
+  g:mr#mru#predicates = [MrPredicate]
 endif
 
 # ReadingVimrc
