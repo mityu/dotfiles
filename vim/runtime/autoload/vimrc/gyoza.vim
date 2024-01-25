@@ -420,7 +420,7 @@ NewFiletypeRule('vim')
     endif
     return CompleteClosingBlock(prev, next, closer)
   })
-  .AddRule('^\s*%(export\s|legacy\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
+  .AddRule('^\s*%(export\s|legacy\s|static\s)?\s*def!?\s+\S+(.*).*$', 'enddef')
   .AddRule('^\s*%(legacy\s)?\s*fu%[nction]!?\s+\S+(.*).*$',
       (prev: dict<any>, next: dict<any>): number => {
         var r = '^\v(.{-})(fu%[nction])(.*)$'
