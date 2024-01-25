@@ -2354,6 +2354,7 @@ if Pacpack.Tap('mr.vim')
   enddef
 
   g:mr#mru#predicates = [MrPredicate]
+  g:mr#mrw#predicates = [MrPredicate]
 endif
 
 # ReadingVimrc
