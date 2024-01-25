@@ -1124,7 +1124,6 @@ def FindGitroot(arg_target: string = bufname('%')): string
   const target: string = resolve(arg_target)
   const git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
-    EchomsgWarning('Not a git repository: ' .. target)
     return ''
   endif
   return fnamemodify(git_dir, ':p:h:h')
@@ -2694,6 +2693,7 @@ def GitDiff(arg_target: string)
   endif
   const cmd = GitDiffGetcmd(target)
   if cmd ==# ''
+    EchomsgWarning('Not a git repository: ' .. target)
     return
   endif
   const bufnr = term_start(cmd, {
