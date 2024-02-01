@@ -345,11 +345,12 @@ export class Pacpack
   enddef
 
   static def LoadNonLazyPlugins()
-    for p in values(pluginList)
-      if !p.isLazy && p.isExists
-        execute 'packadd!' p.name
-      endif
-    endfor
+    const appendPath = pluginList
+      ->values()
+      ->filter((_: number, p: Plugin): bool => !p.isLazy && p.isExists)
+      ->mapnew((_: number, p: Plugin): string => p.path)
+      ->join(',')
+    execute 'set runtimepath+=' .. appendPath
 
     # Enable ftplugin and syntax highlighting.  Note that this order DOES MATTER.
     filetype plugin indent on
