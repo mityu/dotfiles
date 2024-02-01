@@ -1048,7 +1048,7 @@ def CmdwinCompletion(select_next: bool): string
   if pumvisible()
     return select_next ? "\<C-n>" : "\<C-p>"
   else
-      return "\<C-x>\<C-v>" .. (select_next ? "" : "\<C-p>\<C-p>")
+    return "\<C-x>\<C-v>" .. (select_next ? "" : "\<C-p>\<C-p>")
   endif
 enddef
 
@@ -1066,6 +1066,16 @@ inoreabbrev todo: TODO:
 inoreabbrev fixme: FIXME:
 inoreabbrev xxx: XXX:
 inoreabbrev note: NOTE:
+
+# Completion
+augroup vimrc-ins-completion
+  autocmd CompleteDonePre * {
+    if !empty(v:completed_item) && complete_info()->get('mode', '') ==# 'whole_line'
+      &g:undolevels = &g:undolevels
+      setline('.', getline('.')->strpart(0, col('.') - 1))
+    endif
+  }
+augroup END
 
 # Commands
 # Declarations
