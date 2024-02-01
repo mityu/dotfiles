@@ -1102,13 +1102,6 @@ command! -bar Hlgroup vimrc#ShowHighlightGroup()
 command! -bar HighlightGroup Hlgroup
 command! -bar RTP echo &runtimepath->split(',')->join("\n")
 
-# Thanks to cohama
-command! EditAsUtf8 edit ++enc=utf-8 %
-command! EditAsCp932 edit ++enc=cp932 %
-command! EditAsUnix edit ++ff=unix %
-command! EditAsDos edit ++ff=dos %
-command! WriteAsUtf8 set fenc=utf-8|w
-
 # Plugin Shortcuts
 command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
 command! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
