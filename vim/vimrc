@@ -2325,10 +2325,10 @@ if Pacpack.Tap('mr.vim')
   g:mr#mrw#predicates = [MrPredicate]
 endif
 if Pacpack.Tap('skkeleton')
-  inoremap <C-e> <Plug>(skkeleton-toggle)
+  inoremap <expr> <C-e> pumvisible() ? '<C-e>' : '<Plug>(skkeleton-toggle)'
 
   def SkkeletonInit()
-    var config = {eggLikeNewline: true}
+    var config: dict<any> = {eggLikeNewline: true}
 
     if Pacpack.Tap('dict')
       config.globalDictionaries = ['SKK-JISYO.L.json']
