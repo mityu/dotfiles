@@ -481,7 +481,7 @@ Pacpack.Add('https://github.com/thinca/vim-themis')
 Pacpack.Add('https://github.com/tikhomirov/vim-glsl')
 Pacpack.Add('https://github.com/tyru/capture.vim')
 Pacpack.Add('https://github.com/tyru/open-browser.vim')
-Pacpack.Add('https://github.com/utubo/vim-vim9skk')
+# Pacpack.Add('https://github.com/utubo/vim-vim9skk')
 Pacpack.Add('https://github.com/vim-jp/autofmt')
 Pacpack.Add('https://github.com/vim-jp/vimdoc-ja')
 Pacpack.Add('https://github.com/vim-jp/vital.vim')
@@ -516,6 +516,8 @@ Pacpack.AddLazy('https://github.com/thinca/vim-textobj-between')
 # Denops plugins
 Pacpack.Add('https://github.com/vim-denops/denops.vim')
 # Pacpack.AddLazy('https://github.com/4513ECHO/parade.vim')
+Pacpack.Add('https://github.com/vim-skk/skkeleton')
+Pacpack.Add('https://github.com/skk-dev/dict')
 
 # Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/mr.vim')
@@ -1799,7 +1801,7 @@ if Pacpack.Tap('vim-lsp')
           \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-n>"
     inoremap <expr> <C-p>
           \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-p>"
-    inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
+    # inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
     lsp#enable()
 
     autocmd! vimrc_lsp_lazyload
@@ -2358,6 +2360,66 @@ if Pacpack.Tap('mr.vim')
 
   g:mr#mru#predicates = [MrPredicate]
   g:mr#mrw#predicates = [MrPredicate]
+endif
+if Pacpack.Tap('skkeleton')
+  inoremap <C-e> <Plug>(skkeleton-toggle)
+
+  def SkkeletonInit()
+    var config = {eggLikeNewline: true}
+
+    if Pacpack.Tap('dict')
+      config.globalDictionaries = ['SKK-JISYO.L.json']
+        ->map((_: number, v: string): string => JoinPath(Pacpack.plugin.path, 'json', v))
+    endif
+
+    skkeleton#config(config)
+
+    extend(g:skkeleton#mapped_keys, ['<C-n>', '<C-p>', '<C-y>', '<C-e>'])
+    skkeleton#register_keymap('input', ';', 'henkanPoint')
+    skkeleton#register_keymap('input', '<C-n>', 'henkanFirst')
+    skkeleton#register_keymap('henkan', '<C-p>', 'henkanBackward')
+    skkeleton#register_keymap('henkan', '<C-n>', 'henkanForward')
+    skkeleton#register_keymap('henkan', '<C-y>', 'kakutei')
+    skkeleton#register_keymap('henkan', '<C-e>', 'cancel')
+  enddef
+
+  def SkkeletonOnEnable()
+    popup_create('あ', {
+      line: 'cursor+1',
+      col: 'cursor',
+      time: 1000,
+    })
+  enddef
+
+  def SkkeletonOnDisable()
+    popup_create('A', {
+      line: 'cursor+1',
+      col: 'cursor',
+      time: 1000,
+    })
+  enddef
+
+  def SkkeletonOnModeChanged()
+    const modemap = {
+      hira: 'あ',
+      kata: 'ア',
+      hankata: 'ｱ',
+      zenkaku: '全A',
+      abbrev: 'abbr',
+    }
+
+    popup_create(get(modemap, g:skkeleton#mode, 'A'), {
+      line: 'cursor+1',
+      col: 'cursor',
+      time: 1000,
+      moved: 'any',
+    })
+  enddef
+
+  augroup vimrc-skkeleton
+    autocmd User skkeleton-initialize-pre SkkeletonInit()
+    autocmd User skkeleton-mode-changed SkkeletonOnModeChanged()
+  augroup END
 endif
 
 # ReadingVimrc
