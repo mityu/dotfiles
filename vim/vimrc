@@ -1269,7 +1269,7 @@ if Pacpack.Tap('fern.vim')
     autocmd BufWinLeave fern//* FernUnsetAltbufOnLeave()
   augroup END
 
-  nnoremap <Space>f <Cmd>Fern -reveal=% `=<SID>FernGetLaunchPath()`<CR>
+  nnoremap <Space>f <Cmd>Fern `=<SID>FernGetLaunchPath()`<CR>
 endif
 if Pacpack.Tap('gina.vim')
   g:gina#action#mark_sign_text = '*'
