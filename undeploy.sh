@@ -20,3 +20,4 @@ rm-link $CONFIG_DIR/dunst
 rm-link $CONFIG_DIR/libinput-gestures.conf
 rm-link $CONFIG_DIR/karabiner
 rm-link $CONFIG_DIR/rofi
+rm-link $CONFIG_DIR/nvim
