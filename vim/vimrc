@@ -545,6 +545,7 @@ Pacpack.AddLazy('https://github.com/thinca/vim-textobj-between')
 
 # Denops plugins
 Pacpack.Add('https://github.com/vim-denops/denops.vim')
+Pacpack.Add('https://github.com/vim-denops/denops-shared-server.vim')
 # Pacpack.AddLazy('https://github.com/4513ECHO/parade.vim')
 Pacpack.Add('https://github.com/vim-skk/skkeleton')
 Pacpack.Add('https://github.com/skk-dev/dict')
@@ -2126,6 +2127,9 @@ if Pacpack.Tap('vim-textobj-between')
   omap a/ ad/
   vmap i/ id/
   vmap a/ ad/
+endif
+if Pacpack.Tap('denops-shared-server.vim')
+  g:denops_server_abbr = '127.0.0.1:32123'
 endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
