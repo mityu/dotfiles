@@ -2128,8 +2128,10 @@ if Pacpack.Tap('vim-textobj-between')
   vmap i/ id/
   vmap a/ ad/
 endif
-if Pacpack.Tap('denops-shared-server.vim')
-  g:denops_server_addr = '127.0.0.1:32123'
+if Pacpack.Tap('denops.vim')
+  if IsMac
+    g:denops_server_addr = '127.0.0.1:32123'
+  endif
 endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
