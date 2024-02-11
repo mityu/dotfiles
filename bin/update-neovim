@@ -1,0 +1,31 @@
+#!/bin/bash -xe
+
+function build-neovim() {
+	make -j4 && make -j4 install
+}
+
+FORCEBUILD=false
+if [[ "$1" == "--force" || "$1" == "-f" ]]; then
+	FORCEBUILD=true
+fi
+if [ ! -d "$HOME/.cache" ]; then
+	mkdir ~/.cache
+fi
+if [ ! -d "$HOME/.cache/neovimbuild" ]; then
+	git clone https://github.com/neovim/neovim ~/.cache/neovimbuild
+	FORCEBUILD=true
+fi
+if [ ! -d "$HOME/.local" ]; then
+	mkdir ~/.local
+fi
+cd ~/.cache/neovimbuild
+HASH=$(git rev-parse HEAD)
+git pull
+if [[ $HASH != $(git rev-parse HEAD) ]] || $FORCEBUILD; then
+	export CMAKE_BUILD_TYPE=Release
+	export CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local"
+	if ! $FORCEBUILD; then
+	build-neovim && exit 0
+	fi
+	make distclean && build-neovim
+fi
