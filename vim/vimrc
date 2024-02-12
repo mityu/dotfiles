@@ -2310,8 +2310,15 @@ if Pacpack.Tap('ddu.vim')
   enddef
 
   def DduLiveGrep(pathGiven: string = '')
-    const path = DduGetSearchRootPath(pathGiven)
+    var path = DduGetSearchRootPath(pathGiven)
     if path !=# ''
+      if pathGiven ==# ''
+        path = Input('live-grep: ', path, 'dir')
+        if !path->isdirectory()
+          EchomsgError($'Directory not found: {path}')
+          return
+        endif
+      endif
       ddu#start({name: 'live-grep', sourceOptions: {rg: {path: path}}})
     endif
   enddef
@@ -2347,13 +2354,15 @@ if Pacpack.Tap('ddu.vim')
     autocmd FileType ddu-ff-filter DduMapFFFilter()
   augroup END
 
-  if !exists(':DduRg')
-    autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once
-          \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
-  endif
+  # if !exists(':DduRg')
+  #   autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once
+  #        \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
+  # endif
+  command! -nargs=? -complete=dir LiveGrep call DduLiveGrep(<q-args>)
 
   if !v:vim_did_enter
     autocmd vimrc-ddu User vimrc_initialize ++once DduConfig()
+    autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once delcommand DduRg
   endif
 endif
 if Pacpack.Tap('ddc.vim')
