@@ -520,8 +520,8 @@ Pacpack.Add('https://github.com/whonore/Coqtail')
 
 Pacpack.AddLazy('https://github.com/lambdalisue/suda.vim')
 Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
-Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
-Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
+# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
+# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
 Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
 Pacpack.AddLazy('https://github.com/tweekmonster/helpful.vim')
 Pacpack.AddLazy('https://github.com/y0za/vim-reading-vimrc')
@@ -569,6 +569,15 @@ Pacpack.Add('https://github.com/shun/ddu-source-buffer')
 Pacpack.Add('https://github.com/shun/ddu-source-rg')
 Pacpack.Add('https://github.com/tennashi/ddu-source-git')
 Pacpack.Add('https://github.com/uga-rosa/ddu-source-lsp')
+
+# Ddc plugins
+Pacpack.Add('https://github.com/Shougo/ddc.vim')
+Pacpack.Add('https://github.com/Shougo/ddc-ui-native')
+Pacpack.Add('https://github.com/Shougo/ddc-source-lsp')
+Pacpack.Add('https://github.com/Shougo/ddc-source-around')
+Pacpack.Add('https://github.com/Shougo/ddc-source-line')
+Pacpack.Add('https://github.com/matsui54/ddc-source-buffer')
+Pacpack.Add('https://github.com/tani/ddc-fuzzy')
 
 # Options {{{
 if !exists('g:colors_name')  # Don't override colorscheme
@@ -1790,10 +1799,10 @@ if Pacpack.Tap('vim-lsp')
     Pacpack.Load('vim-lsp')
 
     # Plugin initializations
-    inoremap <expr> <C-n>
-          \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-n>"
-    inoremap <expr> <C-p>
-          \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-p>"
+    # inoremap <expr> <C-n>
+    #      \ pumvisible() ? "\<C-n>" : asyncomplete#close_popup() .. "\<C-n>"
+    # inoremap <expr> <C-p>
+    #      \ pumvisible() ? "\<C-p>" : asyncomplete#close_popup() .. "\<C-p>"
     # inoremap <expr> <C-e> pumvisible() ? asyncomplete#cancel_popup() : "\<C-e>"
     lsp#enable()
 
@@ -2345,6 +2354,63 @@ if Pacpack.Tap('ddu.vim')
   if !v:vim_did_enter
     autocmd vimrc-ddu User vimrc_initialize ++once DduConfig()
   endif
+endif
+if Pacpack.Tap('ddc.vim')
+  def DdcInit()
+    call ddc#custom#patch_global({
+      ui: 'native',
+      backspaceCompletion: true,
+      sources: ['lsp', 'around', 'buffer', 'line'],
+      sourceOptions: {
+        _: {
+          matchers: ['matcher_fuzzy'],
+          sorters: ['sorter_fuzzy'],
+          # converters: ['converter_fuzzy'],
+        },
+        around: { mark: 'around' },
+        buffer: { mark: 'buffer' },
+        line: { mark: 'line' },
+        lsp: {
+          mark: 'lsp',
+          forceCompletionPattern: '\.\w*|:\w*|->\w*',
+          sorters: ['sorter_lsp-kind'],
+        },
+      },
+      sourceParams: {
+        around: { maxSize: 500 },
+        buffer: {
+          requireSameFiletype: false,
+          limitBytes: 5000000,
+          fromAltBuf: true,
+          forceCollect: true,
+        },
+        line: { maxSize: 1000 },
+        lsp: {
+          # snippetEngine: denops#callback#register((body) => ...)
+          lspEngine: 'vim-lsp',
+          enableResolveItem: true,
+          enableAdditionalTextEdit: true,
+        }
+      },
+    })
+
+    set completefunc=DdcCompletefunc
+
+    ddc#enable()
+  enddef
+
+  def DdcCompletefunc(findstart: number, base: string): any
+    if !!findstart
+      defer call('ddc#map#manual_complete', [])
+      return -3
+    else
+      return []
+    endif
+  enddef
+
+  augroup vimrc
+    autocmd User vimrc_initialize ++once DdcInit()
+  augroup END
 endif
 if Pacpack.Tap('mr.vim')
   def MrPredicate(filename: string): bool
