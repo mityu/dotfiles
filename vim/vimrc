@@ -489,7 +489,7 @@ Pacpack.Add('https://github.com/lambdalisue/vim-findent')
 Pacpack.Add('https://github.com/lambdalisue/vim-gista')
 Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
 Pacpack.Add('https://github.com/matze/vim-tex-fold')
-Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
+# Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
 Pacpack.Add('https://github.com/mityu/vim-alith')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-gram')
@@ -2496,6 +2496,16 @@ if Pacpack.Tap('skkeleton')
     autocmd User skkeleton-mode-changed SkkeletonOnModeChanged()
   augroup END
 endif
+if Pacpack.Tap('gin.vim')
+  g:gin_log_default_args = ['--oneline']
+  # g:gin_log_persistent_args = ['++opener=noomdeline\ edit']
+  g:gin_patch_persistent_args = ['++opener=tabedit', '++no-head']
+  g:gin_proxy_apply_without_confirm = true
+  nnoremap <Space>g <Cmd>GinStatus<CR>
+  augroup vimrc-gin
+    autocmd BufReadCmd ginstatus://* nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
+  augroup END
+endif
 
 # ReadingVimrc
 command! -bar ReadingVimrc call ReadingVimrc()
@@ -2603,7 +2613,19 @@ augroup vimrc_showmode
 augroup END
 
 # statusline
-if Pacpack.Tap('gina.vim')
+if Pacpack.Tap('gin.vim')
+  # TODO: Lazy loading?
+  augroup vimrc-gin
+    autocmd User GinComponentPost ++nested redrawstatus
+  augroup END
+  def StatuslineGitBranch(): string
+    const branch = gin#component#branch#unicode()
+    if branch ==# ''
+      return 'no-git'
+    endif
+    return branch .. gin#component#traffic#unicode()
+  enddef
+elseif Pacpack.Tap('gina.vim')
   augroup vimrc_gina
     autocmd CursorHold * ++once call gina#component#repo#branch()
     autocmd SourcePost */autoload/gina.vim ++once {
