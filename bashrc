@@ -1,8 +1,29 @@
+# vim: filetype=bash tabstop=2
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+function dotfiles-path() {
+	echo $(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)
+}
+
 function bashrc_is_msys() {
 	[[ $(uname -o) == "Msys" ]]
+}
+
+function bashrc_in_vim_terminal() {
+	[[ "$VIM_TERMINAL" != "" ]]
+}
+
+function bashrc_in_neovim_terminal() {
+	[[ "$NVIM" != "" ]]
+}
+
+function bashrc_XDG_CONFIG_HOME() {
+	echo ${XDG_CONFIG_HOME:-$HOME/.config}
+}
+
+function bashrc_XDG_CACHE_HOME() {
+	echo ${XDG_CACHE_HOME:-$HOME/.cache}
 }
 
 function bashrc_prepend_PATH() {
@@ -15,12 +36,16 @@ function bashrc_has_cmd() {
 	which $1 &> /dev/null
 }
 
-# Set environmental variables (Only when outside of vim.)
-if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
+function bashrc_print_error() {
+	printf "\033[41m$@\033[m"
+}
+
+# Set environmental variables (Only when outside of Vim.)
+if ! bashrc_in_vim_terminal && [[ -f ~/.envrc ]]; then
 	cat ~/.envrc | while read path_expr
 	do
 		# Ignore blank line.
-		if [ -z ${path_expr} ]; then
+		if [ -z "${path_expr}" ]; then
 			continue
 		fi
 
@@ -32,12 +57,17 @@ if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
 	done
 fi
 
+# Environmental variables
 export LANG=en_US.UTF-8
-bashrc_prepend_PATH "$(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)/bin"
+export CLICOLOR=auto
+export LSCOLORS=gxexfxdxcxahadacagacad
+bashrc_prepend_PATH "$(dotfiles-path)/bin"
 bashrc_prepend_PATH "$HOME/.local/bin"
+
 if bashrc_has_cmd cargo; then
 	bashrc_prepend_PATH "$HOME/.cargo/bin"
 fi
+
 if bashrc_has_cmd go; then
 	function bashrc_get_gobin() {
 		local gobin
@@ -51,33 +81,80 @@ if bashrc_has_cmd go; then
 	bashrc_prepend_PATH $(bashrc_get_gobin)
 fi
 
-if bashrc_has_cmd vim && bashrc_is_msys && \
-	[[ $(which vim) == "$(cygpath $USERPROFILE)"* ]]; then
-	export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
+bashrc_has_cmd opam && eval $(opam env)
+
+if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
+	export SDKROOT=$(xcrun --show-sdk-path)
+	export CPATH=$CPATH:$SDKROOT/usr/include
+	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
+	# TODO: How can I set framework search path?
+	if [[ -d "$(brew --prefix)/opt/llvm" ]]; then
+		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
+	fi
+	if [[ -d "$(brew --prefix)/opt/gcc" ]]; then
+		alias gcc="$(ls $(brew --prefix)/bin | grep '^gcc-\d\+')"
+		alias g++="$(ls $(brew --prefix)/bin | grep '^g++-\d\+')"
+	fi
 fi
 
 
-if ! bashrc_has_cmd sudoedit; then
-	alias sudoedit='sudo -e'
-fi
+
+shopt -s nocaseglob
+set -o vi
+bind 'set show-mode-in-prompt on'
+bind 'set vi-ins-mode-string -'
+bind 'set vi-cmd-mode-string :'
+bind 'set keymap vi-command'
+bind 'k: history-search-backward'
+bind 'j: history-search-forward'
+bind 'set keymap vi-insert'
+bind '\C-p: history-search-backward'
+bind '\C-n: history-search-forward'
+bind '\C-b: backward-char'
+bind '\C-f: forward-char'
+bind '\C-a: beginning-of-line'
+bind '\C-e: end-of-line'
+bind '\C-w: kill-word'
 
 
-if [ -n "$VIM_TERMINAL" ]; then
-	function drop() {
-		echo "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
-	}
+alias dotfiles=". $(which dotfiles)"
+alias zenn='deno run -A npm:zenn-cli@latest'
+alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 
-	function synccwd() {
-	  local cwd
-	  echo "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
-	  read cwd
-	  cd "$cwd"
-	}
-fi
+bashrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
+bashrc_has_cmd sudoedit || alias sudoedit='sudo -e'
 
 if bashrc_is_msys; then
 	alias pbpaste='cat /dev/clipboard'
 	alias pbcopy='cat > /dev/clipboard'
+elif bashrc_has_cmd xsel; then
+	# xsel -p?
+	bashrc_has_cmd pbpaste || alias pbpaste='xsel -b'
+	bashrc_has_cmd pbcopy || alias pbcopy='xsel -bi'
+fi
+
+if bashrc_has_cmd eza; then
+	function ls() {
+		if [[ -t 1 ]]; then
+			# When output is terminal.
+			eza --group-directories-first --icons $*
+		else
+			command ls $*
+		fi
+	}
+fi
+
+if bashrc_has_cmd vim; then
+	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
+	alias vim-stable='vi'
+	alias profile-vimrc="vim --cmd 'source $(dotfiles-path)/vim/misc/profile_vimrc.vim'"
+	export MANPAGER='vim -M +MANPAGER -'
+	export EDITOR=vim
+	export GIT_EDITOR=vim
+
+	if bashrc_is_msys && [[ $(which vim) == "$(cygpath $USERPROFILE)"* ]]; then
+		export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
+	fi
 fi
 
 function stdin() {
@@ -89,31 +166,54 @@ function stdin() {
 	done
 }
 
-alias dotfiles=". $(which dotfiles)"
+if bashrc_in_vim_terminal; then
+	function drop() {
+		printf "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
+	}
 
-shopt -s nocaseglob
-set -o vi
-bind 'set show-mode-in-prompt on'
-bind 'set vi-ins-mode-string ❯'
-bind 'set vi-cmd-mode-string ❮'
-bind 'set keymap vi-command'
-bind 'k: history-search-backward'
-bind 'j: history-search-forward'
-bind 'set keymap vi-insert'
-bind '\C-p: history-search-backward'
-bind '\C-n: history-search-forward'
-bind '\C-b: backward-char'
-bind '\C-f: forward-char'
-bind '\C-a: beggining-of-line'
-bind '\C-e: end-of-line'
-bind '\C-w: kill-word'
+	function synccwd() {
+		local cwd
+		printf "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
+		read cwd
+		cd "$cwd"
+	}
+fi
 
-if bashrc_has_cmd fzf; then
+if bashrc_has_cmd sk; then
+	export SKIM_DEFAULT_OPTIONS='--reverse --no-sort'
+
+	bind -x '"\C-r": select-history'
+	function select-history() {
+		local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | sk --tac --no-multi)
+		if [[ $cmd != "" ]]; then
+			READLINE_LINE=$cmd
+			READLINE_POINT=${#cmd}
+		fi
+	}
+
+	function cd() {
+		if [[ $@ != '' ]]; then
+			command cd "$@"
+			return $?
+		fi
+		local directories=(
+			`dotfiles-path`
+			`bashrc_XDG_CONFIG_HOME`
+			`bashrc_XDG_CACHE_HOME`
+			"$HOME/projects"
+		)
+		local cmd="find ${directories[@]} -type d -not -path '*/\.git/*'"
+		local path=$(sk --no-multi -c "$cmd")
+		if [[ $path != "" ]]; then
+			cd $path
+		fi
+	}
+elif bashrc_has_cmd fzf; then
 	export FZF_DEFAULT_OPTS="--reverse --no-sort"
 
 	bind -x '"\C-r": select-history'
 	function select-history() {
-		local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | fzf --tac +m)
+		local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | fzf --tac --no-multi)
 		if [[ $cmd != "" ]]; then
 			READLINE_LINE=$cmd
 			READLINE_POINT=${#cmd}
@@ -121,39 +221,114 @@ if bashrc_has_cmd fzf; then
 	}
 fi
 
-if bashrc_has_cmd vim; then
-	export MANPAGER="vim -M +MANPAGER -"
-	export EDITOR=vim
-	export GIT_EDITOR=vim
+# Plugins
+bashrc_plugin_dir=`bashrc_XDG_CACHE_HOME`/bash
+
+function install-bash-plugins() {
+	local blesh_repo_dir=$bashrc_plugin_dir/ble.sh
+	if [[ ! -d $blesh_repo_dir ]]; then
+		git clone --recursive https://github.com/akinomyoga/ble.sh.git \
+			$blesh_repo_dir
+		# Build ble.sh and install to ~/.local/share/blesh
+		make -C $blesh_repo_dir && make -C $blesh_repo_dir install
+	fi
+
+	local gitstatus_repo_dir=$bashrc_plugin_dir/gitstatus
+	git clone https://github.com/romkatv/gitstatus $gitstatus_repo_dir
+	$gitstatus_repo_dir/build -w
+
+	# local git_prompt_script=$bashrc_plugin_dir/git-promopt.sh
+	# if [[ ! -f $git_prompt_script ]]; then
+	# 	curl -o $git_prompt_script \
+	# 		https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
+	# fi
+}
+
+function update-bash-plugins() {
+	local blesh_bin="$HOME/.local/share/blesh/ble.sh"
+	if [[ ${BLE_VERSION-} ]]; then
+		ble-update
+	elif [[ -f $blesh_bin ]]; then
+		bash $blesh_bin --update
+	fi
+
+	if [[ -d $bashrc_plugin_dir/gitstatus ]]; then
+		pushd $bashrc_plugin_dir/gitstatus
+		local hash=$(git rev-parse HEAD)
+		git pull
+		if [[ $hash != $(git rev-parse HEAD) ]]; then
+			./build -w
+		fi
+		popd
+	fi
+}
+
+if [[ ! -d $bashrc_plugin_dir ]]; then
+	echo 'Start installing bash plugins.'
+	mkdir -p $bashrc_plugin_dir
+	install-bash-plugins
+fi
+
+if [[ -f $bashrc_plugin_dir/gitstatus/gitstatus.plugin.sh ]]; then
+	source $bashrc_plugin_dir/gitstatus/gitstatus.plugin.sh
+	gitstatus_stop && gitstatus_start
 fi
 
 PROMPT_COMMAND=__bashrc_update_prompt
 
+declare -A __bashrc_prompt_colors=(
+	[gray]='\e[38;5;243m'
+	[red]='\e[0;31m'
+	[pink]='\e[38;5;218m'
+	[green]='\e[0;32m'
+	[yellow]='\e[0;33m'
+	[purple]='\e[0;35m'
+	[cyan]='\e[0;36m'
+)
+if ! tput -T xterm-256color longname &> /dev/null; then
+	__bashrc_prompt_colors[gray]='\e[0;37m'
+	__bashrc_prompt_colors[pink]='\e[0;31m'
+fi
+
 function __bashrc_update_prompt() {
 	local exit_code=$?
-	local gitbranch=$(which git &> /dev/null && git branch --show-current 2> /dev/null || echo '')
-	local gray='\e[38;5;243m'
-	local red='\e[0;31m'
-	local green='\e[0;32m'
-	local yellow='\e[0;33m'
-	local purple='\e[0;35m'
 	local reset='\e[m'
+
 	PS1="\[\e]0;\w\a\]\n"
 	if [[ $MSYSTEM != '' ]]; then
-		PS1+="$purple$MSYSTEM$reset "
+		PS1+="${__bashrc_prompt_colors[purple]}$MSYSTEM$reset "
 	fi
-	PS1+="${purple}bash$reset "
+	PS1+="${__bashrc_prompt_colors[purple]}bash$reset "
 	if [[ $exit_code == 0 ]]; then
-		PS1+="$green#\$?$reset"
+		PS1+="${__bashrc_prompt_colors[green]}#\$?$reset"
 	else
-		PS1+="$red#\$?$reset"
+		PS1+="${__bashrc_prompt_colors[red]}#\$?$reset"
 	fi
-	PS1+=" $yellow\w$reset "
-	if [[ $gitbranch != '' ]]; then
-		PS1+="$gray$gitbranch$reset "
+	PS1+=" ${__bashrc_prompt_colors[yellow]}\w$reset "
+	if type gitstatus_query &> /dev/null && gitstatus_query && \
+		[[ "$VCS_STATUS_RESULT" == ok-sync ]]; then
+		local branch=$VCS_STATUS_LOCAL_BRANCH
+		[[ -z $branch ]] && branch="@$VCS_STATUS_COMMIT"
+		local dirty
+		(( dirty = VCS_STATUS_NUM_STAGED + VCS_STATUS_NUM_UNSTAGED + VCS_STATUS_NUM_UNTRACKED ))
+
+		PS1+=" ${__bashrc_prompt_colors[gray]}$branch$reset"
+		(( dirty )) && PS1+="${__bashrc_prompt_colors[pink]}*$reset"
+		(( VCS_STATUS_COMMITS_AHEAD )) && PS1+="${__bashrc_prompt_colors[cyan]}⇡$VCS_STATUS_COMMITS_AHEAD$reset"
+		(( VCS_STATUS_COMMITS_BEHIND )) && PS1+="${__bashrc_prompt_colors[cyan]}⇣$VCS_STATUS_COMMITS_BEHIND$reset"
+		(( VCS_STATUS_STASHES )) && PS1+="${__bashrc_prompt_colors[cyan]}≡$reset"
+		if [[ -n ${VCS_STATUS_REMOTE_NAME:-} ]]; then
+			PS1+="${__bashrc_prompt_colors[gray]} → $VCS_STATUS_REMOTE_NAME"
+			[[ -n ${VCS_STATUS_REMOTE_BRANCH:-} ]] && PS1+="/$VCS_STATUS_REMOTE_BRANCH"
+			PS1+="$reset"
+		fi
+	else
+		local branch=$(git branch --show-current 2> /dev/null || echo '')
+		[[ -n $branch ]] && PS1+=" ${__bashrc_prompt_colors[gray]}$branch$reset (no-status)"
 	fi
-	PS1+='(no-async)'
-	PS1+='\n '
+	PS1+='\n'
+	[[ $(id -u) == 0 ]] && PS1+='# ' || PS1+='$ '
+	return $exit_code
 }
 
 # Don't put duplicate lines in the history.
