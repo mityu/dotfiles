@@ -1217,6 +1217,19 @@ if Pacpack.Tap('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
+if Pacpack.Tap('vim-ripgrep')
+  def RipGrep(args: string)
+    var cwd = getcwd(winnr())
+    cwd = Input('Grep here? ', cwd, 'dir')
+    if !cwd->isdirectory()
+      EchomsgError($'Directory not exist: {cwd}')
+      return
+    endif
+    ripgrep#call(args, cwd, fnamemodify(cwd, ':.'))
+  enddef
+
+  command! -nargs=+ -complete=file RipGrep RipGrep(<q-args>)
+endif
 if Pacpack.Tap('fern.vim')
   g:fern#disable_default_mappings = 1
   g:fern#default_exclude = '.DS_Store'
