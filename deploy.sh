@@ -71,6 +71,9 @@ ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
 echo "Deploying wezterm/"
 ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 
+echo "Deploying blesh/"
+ln -snfv $SCRIPT_DIR/blesh $CONFIG_DIR/blesh
+
 if $IS_MAC; then
 	echo "Deploying karabiner/"
 	ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner

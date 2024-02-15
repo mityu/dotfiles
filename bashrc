@@ -2,6 +2,10 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+# If bash is running interactively, launch ble.sh
+[[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
+	source "$HOME/.local/share/blesh/ble.sh" --noattach
+
 function dotfiles-path() {
 	echo $(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)
 }
@@ -101,9 +105,11 @@ fi
 
 shopt -s nocaseglob
 set -o vi
-bind 'set show-mode-in-prompt on'
-bind 'set vi-ins-mode-string -'
-bind 'set vi-cmd-mode-string :'
+if ! type ble &> /dev/null; then
+	bind 'set show-mode-in-prompt on'
+	bind 'set vi-ins-mode-string -'
+	bind 'set vi-cmd-mode-string :'
+fi
 bind 'set keymap vi-command'
 bind 'k: history-search-backward'
 bind 'j: history-search-forward'
@@ -358,3 +364,5 @@ fi
 # Default to human readable figures
 # alias df='df -h'
 # alias du='du -h'
+
+[[ ${BLE_VERSION-} ]] && ble-attach || true  # Do not left error exit status.
