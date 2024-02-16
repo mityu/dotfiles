@@ -132,6 +132,7 @@ alias dotfiles=". $(which dotfiles)"
 alias zenn='deno run -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias no-ble-bash='NO_BLE=true exec bash'
+alias themis-nvim='THEMIS_VIM=nvim themis'
 
 bashrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
 bashrc_has_cmd sudoedit || alias sudoedit='sudo -e'
@@ -189,6 +190,10 @@ if bashrc_in_vim_terminal; then
 		read cwd
 		cd "$cwd"
 	}
+
+	if bashrc_has_cmd nvim; then
+		alias nvim='VIM= VIMRUNTIME= nvim'
+	fi
 fi
 
 if bashrc_has_cmd sk; then
