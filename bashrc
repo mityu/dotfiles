@@ -46,7 +46,12 @@ function bashrc_has_cmd() {
 }
 
 function bashrc_print_error() {
-	printf "\033[41m$@\033[m"
+	printf "\033[41m$@\033[m\n"
+}
+
+function bashrc_ask_yesno() {
+	echo -n "$1 [y/N]: "
+	read -q
 }
 
 # Set environmental variables (Only when outside of Vim.)
@@ -157,6 +162,22 @@ if bashrc_has_cmd vim; then
 		export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
 	fi
 fi
+
+function gitinit() {
+	if git rev-parse 2> /dev/null; then
+		bashrc_ask_yesno 'In a git repository. continue?' || return 1
+	fi
+	git init --initial-branch main
+	git commit --allow-empty -m "Initial commit"
+}
+
+function CAPSLOCK() {
+	if bashrc_has_cmd xdotool; then
+		xdotool key Caps_Lock
+	else
+		bashrc_print_error 'xdotool not found.'
+	fi
+}
 
 function stdin() {
 	local cmd stdin
