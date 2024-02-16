@@ -9,19 +9,7 @@ function gobin-path() {
 
 # Set environmental variables (Only when outside of vim.)
 if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
-	cat ~/.envrc | while read path_expr
-	do
-		# Ignore blank line.
-		if [ -z ${path_expr} ]; then
-			continue
-		fi
-
-		# Ignore comment.
-		if [ ${path_expr:0:1} = "#" ]; then
-			continue
-		fi
-		eval 'export' $path_expr
-	done
+	source ~/.envrc
 fi
 export LANG=en_US.UTF-8
 
@@ -558,85 +546,6 @@ if zshrc_has_cmd fzf; then
 	zle -N select-history
 	bindkey '^r' select-history
 fi
-
-function update-vim-plugins() {
-	echo 'Updating vim plugins'
-	vim -u "$(dotfiles-path)/vim/vimrc" -i NONE --noplugins -n -N -e -s -S <(cat <<- EOF
-	function UpdatePlugins()
-		PackInit
-		if !exists("*minpac#init()")
-			call setline(1, split(execute("message"), "\n"))
-			call append("$", "Failed to load minpac")
-			%print
-			cquit!
-		endif
-		let info = minpac#getpluginfo("vimdoc-ja")
-		if !empty(info)
-			call system(printf('git -C %s reset --hard', shellescape(info.dir)))
-		endif
-		let g:minpac#opt.status_auto = v:true
-		call minpac#update("", {"do": "call PostUpdatePlugins()"})
-	endfunction
-	function PostUpdatePlugins()
-		%print
-		quitall!
-	endfunction
-	autocmd VimEnter * ++once call UpdatePlugins()
-	EOF
-	)
-}
-
-function update-softwares() {
-	local password=''
-	local need_password=(zshrc_has_cmd pacman)
-
-	if $need_password; then
-		sudo -k  # Reset sudo credential cache
-		echo -n 'Password:'; read -s password;
-		while ! sudo -Svp '' &> /dev/null <<< $password; do
-				echo
-				echo 'Sorry, try again.'
-				echo -n 'Password:'; read -s password;
-		done
-	fi
-
-	update-vim
-	update-macvim
-
-	if zshrc_has_cmd brew; then
-		brew upgrade
-		brew cleanup
-		if [[ "$(uname)" == "Darwin" ]]; then
-			brew upgrade --cask
-		fi
-	fi
-	if zshrc_has_cmd pacman; then
-		if zshrc_has_cmd yay; then
-			# Prefer using yay to pacman
-			yay -Syyu --noconfirm --sudoflags -S <<< $password
-		else
-			sudo -S pacman -Syyu --noconfirm <<< $password
-		fi
-	fi
-	if zshrc_has_cmd go; then
-		pushd ~
-		print -rl $(gobin-path)/*(*) | while read file; do
-			local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
-			go install "${pkg}@latest"
-		done
-		popd
-	fi
-	if zshrc_has_cmd opam; then
-		opam update && opam upgrade --yes
-	fi
-	if zshrc_has_cmd pip3; then
-		pip3 list --outdated --format json | \
-			python3 -c "import sys; import json; list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))" | \
-			xargs pip3 install -U
-	fi
-	update-zsh-plugins
-	update-vim-plugins
-}
 
 function gitinit() {
 	if zshrc_in_git_repo; then

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+function has-cmd() {
+	type $1 &> /dev/null
+}
+
+function need-password() {
+	has-cmd pacman
+}
+
+function gobin-path() {
+	local gobin=$(go env GOBIN)
+	gobin=${gobin:-$(go env GOPATH)/bin}
+	echo $gobin
+}
+
+function do-update {
+	local password=''
+
+	if need-password; then
+		sudo -k  # Reset sudo credential cache
+		echo -n 'Password:'; read -s password;
+		while ! sudo -Svp '' &> /dev/null <<< $password; do
+				echo
+				echo 'Sorry, try again.'
+				echo -n 'Password:'; read -s password;
+		done
+	fi
+
+	has-cmd update-vim && update-vim
+	[[ $(uname -o) != "Msys" ]] && has-cmd update-neovim && update-neovim
+	has-cmd update-macvim && update-macvim
+
+	if has-cmd brew; then
+		brew upgrade
+		brew cleanup
+		if [[ "$(uname)" == "Darwin" ]]; then
+			brew upgrade --cask
+		fi
+	fi
+
+	if has-cmd pacman; then
+		if has-cmd yay; then
+			# Prefer using yay to pacman
+			yay -Syyu --noconfirm --sudoflags -S <<< $password
+		else
+			sudo -S pacman -Syyu --noconfirm <<< $password
+		fi
+	fi
+
+	if has-cmd go; then
+		pushd ~
+		find $(gobin-path) -type f	| while read file; do
+			local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
+			go install "${pkg}@latest"
+		done
+		popd
+	fi
+
+	if has-cmd opam; then
+		opam update && opam upgrade --yes
+	fi
+
+	if has-cmd pip3; then
+		pip3 list --outdated --format json | python3 <(cat <<- EOF
+			import sys
+			import json
+			list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))
+			EOF
+			) | xargs pip3 install -U
+	fi
+
+	has-cmd update-zsh-plugins && update-zsh-plugins
+	has-cmd update-bash-plugins && update-bash-plugins
+	has-cmd update-vim-plugins && update-vim-plugins
+}
+
+do-update

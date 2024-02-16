@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function dotfiles-path() {
+	echo $(cd $(dirname $(dirname $(readlink -f ${BASH_SOURCE[0]}))); pwd)
+}
+
+echo 'Updating vim plugins'
+vim -u "$(dotfiles-path)/vim/vimrc" -i NONE --noplugins -n -N -e -s -S <(cat <<- EOF
+function UpdatePlugins()
+	PackInit
+	if !exists("*minpac#init()")
+		call setline(1, split(execute("message"), "\n"))
+		call append("$", "Failed to load minpac")
+		%print
+		cquit!
+	endif
+	let info = minpac#getpluginfo("vimdoc-ja")
+	if !empty(info)
+		call system(printf('git -C %s reset --hard', shellescape(info.dir)))
+	endif
+	let g:minpac#opt.status_auto = v:true
+	call minpac#update("", {"do": "call PostUpdatePlugins()"})
+endfunction
+function PostUpdatePlugins()
+	%print
+	quitall!
+endfunction
+autocmd VimEnter * ++once call UpdatePlugins()
+EOF
+)
