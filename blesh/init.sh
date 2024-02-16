@@ -13,6 +13,12 @@ function blerc/hook-keymap-vi-load {
 	ble-bind -m vi_xmap --cursor 2
 	ble-bind -m vi_cmap --cursor 2
 
+	ble-bind -m vi_imap -f 'C-@' 'vi_imap/normal-mode'
+	ble-bind -m vi_nmap -f 'C-@' 'vi-command/bell'
+	ble-bind -m vi_omap -f 'C-@' 'vi_omap/cancel'
+	ble-bind -m vi_xmap -f 'C-@' 'vi_xmap/exit'
+	ble-bind -m vi_cmap -f 'C-@' 'vi_cmap/cancel'
+
 	ble-bind -m vi_imap -f 'C-i' 'vi_imap/complete'
 	ble-bind -m vi_imap -f 'TAB' 'vi_imap/complete'
 
@@ -34,6 +40,8 @@ ble-face command_builtin='fg=green'
 ble-face command_alias='fg=green'
 ble-face command_function='fg=green'
 ble-face command_keyword='fg=cyan'
+ble-face command_directory='fg=white,underline'
+ble-face filename_directory='underline,fg=white,underline'
 ble-face auto_complete='fg=gray'
 
 ble-sabbrev g='git'
