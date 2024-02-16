@@ -50,20 +50,8 @@ function bashrc_print_error() {
 }
 
 # Set environmental variables (Only when outside of Vim.)
-if ! bashrc_in_vim_terminal && [[ -f ~/.envrc ]]; then
-	cat ~/.envrc | while read path_expr
-	do
-		# Ignore blank line.
-		if [ -z "${path_expr}" ]; then
-			continue
-		fi
-
-		# Ignore comment.
-		if [ ${path_expr:0:1} = "#" ]; then
-			continue
-		fi
-		eval 'export' $path_expr
-	done
+if ! (bashrc_in_vim_terminal || bashrc_in_neovim_terminal) && [[ -f ~/.envrc ]]; then
+	source ~/.envrc
 fi
 
 # Environmental variables
