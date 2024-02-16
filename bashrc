@@ -3,8 +3,13 @@
 # [[ "$-" != *i* ]] && return
 
 # If bash is running interactively, launch ble.sh
-[[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
+if [[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
+	[[ -z ${NO_BLE:-} ]]; then
 	source "$HOME/.local/share/blesh/ble.sh" --noattach
+elif tput -T xterm longname &> /dev/null; then
+	# Fix cursor shape (it's maybe different when bash is launched via "no-ble-bash")
+	printf "\e[2 q"
+fi
 
 function dotfiles-path() {
 	echo $(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)
@@ -126,6 +131,7 @@ bind '\C-w: kill-word'
 alias dotfiles=". $(which dotfiles)"
 alias zenn='deno run -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
+alias no-ble-bash='NO_BLE=true exec bash'
 
 bashrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
 bashrc_has_cmd sudoedit || alias sudoedit='sudo -e'
