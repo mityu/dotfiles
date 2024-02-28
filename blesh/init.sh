@@ -3,6 +3,8 @@
 
 bleopt editor=vim
 bleopt exec_errexit_mark=
+bleopt term_modifyOtherKeys_external=
+bleopt term_modifyOtherKeys_internal=
 
 
 function blerc/hook-keymap-vi-load {
