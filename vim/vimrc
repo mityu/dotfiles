@@ -1217,7 +1217,7 @@ if Pacpack.Tap('vim-ripgrep')
       EchomsgError($'Directory not exist: {cwd}')
       return
     endif
-    ripgrep#call(args, cwd, fnamemodify(cwd, ':.'))
+    ripgrep#call($'rg --json -w -i {args}', cwd, fnamemodify(cwd, ':.') .. Filesystem.slash)
   enddef
 
   command! -nargs=+ -complete=file RipGrep RipGrep(<q-args>)
