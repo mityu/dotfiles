@@ -491,6 +491,7 @@ Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
 Pacpack.Add('https://github.com/matze/vim-tex-fold')
 # Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
 Pacpack.Add('https://github.com/mityu/vim-alith')
+Pacpack.Add('https://github.com/mityu/vim-charjump')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-gram')
 Pacpack.Add('https://github.com/mityu/vim-gram-peripherals')
@@ -1033,15 +1034,6 @@ def MapTabmove(delta: number)
   execute movecmd
 enddef
 
-# f F t T ; , declarations {{{
-map <expr> f vimrc#charjump#Jump(v:true, v:false)
-map <expr> F vimrc#charjump#Jump(v:false, v:false)
-map <expr> t vimrc#charjump#Jump(v:true, v:true)
-map <expr> T vimrc#charjump#Jump(v:false, v:true)
-noremap ; <Cmd>call vimrc#charjump#Repeat(v:false)<CR>
-noremap , <Cmd>call vimrc#charjump#Repeat(v:true)<CR>
-# }}}
-
 def CmdwinEnter()
   # Type <CR> to execute current line in command-line window.
   # This mapping is overwritten when ambicmd.vim is installed.
@@ -1409,6 +1401,14 @@ if Pacpack.Tap('vim-alith')
     autocmd ColorScheme * highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
+endif
+if Pacpack.Tap('vim-charjump')
+  noremap f <Plug>(charjump-inclusive-forward)
+  noremap F <Plug>(charjump-inclusive-backward)
+  noremap t <Plug>(charjump-exclusive-forward)
+  noremap T <Plug>(charjump-exclusive-backward)
+  noremap ; <Plug>(charjump-repeat-obverse)
+  noremap , <Plug>(charjump-repeat-reverse)
 endif
 if Pacpack.Tap('vim-cmdhistory')
   augroup vimrc-cmdhistory
