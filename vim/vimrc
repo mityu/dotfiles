@@ -491,6 +491,7 @@ Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
 Pacpack.Add('https://github.com/matze/vim-tex-fold')
 # Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
 Pacpack.Add('https://github.com/mityu/vim-alith')
+Pacpack.Add('https://github.com/mityu/vim-backpair')
 Pacpack.Add('https://github.com/mityu/vim-charjump')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-gram')
@@ -1401,6 +1402,20 @@ if Pacpack.Tap('vim-alith')
     autocmd ColorScheme * highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
+endif
+if Pacpack.Tap('vim-backpair')
+  def BackpairConfig()
+    backpair#add_pair('(', ')')
+    backpair#add_pair('[', ']')
+    backpair#add_pair('<', '>')
+    backpair#add_pair('"', '"')
+    backpair#add_pair("'", "'")
+  enddef
+
+  augroup vimrc-plugin-backpair
+    autocmd InsertEnter * ++once backpair#enable()
+    autocmd User backpair-initialize BackpairConfig()
+  augroup END
 endif
 if Pacpack.Tap('vim-charjump')
   noremap f <Plug>(charjump-inclusive-forward)
