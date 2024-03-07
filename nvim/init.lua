@@ -135,5 +135,12 @@ if not vim_did_start then
 end
 
 if not vim.g.colors_name then
-  vim.cmd 'colorscheme habamax'
+  -- vim.cmd 'colorscheme habamax'
+  vim.opt.runtimepath:prepend([[~/dotfiles/vim/runtime]])
+  vim.cmd 'colorscheme reliquiae'
+  vim.opt.runtimepath:remove([[~/dotfiles/vim/runtime]])
+  -- require('ibl').update({indent = {highlight = 'Comment'}})
+  -- vim.cmd 'highlight IblIndent gui=reverse cterm=reverse'
+  -- vim.cmd 'highlight link IblIndent CursorLine'
+  vim.cmd [[highlight IblIndent guifg=black ctermfg=black]]
 end
