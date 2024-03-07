@@ -1408,8 +1408,11 @@ if Pacpack.Tap('vim-backpair')
     backpair#add_pair('(', ')')
     backpair#add_pair('[', ']')
     backpair#add_pair('<', '>')
+    backpair#add_pair('{', '}')
     backpair#add_pair('"', '"')
     backpair#add_pair("'", "'")
+    backpair#add_pair('\(', '\)')
+    backpair#add_pair('\%(', '\)')
   enddef
 
   augroup vimrc-plugin-backpair
