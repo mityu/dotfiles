@@ -27,7 +27,7 @@ if which uname &> /dev/null && [[ "`uname`" == "Darwin" ]]; then
 
 	ODIR=./nvim-$1
 	if [ -d "./nvim-osx64" ]; then
-		mv ./nvim-osx64 $ODiR
+		mv ./nvim-osx64 $ODIR
 	elif [ -d "./nvim-macos" ]; then
 		mv ./nvim-macos $ODIR
 	fi
