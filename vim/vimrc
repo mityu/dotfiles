@@ -1211,17 +1211,21 @@ if Pacpack.Tap('vim-altr')
   command! -bar AlterBack call altr#back()
 endif
 if Pacpack.Tap('vim-ripgrep')
-  def RipGrep(args: string)
+  def RipGrep(argsGiven: string)
     var cwd = getcwd(winnr())
     cwd = Input('Grep here? ', cwd, 'dir')
     if !cwd->isdirectory()
       EchomsgError($'Directory not exist: {cwd}')
       return
     endif
+    var args = argsGiven
+    if args ==# ''
+      args = Input('Search pattern: ')
+    endif
     ripgrep#call($'rg --json -w -i {args}', cwd, fnamemodify(cwd, ':.') .. Filesystem.slash)
   enddef
 
-  command! -nargs=+ -complete=file RipGrep RipGrep(<q-args>)
+  command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)
 endif
 if Pacpack.Tap('fern.vim')
   g:fern#disable_default_mappings = 1
