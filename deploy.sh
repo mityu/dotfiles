@@ -74,6 +74,9 @@ ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 echo "Deploying blesh/"
 ln -snfv $SCRIPT_DIR/blesh $CONFIG_DIR/blesh
 
+echo "Deploying efm-langserver/"
+ln -snfv $SCRIPT_DIR/efm-langserver $CONFIG_DIR/efm-langserver
+
 if $IS_MAC; then
 	echo "Deploying karabiner/"
 	ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner
