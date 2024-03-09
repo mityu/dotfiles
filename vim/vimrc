@@ -1410,13 +1410,15 @@ endif
 if Pacpack.Tap('vim-backpair')
   def BackpairConfig()
     backpair#add_pair('(', ')')
-    backpair#add_pair('[', ']')
+    backpair#add_pair('[', ']', {skip_if_ongoing: ['[[]']})
     backpair#add_pair('<', '>')
     backpair#add_pair('{', '}')
     backpair#add_pair('"', '"')
     backpair#add_pair("'", "'")
     backpair#add_pair('\(', '\)')
     backpair#add_pair('\%(', '\)')
+    backpair#add_pair('[[', ']]', {enable_filetypes: ['lua', 'sh', 'bash', 'zsh', 'toml']})
+    backpair#add_pair('`', '`', {condition: (): bool => trim(getline('.')) !=# '``'})
   enddef
 
   augroup vimrc-plugin-backpair
