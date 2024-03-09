@@ -1836,7 +1836,6 @@ if Pacpack.Tap('vim-lsp')
     if Pacpack.Tap('vim-lsp-settings')
       Pacpack.Load('vim-lsp-settings')
     endif
-    Pacpack.Load('vim-lsp')
 
     # Plugin initializations
     # inoremap <expr> <C-n>
