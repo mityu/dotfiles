@@ -1828,7 +1828,9 @@ if Pacpack.Tap('vim-lsp')
       Pacpack.Load('asyncomplete.vim')
     endif
 
-    # vim-lsp-settings must be loaded before vim-lsp
+    Pacpack.Load('vim-lsp')
+
+    # vim-lsp-settings must be loaded after vim-lsp
     if Pacpack.Tap('vim-lsp-settings')
       Pacpack.Load('vim-lsp-settings')
     endif
