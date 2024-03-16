@@ -2251,7 +2251,7 @@ if Pacpack.Tap('ddu.vim')
       uiParams: {ff: {startFilter: true}},
     })
     ddu#custom#patch_local('file-rec', 'sources', [{name: 'file_rec'}])
-    ddu#custom#patch_local('plugin-files', {
+    ddu#custom#patch_local('pack-files', {
       sources:
         [
           PacPath,
@@ -2407,7 +2407,7 @@ if Pacpack.Tap('ddu.vim')
   nnoremap <Space>j <Cmd>call <SID>DduFiles()<CR>
   nnoremap <Space>l <Cmd>call <SID>DduStartSync(#{sources: [#{name: 'line'}]})<CR>
   nnoremap <Space>b <Cmd>call <SID>DduStartSync({'name': 'buffer'})<CR>
-  command! PackFiles DduStartSync({'name': 'plugin-files'})
+  command! PackFiles DduStartSync({'name': 'pack-files'})
   command! Dotfiles DduStartSync({'name': 'dotfiles'})
   command! -nargs=? -complete=dir Files DduFiles(<q-args>)
 
