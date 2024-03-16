@@ -2347,6 +2347,27 @@ if Pacpack.Tap('ddu.vim')
     return path
   enddef
 
+  var dduWaitingUiOpen = false
+  def DduOnUiReady()
+    dduWaitingUiOpen = false
+  enddef
+
+  def DduStartSync(options: dict<any> = {})
+    ddu#start(options)
+    var keyTypes = ''
+    dduWaitingUiOpen = true
+    autocmd User Ddu:uiReady ++once DduOnUiReady()
+    while dduWaitingUiOpen
+      while getcharstr(true) !=# ''
+        keyTypes ..= getcharstr()
+      endwhile
+      sleep 1m
+    endwhile
+    if keyTypes !=# ''
+      feedkeys(keyTypes .. "\<Cmd>redraw\<CR>", 'it')
+    endif
+  enddef
+
   def DduLiveGrep(pathGiven: string = '')
     var path = DduGetSearchRootPath(pathGiven)
     if path !=# ''
@@ -2357,19 +2378,19 @@ if Pacpack.Tap('ddu.vim')
           return
         endif
       endif
-      ddu#start({name: 'live-grep', sourceOptions: {rg: {path: path}}})
+      DduStartSync({name: 'live-grep', sourceOptions: {rg: {path: path}}})
     endif
   enddef
 
   def DduFiles(pathGiven: string = '')
     const path = DduGetSearchRootPath(pathGiven)
     if path !=# ''
-      ddu#start({name: 'file-rec', sourceOptions: {file_rec: {path: path}}})
+      DduStartSync({name: 'file-rec', sourceOptions: {file_rec: {path: path}}})
     endif
   enddef
 
   def DduMru()
-    ddu#start({
+    DduStartSync({
       name: 'mru',
       sources: [
         {name: 'mr'},
@@ -2381,10 +2402,10 @@ if Pacpack.Tap('ddu.vim')
 
   nnoremap <Space>k <Cmd>call <SID>DduMru()<CR>
   nnoremap <Space>j <Cmd>call <SID>DduFiles()<CR>
-  nnoremap <Space>l <Cmd>call ddu#start(#{sources: [#{name: 'line'}]})<CR>
-  nnoremap <Space>b <Cmd>call ddu#start({'name': 'buffer'})<CR>
-  command! PackFiles call ddu#start({'name': 'plugin-files'})
-  command! Dotfiles call ddu#start({'name': 'dotfiles'})
+  nnoremap <Space>l <Cmd>call <SID>DduStartSync(#{sources: [#{name: 'line'}]})<CR>
+  nnoremap <Space>b <Cmd>call <SID>DduStartSync({'name': 'buffer'})<CR>
+  command! PackFiles DduStartSync({'name': 'plugin-files'})
+  command! Dotfiles DduStartSync({'name': 'dotfiles'})
   command! -nargs=? -complete=dir Files DduFiles(<q-args>)
 
   augroup vimrc-ddu
