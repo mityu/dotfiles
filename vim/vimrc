@@ -2437,7 +2437,6 @@ if Pacpack.Tap('ddc.vim')
         _: {
           matchers: ['matcher_fuzzy'],
           sorters: ['sorter_fuzzy'],
-          # converters: ['converter_fuzzy'],
         },
         around: { mark: 'around' },
         buffer: { mark: 'buffer' },
@@ -2452,7 +2451,7 @@ if Pacpack.Tap('ddc.vim')
         around: { maxSize: 500 },
         buffer: {
           requireSameFiletype: false,
-          limitBytes: 5000000,
+          limitBytes: 50000,
           fromAltBuf: true,
           forceCollect: true,
         },
