@@ -1287,8 +1287,7 @@ if Pacpack.Tap('fern.vim')
 
   def FernClose()
     if exists('w:vimrc_fern_altbuf') &&
-        bufexists(w:vimrc_fern_altbuf) &&
-        bufname(w:vimrc_fern_altbuf) !~# '^fern://'
+        buflisted(w:vimrc_fern_altbuf)
       execute 'buffer' w:vimrc_fern_altbuf
     else
       enew
