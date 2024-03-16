@@ -2964,6 +2964,7 @@ if has('gui_running')
 
     if IsWindows
       winpos 0 0
+      autocmd GuiEnter * ++once simalt ~x
       cd $USERPROFILE
       if &shell =~? 'cmd\.exe' && executable('C:/msys64/usr/bin/bash.exe')
         # Set MSYS2 MinGW64 related environmental variables.
@@ -2989,15 +2990,15 @@ if has('gui_running')
   set nomousefocus
   set mousehide
 
-  if has('win32')
+  if IsWindows
     set guifont=Cica:h12,MS_Gothic:h10:cSHIFTJIS
     set linespace=1
-  elseif has('mac')
+  elseif IsMac
     set guifont=Cica:h14,Osaka-Mono:h14
   elseif has('xfontset')
     # for unix (use xfontset)
     set guifont=a14,r14,k14
-  elseif has('linux')
+  elseif IsLinux
     set guifont=Cica\ 14,DejaVu\ Sans\ Mono\ 14
   endif
 
