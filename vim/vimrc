@@ -2413,10 +2413,6 @@ if Pacpack.Tap('ddu.vim')
     autocmd FileType ddu-ff-filter DduMapFFFilter()
   augroup END
 
-  # if !exists(':DduRg')
-  #   autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once
-  #        \ command! -nargs=? -complete=dir DduRg call DduLiveGrep(<q-args>)
-  # endif
   command! -nargs=? -complete=dir LiveGrep call DduLiveGrep(<q-args>)
 
   if !v:vim_did_enter
@@ -2555,13 +2551,16 @@ if Pacpack.Tap('skkeleton')
   augroup END
 endif
 if Pacpack.Tap('gin.vim')
-  g:gin_log_default_args = ['--oneline']
+  # g:gin_log_default_args = ['--oneline']
   # g:gin_log_persistent_args = ['++opener=noomdeline\ edit']
   g:gin_patch_persistent_args = ['++opener=tabedit', '++no-head']
   g:gin_proxy_apply_without_confirm = true
   nnoremap <Space>g <Cmd>GinStatus<CR>
+
   augroup vimrc-gin
     autocmd BufReadCmd ginstatus://* nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
+    autocmd BufReadCmd gin{status,branch,log}://*
+          \ nnoremap <buffer> <Tab> <Plug>(gin-action-choice)
   augroup END
 endif
 
