@@ -1055,8 +1055,6 @@ def CmdwinEnter()
   endif
   if Pacpack.Tap('vim-winc')
     winc#Setup()
-  else
-    vimrc#incsearch#Setup()
   endif
 
   const cmdwin_type = expand('<afile>')
