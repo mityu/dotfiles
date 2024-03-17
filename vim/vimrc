@@ -552,6 +552,7 @@ Pacpack.Add('https://github.com/vim-denops/denops-shared-server.vim')
 Pacpack.Add('https://github.com/vim-skk/skkeleton')
 Pacpack.Add('https://github.com/skk-dev/dict')
 Pacpack.Add('https://github.com/lambdalisue/gin.vim')
+Pacpack.Add('https://github.com/vim-fall/fall.vim')
 
 # Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/mr.vim')
