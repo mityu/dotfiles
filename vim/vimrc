@@ -2993,6 +2993,7 @@ if has('gui_running')
     set linespace=1
   elseif IsMac
     set guifont=Cica:h14,Osaka-Mono:h14
+    nnoremap <D-n> <Cmd>macaction newWindow:<CR>
   elseif has('xfontset')
     # for unix (use xfontset)
     set guifont=a14,r14,k14
