@@ -793,6 +793,13 @@ augroup vimrc_window
   autocmd VimResized * wincmd =
 augroup END
 
+augroup vimrc
+  autocmd BufRead */vimdoc-ja-working/doc/*.jax
+        \ b:autofmt_allow_over_tw = 1
+        \ | setlocal formatoptions+=mM
+        \ | autocmd Filetype <buffer> ++once HelpEdit
+augroup END
+
 # Mapping {{{
 nnoremap : q:A
 vnoremap : q:A
