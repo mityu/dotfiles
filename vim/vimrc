@@ -891,6 +891,19 @@ cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
 cnoremap <C-o> <Cmd>call cmdhistory#Select()<CR>
 
+onoremap a( 2i(
+onoremap a{ 2i{
+onoremap a[ 2i[
+onoremap a< 2i<
+onoremap a" 2i"
+onoremap a' 2i'
+xnoremap a( 2i(
+xnoremap a{ 2i{
+xnoremap a[ 2i[
+xnoremap a< 2i<
+xnoremap a" 2i"
+xnoremap a' 2i'
+
 nnoremap <C-w>, <Cmd>call <SID>ToggleQuickfix()<CR>
 def ToggleQuickfix()
   const wincount = winnr('$')
@@ -923,7 +936,6 @@ def ToggleLocationlist()
     echoerr v:exception
   endtry
 enddef
-# }}}
 tnoremap <C-w>: <C-w>:<C-f>A
 tnoremap <C-w><Space>: <C-w>:<C-f>k
 tnoremap <C-w>; <C-w>:
@@ -939,6 +951,7 @@ if IsMac && has('gui_running')
   noremap <D-[> <ESC>
   noremap! <D-[> <ESC>
 endif
+# }}}
 
 # Loop
 def LoopDefine(config: dict<any>)
