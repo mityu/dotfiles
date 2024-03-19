@@ -231,7 +231,7 @@ if bashrc_has_cmd sk; then
 		local cmd="find ${directories[@]} -type d -not -path '*/\.git/*'"
 		local path=$(sk --no-multi -c "$cmd")
 		if [[ $path != "" ]]; then
-			cd $path
+			command cd $path
 		fi
 	}
 elif bashrc_has_cmd fzf; then
