@@ -1,6 +1,7 @@
 # vim: set tabstop=2 shiftwidth=2
 # See also: https://github.com/akinomyoga/ble.sh/blob/master/blerc.template
 
+bleopt history_share=0
 bleopt editor=vim
 bleopt exec_errexit_mark=
 bleopt term_modifyOtherKeys_external=
