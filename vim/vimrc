@@ -189,8 +189,7 @@ if !v:vim_did_enter
     &t_Ce = "\e[4:0m"
   endif
 
-  if &term =~# '\<\%(256color\|win32\)\>' &&
-      $TERM_PROGRAM !=# 'Apple_Terminal' && $NVIM ==# ''
+  if $COLORTERM ==# 'truecolor' || IsWindows
     set termguicolors  # Use true color if possible.
   endif
 
