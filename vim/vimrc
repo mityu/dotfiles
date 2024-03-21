@@ -1436,6 +1436,11 @@ if Pacpack.Tap('vim-backpair')
     backpair#add_pair('\%(', '\)')
     backpair#add_pair('[[', ']]', {enable_filetypes: ['lua', 'sh', 'bash', 'zsh', 'toml']})
     backpair#add_pair('`', '`', {condition: (): bool => trim(getline('.')) !=# '``'})
+    backpair#add_pair('(', ');')
+    backpair#add_pair('[', '];')
+    backpair#add_pair('{', '};')
+    backpair#add_pair('"', '";')
+    backpair#add_pair("'", "';")
   enddef
 
   augroup vimrc-plugin-backpair
