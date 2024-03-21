@@ -4,7 +4,7 @@
 
 # If bash is running interactively, launch ble.sh
 if [[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
-	[[ -z ${NO_BLE:-} ]]; then
+	[[ -z ${NO_BLE:-} ]] && [[ $(uname -o) != "Msys" ]]; then
 	source "$HOME/.local/share/blesh/ble.sh" --noattach
 elif tput -T xterm longname &> /dev/null; then
 	# Fix cursor shape (it's maybe different when bash is launched via "no-ble-bash")
