@@ -131,8 +131,8 @@ bashrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
 bashrc_has_cmd sudoedit || alias sudoedit='sudo -e'
 
 if bashrc_is_msys; then
-	alias pbpaste='cat /dev/clipboard'
-	alias pbcopy='cat > /dev/clipboard'
+	alias pbpaste='command cat /dev/clipboard'
+	alias pbcopy='command cat > /dev/clipboard'
 elif bashrc_has_cmd xsel; then
 	# xsel -p?
 	bashrc_has_cmd pbpaste || alias pbpaste='xsel -b'
