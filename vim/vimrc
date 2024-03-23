@@ -643,6 +643,8 @@ set nowrapscan
 set timeoutlen=3000 ttimeoutlen=100
 set isfname-==
 set spelllang& spelllang+=cjk
+g:vim_indent = get(g:, 'vim_indent', {})
+g:vim_indent.line_continuation = 'shiftwidth()'
 # }}}
 
 Mkdir(Stdpath.cache, 'p')
