@@ -1233,7 +1233,7 @@ endif
 if Pacpack.Tap('vim-ripgrep')
   def RipGrep(argsGiven: string)
     var cwd = getcwd(winnr())
-    cwd = Input('Grep here? ', cwd, 'dir')
+    cwd = Input('Grep here? ', cwd, 'dir')->expand()
     if !cwd->isdirectory()
       EchomsgError($'Directory not exist: {cwd}')
       return
@@ -2399,7 +2399,7 @@ if Pacpack.Tap('ddu.vim')
     var path = DduGetSearchRootPath(pathGiven)
     if path !=# ''
       if pathGiven ==# ''
-        path = Input('live-grep: ', path, 'dir')
+        path = Input('live-grep: ', path, 'dir')->expand()
         if !path->isdirectory()
           EchomsgError($'Directory not found: {path}')
           return
