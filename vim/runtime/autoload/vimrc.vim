@@ -204,3 +204,39 @@ export def ShowHighlightGroup()
     execute 'highlight' group
   endfor
 enddef
+
+export def CdProjectRoot(cdcmd: string)
+  const parent = expand('%:p:h') .. ';'
+  if parent ==# ';'
+    return
+  endif
+
+  const rootMarkerDirs = [
+    '.git',
+    'autoload', 'plugin',
+  ]
+  const rootMarkerFiles = [
+    'go.mod',
+    'compile_flags.txt', 'compile_commands.json', '.clang-format',
+    'Cargo.toml',
+    'dune-project',
+  ]
+
+  var root = ''
+  for marker in rootMarkerDirs
+    const d = finddir(marker, parent)->fnamemodify(':h')
+    if strlen(d) > strlen(root)
+      root = d
+    endif
+  endfor
+  for marker in rootMarkerFiles
+    const d = findfile(marker, parent)->fnamemodify(':h')
+    if strlen(d) > strlen(root)
+      root = d
+    endif
+
+    if root !=# ''
+      execute $'{cdcmd} {root}'
+    endif
+  endfor
+enddef
