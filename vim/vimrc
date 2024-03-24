@@ -487,6 +487,7 @@ Pacpack.Add('https://github.com/lambdalisue/fern.vim')
 Pacpack.Add('https://github.com/lambdalisue/vim-findent')
 Pacpack.Add('https://github.com/lambdalisue/vim-gista')
 Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
+Pacpack.Add('https://github.com/mattn/vim-notification')
 Pacpack.Add('https://github.com/matze/vim-tex-fold')
 # Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
 Pacpack.Add('https://github.com/mityu/vim-alith')
@@ -1906,6 +1907,36 @@ if Pacpack.Tap('vim-lsp')
   g:lsp_fold_enabled = 0
   g:lsp_settings_filetype_typescript = ['deno']
 
+  def LspNotifyDiagnosticCount()
+    # Update location list.
+    if lsp#internal#diagnostics#state#_is_enabled_for_buffer(bufnr('%'))
+      const uri = lsp#utils#get_buffer_uri()
+      const diagnostics =
+        lsp#internal#diagnostics#state#_get_all_diagnostics_grouped_by_server_for_uri(uri)
+      var loclist = []
+      for d in values(diagnostics)
+        loclist += lsp#ui#vim#utils#diagnostics_to_loc_list({response: d})
+      endfor
+      setloclist(0, loclist)
+    endif
+
+    if !Pacpack.Tap('vim-notification')
+      return
+    endif
+
+    # Notify error/warning count.
+    const counts = lsp#get_buffer_diagnostics_counts()
+    if (counts.error + counts.warning) == 0
+      return
+    endif
+
+    notification#show({
+      text: $"LSP\nError: {counts.error}  Warning: {counts.warning}",
+      clicked: function('execute', ['lopen']),
+      wait: 10000,
+    })
+  enddef
+
   def LspDefineBufferAutocmds()
     LspClearBufferAutocmds()
 
@@ -1918,7 +1949,7 @@ if Pacpack.Tap('vim-lsp')
     endif
 
     augroup vimrc_lsp_buffer
-      autocmd BufWritePost <buffer> lclose | silent LspDocumentDiagnostics
+      autocmd BufWritePost <buffer> LspNotifyDiagnosticCount()
     augroup END
   enddef
 
