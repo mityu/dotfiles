@@ -97,6 +97,11 @@ vim.api.nvim_create_autocmd('TermOpen', {
   command = 'startinsert!',
 })
 
+vim.api.nvim_create_autocmd('CursorHold', {
+  group = 'vimrc',
+  command = [[if getcmdwintype() ==# '' | checktime | endif]]
+})
+
 -- Load plugin configurations only when startup.
 if not vim_did_start then
   local lazy_root_path = vim.fn.stdpath('cache') .. '/lazy'
