@@ -891,16 +891,8 @@ cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
 cnoremap <C-o> <Cmd>call cmdhistory#Select()<CR>
 
-onoremap a( 2i(
-onoremap a{ 2i{
-onoremap a[ 2i[
-onoremap a< 2i<
 onoremap a" 2i"
 onoremap a' 2i'
-xnoremap a( 2i(
-xnoremap a{ 2i{
-xnoremap a[ 2i[
-xnoremap a< 2i<
 xnoremap a" 2i"
 xnoremap a' 2i'
 
