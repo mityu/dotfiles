@@ -1624,7 +1624,7 @@ if Pacpack.Tap('vim-quickrun')
 
     g:quickrun_config['typescript/deno-check'] = {
       command: 'deno',
-      cmdopt: '--check --allow-all --unstable',
+      cmdopt: '--check --allow-all',
       tempfile: '%{tempname()}.ts',
       exec: ['%c run %o %s'],
     }
