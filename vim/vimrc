@@ -862,6 +862,9 @@ nnoremap <Space>f <Cmd>call vimrc#filore#start()<CR>
 nnoremap m <Nop>
 vnoremap m <Nop>
 
+nnoremap % <Cmd>packadd matchit<CR>%
+xnoremap % <Cmd>packadd matchit<CR>%
+
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
@@ -2595,6 +2598,46 @@ def OnOpenReadingVimrcBuffer()
       wincmd T
     endif
   endif
+enddef
+
+
+# matchit plugin
+augroup vimrc-matchit
+  autocmd Filetype * b:match_words = GetMatchitWords()
+augroup END
+
+def GetMatchitWords(): string
+  if &l:filetype ==# 'vim'
+    return [
+      '\<if\>:\<elseif\>:\<else\>:\<endif\>',
+      '\<while\>:\<endwhile\>',
+      '\<for\>:\<endfor\>',
+      '\<def\>:\<enddef\>',
+      '\<fu\%[nction]\>:\<endf\%[unction]\>',
+      '\<augroup\>\%(\s\+END\)\@!:\<augroup\s\+END\>',
+      '\<try\>:\<catch\>:\<finally\>:\<endtry\>',
+      '\<class\>:\<endclass\>',
+      '\<enum\>:\<endenum\>',
+    ]->join(',')
+  elseif &l:filetype =~# '^\%(c\|cpp\|objc\%(pp\)\)$'
+    var rules = [
+      '^\s*#\s*if\%(def\)\?\>:^\s*#\s*elif\%(def\)\?\>:^\s*#\s*else\>:^\s*#\s*endif\>',
+      '/\*:\*/',
+    ]
+    if &l:filetype =~# '^objc\%(pp\)\?$'
+      rules += ['^\s*@\%(interface\|implementation\)\>:^\s*@end\>']
+    endif
+    return rules->join(',')
+  elseif &l:filetype =~# '^\%(ba\|z\|fi\|c\)\?sh$'
+    return [
+      '\<if\>:\<elif\>:\<else\>:\<fi\>',
+      '\<do\>:\<done\>',
+      '\<case\>:\<esac\>',
+    ]->join(',')
+  elseif &l:filetype ==# 'ocaml'
+    return '(\*:\*)'
+  endif
+  return ''
 enddef
 
 
