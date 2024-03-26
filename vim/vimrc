@@ -569,6 +569,7 @@ Pacpack.Add('https://github.com/kuuote/ddu-source-mr')
 Pacpack.Add('https://github.com/matsui54/ddu-source-file_external')
 Pacpack.Add('https://github.com/matsui54/ddu-source-help')
 Pacpack.Add('https://github.com/matsui54/ddu-source-man')
+# Pacpack.Add('https://github.com/mityu/ddu-filter-matcher_multi_regex')
 Pacpack.Add('https://github.com/shun/ddu-source-buffer')
 Pacpack.Add('https://github.com/shun/ddu-source-rg')
 Pacpack.Add('https://github.com/tennashi/ddu-source-git')
@@ -2218,11 +2219,11 @@ if Pacpack.Tap('ddu.vim')
       },
       sourceOptions: {
         _: {
-          matchers: ['matcher_substring'],
+          matchers: ['matcher_multi_regex'],
           ignoreCase: true,
         },
         mr: {
-          matchers: ['converter_tr_homepath', 'matcher_substring'],
+          matchers: ['converter_tr_homepath', 'matcher_multi_regex'],
           ignoreCase: true,
         },
       },
@@ -2251,6 +2252,7 @@ if Pacpack.Tap('ddu.vim')
       },
       filterParams: {
         matcher_substring: {highlightMatched: 'Special'},
+        matcher_multi_regex: {highlightMatched: 'Special'},
         converter_hl_dir: {hlGroup: 'PreProc'},
       },
     })
