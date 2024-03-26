@@ -234,9 +234,9 @@ export def CdProjectRoot(cdcmd: string)
     if strlen(d) > strlen(root)
       root = d
     endif
-
-    if root !=# ''
-      execute $'{cdcmd} {root}'
-    endif
   endfor
+
+  if root !=# ''
+    execute $'{cdcmd} {root}'
+  endif
 enddef
