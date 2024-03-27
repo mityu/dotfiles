@@ -2204,6 +2204,8 @@ if Pacpack.Tap('ddu.vim')
     g:ddu_source_lsp_clientName = 'vim-lsp'
     ddu#custom#alias('source', 'file_git', 'file_external')
     ddu#custom#action('kind', 'file', 'open-or-narrow', DduCustomActionFileOpenOrNarrow)
+    ddu#custom#action('kind', 'file',
+      'searchFilesInContainedProject', DduCustomActionSearchFilesInContainedProject)
     ddu#custom#patch_global({
       ui: 'ff',
       uiParams: {
@@ -2252,7 +2254,7 @@ if Pacpack.Tap('ddu.vim')
       },
       filterParams: {
         matcher_substring: {highlightMatched: 'Special'},
-        matcher_multi_regex: {highlightMatched: 'Special'},
+        matcher_multi_regex: {highlightMatched: 'Special', highlightGreedy: true},
         converter_hl_dir: {hlGroup: 'PreProc'},
       },
     })
@@ -2319,6 +2321,23 @@ if Pacpack.Tap('ddu.vim')
     return 8
   enddef
 
+  def DduCustomActionSearchFilesInContainedProject(args: dict<any>): number
+    const action = args.items[0].action
+    const path = action->get('path', '')
+    var root = vimrc#FindProjectRoot(path)
+    if root ==# ''
+      if filereadable(path)
+        root = path->fnamemodify(':h')
+      elseif isdirectory(path)
+        root = path
+      endif
+    endif
+    if root !=# ''
+      ddu#start({push: true, sources: [{name: 'file_rec', options: {path: root}}]})
+    endif
+    return 0
+  enddef
+
   def DduMapFF()
     nnoremap <buffer> q <Cmd>call ddu#ui#do_action('quit')<CR>
     nnoremap <buffer> <C-o> <Cmd>call ddu#ui#do_action('quit')<CR>
@@ -2333,6 +2352,9 @@ if Pacpack.Tap('ddu.vim')
     nnoremap <buffer> * <Cmd>call ddu#ui#do_action('toggleAllItems')<CR>
     nnoremap <buffer> >>
           \ <Cmd>call ddu#ui#do_action('itemAction', {'name': 'quickfix'})<CR>
+    nnoremap <buffer> /
+          \ <Cmd>call ddu#ui#do_action('itemAction',
+          \ {'name': 'searchFilesInContainedProject'})<CR>
     nnoremap <buffer> <C-p>
           \ <Cmd>call ddu#ui#do_action('previewExecute',
           \ {'command': 'execute "normal! \<C-y>"'})<CR>
