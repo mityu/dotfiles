@@ -278,7 +278,9 @@ export def ListInstalledPlugins(): dict<bool>
     endif
     return 0
   }
-  PacPath->readdirex(F, {sort: 'none'})
+  if isdirectory(PacPath)
+    PacPath->readdirex(F, {sort: 'none'})
+  endif
   return d
 enddef
 
