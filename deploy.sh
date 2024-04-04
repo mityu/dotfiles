@@ -106,4 +106,8 @@ if $IS_LINUX; then
 		$CONFIG_DIR/libinput-gestures.conf
 
 	ln -snfv $SCRIPT_DIR/rofi $CONFIG_DIR/rofi
+
+	if type pacman &> /dev/null; then
+		ln -snfv $SCRIPT_DIR/pacman $CONFIG_DIR/pacman
+	fi
 fi
