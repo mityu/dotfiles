@@ -498,6 +498,7 @@ Pacpack.Add('https://github.com/mityu/vim-charjump')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-gram')
 Pacpack.Add('https://github.com/mityu/vim-gram-peripherals')
+Pacpack.Add('https://github.com/mityu/vim-gyoza')
 Pacpack.Add('https://github.com/mityu/vim-quickrun-hook-auto_run_in_vim9')
 Pacpack.Add('https://github.com/mityu/vim-winc')
 Pacpack.Add('https://github.com/mityu/vim-wispath')
@@ -1509,6 +1510,17 @@ if Pacpack.Tap('vim-gram')
     nnoremap <Space>b <Cmd>call gram#core#setup(#{sources: [#{name: 'buffers', default_action: 'buffer:edit'}]})<CR>
     nnoremap <Space>tb <Cmd>call gram#core#setup(#{sources: [#{name: 'terminals', default_action: 'buffer:edit'}]})<CR>
   endif
+endif
+if Pacpack.Tap('vim-gyoza')
+  g:gyoza_disable_auto_setup = 1
+  augroup vimrc-gyoza
+    autocmd!
+    autocmd InsertEnter * ++once gyoza#enable()
+    autocmd InsertEnter * ++once gyoza#config#load_rules_for_filetype('_')
+    autocmd InsertEnter * ++once gyoza#builtin_rules#load_all_rules_for_filetype('_')
+    autocmd FileType * gyoza#config#load_rules_for_filetype(expand('<amatch>'))
+    autocmd FileType * gyoza#builtin_rules#load_all_rules_for_filetype(expand('<amatch>'))
+  augroup END
 endif
 if Pacpack.Tap('vim-wispath')
   imap <C-l><C-f> <Plug>(wispath-complete)
@@ -2955,11 +2967,6 @@ def GitDiff(arg_target: string)
   return
 enddef
 command! -nargs=? -complete=file GitDiff call GitDiff(<q-args>)
-
-# gyoza
-augroup vimrc_gyoza
-  autocmd InsertEnter * ++once vimrc#gyoza#Enable()
-augroup END
 
 # splash
 command! Splash call vimrc#splash#Show()
