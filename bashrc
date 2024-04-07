@@ -371,6 +371,18 @@ if [[ -f /etc/bash_completion ]]; then
 	. /etc/bash_completion
 fi
 
+if bashrc_has_cmd brew; then
+	__bashrc_brew_prefix=$(brew --prefix)
+	if [[ -f $__bashrc_brew_prefix/etc/bash_completion ]]; then
+		. $__bashrc_brew_prefix/etc/bash_completion
+	fi
+	if [[ -d "$__bashrc_brew_prefix/etc/bash_completion.d" ]]; then
+		for f in $__bashrc_brew_prefix/etc/bash_completion.d/*; do
+			. $f
+		done
+	fi
+fi
+
 # Whenever displaying the prompt, write the previous line to disk
 # export PROMPT_COMMAND="history -a"
 
@@ -385,4 +397,4 @@ fi
 # alias df='df -h'
 # alias du='du -h'
 
-[[ ${BLE_VERSION-} ]] && ble-attach || true  # Do not left error exit status.
+[[ ${BLE_VERSION-} ]] && ble-attach || true  # Do not leave error exit status.
