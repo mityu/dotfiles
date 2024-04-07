@@ -102,6 +102,8 @@ vim.api.nvim_create_autocmd('CursorHold', {
   command = [[if getcmdwintype() ==# '' | checktime | endif]]
 })
 
+vim.cmd 'colorscheme reliquiae'
+
 -- Load plugin configurations only when startup.
 if not vim_did_start then
   local lazy_root_path = vim.fn.stdpath('cache') .. '/lazy'
@@ -137,15 +139,4 @@ if not vim_did_start then
       enabled = false,
     },
   })
-end
-
-if not vim.g.colors_name then
-  -- vim.cmd 'colorscheme habamax'
-  vim.opt.runtimepath:prepend([[~/dotfiles/vim/runtime]])
-  vim.cmd 'colorscheme reliquiae'
-  vim.opt.runtimepath:remove([[~/dotfiles/vim/runtime]])
-  -- require('ibl').update({indent = {highlight = 'Comment'}})
-  -- vim.cmd 'highlight IblIndent gui=reverse cterm=reverse'
-  -- vim.cmd 'highlight link IblIndent CursorLine'
-  vim.cmd [[highlight IblIndent guifg=black ctermfg=black]]
 end
