@@ -92,4 +92,10 @@ return {
       }
     end,
   },
+  {
+    'https://github.com/cryptomilk/nightcity.nvim',
+    lazy = true,
+    priority = 1000,
+    version = false,
+  },
 }
