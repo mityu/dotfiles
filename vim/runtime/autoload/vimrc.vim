@@ -205,10 +205,9 @@ export def ShowHighlightGroup()
   endfor
 enddef
 
-export def CdProjectRoot(cdcmd: string)
-  const parent = expand('%:p:h') .. ';'
-  if parent ==# ';'
-    return
+export def FindProjectRoot(path: string): string
+  if path ==# ''
+    return ''
   endif
 
   const rootMarkerDirs = [
@@ -223,6 +222,7 @@ export def CdProjectRoot(cdcmd: string)
   ]
 
   var root = ''
+  const parent = path .. ';'
   for marker in rootMarkerDirs
     const d = finddir(marker, parent)->fnamemodify(':h')
     if strlen(d) > strlen(root)
@@ -235,8 +235,12 @@ export def CdProjectRoot(cdcmd: string)
       root = d
     endif
   endfor
+  return root
+enddef
 
+export def CdProjectRoot(cdcmd: string)
+  const root = FindProjectRoot(expand('%:p:h'))
   if root !=# ''
-    execute $'{cdcmd} {root}'
+    execute cdcmd fnameescape(root)
   endif
 enddef
