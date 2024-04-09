@@ -8,6 +8,7 @@ Gen.Init(expand('<sfile>'), 'dark')
 Gen.Hi('Normal', '#fff8dc', '#1f1f1f')
 Gen.HiLink('ModeMsg', 'Normal')
 Gen.HiLink('Terminal', 'Normal')
+Gen.HiLink('MsgArea', 'Normal')
 
 Gen.Hi('Comment', '#ffd700', '')
 Gen.Hi('Todo', '#ff7f00', '')

@@ -10,6 +10,7 @@ Gen.Hi('Normal', '#d6d1b0', '#232526')
 Gen.HiLink('NonText', 'Normal')
 Gen.HiLink('ModeMsg', 'Normal')
 Gen.HiLink('Terminal', 'Normal')
+Gen.HiLink('MsgArea', 'Normal')
 
 Gen.Hi('Comment', '#908a7c', '')
 Gen.Hi('Todo', '#ff6347', '')
