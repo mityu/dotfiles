@@ -2210,9 +2210,11 @@ if Pacpack.Tap('denops.vim')
   if IsWindows
     g:denops_server_addr = '127.0.0.1:32123'
   endif
-  augroup vimrc
-    autocmd User DenopsPluginPost:* Echomsg(expand('<amatch>'))
-  augroup END
+  if Pacpack.Tap('vim-notification')
+    augroup vimrc
+      autocmd User DenopsReady notification#show('Denops is ready.')
+    augroup END
+  endif
 endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
