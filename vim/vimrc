@@ -486,6 +486,8 @@ Pacpack.Add('https://github.com/kana/vim-textobj-user')
 Pacpack.Add('https://github.com/kawarimidoll/autoplay.vim')
 Pacpack.Add('https://github.com/kyoh86/vim-ripgrep')
 Pacpack.Add('https://github.com/lambdalisue/fern.vim')
+Pacpack.Add('https://github.com/lambdalisue/fern-renderer-nerdfont.vim')
+Pacpack.Add('https://github.com/lambdalisue/nerdfont.vim')
 Pacpack.Add('https://github.com/lambdalisue/vim-findent')
 Pacpack.Add('https://github.com/lambdalisue/vim-gista')
 Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
@@ -1215,6 +1217,9 @@ endif
 if Pacpack.Tap('fern.vim')
   g:fern#disable_default_mappings = 1
   g:fern#default_exclude = '.DS_Store'
+  g:fern#renderer = 'nerdfont'
+  g:fern#renderer#nerdfont#padding = '  '
+
 
   def FernOnOpen()
     nnoremap <buffer> <expr> o fern#smart#leaf(
