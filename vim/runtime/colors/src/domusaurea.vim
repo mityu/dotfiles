@@ -116,6 +116,12 @@ Gen.Hi('ColorColumn', '', '#40250a', '')
 
 Gen.Hi('vimStringUrlGithub', '#b28214', '', '')  # Gen.BlendColor('#ffa500', '#003344', 0.3)
 
+# Gen.Hi('FernBranchText', '#aba7a0', '', '')
+Gen.Hi('FernBranchSymbol', '#70c0ba', '', '')
+Gen.HiLink('FernLeafSymbol', 'FernBranchSymbol')
+Gen.HiLink('FernLeaderSymbol', 'FernBranchSymbol')
+Gen.HiLink('FernBranchText', 'FernBranchSymbol')
+
 const ansiColors = [
  '#000000',
  '#d54e53',

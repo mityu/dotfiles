@@ -1240,10 +1240,18 @@ if Pacpack.Tap('fern.vim')
   enddef
 
   def FernOnHighlight()
-    highlight link FernLeafSymbol Title
-    highlight link FernBranchSymbol Title
-    highlight link FernBranchText PreProc
-    highlight link FernRootText Normal
+    if g:fern#renderer ==# 'nerdfont'
+      if g:colors_name !=# 'domusaurea'
+        highlight! link FernLeafSymbol Directory
+        highlight! link FernBranchSymbol Directory
+        highlight! link FernBranchText Directory
+      endif
+    else
+      highlight! link FernLeafSymbol Title
+      highlight! link FernBranchSymbol Title
+      highlight! link FernBranchText Directory
+    endif
+    highlight! link FernRootText Normal
   enddef
 
   def FernSetAltbufOnOpen()
