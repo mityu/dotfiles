@@ -101,6 +101,9 @@ local config = {
     {key = 'x', mods = MODKEY, action = "ActivateCopyMode"},
     {key = 'z', mods = MODKEY, action = "TogglePaneZoomState"},
     {key = 'q', mods = 'CTRL', action = wezterm.action{SendString = '\x11'}},
+
+    {key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize},
+    {key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize},
   },
   window_padding = {
     top = 0,
