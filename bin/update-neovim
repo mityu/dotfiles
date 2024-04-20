@@ -4,6 +4,11 @@ function build-neovim() {
 	make -j4 && make -j4 install
 }
 
+if ! which cmake &> /dev/null; then
+	echo 'CMake is necessary for building Neovim.'
+	exit 1
+fi
+
 FORCEBUILD=false
 if [[ "$1" == "--force" || "$1" == "-f" ]]; then
 	FORCEBUILD=true
