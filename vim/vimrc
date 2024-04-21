@@ -563,7 +563,6 @@ Pacpack.Add('https://github.com/vim-fall/fall.vim')
 # Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/mr.vim')
 Pacpack.Add('https://github.com/Shougo/ddu.vim')
-Pacpack.Add('https://github.com/Shougo/ddu-commands.vim')
 Pacpack.Add('https://github.com/Shougo/ddu-ui-ff')
 Pacpack.Add('https://github.com/Shougo/ddu-filter-matcher_substring')
 Pacpack.Add('https://github.com/Shougo/ddu-kind-file')
@@ -2471,6 +2470,50 @@ if Pacpack.Tap('ddu.vim')
     })
   enddef
 
+  def DduCommand(...args: list<string>)
+    if empty(args)
+      EchomsgError('Ddu: No command specified.')
+      return
+    endif
+
+    const cmd = args[0]
+    if cmd =~# '^lsp-\%(workspaceSymbol\|documentSymbol\|callHierarchy\)$'
+      DduStartSync({name: cmd})
+    elseif cmd =~# '^git\%(-\?files\)\?$'
+      DduStartSync({name: 'file_git'})
+    elseif cmd =~# '^live-\?grep$'
+      call(DduLiveGrep, args[1 :])
+    elseif cmd ==# 'files'
+      call(DduFiles, args[1 :])
+    elseif cmd ==# 'help'
+      DduStartSync({sources: [{name: 'help'}]})
+    elseif cmd ==# 'man'
+      DduStartSync({sources: [{name: 'man'}]})
+    endif
+  enddef
+
+  def DduCommandComplete(argLead: string, cmdLine: string, cursorPos: number): list<string>
+    const argPos = (cmdLine .. '$')->split()->len()
+    if argPos <= 2
+      return [
+        'lsp-workspaceSymbol',
+        'lsp-documentSymbol',
+        'lsp-callHierarchy',
+        'git-files',
+        'live-grep',
+        'files',
+        'help',
+      ]->filter((_: number, v: string): bool => stridx(v, argLead) == 0)
+    else
+      const cmd = cmdLine->split()[1]
+      if cmd =~# '^\%(files\|live-\?grep\)$'
+        return getcompletion(argLead, 'dir')
+          ->map((_: number, v: string): string => v->fnameescape())
+      endif
+    endif
+    return []
+  enddef
+
   nnoremap <Space>k <Cmd>call <SID>DduMru()<CR>
   nnoremap <Space>j <Cmd>call <SID>DduFiles()<CR>
   nnoremap <Space>l <Cmd>call <SID>DduStartSync(#{sources: [#{name: 'line'}]})<CR>
@@ -2478,13 +2521,13 @@ if Pacpack.Tap('ddu.vim')
   command! PackFiles DduStartSync({'name': 'pack-files'})
   command! Dotfiles DduStartSync({'name': 'dotfiles'})
   command! -nargs=? -complete=dir Files DduFiles(<q-args>)
+  command! -nargs=? -complete=dir LiveGrep call DduLiveGrep(<q-args>)
+  command! -nargs=+ -complete=customlist,DduCommandComplete Ddu DduCommand(<f-args>)
 
   augroup vimrc-ddu
     autocmd FileType ddu-ff DduMapFF()
     autocmd FileType ddu-ff-filter DduMapFFFilter()
   augroup END
-
-  command! -nargs=? -complete=dir LiveGrep call DduLiveGrep(<q-args>)
 
   if !v:vim_did_enter
     autocmd vimrc-ddu User vimrc_initialize ++once DduConfig()
