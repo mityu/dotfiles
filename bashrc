@@ -122,7 +122,7 @@ fi
 
 
 alias dotfiles=". $(which dotfiles)"
-alias zenn='deno run -A npm:zenn-cli@latest'
+alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias no-ble-bash='NO_BLE=true exec bash'
 alias themis-nvim='THEMIS_VIM=nvim themis'
