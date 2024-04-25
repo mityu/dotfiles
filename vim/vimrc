@@ -1526,6 +1526,12 @@ if Pacpack.Tap('vim-gram')
 endif
 if Pacpack.Tap('vim-gyoza')
   g:gyoza_disable_auto_setup = 1
+
+  def GyozaExtendRules(dst: string, src: string)
+    var stack = gyoza#config#get_rules_for_filetype(src)
+    stack.extend_rules(gyoza#config#get_rules_for_filetype(dst))
+  enddef
+
   augroup vimrc-gyoza
     autocmd!
     autocmd InsertEnter * ++once gyoza#enable()
@@ -1533,6 +1539,8 @@ if Pacpack.Tap('vim-gyoza')
     autocmd InsertEnter * ++once gyoza#builtin_rules#load_all_rules_for_filetype('_')
     autocmd FileType * gyoza#config#load_rules_for_filetype(expand('<amatch>'))
     autocmd FileType * gyoza#builtin_rules#load_all_rules_for_filetype(expand('<amatch>'))
+    autocmd FileType vimspec ++once GyozaExtendRules('vimspec', 'vim')
+    autocmd FileType bash,zsh ++once GyozaExtendRules(expand('<amatch>'), 'sh')
   augroup END
 endif
 if Pacpack.Tap('vim-wispath')
