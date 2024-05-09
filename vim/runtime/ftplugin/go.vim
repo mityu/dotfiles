@@ -1,7 +1,7 @@
-execute 'SetUndoFtplugin let &l:expandtab=' . &l:expandtab
-execute 'SetUndoFtplugin let &l:smarttab=' . &l:smarttab
-SetUndoFtplugin delcommand EditTest
+SetUndoFtplugin setlocal expandtab< smarttab<
 setlocal noexpandtab nosmarttab
+
+SetUndoFtplugin delcommand EditTest
 command! -buffer -bar EditTest
       \ if expand('%')
       \|   echohl Error

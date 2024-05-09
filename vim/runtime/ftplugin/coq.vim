@@ -11,7 +11,7 @@ SetUndoFtplugin nunmap <buffer> <Space>rj
 SetUndoFtplugin nunmap <buffer> <Space>rk
 SetUndoFtplugin nunmap <buffer> gd
 
-execute $'SetUndoFtplugin let &l:keywordprg={string(&l:keywordprg)}'
+SetUndoFtplugin setlocal keywordprg<
 setlocal keywordprg=:Coq\ Search
 
 def Abbrev(target: string): string
