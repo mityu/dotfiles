@@ -485,9 +485,9 @@ Pacpack.Add('https://github.com/kana/vim-operator-user')
 Pacpack.Add('https://github.com/kana/vim-textobj-user')
 Pacpack.Add('https://github.com/kawarimidoll/autoplay.vim')
 Pacpack.Add('https://github.com/kyoh86/vim-ripgrep')
-Pacpack.Add('https://github.com/lambdalisue/fern.vim')
-Pacpack.Add('https://github.com/lambdalisue/fern-renderer-nerdfont.vim')
-Pacpack.Add('https://github.com/lambdalisue/nerdfont.vim')
+Pacpack.Add('https://github.com/lambdalisue/vim-fern')
+Pacpack.Add('https://github.com/lambdalisue/vim-fern-renderer-nerdfont')
+Pacpack.Add('https://github.com/lambdalisue/vim-nerdfont')
 Pacpack.Add('https://github.com/lambdalisue/vim-findent')
 Pacpack.Add('https://github.com/lambdalisue/vim-gista')
 Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
@@ -526,7 +526,7 @@ Pacpack.Add('https://github.com/vim-jp/vital.vim')
 Pacpack.Add('https://github.com/vim-scripts/autodate.vim')
 Pacpack.Add('https://github.com/whonore/Coqtail')
 
-Pacpack.AddLazy('https://github.com/lambdalisue/suda.vim')
+Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
 Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
 Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
 Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
@@ -557,11 +557,11 @@ Pacpack.Add('https://github.com/vim-denops/denops-shared-server.vim')
 # Pacpack.AddLazy('https://github.com/4513ECHO/parade.vim')
 Pacpack.Add('https://github.com/vim-skk/skkeleton')
 Pacpack.Add('https://github.com/skk-dev/dict')
-Pacpack.Add('https://github.com/lambdalisue/gin.vim')
+Pacpack.Add('https://github.com/lambdalisue/vim-gin')
 Pacpack.Add('https://github.com/vim-fall/fall.vim')
 
 # Ddu plugins
-Pacpack.Add('https://github.com/lambdalisue/mr.vim')
+Pacpack.Add('https://github.com/lambdalisue/vim-mr')
 Pacpack.Add('https://github.com/Shougo/ddu.vim')
 Pacpack.Add('https://github.com/Shougo/ddu-ui-ff')
 Pacpack.Add('https://github.com/Shougo/ddu-filter-matcher_substring')
@@ -1213,7 +1213,7 @@ if Pacpack.Tap('vim-ripgrep')
 
   command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)
 endif
-if Pacpack.Tap('fern.vim')
+if Pacpack.Tap('vim-fern')
   g:fern#disable_default_mappings = 1
   g:fern#default_exclude = '.DS_Store'
   g:fern#renderer = 'nerdfont'
@@ -2025,7 +2025,7 @@ if Pacpack.Tap('vim-lsp-settings')
 
   command! -bar LspUpdateAllServers LspUpdateAllServers()
 endif
-if Pacpack.Tap('suda.vim')
+if Pacpack.Tap('vim-suda')
   if !Pacpack.plugin.IsLoaded()
     command! -nargs=? -complete=file SudaRead
           \ Pacpack.Load('suda.vim')|SudaRead <args>
@@ -2544,7 +2544,7 @@ if Pacpack.Tap('ddu.vim')
     autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once delcommand DduRg
   endif
 endif
-if Pacpack.Tap('mr.vim')
+if Pacpack.Tap('vim-mr')
   def MrPredicate(filename: string): bool
     if filename =~# '\.git\%([\/]\%(config\|hooks\)\>\)\@!\>'
       return false
@@ -2618,7 +2618,7 @@ if Pacpack.Tap('skkeleton')
     autocmd User skkeleton-mode-changed SkkeletonOnModeChanged()
   augroup END
 endif
-if Pacpack.Tap('gin.vim')
+if Pacpack.Tap('vim-gin')
   # g:gin_log_default_args = ['--oneline']
   # g:gin_log_persistent_args = ['++opener=noomdeline\ edit']
   g:gin_patch_persistent_args = ['++opener=tabedit', '++no-head']
