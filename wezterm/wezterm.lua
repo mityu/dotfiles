@@ -72,6 +72,7 @@ local config = {
   }),
   font_size = 14,
   colors = colors,
+  macos_forward_to_ime_modifier_mask = "SHIFT|CTRL",
 
   disable_default_key_bindings = true,
   leader = {key = 'p', mods = MODKEY},
