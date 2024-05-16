@@ -1942,6 +1942,9 @@ if Pacpack.Tap('vim-lsp')
 
     augroup vimrc_lsp_buffer
       autocmd BufWritePost <buffer> LspNotifyDiagnosticCount()
+      if Pacpack.Tap('vim-backpair')
+        autocmd CompleteDone <buffer> LspDisableBackpairPluginTemporallyOnCompleteDone()
+      endif
     augroup END
   enddef
 
@@ -1975,6 +1978,14 @@ if Pacpack.Tap('vim-lsp')
     nunmap <buffer> <Down>
 
     LspClearBufferAutocmds()
+  enddef
+
+  def LspDisableBackpairPluginTemporallyOnCompleteDone()
+    if !empty(get(v:completed_item, 'user_data', ''))
+      call backpair#disable()
+      autocmd User lsp_complete_done ++once
+        \ call feedkeys("\<Cmd>call backpair#enable()\<CR>", 'n')
+    endif
   enddef
 
   augroup vimrc_lsp
