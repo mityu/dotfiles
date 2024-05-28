@@ -24,10 +24,12 @@ Gen.HiLink('Question', 'Number')
 Gen.HiLink('MoreMsg', 'Number')
 Gen.HiLink('Directory', 'Number')
 
-Gen.Hi('String', '#ddd58c', '')
-Gen.HiLink('Title', 'String')
-Gen.HiLink('CursorLineNr', 'String')
+Gen.Hi('CursorLineNr', '#ddd58c', '')
+Gen.HiLink('Title', 'CursorLineNr')
+
+Gen.Hi('String', '#e2b860', '')
 Gen.HiLink('helpExample', 'String')
+
 Gen.Hi('Character', '#E6DB74', '', '')
 
 Gen.Hi('PreProc', '#C4BE89', '', '')
@@ -36,9 +38,11 @@ Gen.HiLink('Macro', 'PreProc')
 Gen.HiLink('PreCondit', 'PreProc')
 Gen.Hi('Define', '#66D9EF', '', '')
 
-Gen.Hi('Type', '#E8BC64', '', '')
+Gen.Hi('Type', '#e0ca70', '', '')
 Gen.HiLink('Identifier', 'Type')
 Gen.HiLink('SpecialKey', 'Type')
+Gen.HiLink('cStructure', 'Type')
+Gen.HiLink('cppStructure', 'Type')
 
 Gen.Hi('WildMenu', '#66D9EF', '#000000')
 
@@ -52,6 +56,7 @@ Gen.HiLink('Operator', 'Statement')
 Gen.HiLink('Keyword', 'Statement')
 Gen.HiLink('Exception', 'Statement')
 Gen.HiLink('Special', 'Statement')
+Gen.HiLink('SpecialChar', 'Statement')
 Gen.HiLink('helpOption', 'Statement')
 Gen.HiLink('helpHyperTextJump', 'Statement')
 
@@ -122,7 +127,6 @@ Gen.Hi('MatchParen', '#000000', '#FD971F')
 
 Gen.Hi('Typedef', '#66d9ef', '')
 Gen.Hi('Tag', '#F92672', '')
-Gen.Hi('SpecialChar', '#F92672', '')
 Gen.Hi('SpecialComment', '#7E8E91', '')
 Gen.Hi('Delimiter', '#f5deb3', '')
 Gen.Hi('Debug', '#BCA3A3', '')
