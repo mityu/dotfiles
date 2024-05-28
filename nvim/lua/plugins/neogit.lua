@@ -4,7 +4,6 @@ return {
     'https://github.com/nvim-lua/plenary.nvim',
     'https://github.com/nvim-telescope/telescope.nvim',
   },
-  branch = 'nightly',
   cmd = 'Neogit',
   keys = { '<Space>g' },
   config = function()
