@@ -493,7 +493,6 @@ Pacpack.Add('https://github.com/lambdalisue/vim-gista')
 Pacpack.Add('https://github.com/lambdalisue/vital-Whisky')
 Pacpack.Add('https://github.com/mattn/vim-notification')
 Pacpack.Add('https://github.com/matze/vim-tex-fold')
-# Pacpack.Add('https://github.com/mityu/gina.vim', {branch: 'fix-cmdwin-completion'})
 Pacpack.Add('https://github.com/mityu/vim-alith')
 Pacpack.Add('https://github.com/mityu/vim-backpair')
 Pacpack.Add('https://github.com/mityu/vim-charjump')
@@ -1316,81 +1315,6 @@ if Pacpack.Tap('vim-fern')
   augroup END
 
   nnoremap <Space>f <Cmd>Fern `=<SID>FernGetLaunchPath()`<CR>
-endif
-if Pacpack.Tap('gina.vim')
-  g:gina#action#mark_sign_text = '*'
-  g:gina#core#console#enable_message_history = 1
-
-  def GinaConfig()
-    def Gina_nnoremap(scheme: string, lhs: string, rhs: string)
-      gina#custom#mapping#nmap(scheme, lhs, rhs, {noremap: 1, silent: 1})
-
-      # Set mapping manually for the first time.
-      # TODO: More smart solution
-      if HasInString(&filetype, scheme)
-        execute 'nnoremap <buffer> <silent>' lhs rhs
-      endif
-    enddef
-
-    Gina_nnoremap('status', '<C-]>', '<Cmd>Gina commit<CR>')
-    Gina_nnoremap('commit', '<C-]>', '<Cmd>Gina status<CR>')
-    Gina_nnoremap('status', '<Space>g', '<Cmd>Gina commit<CR>')
-    Gina_nnoremap('commit', '<Space>g', '<Cmd>Gina status<CR>')
-    Gina_nnoremap('status', '<C-l>', '<Cmd>Gina status<CR>')
-    Gina_nnoremap('log', '<C-l>', '<Cmd>Gina log<CR>')
-    Gina_nnoremap('branch', 'N',
-            '<Cmd>call gina#action#call("branch:new")<CR>')
-    Gina_nnoremap('/\v%(status|branch|log)', 'q', '<Cmd>close<CR>')
-
-    # Jump between unadded files with n/p ..
-    const rhs_base = printf(
-            '<Cmd>call %sGinaStatusSelectAnother(v:count1, %%s)<CR>',
-            SIDPrefix())
-    Gina_nnoremap('status', 'n', printf(rhs_base, 'v:false'))
-    Gina_nnoremap('status', 'N', printf(rhs_base, 'v:true'))
-    # NOTE: Using v:true and v:false as variables above doesn't work because
-    # it seems to be changed into 'false' and 'true' (without v: namespace).
-
-    Gina_nnoremap('status', 'dd',
-           printf('<Cmd>call %sGinaDiff()<CR>', SIDPrefix()))
-
-    gina#custom#action#alias('branch', 'merge', 'commit:merge:no-ff')
-    gina#custom#action#alias('branch', 'merge-ff', 'commit:merge:ff')
-
-    gina#custom#command#option('\v%(^<%(cd|lcd|qrep)>)@<!$', '--opener=edit')
-  enddef
-
-  def GinaStatusSelectAnother(repeat_count: number, search_previous: bool)
-    var flags = 'w'
-    flags ..= search_previous ? 'b' : ''
-    for i in range(1, repeat_count)
-      search('\e[31.\+\e[m', flags)
-    endfor
-  enddef
-
-  def GinaDiff()
-    var filename = matchstr(getline('.'), '\e[31m\zs.\+\ze\e[m')
-    filename = matchstr(filename, '\%(\_^modified\:\s\+\)\?\zs.\+')
-    if filename ==# ''
-      return
-    endif
-    const gitroot = fnamemodify(gina#core#get().repository, ':h')
-    const cmd = $'git -C {gitroot} --no-pager diff --no-color {filename}'
-    const bufnr = term_start(cmd, {
-            term_name: '[gina diff] ' .. filename,
-            norestore: 1,
-            })
-    if bufnr != 0
-      setlocal nocursorline nocursorcolumn filetype=diff
-      nnoremap <buffer> <nowait> q <C-w>q
-      cursor(1, 0)
-    endif
-  enddef
-
-  augroup vimrc_gina
-    autocmd Filetype gina-* ++once GinaConfig()
-  augroup END
-  nnoremap <Space>g <Cmd>Gina status<CR>
 endif
 if Pacpack.Tap('vim-findent')
   augroup vimrc_findent
@@ -2789,7 +2713,7 @@ augroup vimrc_showmode
 augroup END
 
 # statusline
-if Pacpack.Tap('gin.vim')
+if Pacpack.Tap('vim-gin')
   # TODO: Lazy loading?
   augroup vimrc-gin
     autocmd User GinComponentPost ++nested redrawstatus
@@ -2801,40 +2725,9 @@ if Pacpack.Tap('gin.vim')
     endif
     return branch .. gin#component#traffic#unicode()
   enddef
-elseif Pacpack.Tap('gina.vim')
-  augroup vimrc_gina
-    autocmd CursorHold * ++once call gina#component#repo#branch()
-    autocmd SourcePost */autoload/gina.vim ++once {
-      autocmd! vimrc_gina CursorHold
-      call gina#component#repo#branch()
-      redrawstatus!
-    }
-  augroup END
-  def StatuslineGitBranch(): string
-    if exists('*gina#component#repo#branch')
-      const branch = gina#component#repo#branch()
-      if branch ==# ''
-        return 'no-git'
-      else
-        const ahead: any = gina#component#traffic#ahead()
-        const behind: any = gina#component#traffic#behind()
-        const staged = !!gina#component#status#staged()->str2nr()
-        const unstaged = !!gina#component#status#unstaged()->str2nr()
-
-        const icon_modified = (staged || unstaged) ? '*' : ''
-        const icon_ahead =
-              ahead->type() == v:t_number && !!ahead ? '↑' : ''
-        const icon_behind =
-              behind->type() == v:t_number && !!behind ? '↓' : ''
-        return branch .. icon_modified .. icon_ahead .. icon_behind
-      endif
-    else
-      return 'loading...'
-    endif
-  enddef
 else
   def StatuslineGitBranch(): string
-    return 'no-gina'
+    return 'no-gin'
   enddef
 endif
 def StatuslineGenerator(): string
