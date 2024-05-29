@@ -2339,13 +2339,6 @@ if Pacpack.Tap('ddu.vim')
           \ <Cmd>call ddu#ui#do_action('quit')<CR><Cmd>call <SID>DduFiles()<CR>
   enddef
 
-  def DduMapFFFilter()
-    inoremap <buffer> <CR> <ESC><Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
-    nnoremap <buffer> <CR> <Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
-    nnoremap <buffer> q <Cmd>call ddu#ui#do_action('closeFilterWindow')<CR>
-    nnoremap <buffer> <C-l> <Cmd>call ddu#ui#do_action('refreshItems')<CR>
-  enddef
-
   def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
     if pathGiven ==# ''
       return FindGitroot() ?? getcwd(winnr())
@@ -2471,7 +2464,6 @@ if Pacpack.Tap('ddu.vim')
 
   augroup vimrc-ddu
     autocmd FileType ddu-ff DduMapFF()
-    autocmd FileType ddu-ff-filter DduMapFFFilter()
   augroup END
 
   if !v:vim_did_enter
