@@ -497,6 +497,7 @@ Pacpack.Add('https://github.com/mityu/vim-alith')
 Pacpack.Add('https://github.com/mityu/vim-backpair')
 Pacpack.Add('https://github.com/mityu/vim-charjump')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
+Pacpack.Add('https://github.com/mityu/vim-cobachi')
 Pacpack.Add('https://github.com/mityu/vim-gram')
 Pacpack.Add('https://github.com/mityu/vim-gram-peripherals')
 Pacpack.Add('https://github.com/mityu/vim-gyoza')
@@ -1368,6 +1369,35 @@ if Pacpack.Tap('vim-cmdhistory')
     cmdhistory#MapAction('<ESC>', ['no-operation'])
     cmdhistory#MapAction('<C-@>', ['no-operation'])
   enddef
+endif
+if Pacpack.Tap('vim-cobachi')
+  g:cobachi_default_opts = {
+    filter: (text: string, items: list<string>) => cobachi#filter#Substring(text, items),
+    action: (item: string) => execute($'edit `={string(item)}`')
+  }
+
+  def CobachiConfig()
+    nnoremap <buffer> i <Cmd>call cobachi#DoAction('start-filtering')<CR>
+    nnoremap <buffer> <CR> <Cmd>call cobachi#DoAction('accept')<CR>
+    nnoremap <buffer> q <Cmd>call cobachi#DoAction('quit')<CR>
+  enddef
+
+  augroup vimrc
+    autocmd Filetype cobachi CobachiConfig()
+  augroup END
+
+
+  def CobachiMru()
+    if !Pacpack.Tap('vim-mr')
+      EchomsgError('mr.vim is not installed.')
+      return
+    endif
+    const Fn = (): list<string> =>
+      mr#mru#list()->map((idx: number, v: string): string => v->fnamemodify(':~'))
+    cobachi#Filter({source: Fn})
+  enddef
+
+  command! CobachiMru CobachiMru()
 endif
 if Pacpack.Tap('vim-brownie')
   g:brownie_template_dirs =
