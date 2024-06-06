@@ -1372,8 +1372,8 @@ if Pacpack.Tap('vim-cmdhistory')
 endif
 if Pacpack.Tap('vim-cobachi')
   g:cobachi_default_opts = {
-    filter: (text: string, items: list<string>) => cobachi#filter#Substring(text, items),
-    action: (item: string) => execute($'edit `={string(item)}`')
+    filter: (text: string, items: list<string>): list<any> => cobachi#filter#Substring(text, items),
+    action: (item: string) => execute($'edit {fnameescape(item)}')
   }
 
   def CobachiConfig()
