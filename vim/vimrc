@@ -1851,6 +1851,11 @@ if Pacpack.Tap('vim-lsp')
   g:lsp_inlay_hints_delay = 0
   g:lsp_signature_help_delay = 0
   g:lsp_fold_enabled = 0
+  g:lsp_settings = {
+    ['ocaml-lsp']: {
+      cmd: ['ocamllsp'],
+    },
+  }
   g:lsp_settings_filetype_typescript = ['deno']
 
   def LspNotifyDiagnosticCount()
