@@ -912,6 +912,8 @@ tnoremap <C-w>; <C-w>:
 tnoremap <C-w><ESC> <C-w>N
 tnoremap <C-w>p <C-w>""
 tnoremap <C-w><C-r> <C-w>"
+tnoremap <C-w><C-t> <Cmd>tabnew<CR>
+tnoremap <C-w><C-w> <C-w>.
 tnoremap <C-@> <ESC>
 for c in 'tnsvq'
   execute $'tnoremap <C-w>{c} <C-w>.{c}'
