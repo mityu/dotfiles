@@ -1330,6 +1330,25 @@ if Pacpack.Tap('vim-alith')
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
 if Pacpack.Tap('vim-backpair')
+  def BackpairCursorForward(): string
+    var m = "\<Cmd>call backpair#clear_state()\<CR>"
+    if col('.') < col('$')
+      m ..= "\<C-g>U\<Right>"
+    endif
+    return m
+  enddef
+
+  def BackpairCursorBackward(): string
+    var m = "\<Cmd>call backpair#clear_state()\<CR>"
+    if col('.') > 1
+      m ..= "\<C-g>U\<Left>"
+    endif
+    return m
+  enddef
+
+  inoremap <expr> <C-f> BackpairCursorForward()
+  inoremap <expr> <C-b> BackpairCursorBackward()
+
   def BackpairConfig()
     backpair#add_pair('(', ')')
     backpair#add_pair('[', ']', {skip_if_ongoing: ['[[]']})
@@ -2206,6 +2225,7 @@ if Pacpack.Tap('denops.vim')
       autocmd User DenopsReady notification#show('Denops is ready.')
     augroup END
   endif
+  command! -bar DenoUpdateCache denops#cache#update({reload: true})
 endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
