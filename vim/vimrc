@@ -2538,7 +2538,9 @@ if Pacpack.Tap('vim-mr')
   enddef
 
   g:mr#mru#predicates = [MrPredicate]
-  g:mr#mrw#predicates = [MrPredicate]
+  g:mr_mrw_disabled = true
+  g:mr_mrr_disabled = true
+  g:mr_mrd_disabled = true
 endif
 if Pacpack.Tap('skkeleton')
   inoremap <expr> <C-e> pumvisible() ? '<C-e>' : '<Plug>(skkeleton-toggle)'
