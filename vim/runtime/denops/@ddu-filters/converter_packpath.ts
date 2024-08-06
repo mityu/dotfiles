@@ -1,17 +1,17 @@
 import {
   BaseFilter,
   DduItem,
+  type Denops,
   SourceOptions,
-} from "https://deno.land/x/ddu_vim@v3.9.0/types.ts";
-import { Denops } from "https://deno.land/x/ddu_vim@v3.9.0/deps.ts";
-import { SEP_PATTERN } from "https://deno.land/std@0.210.0/path/mod.ts";
+} from "jsr:@shougo/ddu-vim@~5.0.0/types";
+import { SEPARATOR_PATTERN } from "jsr:@std/path@~1.0.2"
 
 type Params = {
   hlGroup: string;
 };
 
 function getPackagePlace(path: string): string {
-  const elems = path.split(SEP_PATTERN);
+  const elems = path.split(SEPARATOR_PATTERN);
   const idx = elems.findLastIndex((e: string) => e === "start" || e === "opt");
   if (idx <= 0) {
     return "no-information";
