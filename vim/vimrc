@@ -2234,6 +2234,11 @@ if Pacpack.Tap('denops.vim')
 endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
+    # Pre-load some custom modules.
+    ddu#load('ui', ['ff'])
+    ddu#load('source', ['mr', 'file', 'file_rec'])
+    ddu#load('filter', ['matcher_multi_regex'])
+
     g:ddu_source_lsp_clientName = 'vim-lsp'
     ddu#custom#alias('source', 'file_git', 'file_external')
     ddu#custom#action('kind', 'file', 'open-or-narrow', DduCustomActionFileOpenOrNarrow)
