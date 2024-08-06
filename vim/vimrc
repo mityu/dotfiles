@@ -1501,19 +1501,24 @@ endif
 if Pacpack.Tap('vim-gyoza')
   g:gyoza_disable_auto_setup = 1
 
+  def GyozaLoadRules(filetype: string)
+    gyoza#config#load_rules_for_filetype(filetype)
+    gyoza#builtin_rules#load_all_rules_for_filetype(filetype)
+  enddef
+
   def GyozaExtendRules(dst: string, src: string)
-    var stack = gyoza#config#get_rules_for_filetype(src)
-    stack.extend_rules(gyoza#config#get_rules_for_filetype(dst))
+    var stack = gyoza#config#get_rules_for_filetype(dst)
+    GyozaLoadRules(src)
+    stack.extend_rules(gyoza#config#get_rules_for_filetype(src))
   enddef
 
   augroup vimrc-gyoza
     autocmd!
     autocmd InsertEnter * ++once gyoza#enable()
-    autocmd InsertEnter * ++once gyoza#config#load_rules_for_filetype('_')
-    autocmd InsertEnter * ++once gyoza#builtin_rules#load_all_rules_for_filetype('_')
-    autocmd FileType * gyoza#config#load_rules_for_filetype(expand('<amatch>'))
-    autocmd FileType * gyoza#builtin_rules#load_all_rules_for_filetype(expand('<amatch>'))
+    autocmd InsertEnter * ++once GyozaLoadRules('_')
+    autocmd FileType * GyozaLoadRules(expand('<amatch>'))
     autocmd FileType vimspec ++once GyozaExtendRules('vimspec', 'vim')
+    autocmd FileType cpp ++once GyozaExtendRules('cpp', 'c')
     autocmd FileType bash,zsh ++once GyozaExtendRules(expand('<amatch>'), 'sh')
   augroup END
 endif
