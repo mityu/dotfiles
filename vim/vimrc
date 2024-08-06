@@ -2713,22 +2713,14 @@ enddef
 
 
 # Showmode
-def ShowmodeInit()
-  const colors = {
+class Showmode
+  static const _colors = {
     normal: [['22', '148'], ['#005f00', '#afdf00']],
     insert: [['23', '117'], ['#005f5f', '#87dfff']],
     visual: [['88', '208'], ['#870000', '#ff8700']],
     replace: [['231', '160'], ['#ffffff', '#df0000']],
   }
-  for [mode, color] in items(colors)
-    execute printf(
-      'highlight VimrcShowMode%s ctermfg=%s ctermbg=%s guifg=%s guibg=%s',
-      mode, color[0][0], color[0][1], color[1][0], color[1][1])
-  endfor
-enddef
-def ShowmodeMode(): string
-  ShowmodeHighlight()
-  const map = {
+  static const _labels = {
     n: 'NORMAL',
     i: 'INSERT',
     R: 'REPLACE',
@@ -2746,29 +2738,58 @@ def ShowmodeMode(): string
     niR: 'N-REPLACE',
     niV: 'N-V-REPLACE',
   }
-  return get(map, mode(), 'UNKNOWN')
-enddef
-def ShowmodeHighlight()
-  const type = get({
+  static const _highlights = {
      i: 'insert',
      t: 'insert',
      R: 'replace',
      v: 'visual',
      V: 'visual',
      ["\<C-v>"]: 'visual',
-   }, mode(), 'normal')
-  execute 'highlight link VimrcShowMode VimrcShowMode' .. type
+  }
+
+  static def DefColor()
+    eval _colors
+      ->items()
+      ->mapnew((_: number, v: list<any>): dict<any> => {
+        const mode = v[0]
+        const color = v[1]
+        return {
+          name: $'VimrcShowMode{mode}',
+          ctermfg: color[0][0],
+          ctermbg: color[0][1],
+          guifg: color[1][0],
+          guibg: color[1][1],
+          force: true}
+      })
+      ->hlset()
+  enddef
+
+  static def GetLabel(): string
+    _highlight()
+    return _labels->get(mode(), 'UNKNOWN')
+  enddef
+
+  static def GetBadge(): string
+    if win_getid() == g:statusline_winid &&
+          getwinvar(g:statusline_winid, '&modifiable')
+      return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
+    endif
+    return ''
+  enddef
+
+  static def _highlight()
+    const hl = get(_highlights, mode(), 'normal')
+    hlset([{name: 'VimrcShowMode', linksto: $'VimrcShowMode{hl}'}])
+  enddef
+endclass
+
+def ShowmodeMode(): string
+  return Showmode.GetLabel()
 enddef
-def ShowmodeLabel(): string
-  if win_getid() == g:statusline_winid &&
-        getwinvar(g:statusline_winid, '&modifiable')
-    return '%#VimrcShowMode# %{<SID>ShowmodeMode()} %#Statusline#'
-  endif
-  return ''
-enddef
+
 augroup vimrc_showmode
-  autocmd ColorScheme * ShowmodeInit()
-  autocmd User vimrc_initialize ++once ShowmodeInit()
+  autocmd ColorScheme * Showmode.DefColor()
+  autocmd User vimrc_initialize ++once Showmode.DefColor()
 augroup END
 
 # statusline
@@ -2792,7 +2813,7 @@ endif
 def StatuslineGenerator(): string
   const statusline =
     '%m' ..
-    ShowmodeLabel() ..
+    Showmode.GetBadge() ..
     '[%{&ft ==# "" ? "No ft" : &ft}]' ..
     '[#%{bufnr("%")}]' ..
     '[%{<SID>StatuslineGitBranch()}]' ..
