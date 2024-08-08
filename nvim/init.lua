@@ -92,6 +92,29 @@ vim.cmd 'iabbrev fixme: FIXME:'
 vim.cmd 'iabbrev xxx: XXX:'
 vim.cmd 'iabbrev note: NOTE:'
 
+vim.api.nvim_create_user_command(
+  'Draft',
+  function(_)
+    vim.bo.buftype = 'nofile'
+    vim.bo.swapfile = false
+    vim.bo.undofile = false
+  end,
+  { bar = true })
+vim.api.nvim_create_user_command(
+  'TMP',
+  function(opts)
+    vim.cmd.enew()
+    vim.cmd.Draft()
+    if opts.fargs[1] then
+      vim.cmd.setfiletype(opts.fargs[1])
+    end
+  end,
+  {
+    bar = true,
+    nargs = '?',
+    complete = 'filetype',
+  })
+
 vim.api.nvim_create_autocmd('TermOpen', {
   group = 'vimrc',
   command = 'startinsert!',
@@ -102,7 +125,7 @@ vim.api.nvim_create_autocmd('CursorHold', {
   command = [[if getcmdwintype() ==# '' | checktime | endif]]
 })
 
-vim.cmd 'colorscheme reliquiae'
+vim.cmd.colorscheme 'reliquiae'
 
 -- Load plugin configurations only when startup.
 if not vim_did_start then
