@@ -2626,6 +2626,17 @@ if Pacpack.Tap('vim-gin')
   augroup END
 endif
 
+if Pacpack.Tap('vim-fall')
+  augroup vimrc-fall
+    autocmd User FallPickerEnter:* vimrc#fall#Setup()
+    autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
+    autocmd ColorScheme * highlight link FallSelectMatch Special
+  augroup END
+  highlight link FallSelectMatch Special
+
+  g:fall_disable_default_mapping = true
+endif
+
 # ReadingVimrc
 command! -bar ReadingVimrc call ReadingVimrc()
 augroup vimrc-readingvimrc
