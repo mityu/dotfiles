@@ -45,6 +45,7 @@ ble-face command_function='fg=green'
 ble-face command_keyword='fg=cyan'
 ble-face command_directory='fg=white,underline'
 ble-face filename_directory='underline,fg=white,underline'
+ble-face filename_directory_sticky='underline,fg=white,underline'
 ble-face auto_complete='fg=gray'
 
 ble-sabbrev g='git'
