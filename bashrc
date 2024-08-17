@@ -65,6 +65,7 @@ export CLICOLOR=auto
 export LSCOLORS=gxexfxdxcxahadacagacad
 bashrc_prepend_PATH "$(dotfiles-path)/bin"
 bashrc_prepend_PATH "$HOME/.local/bin"
+bashrc_prepend_PATH "$HOME/.nodebrew/current/bin"
 
 if bashrc_has_cmd cargo; then
 	bashrc_prepend_PATH "$HOME/.cargo/bin"
@@ -83,6 +84,7 @@ if bashrc_has_cmd go; then
 	bashrc_prepend_PATH $(bashrc_get_gobin)
 fi
 
+bashrc_has_cmd ros && bashrc_prepend_PATH "$HOME/.roswell/bin"
 bashrc_has_cmd opam && eval $(opam env)
 
 if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
