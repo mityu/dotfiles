@@ -30,6 +30,7 @@ return {
   event = { 'BufReadPre', 'BufNewFile', 'VeryLazy' },
   config = function()
     local lspconfig = require('lspconfig')
+    local util = require('lspconfig.util')
 
     lspconfig.lua_ls.setup({
       settings = {
@@ -48,5 +49,16 @@ return {
     })
     lspconfig.clangd.setup({})
     lspconfig.gopls.setup({})
+    lspconfig.sourcekit.setup {
+      filetypes = { "swift" },
+      root_pattern = util.root_pattern("main.swift", "Package.swift", ".git"),
+    }
+  end,
+  on_attach = function(client, _)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.type_definition, { buffer = true })
+    vim.keymap.set('n', '<Space>i', vim.lsp.buf.signature_help, { buffer = true })
+    if vim.bo.filetype == 'vim' then
+      vim.keymap.del('n', 'K')
+    end
   end,
 }
