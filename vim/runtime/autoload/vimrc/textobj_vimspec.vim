@@ -6,7 +6,7 @@ final BLOCK_BEGIN = '\v\c^\s*<%(Describe|Before|After|Context|It)>'
 final BLOCK_END = '\v\c^\s*<End>'
 
 export def Select(object_type: string): any
-  var GetRange: func(string, string): list<number>
+  var GetRange: Vim.GetRangeFn
   if object_type ==# 'a'
     GetRange = Vim.GetRangeA
   else

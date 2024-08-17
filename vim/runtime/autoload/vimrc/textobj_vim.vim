@@ -3,6 +3,7 @@ vim9script noclear
 export final FUNCTION_BEGIN = '\v\C^\s*%(export\s+|legacy\s+)?%(fu%[nction]|def)>'
 export final FUNCTION_END = '\v\C^\s*end%(f%[unction]|def)>'
 export final RANGE_NOT_FOUND = [0, 0]
+export type GetRangeFn = func(string, string): list<number>
 
 export def Select(object_type: string): any
   var range: list<number>
