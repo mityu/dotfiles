@@ -592,54 +592,61 @@ catch
   EchomsgError(v:exception)
   language C
 endtry
-set relativenumber number
-set wrap
-set smartindent autoindent
-set cinoptions=:0,g0,N-s,E-s
-set backspace=eol,start,indent
-set pumheight=10
-set completeopt=menuone,noselect
-set noequalalways
-set scrolloff=1 splitkeep=screen
-set colorcolumn=78
-set tabstop=4
-set shiftwidth=4
-set expandtab
-set smarttab
-set softtabstop=4
-set hlsearch
-set display=lastline
-set listchars=tab:\|-
-set autoread
-set incsearch ignorecase
-set showmatch matchtime=1
-set cursorline cursorlineopt=number
-set laststatus=2
-set showtabline=2
-set cmdheight=2 cmdwinheight=10
-set wildmenu
-set wildoptions=pum,fuzzy
-set wildignore& wildignore+=*.DS_STORE
-set history=500
-set keywordprg=:help
-set shortmess& shortmess+=Ic
-set helplang=ja
-set hidden
-set diffopt=internal,algorithm:histogram
-set fileformat=unix
-#set breakindent
-#set virtualedit& virtualedit+=block
-set virtualedit=block
-set complete=.,i,d,w,b,u
-set noimdisable
-set lazyredraw
-# set previewpopup=highlight:Normal
-set termwinkey=<C-w>
-set noesckeys
-set nowrapscan
-set timeoutlen=3000 ttimeoutlen=100
-set isfname-==
-set spelllang& spelllang+=cjk
+
+if v:vim_did_enter
+  command! -nargs=+ -bar Set setglobal <args>
+else
+  command! -nargs=+ -bar Set set <args>
+endif
+Set relativenumber number
+Set wrap
+Set smartindent autoindent
+Set cinoptions=:0,g0,N-s,E-s
+Set backspace=eol,start,indent
+Set pumheight=10
+Set completeopt=menuone,noselect
+Set noequalalways
+Set scrolloff=1 splitkeep=screen
+Set colorcolumn=78
+Set tabstop=4
+Set shiftwidth=4
+Set expandtab
+Set smarttab
+Set softtabstop=4
+Set hlsearch
+Set display=lastline
+Set listchars=tab:\|-
+Set autoread
+Set incsearch ignorecase
+Set showmatch matchtime=1
+Set cursorline cursorlineopt=number
+Set laststatus=2
+Set showtabline=2
+Set cmdheight=2 cmdwinheight=10
+Set wildmenu
+Set wildoptions=pum,fuzzy
+Set wildignore& wildignore+=*.DS_STORE
+Set history=500
+Set keywordprg=:help
+Set shortmess& shortmess+=Ic
+Set helplang=ja
+Set hidden
+Set diffopt=internal,algorithm:histogram
+# Set breakindent
+# Set virtualedit& virtualedit+=block
+Set virtualedit=block
+Set complete=.,i,d,w,b,u
+Set noimdisable
+Set lazyredraw
+# Set previewpopup=highlight:Normal
+Set termwinkey=<C-w>
+Set noesckeys
+Set nowrapscan
+Set timeoutlen=3000 ttimeoutlen=100
+Set isfname-==
+Set spelllang& spelllang+=cjk
+setglobal fileformat=unix
+# Set fillchars& fillchars+=vert:\\u02502  # TODO: Set this once?
 g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
 # }}}
