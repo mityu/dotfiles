@@ -238,6 +238,34 @@ if !v:vim_did_enter
       endfor
     endif
   }
+
+  {  # Create directories for undo/swap/backup files.
+    Mkdir(Stdpath.cache, 'p')
+
+    final undodir = Fs.JoinPath(Stdpath.cache, 'undo')
+    if Mkdir(undodir, 'p')
+      set undofile
+      &undodir = undodir
+    else
+      set noundofile
+    endif
+
+    final swapdir = Fs.JoinPath(Stdpath.cache, 'swap')
+    if Mkdir(swapdir, 'p')
+      set swapfile
+      &directory = Fs.JoinPath(fnamemodify(swapdir, ':p'), '')
+    else
+      set noswapfile
+    endif
+
+    final backupdir = Fs.JoinPath(Stdpath.cache, 'backup')
+    if Mkdir(backupdir, 'p')
+      set backup writebackup
+      &backupdir = backupdir
+    else
+      set nobackup nowritebackup
+    endif
+  }
 endif
 
 { # Initialize augroups
@@ -627,33 +655,6 @@ g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
 # }}}
 
-Mkdir(Stdpath.cache, 'p')
-
-{
-  final undodir = Fs.JoinPath(Stdpath.cache, 'undo')
-  if Mkdir(undodir, 'p')
-    set undofile
-    &undodir = undodir
-  else
-    set noundofile
-  endif
-
-  final swapdir = Fs.JoinPath(Stdpath.cache, 'swap')
-  if Mkdir(swapdir, 'p')
-    set swapfile
-    &directory = Fs.JoinPath(fnamemodify(swapdir, ':p'), '')
-  else
-    set noswapfile
-  endif
-
-  final backupdir = Fs.JoinPath(Stdpath.cache, 'backup')
-  if Mkdir(backupdir, 'p')
-    set backup writebackup
-    &backupdir = backupdir
-  else
-    set nobackup nowritebackup
-  endif
-}
 
 # IM control
 if !has('gui_running')
