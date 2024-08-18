@@ -535,48 +535,11 @@ function! s:browse_color() abort "{{{
   endfor
 endfunction "}}}
 
-function! s:browse_filter_files() abort
-  " call gram#select({
-  "      \ 'name': 'Move to file',
-  "      \ 'items': files,
-  "      \ 'callback': {item -> cursor(s:browse_get_lnum_from_index(item.user_data), 0)},
-  "      \ })
-  call gram#core#setup(#{
-        \sources: [#{name: 'filore', matcher: 'regexp', kinds: ['filore'], default_action: 'filore:move-to'}],
-        \UI: 'popup'
-        \})
-endfunction
-function! s:browse_filter_files_gather_candidates(Callbacks) abort
-  let cwd_strlen = s:win_get_reference_of_current_items().current_directory
-        \->fnamemodify(':p')->strlen()
-  let files = s:win_get_reference_of_current_items().file_list
-        \->mapnew({idx, item -> #{word: item.abs[cwd_strlen :], action_idx: idx}})
-  call a:Callbacks.clear()
-  call a:Callbacks.add(files)
-endfunction
-call gram#source#register('filore', #{gather_candidates: function('s:browse_filter_files_gather_candidates')})
-call gram#item_action#register('filore', {
-      \'move-to': {items -> cursor(s:browse_get_lnum_from_index(items[0].action_idx), 0)}
-      \})
 " History
 function! s:history_register(path) abort "{{{
   call s:remove_item(s:history, a:path)
   call insert(s:history, a:path)
 endfunction "}}}
-function! s:history_start_select() abort "{{{
-  call s:notify.warning('Sorry, history-select not work now.')
-  return
-  let s:gram.items = s:history
-  call gram#select(s:gram)
-endfunction "}}}
-if !exists('s:gram')
-  let s:gram = {'name': 'filore-history'}
-  function! s:gram.callback(selected_item) abort
-    let items = s:win_get_reference_of_current_items()
-    let items.current_directory = a:selected_item.word
-    call s:browse_fresh_display()
-  endfunction
-endif
 if !exists('s:history')
   let s:history = []
 endif

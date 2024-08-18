@@ -515,8 +515,6 @@ Pacpack.Add('https://github.com/mityu/vim-backpair')
 Pacpack.Add('https://github.com/mityu/vim-charjump')
 Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-cobachi')
-Pacpack.Add('https://github.com/mityu/vim-gram')
-Pacpack.Add('https://github.com/mityu/vim-gram-peripherals')
 Pacpack.Add('https://github.com/mityu/vim-gyoza')
 Pacpack.Add('https://github.com/mityu/vim-quickrun-hook-auto_run_in_vim9')
 Pacpack.Add('https://github.com/mityu/vim-winc')
@@ -1342,66 +1340,6 @@ if Pacpack.Tap('vim-cobachi')
   enddef
 
   command! CobachiMru CobachiMru()
-endif
-if Pacpack.Tap('vim-gram')
-  augroup vimrc_gram_init
-    autocmd User gram-initialize ++once InitGram()
-  augroup END
-
-  def InitGram()
-    gram#custom#map_action('normal', 'i', 'switch-to-insert')
-    gram#custom#map_action('normal', 'q', 'quit')
-    gram#custom#map_action('normal', 'k', 'select-prev-item')
-    gram#custom#map_action('normal', 'j', 'select-next-item')
-    gram#custom#map_action('normal', '<CR>', 'do-default-item-action')
-    gram#custom#map_action('normal', 'p', 'request-preview')
-    gram#custom#map_keys('normal', '<NL>', '<CR>')
-
-    gram#custom#map_action('insert', '<ESC>', 'switch-to-normal')
-    gram#custom#map_action('insert', '<C-@>', 'switch-to-normal')
-    gram#custom#map_action('insert', '<CR>', 'switch-to-normal')
-    gram#custom#map_action('insert', '<C-h>', 'delete-character')
-    gram#custom#map_action('insert', '<BS>', 'delete-character')
-    gram#custom#map_action('insert', '<Del>', 'delete-character')
-    gram#custom#map_action('insert', '<C-u>', 'clear-line')
-    gram#custom#map_action('insert', '<C-f>', 'move-forward')
-    gram#custom#map_action('insert', '<C-b>', 'move-backward')
-    gram#custom#map_action('insert', '<C-j>', 'select-next-item')
-    gram#custom#map_action('insert', '<C-k>', 'select-prev-item')
-    gram#custom#map_action('insert', '<C-n>', 'select-next-item')
-    gram#custom#map_action('insert', '<C-p>', 'select-prev-item')
-    gram#custom#map_keys('insert', '<C-y>', '<CR><CR>')
-
-    gram#option#set_global('UI', 'popup')
-    gram#option#set_global('UI_options', {enable_preview: 1, prompt_text: '>> '})
-    gram#option#set_global('matcher', 'regexp')
-    gram#option#set_global('preview', 'manual')
-    # gram#option#set_global('preview_delay', 1000)
-    gram#option#set_for_source('mru', 'kinds', ['file'])
-    gram#option#set_for_source('file_rec', 'kinds', ['file'])
-    gram#option#set_for_source('gitfiles', 'kinds', ['file'])
-    gram#option#set_for_source('buffers', 'kinds', ['buffer'])
-    gram#option#set_for_source('terminals', 'kinds', ['buffer'])
-
-    vimrc#mru#register_source()  # TODO: workaround.
-  enddef
-
-  if IsWindows
-    nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}]})<CR>
-  else
-    nnoremap <Space>k <Cmd>call gram#core#setup(#{sources: [#{name: 'mru', default_action: 'file:edit'}, #{name: 'gitfiles', default_action: 'file:edit'}]})<CR>
-  endif
-
-  if Pacpack.Tap('vim-gram-sources')
-    nnoremap <Space>b <Cmd>call gram#sources#buffers#launch()<CR>
-    command! -nargs=? -complete=dir Files call gram#sources#file_rec#launch(<q-args>)
-  endif
-
-  if Pacpack.Tap('vim-gram-peripherals')
-    nnoremap <Space>j <Cmd>call gram#core#setup(#{sources: [#{name: 'file_rec', default_action: 'file:edit'}]})<CR>
-    nnoremap <Space>b <Cmd>call gram#core#setup(#{sources: [#{name: 'buffers', default_action: 'buffer:edit'}]})<CR>
-    nnoremap <Space>tb <Cmd>call gram#core#setup(#{sources: [#{name: 'terminals', default_action: 'buffer:edit'}]})<CR>
-  endif
 endif
 if Pacpack.Tap('vim-gyoza')
   g:gyoza_disable_auto_setup = 1
