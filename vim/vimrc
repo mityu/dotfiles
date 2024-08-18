@@ -1344,25 +1344,6 @@ if Pacpack.Tap('vim-cobachi')
 
   command! CobachiMru CobachiMru()
 endif
-if Pacpack.Tap('vim-brownie')
-  g:brownie_template_dirs =
-        [JoinPath(expand('$DOT_VIM'), 'runtime', 'extension', 'brownie')]
-  g:brownie_extra_imports = {
-    cpp: ['c'],
-    vimspec: ['vim'],
-  }
-
-  def BrownieFiletype(): string
-    return getbufvar(brownie#get_current_bufnr(), '&filetype')
-  enddef
-  def VimrcTemplateComplete(arg: string, line: string, pos: number): list<string>
-    return filter(brownie#list(BrownieFiletype(), 'template'),
-                (_, val) => stridx(val, arg) == 0)
-  enddef
-
-  command! -nargs=1 -complete=customlist,VimrcTemplateComplete Template
-        \ call brownie#extract(BrownieFiletype(), 'template', <q-args>)
-endif
 if Pacpack.Tap('vim-gram')
   augroup vimrc_gram_init
     autocmd User gram-initialize ++once InitGram()

@@ -1,6 +1,0 @@
-:call brownie#replace('\<PLUGIN\>', expand('%:t:r'))
-:call brownie#replace('__INDENT__', repeat(' ', 52))
-:call brownie#highlight('\C\<FUNCTION\>')
-:call brownie#replace('\C\<FUNCTION\>', brownie#input('function?: '))
-__INDENT__*PLUGIN#FUNCTION()*
-PLUGIN#FUNCTION({{_cursor_}})
