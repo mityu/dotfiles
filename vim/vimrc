@@ -3043,18 +3043,15 @@ if !v:vim_did_enter
 endif
 
 # Initialize when loading this file.
-augroup vimrc_initialize_dummy
-  # Not to provide an error. For more information, see `:h E217`
-  autocmd User vimrc_initialize ++once # Do nothing.
-augroup END
-
-if v:vim_did_enter
-  doautocmd User vimrc_initialize
-else
-  def VimrcInitialize(statusLineSave: string): string
-    &statusline = statusLineSave
-    timer_start(5, (timer) => execute('doautocmd User vimrc_initialize'))
-    return ''
-  enddef
-  &statusline = $'%!{SIDPrefix()}VimrcInitialize({&statusline->string()})'
+if exists('#User#vimrc_initialize')
+  if v:vim_did_enter
+    doautocmd User vimrc_initialize
+  else
+    def VimrcInitialize(statusLineSave: string): string
+      &statusline = statusLineSave
+      timer_start(5, (timer) => execute('doautocmd User vimrc_initialize', ''))
+      return ''
+    enddef
+    &statusline = $'%!{SIDPrefix()}VimrcInitialize({&statusline->string()})'
+  endif
 endif
