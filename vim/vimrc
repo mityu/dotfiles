@@ -543,6 +543,7 @@ Pacpack.Add('https://github.com/vim-jp/vital.vim')
 Pacpack.Add('https://github.com/vim-scripts/autodate.vim')
 Pacpack.Add('https://github.com/whonore/Coqtail')
 
+Pacpack.AddLazy('https://github.com/4513ECHO/nvim-keycastr')
 Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
 Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
 Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
