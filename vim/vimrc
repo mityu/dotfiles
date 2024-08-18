@@ -978,7 +978,6 @@ def CmdwinEnter()
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
     inoremap <expr> <buffer> <C-n> <SID>CmdwinCompletion(1)
-    b:completeopt_save = &completeopt
     setlocal completeopt=menu,preview
     if line('$') >= &cmdwinheight
       execute $':silent! :1,$-{&cmdwinheight} delete _'
@@ -988,11 +987,6 @@ def CmdwinEnter()
     if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
       asyncomplete#disable_for_buffer()
     endif
-  endif
-enddef
-def CmdwinLeave()
-  if exists('b:completeopt_save')
-    &completeopt = b:completeopt_save
   endif
 enddef
 def CmdwinCompletion(select_next: bool): string
@@ -1005,7 +999,6 @@ enddef
 
 augroup vimrc-cmdwin
   autocmd CmdWinEnter * call CmdwinEnter()
-  autocmd CmdWinLeave * call CmdwinLeave()
 augroup END
 
 if IsMac
