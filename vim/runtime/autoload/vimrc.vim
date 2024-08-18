@@ -2,7 +2,7 @@ vim9script
 
 import $MYVIMRC as Vimrc
 
-final SLASH = Vimrc.Filesystem.slash
+final SLASH = Vimrc.Fs.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
 
 export def DeleteUndofiles()
@@ -144,10 +144,10 @@ export def UpdateLocalPackages()
     Vimrc.EchomsgError('No git')
     return
   endif
-  var packDir = Vimrc.JoinPath(Vimrc.Stdpath.cache, 'pack')
+  var packDir = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'pack')
   var dirs: list<string>
-  dirs = Vimrc.JoinPath(packDir, 'local', 'start', '*', '.git')->glob(true, true)
-  dirs += Vimrc.JoinPath(packDir, 'local', 'opt', '*', '.git')->glob(true, true)
+  dirs = Vimrc.Fs.JoinPath(packDir, 'local', 'start', '*', '.git')->glob(true, true)
+  dirs += Vimrc.Fs.JoinPath(packDir, 'local', 'opt', '*', '.git')->glob(true, true)
   var cmds: list<string>
   for dir in dirs
     cmds->add('git -C ' .. dir->fnamemodify(':h')->shellescape() .. ' pull')

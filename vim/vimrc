@@ -37,7 +37,34 @@ endif
 
 scriptencoding utf-8
 
-# Local utility functions
+final IsWindows = has('win32')
+final IsWinUnix = has('win32unix')
+final IsLinux = has('linux')
+final IsMac = has('mac')
+final IsUnix = IsLinux || IsMac
+final IsWSL = IsLinux && getftype('/proc/sys/fs/binfmt_misc/WSLInterop') !=# ''
+
+export class Fs
+  static const slash = IsWindows ? '\\' : '/'
+  static const pathSeparator = IsWindows ? ':' : ';'
+  static const rcfilePrefix = IsWindows ? '_' : '.'
+
+  static def Rc(fname: string): string
+    return rcfilePrefix .. fname
+  enddef
+
+  static def JoinPath(...elems: list<any>): string
+    return join(elems, slash)
+  enddef
+endclass
+
+export class Stdpath
+  static const cache = (IsWindows ? '~\.cache\vim' : '~/.cache/vim')->expand()
+  static const dotvim = (IsWindows ? '~\vimfiles' : '~/.vim')->expand()
+endclass
+
+$DOT_VIM = Stdpath.dotvim
+
 export def SIDPrefix(): string
   # Returns "<SNR>{script-ID}_"
   return expand('<SID>')
@@ -45,14 +72,6 @@ enddef
 
 def SNR(): string
   return matchstr(SIDPrefix(), '<SNR>\zs\d\+\ze_$')
-enddef
-
-def Rc(fname: string): string
-  return Filesystem.rcfile_prefix .. fname
-enddef
-
-export def JoinPath(...arg: list<any>): string
-  return join(arg, Filesystem.slash)
 enddef
 
 export def HasInString(object: string, to_search: string): bool
@@ -145,37 +164,6 @@ def g:Tapi_getcwd(bufnr: number, arglist: list<any>)
   ch_sendraw(channel, cwd .. "\n")
 enddef
 
-final IsWindows = has('win32')
-final IsWinUnix = has('win32unix')
-final IsLinux = has('linux')
-final IsMac = has('mac')
-final IsUnix = IsLinux || IsMac
-final IsWSL = IsLinux && getftype('/proc/sys/fs/binfmt_misc/WSLInterop') !=# ''
-
-export var Filesystem: dict<string>
-export var Stdpath: dict<string>
-if IsWindows
-  $DOT_VIM = expand('~\vimfiles')
-  Filesystem = {
-    slash: '\',
-    path_separator: ';',
-    rcfile_prefix: '_'
-  }
-  Stdpath = {
-    cache: expand('~\.cache\vim')
-  }
-else
-  $DOT_VIM = expand('~/.vim')
-  Filesystem = {
-    slash: '/',
-    path_separator: ':',
-    rcfile_prefix: '.'
-  }
-  Stdpath = {
-    cache: expand('~/.cache/vim')
-  }
-endif
-
 # Startup config
 if !v:vim_did_enter
   if has('multi_lang') && has('menu')
@@ -232,12 +220,12 @@ if !v:vim_did_enter
 
   &runtimepath = &runtimepath->split(',')->filter('isdirectory(v:val)')->join(',')
   &packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
-  &runtimepath ..= ',' .. escape(JoinPath($DOT_VIM, 'runtime'), ' \')
+  &runtimepath ..= ',' .. escape(Fs.JoinPath($DOT_VIM, 'runtime'), ' \')
   &packpath = Stdpath.cache .. ',' .. &packpath
 
   # Set environmental variables on gVim.
   {
-    const envrc = JoinPath(expand('~'), Rc('envrc'))
+    const envrc = Fs.JoinPath(expand('~'), Fs.Rc('envrc'))
     if has('gui_running') && filereadable(envrc)
       const lines = readfile(envrc)
             ->map((_: number, val: string): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
@@ -250,8 +238,8 @@ if !v:vim_did_enter
     endif
   }
 endif
-# Initialize autocmd
-{
+
+{ # Initialize augroups
   const filename = expand('<sfile>')
   const pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
   const augroups = readfile(filename)
@@ -268,7 +256,7 @@ endif
 }
 
 # minpac
-export const PacPath = JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
+export const PacPath = Fs.JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
 
 export def ListInstalledPlugins(): dict<bool>
   var d: dict<bool> = {}
@@ -310,7 +298,7 @@ class Plugin
       this.path = this.uri[_fileSchemaLen :]->expand()
       this.isExists = this.path->isdirectory()
     else
-      this.path = JoinPath(PacPath, name)
+      this.path = Fs.JoinPath(PacPath, name)
       this.isExists = _installedPlugins->has_key(name)
     endif
   enddef
@@ -424,7 +412,7 @@ export class Pacpack
     silent! MinpacInit()
     if !exists('*minpac#init()')
       # Download minpac...
-      const minpacPath = JoinPath(pacPath, 'minpac')
+      const minpacPath = Fs.JoinPath(pacPath, 'minpac')
       Mkdir(fnamemodify(minpacPath, ':h'), 'p')
       Echomsg('Downloading minpac...')
       system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
@@ -654,7 +642,7 @@ g:vim_indent.line_continuation = 'shiftwidth()'
 Mkdir(Stdpath.cache, 'p')
 
 {
-  final undodir = JoinPath(Stdpath.cache, 'undo')
+  final undodir = Fs.JoinPath(Stdpath.cache, 'undo')
   if Mkdir(undodir, 'p')
     set undofile
     &undodir = undodir
@@ -662,15 +650,15 @@ Mkdir(Stdpath.cache, 'p')
     set noundofile
   endif
 
-  final swapdir = JoinPath(Stdpath.cache, 'swap')
+  final swapdir = Fs.JoinPath(Stdpath.cache, 'swap')
   if Mkdir(swapdir, 'p')
     set swapfile
-    &directory = JoinPath(fnamemodify(swapdir, ':p'), '')
+    &directory = Fs.JoinPath(fnamemodify(swapdir, ':p'), '')
   else
     set noswapfile
   endif
 
-  final backupdir = JoinPath(Stdpath.cache, 'backup')
+  final backupdir = Fs.JoinPath(Stdpath.cache, 'backup')
   if Mkdir(backupdir, 'p')
     set backup writebackup
     &backupdir = backupdir
@@ -682,10 +670,10 @@ Mkdir(Stdpath.cache, 'p')
 # IM control
 if !has('gui_running')
   if IsWSL || IsWindows || IsWinUnix
-    const exepath = JoinPath(Stdpath.cache, 'disableim.exe')
+    const exepath = Fs.JoinPath(Stdpath.cache, 'disableim.exe')
     if !executable(exepath)  # Build disableim.exe
       var csc = 'C:\Windows\Microsoft.Net\Framework64\v4.0.30319\csc.exe'
-      var srcpath = JoinPath(fnamemodify($MYVIMRC, ':h'), 'misc', 'disableim.cs')
+      var srcpath = Fs.JoinPath(fnamemodify($MYVIMRC, ':h'), 'misc', 'disableim.cs')
       var outpath = $'{shellescape(exepath)}'  # Check with Unix path, compile with Windows path.
       var cmdopts = ['/optimize+', '/debug-', '/nologo', '/target:winexe']
       if IsWSL
@@ -2317,8 +2305,8 @@ if Pacpack.Tap('ddu.vim')
       sources:
         [
           PacPath,
-          JoinPath(Stdpath.cache, 'pack', 'local', 'start'),
-          JoinPath(Stdpath.cache, 'pack', 'local', 'opt'),
+          Fs.JoinPath(Stdpath.cache, 'pack', 'local', 'start'),
+          Fs.JoinPath(Stdpath.cache, 'pack', 'local', 'opt'),
         ]
         ->filter('isdirectory(v:val)')
         ->mapnew('{"name": "file_rec", "options": {"path": v:val}}'),
@@ -2567,7 +2555,7 @@ if Pacpack.Tap('skkeleton')
 
     if Pacpack.Tap('dict')
       config.globalDictionaries = ['SKK-JISYO.L.json']
-        ->map((_: number, v: string): string => JoinPath(Pacpack.plugin.path, 'json', v))
+        ->map((_: number, v: string): string => Fs.JoinPath(Pacpack.plugin.path, 'json', v))
     endif
 
     skkeleton#config(config)
@@ -2971,8 +2959,8 @@ command! ReplaceTwobyteSpace keeppatterns :%s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
 
 # mru
-Mkdir(JoinPath(Stdpath.cache, 'mru'), 'p')
-g:mru_history_file = JoinPath(Stdpath.cache, 'mru', 'history')
+Mkdir(Fs.JoinPath(Stdpath.cache, 'mru'), 'p')
+g:mru_history_file = Fs.JoinPath(Stdpath.cache, 'mru', 'history')
 g:mru_ignore_pattern = [
       \ '\.git\>',
       \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
@@ -3115,7 +3103,7 @@ endif
 
 # lvimrc
 {
-  const lvimrc = JoinPath('~', Rc('lvimrc'))
+  const lvimrc = Fs.JoinPath('~', Fs.Rc('lvimrc'))
   execute 'command! -bar -nargs=* LVimrc ' ..
           'execute <q-args> ?? "edit"' string(lvimrc)
   if filereadable(expand(lvimrc))
