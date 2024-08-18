@@ -74,10 +74,6 @@ def SNR(): string
   return matchstr(SIDPrefix(), '<SNR>\zs\d\+\ze_$')
 enddef
 
-export def HasInString(object: string, to_search: string): bool
-  return stridx(object, to_search) != -1
-enddef
-
 def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
@@ -593,53 +589,40 @@ else
 endif
 Set relativenumber number
 Set wrap
+# Set breakindent
+Set noequalalways
+Set scrolloff=1
+Set colorcolumn=78
 Set smartindent autoindent
 Set cinoptions=:0,g0,N-s,E-s
+Set tabstop=4 shiftwidth=4 softtabstop=4
+Set expandtab smarttab
 Set backspace=eol,start,indent
-Set pumheight=10
-Set completeopt=menuone,noselect
-Set noequalalways
-Set scrolloff=1 splitkeep=screen
-Set colorcolumn=78
-Set tabstop=4
-Set shiftwidth=4
-Set expandtab
-Set smarttab
-Set softtabstop=4
 Set hlsearch
 Set display=lastline
-Set listchars=tab:\|-
-Set autoread
 Set incsearch ignorecase
 Set showmatch matchtime=1
 Set cursorline cursorlineopt=number
-Set laststatus=2
-Set showtabline=2
-Set cmdheight=2 cmdwinheight=10
-Set wildmenu
-Set wildoptions=pum,fuzzy
-Set wildignore& wildignore+=*.DS_STORE
-Set history=500
-Set keywordprg=:help
+Set laststatus=2 showtabline=2
+Set history=500 cmdheight=2 cmdwinheight=10
+Set wildignore& wildmenu wildoptions=pum,fuzzy wildignore+=*.DS_STORE
+Set helplang=ja keywordprg=:help
 Set shortmess& shortmess+=Ic
-Set helplang=ja
 Set hidden
+Set autoread
 Set diffopt=internal,algorithm:histogram
-# Set breakindent
-# Set virtualedit& virtualedit+=block
 Set virtualedit=block
-Set complete=.,i,d,w,b,u
+Set complete=.,i,d,w,b,u completeopt=menuone,noselect pumheight=10
 Set noimdisable
 Set lazyredraw
-# Set previewpopup=highlight:Normal
 Set termwinkey=<C-w>
-Set noesckeys
 Set nowrapscan
-Set timeoutlen=3000 ttimeoutlen=100
+Set noesckeys timeoutlen=3000 ttimeoutlen=100
 Set isfname-==
 Set spelllang& spelllang+=cjk
 setglobal fileformat=unix
 # Set fillchars& fillchars+=vert:\\u02502  # TODO: Set this once?
+&listchars = 'tab:|-'
 g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
 # }}}
@@ -743,15 +726,13 @@ elseif executable('ag')
   &grepprg = 'ag --vimgrep'
   &grepformat = '%f:%l:%c:%m'
 endif
-augroup vimrc_filetype
+
+augroup vimrc
   autocmd BufRead .envrc set filetype=sh
-augroup END
-augroup vimrc_mru
-  autocmd BufRead,BufWritePost * call vimrc#mru#onReadFile()
-augroup END
-augroup vimrc_checktime
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
+  autocmd VimResized * wincmd =
 augroup END
+
 if executable('chmod')
   # This hack is from github.com/thinca/config/dotfiles/dot.vim/vimrc. Thanks!
   augroup vimrc_autoexecutable
@@ -765,8 +746,9 @@ if executable('chmod')
     endif
   enddef
 endif
+
 # From: https://zenn.dev/vim_jp/articles/f02adb4f325e51   Thanks!
-augroup vimrc_validate_filename
+augroup vimrc-validate-filename
   autocmd BufWritePre * ValidateFilename(expand('<afile>:t'))
 augroup END
 def ValidateFilename(filename: string)
@@ -782,13 +764,10 @@ def ValidateFilename(filename: string)
     throw 'Filename is invalid format: ' .. filename
   endif
 enddef
-augroup vimrc_quickfix_window
+
+augroup vimrc-quickfix-window
   autocmd QuickfixCmdPost [^l]* cwindow
   autocmd QuickfixCmdPost l* lwindow
-augroup END
-
-augroup vimrc_window
-  autocmd VimResized * wincmd =
 augroup END
 
 augroup vimrc
@@ -1002,7 +981,7 @@ def CmdwinEnter()
     b:completeopt_save = &completeopt
     setlocal completeopt=menu,preview
     if line('$') >= &cmdwinheight
-      execute printf(':silent! :1,$-%d delete _', &cmdwinheight)
+      execute $':silent! :1,$-{&cmdwinheight} delete _'
       normal! G
       &undolevels = &undolevels  # Separate undo sequence
     endif
@@ -1024,7 +1003,7 @@ def CmdwinCompletion(select_next: bool): string
   endif
 enddef
 
-augroup vimrc_mapping
+augroup vimrc-cmdwin
   autocmd CmdWinEnter * call CmdwinEnter()
   autocmd CmdWinLeave * call CmdwinLeave()
 augroup END
@@ -1658,7 +1637,7 @@ if Pacpack.Tap('vim-quickrun')
   augroup END
 endif
 if Pacpack.Tap('capture.vim')
-  augroup vimrc_filetype
+  augroup vimrc
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
@@ -1708,7 +1687,7 @@ if Pacpack.Tap('vim-vim9skk')
   g:vim9skk.recent = 0
 endif
 if Pacpack.Tap('autofmt')
-  set formatexpr=autofmt#japanese#formatexpr()
+  Set formatexpr=autofmt#japanese#formatexpr()
 endif
 if Pacpack.Tap('asyncomplete.vim')
   def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
@@ -1829,7 +1808,7 @@ if Pacpack.Tap('vim-lsp')
   g:lsp_signature_help_delay = 0
   g:lsp_fold_enabled = 0
   g:lsp_settings = {
-    ['ocaml-lsp']: {
+    ocaml-lsp: {
       cmd: ['ocamllsp'],
     },
   }
@@ -2998,15 +2977,12 @@ if has('gui_running')
   if !v:vim_did_enter
     if IsWSL
       # Avoid too large window.
-      set lines=35
-      set columns=100
+      set lines=35 columns=100
     elseif IsLinux && executable('i3')
       # It seems that too large window on i3 does not work properly.
-      set lines=50
-      set columns=200
+      set lines=50 columns=200
     else
-      set lines=999
-      set columns=9999
+      set lines=999 columns=9999
     endif
 
     if IsWindows
