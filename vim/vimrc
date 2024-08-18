@@ -2730,9 +2730,12 @@ augroup END
 
 # statusline
 if Pacpack.Tap('vim-gin')
-  # TODO: Lazy loading?
   augroup vimrc-gin
-    autocmd User GinComponentPost ++nested redrawstatus
+    autocmd User GinComponentPost ++nested {
+      if mode() !=# 'r'
+        redrawstatus
+      endif
+    }
   augroup END
   def StatuslineGitBranch(): string
     const branch = gin#component#branch#unicode()
