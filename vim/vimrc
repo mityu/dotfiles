@@ -133,6 +133,11 @@ export def Input(prompt: string, ...opt: list<any>): string
   return ''
 enddef
 
+export def ReplaceTermcodes(key: string): string
+  return key->substitute(
+    '<[^<>]\+>', (m: list<string>): string => eval($'"\{m[0]}"'), 'g')
+enddef
+
 # Global utility functions
 export def SetUndoFtplugin(config: string)
   const restorer = 'execute ' .. string(config)
@@ -920,73 +925,25 @@ if IsMac && has('gui_running')
 endif
 # }}}
 
-# Loop
-def LoopDefine(config: dict<any>)
-  var prefix = printf('<Plug>(<SID>-loop-%s)', config.id)
-  var enter_with = config.enter_with
-  var mode = get(config, 'mode', 'n')
-  var plug_map: dict<string>
-  for key in ['prefix', 'main', 'do']
-    plug_map[key] = printf('%s(%s)', prefix, key)
-  endfor
-
-  execute printf('%snoremap %s <Nop>', mode, plug_map.prefix)
-  execute printf('%snoremap %s<ESC> <Nop>', mode, plug_map.prefix)
-  for mapping in config.map
-    var commands: list<list<string>>
-    const [lhs, rhs] =
-        mapping->map((_, val): string => substitute(val, '|', '<bar>', 'g'))
-    commands->add([mode .. 'noremap', enter_with .. lhs, plug_map.main .. lhs])
-            ->add([mode .. 'noremap', plug_map.main .. lhs, rhs .. plug_map.prefix])
-            ->add([mode .. 'noremap', plug_map.prefix .. lhs, plug_map.main .. lhs])
-    execute commands->mapnew('join(v:val)')->join("\n")
-  endfor
-
-  if mode ==# 'n'
-    var t_config = deepcopy(config)
-    t_config.mode = 't'
-    if t_config.enter_with[: strlen(&termwinkey)] !=# &termwinkey &&
-        t_config.enter_with[0] !=# printf('"\%s"', &termwinkey)->eval()
-      t_config.enter_with = &termwinkey .. config.enter_with
-    endif
-    t_config.map->map('LoopDefineGenerateTmap(v:val)')
-    LoopDefine(t_config)
-  endif
-enddef
-
-def LoopDefineGenerateTmap(value: list<string>): list<string>
-  var rhs = value[1]
-        ->substitute('\c<SID>', SIDPrefix(), 'g')
-        ->substitute('\zs<\ze.\{-}>', '\\<lt>', 'g')
-  rhs = '<Cmd>execute "normal! ' .. rhs .. '"<CR>'
-  return [value[0], rhs]
-enddef
-
-def SimpleLoopDefine(config: dict<any>)
-  var new_config = deepcopy(config)
-  new_config.map = config.follow_key->split('\zs')
-        ->mapnew((_, val): list<string> => [val, config.enter_with .. val])
-  LoopDefine(new_config)
-enddef
-
-augroup vimrc_mapping
+augroup vimrc
   autocmd User vimrc_initialize ++once DefineLoopMappings()
 augroup END
 
 def DefineLoopMappings()
-  SimpleLoopDefine({
+  const sid = SIDPrefix()
+  vimrc#loopmap#SimpleLoopDefine({
     id: 'Window',
     enter_with: '<C-w>',
     follow_key: '<>-+',
   })
-  LoopDefine({
+  vimrc#loopmap#LoopDefine({
     id: 'Tab',
     enter_with: 'g',
-    map: [
+    body: [
       ['h', 'gT'],
       ['l', 'gt'],
-      ['T', '<Cmd>call <SID>MapTabmove(-1)<CR>'],
-      ['t', '<Cmd>call <SID>MapTabmove(1)<CR>'],
+      ['T', $'<Cmd>call {sid}MapTabmove(-1)<CR>'],
+      ['t', $'<Cmd>call {sid}MapTabmove(1)<CR>'],
     ]
   })
 enddef
