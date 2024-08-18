@@ -1052,8 +1052,6 @@ command! -bar HighlightGroup Hlgroup
 command! -bar RTP echo &runtimepath->split(',')->join("\n")
 
 # Plugin Shortcuts
-command! -bar -nargs=* MruEditHistoryStart call vimrc#mru#edit_history_start(<q-args>)
-command! -bar MruDeleteUnexistHistory call vimrc#mru#delete_unexist_file_history()
 command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
 command! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0, <f-args>)
 command! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0, <f-args>)
@@ -2872,14 +2870,6 @@ def WarningSpace()
 enddef
 command! ReplaceTwobyteSpace keeppatterns :%s/\%d12288/ /g
 command! DeleteLineEndSpace keeppatterns :%s/\s\+$//g
-
-# mru
-Mkdir(Fs.JoinPath(Stdpath.cache, 'mru'), 'p')
-g:mru_history_file = Fs.JoinPath(Stdpath.cache, 'mru', 'history')
-g:mru_ignore_pattern = [
-      \ '\.git\>',
-      \ '^\V\%(' .. escape(expand('~'), '\') .. '\)\@!'
-      \ ]
 
 # filore
 def FiloreMapping()
