@@ -630,6 +630,7 @@ Set display=lastline
 Set incsearch ignorecase
 Set showmatch matchtime=1
 Set cursorline cursorlineopt=number
+Set showcmd
 Set laststatus=2 showtabline=2
 Set history=500 cmdheight=2 cmdwinheight=10
 Set wildignore& wildmenu wildoptions=pum,fuzzy wildignore+=*.DS_STORE
