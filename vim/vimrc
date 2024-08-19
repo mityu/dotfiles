@@ -1132,7 +1132,7 @@ if Pacpack.Tap('vim-ripgrep')
     if args ==# ''
       args = Input('Search pattern: ')
     endif
-    ripgrep#call($'rg --json -w -i {args}', cwd, fnamemodify(cwd, ':.') .. Filesystem.slash)
+    ripgrep#call($'rg --json -w -i {args}', cwd, fnamemodify(cwd, ':.') .. Fs.slash)
   enddef
 
   command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)
