@@ -541,12 +541,15 @@ Pacpack.Add('https://github.com/vim-jp/vital.vim')
 Pacpack.Add('https://github.com/vim-scripts/autodate.vim')
 Pacpack.Add('https://github.com/whonore/Coqtail')
 
+Pacpack.Add('https://github.com/yegappan/lsp')
+Pacpack.Add('https://github.com/mattn/vim-lsp-settings')
+Pacpack.Add('https://github.com/normen/vim-lsp-settings-adapter')
+
 Pacpack.AddLazy('https://github.com/4513ECHO/nvim-keycastr')
 Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
-Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
-Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
-Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
-Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
+# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
+# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
+# Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
 Pacpack.AddLazy('https://github.com/tweekmonster/helpful.vim')
 Pacpack.AddLazy('https://github.com/y0za/vim-reading-vimrc')
 
@@ -1602,6 +1605,101 @@ endif
 if Pacpack.Tap('autofmt')
   Set formatexpr=autofmt#japanese#formatexpr()
 endif
+
+if Pacpack.Tap('lsp')
+  augroup vimrc
+    autocmd ColorScheme * LspHighlight()
+    if !v:vim_did_enter
+      autocmd User vimrc_initialize ++once LspHighlight()
+    endif
+    autocmd User LspSetup ++once LspSetup()
+    autocmd User LspAttached LspAttached()
+  augroup END
+
+  command! -bar LspStatus LspServer show status
+
+  def LspGetDiagCounts(bufnr: number = bufnr()): dict<number>
+    var counts = [0, 0, 0, 0]
+    const diags = lsp#diag#GetDiagsForBuf(bufnr)
+
+    for diag in diags
+      const severity = diag.severity > 4 ? 3 : diag.severity - 1
+      ++counts[severity]
+    endfor
+
+    return {
+      error: counts[0],
+      warning: counts[1],
+      info: counts[2],
+      hint: counts[3],
+    }
+  enddef
+
+  def LspSetup()
+    g:LspOptionsSet({
+      autoPopulateDiags: true,
+      completionMatcher: 'fuzzy',
+      diagVirtualTextAlign: 'after',
+      diagVirtualTextWrap: 'truncate',
+      showDiagWithVirtualText: true,
+    })
+  enddef
+
+  def LspAttached()
+    setlocal omnifunc=g:LspOmniFunc
+    setlocal tagfunc=lsp#lsp#TagFunc
+
+    nnoremap <buffer> <Space>i <Cmd>LspDiag current<CR>
+    nnoremap <buffer> <Up> <Cmd>LspDiag prev<CR>
+    nnoremap <buffer> <Down> <Cmd>LspDiag next<CR>
+    nnoremap <buffer> <C-g> <Cmd>LspHover<CR><C-g>
+    if &l:filetype !~# '\<vim\%(spec\)\?\>'
+      nnoremap <buffer> gd <Cmd>LspGotoDeclaration<CR>
+      setlocal keywordprg=:LspHover
+      SetUndoFtplugin nunmap <buffer> gd
+      SetUndoFtplugin setlocal keywordprg<
+    endif
+
+    augroup vimrc-lsp-buffer
+      autocmd!
+      autocmd BufWritePre <buffer> LspFormat
+      autocmd BufWritePre <buffer> LspNotifyDiagnosticCount()
+    augroup END
+
+    SetUndoFtplugin setlocal omnifunc< tagfunc<
+    SetUndoFtplugin nunmap <buffer> <Space>i
+    SetUndoFtplugin nunmap <buffer> <Up>
+    SetUndoFtplugin nunmap <buffer> <Down>
+    SetUndoFtplugin nunmap <buffer> <C-g>
+    SetUndoFtplugin autocmd! vimrc-lsp-buffer
+  enddef
+
+  def LspHighlight()
+    highlight link LspDiagVirtualTextError Error
+    highlight link LspDiagVirtualTextWarning WarningMsg
+    highlight link LspDiagVirtualTextHint Normal
+    highlight link LspDiagVirtualTextInfo Normal
+    highlight link LspSigActiveParameter String
+  enddef
+
+  def LspNotifyDiagnosticCount()
+    if !Pacpack.Tap('vim-notification')
+      return
+    endif
+
+    const counts = LspGetDiagCounts()
+    if (counts.error + counts.warning) == 0
+      return
+    endif
+
+    notification#show({
+      text: $"LSP\nError: {counts.error}  Warning: {counts.warning}",
+      clicked: function('execute', ['lopen']),
+      wait: 10000,
+    })
+  enddef
+endif
+
 if Pacpack.Tap('asyncomplete.vim')
   def AsyncompletePreprocessor(context: dict<any>, matches_dict: dict<any>)
     var base = tolower(context.base)
