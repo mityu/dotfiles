@@ -86,6 +86,8 @@ Gen.Hi('Pmenu', '#caca9d', '#493f2f', '')
 Gen.Hi('PmenuSel', '#caca9d', '#706656', '')
 Gen.Hi('PmenuSbar', '', '#82775a', '')
 Gen.Hi('PmenuThumb', '', '#b6b689', '')
+Gen.Hi('PmenuMatch', Gen.BlendColor('#caca9d', '#ffffff', 0.2), '#493f2f', 'underline')
+Gen.Hi('PmenuMatchSel', Gen.BlendColor('#caca9d', '#ffffff', 0.2), '#706656', 'underline')
 
 const DiffAddBg = Gen.BlendColor('#1f1f1f', '#75ff22', 0.15)
 const DiffAddFg = Gen.BlendColor('#fff8dc', DiffAddBg, 0.08)
