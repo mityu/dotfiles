@@ -5,9 +5,10 @@ SetUndoFtplugin setlocal foldexpr< foldmethod<
 # The below is already set by textobj-function
 # SetUndoFtplugin unlet! b:textobj_function_select
 setlocal shiftwidth=2
-setlocal foldmethod=expr
+# setlocal foldmethod=expr
+# setlocal foldexpr=<SID>FoldExpr()
 setbufvar('%', 'textobj_function_select', function('vimrc#textobj_vim#Select'))
-&l:foldexpr = expand('<SID>') .. 'FoldExpr()'
+setlocal foldmethod=indent
 
 def FoldIsBlockOpen(line: string): bool
   if line =~# '\v^<%(%(export\s+|legacy\s+|static\s+)?%(fu%[nction]|def|class)|if|for|while|try)>' ||
@@ -19,7 +20,8 @@ def FoldIsBlockOpen(line: string): bool
 enddef
 
 def FoldIsBlockClose(line: string): bool
-  if line =~# '\v^<end%(func%[tion]|def|class|if|for|while|try)>' ||
+  if line =~# '\v^<end%(f%[unction]|def|class|fo%[r]|w%[hile]|t%[ry])>' ||
+     line =~# '^\<en\%[dif]\>' ||
      line =~# '\v^augroup\s+<\cEND>' ||
      line =~# '\V' .. split(&l:foldmarker, ',')[1] .. '\d\*\s\*\$'
     return true
@@ -28,32 +30,19 @@ def FoldIsBlockClose(line: string): bool
 enddef
 
 def FoldExpr(): any
-  var line = getline(v:lnum)
-  if line =~# '^\s'
-    # :def functions in class
-    line = trim(line)
-    if line =~# '\v^%(static\s+)?def>'
-      return '>2'
-    elseif line ==# 'enddef' && (v:lnum + 1) == nextnonblank(v:lnum + 1)
-      return '<2'
-    endif
-    return '='
-  elseif FoldIsBlockOpen(line)
-    return '>1'
-  elseif v:lnum == 1 || FoldIsBlockClose(getline(prevnonblank(v:lnum - 1)))
-    if getline(v:lnum) ==# '' &&
-        (v:lnum - 1) == prevnonblank(v:lnum - 1) &&
-        getline(v:lnum - 1) =~# '\v^end%(func%[tion]|def)'
-      return '='
-    endif
+  if v:lnum == 1
     return 0
-  elseif getline(prevnonblank(v:lnum - 1)) =~# '^\s\+enddef\s*$' # :enddef in class
-    if getline(v:lnum) ==# '' && (v:lnum - 1) == prevnonblank(v:lnum - 1)
+  elseif FoldIsBlockOpen(getline(v:lnum - 1)->trim())
+    if FoldIsBlockClose(getline(v:lnum + 1)->trim()) || FoldIsBlockClose(getline(v:lnum)->trim())
       return '='
+    else
+      return 'a1'
     endif
-    return '<2'
+  elseif FoldIsBlockClose(getline(v:lnum + 1)->trim())
+    return 's1'
+  else
+    return '='
   endif
-  return '='
 enddef
 
 def AbbrevDirectiveFunction(): string
