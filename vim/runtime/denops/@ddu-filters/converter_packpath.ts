@@ -4,7 +4,7 @@ import {
   type Denops,
   SourceOptions,
 } from "jsr:@shougo/ddu-vim@~5.0.0/types";
-import { SEPARATOR_PATTERN } from "jsr:@std/path@~1.0.2"
+import { SEPARATOR_PATTERN } from "jsr:@std/path@~1.0.2";
 
 type Params = {
   hlGroup: string;
