@@ -2177,77 +2177,12 @@ endif
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
     # Pre-load some custom modules.
+    ddu#custom#load_config(Fs.JoinPath(Stdpath.dotvim, 'ddu', 'config.ts'))
     ddu#load('ui', ['ff'])
     ddu#load('source', ['mr', 'file', 'file_rec'])
     ddu#load('filter', ['matcher_multi_regex'])
 
-    g:ddu_source_lsp_clientName = 'vim-lsp'
-    ddu#custom#alias('source', 'file_git', 'file_external')
-    ddu#custom#action('kind', 'file', 'open-or-narrow', DduCustomActionFileOpenOrNarrow)
-    ddu#custom#action('kind', 'file',
-      'searchFilesInContainedProject', DduCustomActionSearchFilesInContainedProject)
-    ddu#custom#patch_global({
-      ui: 'ff',
-      uiParams: {
-        ff: {
-          split: 'no',
-          filterSplitDirection: 'belowright',
-          prompt: '> ',
-          highlights: {
-            prompt: 'Normal',
-            selected: 'Number',
-          },
-        },
-      },
-      sourceOptions: {
-        _: {
-          matchers: ['matcher_multi_regex'],
-          ignoreCase: true,
-        },
-        mr: {
-          matchers: ['converter_tr_homepath', 'matcher_multi_regex'],
-          ignoreCase: true,
-        },
-      },
-      sourceParams: {
-        file_rec: {
-          ignoreDirectories: ["node_modules", ".git", "dist", ".vscode"],
-        },
-        rg: {
-          args: ['--json'],
-          highlights: {
-            path: 'Preproc',
-            lineNr: 'Normal',
-            word: 'Special',
-          },
-        },
-        file_git: {
-          cmd: ['git', 'ls-files'],
-        },
-      },
-      kindOptions: {
-        action: {defaultAction: 'do'},
-        file: {defaultAction: 'open-or-narrow'},
-        help: {defaultAction: 'open'},
-        lsp: {defaultAction: 'open'},
-        lsp_codeAction: {defaultAction: 'apply'},
-      },
-      filterParams: {
-        matcher_multi_regex: {highlightMatched: 'Special', highlightGreedy: true},
-        converter_hl_dir: {hlGroup: 'PreProc'},
-      },
-    })
-    ddu#custom#patch_local('live-grep', {
-      sources: [{
-        name: 'rg',
-        options: {
-          matchers: [],
-          volatile: true,
-        },
-      }],
-      uiParams: {ff: {startFilter: true}},
-    })
-    ddu#custom#patch_local('file-rec', 'sources', [{name: 'file_rec'}])
+    # g:ddu_source_lsp_clientName = 'vim-lsp'
     ddu#custom#patch_local('pack-files', {
       sources:
         [
@@ -2265,56 +2200,6 @@ if Pacpack.Tap('ddu.vim')
         {name: 'file_rec', options: {path: fnamemodify($MYVIMRC, ':h:h')}}
       ],
     })
-    ddu#custom#patch_local('buffer', 'sources', [{name: 'buffer'}])
-    ddu#custom#patch_local('lsp-workspaceSymbol', {
-      sources: [{name: 'lsp_workspaceSymbol'}],
-      sourceOptions: {lsp: {volatile: true}},
-    })
-    ddu#custom#patch_local('lsp-documentSymbol', {
-      sources: [{name: 'lsp_documentSymbol'}],
-      uiParams: {ff: {displayTree: true}},
-    })
-    ddu#custom#patch_local('lsp-callHierarchy', {
-      sources: [{
-        name: 'lsp_callHierarchy',
-        params: {method: 'callHierarchy/outgoingCalls'},
-      }],
-      uiParams: {ff: {displayTree: true}},
-    })
-  enddef
-
-  def DduCustomActionFileOpenOrNarrow(args: dict<any>): number
-    const action = args.items[0].action
-    const path = action->get('path', '')
-    const isDirectory = action->get('isDirectory', false)
-    if isDirectory && path !=# ''
-      ddu#start({sources: [{name: 'file', options: {path: path}}]})
-      return 0
-    endif
-
-    ddu#ui_sync_action(args.options.name, 'itemAction', {
-      name: 'open',
-      items: args.items,
-      params: args.actionParams,
-    })
-    return 8
-  enddef
-
-  def DduCustomActionSearchFilesInContainedProject(args: dict<any>): number
-    const action = args.items[0].action
-    const path = action->get('path', '')
-    var root = vimrc#FindProjectRoot(path)
-    if root ==# ''
-      if filereadable(path)
-        root = path->fnamemodify(':h')
-      elseif isdirectory(path)
-        root = path
-      endif
-    endif
-    if root !=# ''
-      ddu#start({push: true, sources: [{name: 'file_rec', options: {path: root}}]})
-    endif
-    return 0
   enddef
 
   def DduMapFF()
