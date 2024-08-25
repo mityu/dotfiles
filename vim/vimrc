@@ -2450,6 +2450,7 @@ if Pacpack.Tap('vim-gin')
     autocmd BufReadCmd ginstatus://* nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
     autocmd BufReadCmd gin{status,branch,log}://*
           \ nnoremap <buffer> <Tab> <Plug>(gin-action-choice)
+    autocmd BufReadCmd gin*://* setlocal nomodeline
   augroup END
 endif
 
