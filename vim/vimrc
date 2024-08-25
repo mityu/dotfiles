@@ -61,6 +61,7 @@ endclass
 export class Stdpath
   static const cache = (IsWindows ? '~\.cache\vim' : '~/.cache/vim')->expand()
   static const dotvim = (IsWindows ? '~\vimfiles' : '~/.vim')->expand()
+  static const dotfiles = $MYVIMRC->fnamemodify(':h:h')
 endclass
 
 $DOT_VIM = Stdpath.dotvim
@@ -665,7 +666,7 @@ if !has('gui_running')
     const exepath = Fs.JoinPath(Stdpath.cache, 'disableim.exe')
     if !executable(exepath)  # Build disableim.exe
       var csc = 'C:\Windows\Microsoft.Net\Framework64\v4.0.30319\csc.exe'
-      var srcpath = Fs.JoinPath(fnamemodify($MYVIMRC, ':h'), 'misc', 'disableim.cs')
+      var srcpath = Fs.JoinPath(Stdpath.dotvim, 'misc', 'disableim.cs')
       var outpath = $'{shellescape(exepath)}'  # Check with Unix path, compile with Windows path.
       var cmdopts = ['/optimize+', '/debug-', '/nologo', '/target:winexe']
       if IsWSL
@@ -2197,7 +2198,7 @@ if Pacpack.Tap('ddu.vim')
     })
     ddu#custom#patch_local('dotfiles', {
       sources: [
-        {name: 'file_rec', options: {path: fnamemodify($MYVIMRC, ':h:h')}}
+        {name: 'file_rec', options: {path: Stdpath.dotfiles}}
       ],
     })
   enddef
@@ -2295,7 +2296,7 @@ if Pacpack.Tap('ddu.vim')
       sources: [
         {name: 'mr'},
         {name: 'file', options: {path: DduGetSearchRootPath('')}},
-        {name: 'file_rec', options: {path: fnamemodify($MYVIMRC, ':h:h')}},
+        {name: 'file_rec', options: {path: Stdpath.dotfiles}},
       ],
     })
   enddef
