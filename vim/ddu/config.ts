@@ -5,10 +5,12 @@ import {
 import {
   type ActionArguments,
   ActionFlags,
+  type Denops,
 } from "jsr:@shougo/ddu-vim@~5.0.0/types";
 import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.2.0";
 import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.8.0";
 import { exists as vimFnExists } from "jsr:@denops/std@~7.0.0/function";
+import { go } from "jsr:@denops/std@~7.0.0/variable";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { as } from "jsr:@core/unknownutil@~4.3.0/as";
 import { assert } from "jsr:@core/unknownutil@~4.3.0/assert";
@@ -30,7 +32,7 @@ export class Config extends BaseConfig {
     args.setAlias("source", "file_git", "file_external");
 
     args.contextBuilder.patchGlobal({
-      ui: "ff",
+      ui: "ff_vim_popup",
       uiParams: {
         ff: {
           split: "no",
@@ -39,6 +41,74 @@ export class Config extends BaseConfig {
             selected: "Number",
           },
         } satisfies Partial<FFParams>,
+        ff_vim_popup: {
+          bounds: async (denops: Denops) => {
+            const scWidth = ensure(await go.get(denops, "columns"), is.Number);
+            const scHeight = ensure(await go.get(denops, "lines"), is.Number);
+            const width = Math.max(scWidth - 20, Math.min(50, scWidth));
+            const height = Math.max(scHeight - 10, Math.min(20, scHeight));
+            const finder = {
+              line: Math.trunc((scHeight - height) / 3),
+              col: Math.trunc((scWidth - width) / 2),
+              width: Math.trunc(width * 3 / 5),
+              height: height,
+            };
+            const preview = {
+              line: finder.line,
+              col: finder.col + finder.width,
+              width: width - finder.width,
+              height: height,
+            };
+            return {
+              finder: finder,
+              preview: preview,
+            };
+          },
+          listerBorder: {
+            mask: [1, 1, 1, 1],
+            chars: [
+              "\u2500",
+              "\u2502",
+              "\u2500",
+              "\u2502",
+              "\u251c",
+              "\u2524",
+              "\u2534",
+              "\u2570",
+            ],
+          },
+          filterBorder: {
+            mask: [1, 1, 0, 1],
+            chars: [
+              "\u2500",
+              "\u2502",
+              "\u2500",
+              "\u2502",
+              "\u256d",
+              "\u252c",
+              "\u2524",
+              "\u251c",
+            ],
+          },
+          previewBorder: {
+            mask: [1, 1, 1, 0],
+            chars: [
+              "\u2500",
+              "\u2502",
+              "\u2500",
+              "\u2502",
+              "\u252c",
+              "\u256e",
+              "\u256f",
+              "\u2534",
+            ],
+          },
+          highlights: {
+            popup: "Normal",
+            selected: "Number",
+          },
+          hideCursor: true,
+        },
       },
       sourceOptions: {
         _: {
