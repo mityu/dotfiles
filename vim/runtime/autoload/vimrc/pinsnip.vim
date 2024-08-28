@@ -299,6 +299,14 @@ SnipFiletype('c')
     return true
   })
   ->AddSnip((comparison: string): bool => {
+    if comparison !~# '\v^#\s*in%[clude]' || comparison =~# '\v^#\s*include\s*\<'
+      return false
+    endif
+    const padding = matchstr(comparison, '\v^#\zs\*\zein')
+    ApplySnip([$'#{padding}include <{CursorPlaceholder}>'])
+    return true
+  })
+  ->AddSnip((comparison: string): bool => {
     # This snippet works like a template; apply this only when the cursor line
     # is modified.
     if !(prevnonblank(line('.') - 1) == 0 && nextnonblank(line('.') + 1) == 0)
