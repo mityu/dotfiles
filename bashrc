@@ -228,7 +228,7 @@ if bashrc_has_cmd sk; then
 			`dotfiles-path`
 			`bashrc_XDG_CONFIG_HOME`
 			`bashrc_XDG_CACHE_HOME`
-			"$HOME/projects"
+			"$HOME/dev"
 		)
 		local cmd="find ${directories[@]} -type d -not -path '*/\.git/*'"
 		local path=$(sk --no-multi -c "$cmd")
