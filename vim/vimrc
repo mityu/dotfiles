@@ -2183,7 +2183,7 @@ if Pacpack.Tap('ddu.vim')
   def DduConfig()
     # Pre-load some custom modules.
     ddu#custom#load_config(Fs.JoinPath(Stdpath.dotvim, 'ddu', 'config.ts'))
-    ddu#load('ui', ['ff'])
+    ddu#load('ui', ['ff_vim_popup'])
     ddu#load('source', ['mr', 'file', 'file_rec'])
     ddu#load('filter', ['matcher_multi_regex'])
 
@@ -2234,6 +2234,39 @@ if Pacpack.Tap('ddu.vim')
           \ {'command': 'execute "normal! \<C-e>"'})<CR>
     nnoremap <buffer> <Space>j
           \ <Cmd>call ddu#ui#do_action('quit')<CR><Cmd>call <SID>DduFiles()<CR>
+  enddef
+
+  def DduMapFFVimPopup()
+    const MapAction = ddu#ui#ff_vim_popup#MapAction
+    MapAction('n', 'q', 'quit')
+    MapAction('n', 'j', 'selectLowerItem')
+    MapAction('n', 'k', 'selectUpperItem')
+    MapAction('n', 'i', 'moveToInsertMode')
+    MapAction('n', '<CR>', 'itemAction')
+    MapAction('n', 'u', 'undoInput')
+    MapAction('n', '<C-r>', 'redoInput')
+    MapAction('n', 'm', 'toggleSelectItem')
+    MapAction('n', '*', 'toggleAllItems')
+    MapAction('n', 'o', 'expandItem', {mode: 'toggle'})
+    MapAction('n', 'O', 'collapseItem')
+    MapAction('n', 'p', 'previewItem')
+    MapAction('n', '<<', 'itemAction', {name: 'quickfix'})
+    MapAction('n', 'a', 'chooseAction')
+    MapAction('n', '<Tab>', 'chooseAction')
+
+    MapAction('i', '<ESC>', 'moveToNormalMode')
+    MapAction('i', '<CR>', 'moveToNormalMode')
+    MapAction('i', '<C-f>', 'moveForward')
+    MapAction('i', '<C-b>', 'moveBackward')
+    MapAction('i', '<C-a>', 'moveToHead')
+    MapAction('i', '<C-e>', 'moveToTail')
+    MapAction('i', '<C-n>', 'selectLowerItem')
+    MapAction('i', '<C-p>', 'selectUpperItem')
+    MapAction('i', '<C-h>', 'deleteChar')
+    MapAction('i', '<Del>', 'deleteChar')
+    MapAction('i', '<BS>', 'deleteChar')
+    MapAction('i', '<C-w>', 'deleteWord')
+    MapAction('i', '<C-u>', 'deleteToHead')
   enddef
 
   def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
@@ -2361,6 +2394,7 @@ if Pacpack.Tap('ddu.vim')
 
   augroup vimrc-ddu
     autocmd FileType ddu-ff DduMapFF()
+    autocmd User Ddu:ui:ff_vim_popup:openWindowPre DduMapFFVimPopup()
   augroup END
 
   if !v:vim_did_enter

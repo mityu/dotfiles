@@ -104,8 +104,11 @@ export class Config extends BaseConfig {
             ],
           },
           highlights: {
+            cursorline: "Cursorline",
+            cursor: "Cursor",
             popup: "Normal",
             selected: "Number",
+            previewline: "Search",
           },
           hideCursor: true,
         },
