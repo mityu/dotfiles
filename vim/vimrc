@@ -336,19 +336,6 @@ class Plugin
     endif
   enddef
 
-  def AddHookOnLoad(F: func(): void)
-    if !this.isLazy
-      EchomsgError($'HookOnLoad is only valid for lazy plugins: {this.name}')
-    endif
-    this.hooksOnLoad->add(F)
-  enddef
-
-  def InvokeHookOnLoad()
-    for F in this.hooksOnLoad
-      call(F, [])
-    endfor
-  enddef
-
   def IsLoaded(): bool
     const idx = &runtimepath->stridx(this.path)
     const ridx = idx + this.path->strlen()
@@ -408,14 +395,13 @@ export class Pacpack
     syntax enable
   enddef
 
-  # Load a plugin.  If the plugins is already loaded, this function does nothing.
+  # Load a plugin.  If the plugin is already loaded, this function does nothing.
   static def Load(name: string)
     const p: Plugin = pluginList->get(name, null_object)
     if p == null_object
       echoerr 'Plugin not found:' name
     elseif !p.IsLoaded()
       execute 'packadd' name
-      p.InvokeHookOnLoad()
     endif
   enddef
 
@@ -2062,13 +2048,15 @@ if Pacpack.Tap('vim-sandwich')
   def SandwichConfig()
     operator#sandwich#set('all', 'all', 'highlight', 0)
   enddef
-  Pacpack.plugin.AddHookOnLoad(SandwichConfig)
   MapOperator('vim-sandwich',
       {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
   MapOperator('vim-sandwich',
       {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'})
   MapOperator('vim-sandwich',
       {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
+  augroup vimrc-custom-operator
+    autocmd SourcePost */plugin/sandwich.vim SandwichConfig()
+  augroup END
 endif
 
 if Pacpack.Tap('caw.vim')
@@ -2077,10 +2065,14 @@ if Pacpack.Tap('caw.vim')
         \ <C-r>=b:caw_oneline_comment<CR>
 
   def CawLoadFtplugin()
-    execute $'runtime! OPT after/ftplugin/{&filetype}/caw.vim'
+    for ft in split(&filetype, '.')
+      execute $'runtime! OPT after/ftplugin/{ft}/caw.vim'
+    endfor
   enddef
 
-  Pacpack.plugin.AddHookOnLoad(CawLoadFtplugin)
+  augroup vimrc-custom-operator
+    autocmd SourcePost */plugin/caw.vim CawLoadFtplugin()
+  augroup END
 
   def CawMap(): string
     var kind = ''
@@ -2127,18 +2119,18 @@ if Pacpack.Tap('vim-textobj-entire')
 endif
 
 if Pacpack.Tap('vim-textobj-function')
-  augroup vim_textobj_function
-    autocmd Filetype c,java,vim ++once {
+  augroup vimrc-textobj-function
+    autocmd Filetype * ++once {
       packadd vim-textobj-function
-      execute 'runtime ftplugin/vim-textobj-function/' .. expand('<amatch>') .. '/textobj-function.vim'
+      for ft in split(&filetype, '.')
+        if ft =~# '\v^%(c|java|vim)$'
+          execute $'runtime ftplugin/vim-textobj-function/{expand('<amatch>')}/textobj-function.vim'
+        endif
+      endfor
     }
+    autocmd SourcePost */plugin/textobj/function.vim ++once ++nested
+      \ autocmd! vimrc-textobj-function
   augroup END
-  def CleanTextobjFunctionAutocmd()
-    augroup vim_textobj_function
-      autocmd!
-    augroup END
-  enddef
-  Pacpack.plugin.AddHookOnLoad(CleanTextobjFunctionAutocmd)
 
   MapTextobj('vim-textobj-function',
     {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
@@ -2184,8 +2176,11 @@ if Pacpack.Tap('vim-textobj-commentblock')
     TextobjCommentblockPickerCaw()
   enddef
 
-  Pacpack.plugin.AddHookOnLoad(OnLoadingTextobjCommentblock)
+  augroup vimrc_textobj_commentblock
+    autocmd SourcePost */plugin/textobj/commentblock.vim OnLoadingTextobjCommentblock()
+  augroup END
 endif
+
 if Pacpack.Tap('vim-textobj-between')
   MapTextobj('vim-textobj-between', {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'})
   MapTextobj('vim-textobj-between', {lhs: 'id', rhs: '<Plug>(textobj-between-i)'})
