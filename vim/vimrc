@@ -353,7 +353,6 @@ export class Pacpack
   static var pluginList: dict<Plugin> = {}  # List of enabled plugins.
   static var minpacPluginList: list<Plugin> = []  # List of plugins that are not local.
   static var overriddenPluginList: dict<string> = {}
-  static var plugin: Plugin  # Valid after calling Tap()
 
   static def _add(uri: string, config: dict<any>, isLazy: bool)
     const name = uri->matchstr('/\zs[^/]\+$')
@@ -397,7 +396,7 @@ export class Pacpack
 
   # Load a plugin.  If the plugin is already loaded, this function does nothing.
   static def Load(name: string)
-    const p: Plugin = pluginList->get(name, null_object)
+    const p = GetPlugin(name)
     if p == null_object
       echoerr 'Plugin not found:' name
     elseif !p.IsLoaded()
@@ -405,18 +404,18 @@ export class Pacpack
     endif
   enddef
 
-  static def Tap(nameGiven: string): bool
-    const name = overriddenPluginList->get(nameGiven, nameGiven)
-    plugin = pluginList->get(name, null_object)
-    return plugin != null_object && plugin.isExists
+  static def Tap(name: string): bool
+    const p = GetPlugin(name)
+    return p != null_object && p.isExists
   enddef
 
   static def IsLoaded(name: string): bool
-    const p: Plugin = pluginList->get(name, null_object)
+    const p = GetPlugin(name)
     return p != null_object && p.IsLoaded()
   enddef
 
-  static def GetPlugin(name: string): Plugin
+  static def GetPlugin(nameGiven: string): Plugin
+    const name = overriddenPluginList->get(nameGiven, nameGiven)
     return pluginList->get(name, null_object)
   enddef
 
@@ -1971,7 +1970,7 @@ if Pacpack.Tap('vim-lsp-settings')
 endif
 
 if Pacpack.Tap('vim-suda')
-  if !Pacpack.plugin.IsLoaded()
+  if !Pacpack.GetPlugin('vim-suda').IsLoaded()
     command! -nargs=? -complete=file SudaRead
           \ Pacpack.Load('suda.vim')|SudaRead <args>
     command! -nargs=? -complete=file SudaWrite
@@ -1980,7 +1979,7 @@ if Pacpack.Tap('vim-suda')
 endif
 
 if Pacpack.Tap('helpful.vim')
-  if !Pacpack.plugin.IsLoaded()
+  if !Pacpack.GetPlugin('helpful.vim').IsLoaded()
     command! -nargs=+ -complete=help HelpfulVersion
           \ Pacpack.Load('helpful.vim')|HelpfulVersion <args>
   endif
@@ -2448,10 +2447,11 @@ if Pacpack.Tap('skkeleton')
 
   def SkkeletonInit()
     var config: dict<any> = {eggLikeNewline: true}
+    const plugin = Pacpack.GetPlugin('skkeleton')
 
     if Pacpack.Tap('dict')
       config.globalDictionaries = ['SKK-JISYO.L.json']
-        ->map((_: number, v: string): string => Fs.JoinPath(Pacpack.plugin.path, 'json', v))
+        ->map((_: number, v: string): string => Fs.JoinPath(plugin.path, 'json', v))
     endif
 
     skkeleton#config(config)
