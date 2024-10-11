@@ -957,6 +957,8 @@ def CmdwinEnter()
   nnoremap <buffer> q <Cmd>quit<CR>
   inoremap <buffer> <C-c> <ESC><Cmd>quit<CR>
 
+  nnoremap <buffer> : :
+  xnoremap <buffer> : :
   inoremap <buffer> <C-l><C-n> <C-x><C-n>
   inoremap <buffer> <C-l><C-p> <C-x><C-n>
 
