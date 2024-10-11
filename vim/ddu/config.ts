@@ -1,16 +1,16 @@
 import {
   BaseConfig,
   type ConfigArguments,
-} from "jsr:@shougo/ddu-vim@~5.0.0/config";
+} from "jsr:@shougo/ddu-vim@~6.2.0/config";
 import {
   type ActionArguments,
   ActionFlags,
-  type Denops,
-} from "jsr:@shougo/ddu-vim@~5.0.0/types";
-import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.2.0";
-import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.8.0";
-import { exists as vimFnExists } from "jsr:@denops/std@~7.0.0/function";
-import { go } from "jsr:@denops/std@~7.0.0/variable";
+} from "jsr:@shougo/ddu-vim@~6.2.0/types";
+import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.4.0";
+import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.9.0";
+import type { Denops } from "jsr:@denops/std@~7.2.0";
+import { exists as vimFnExists } from "jsr:@denops/std@~7.2.0/function";
+import { go } from "jsr:@denops/std@~7.2.0/variable";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { as } from "jsr:@core/unknownutil@~4.3.0/as";
 import { assert } from "jsr:@core/unknownutil@~4.3.0/assert";

@@ -1,10 +1,10 @@
+import type { Denops } from "jsr:@denops/std@~7.2.0";
 import {
-  BaseFilter,
   DduItem,
-  type Denops,
   SourceOptions,
-} from "jsr:@shougo/ddu-vim@~5.0.0/types";
-import * as fn from "jsr:@denops/std@~7.0.3/function";
+} from "jsr:@shougo/ddu-vim@~6.2.0/types";
+import { BaseFilter } from "jsr:@shougo/ddu-vim@~6.2.0/filter";
+import * as fn from "jsr:@denops/std@~7.2.0/function";
 
 type Params = Record<string, never>;
 
