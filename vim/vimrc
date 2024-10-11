@@ -1145,6 +1145,7 @@ if Pacpack.Tap('vim-ripgrep')
 
   command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)
 endif
+
 if Pacpack.Tap('vim-fern')
   g:fern#disable_default_mappings = 1
   g:fern#default_exclude = '.DS_Store'
@@ -1249,17 +1250,20 @@ if Pacpack.Tap('vim-fern')
 
   nnoremap <Space>f <Cmd>Fern `=<SID>FernGetLaunchPath()`<CR>
 endif
+
 if Pacpack.Tap('vim-findent')
   augroup vimrc_findent
     autocmd FileType * if &l:modifiable && &l:filetype !=# 'help' | execute 'Findent' | endif
   augroup END
 endif
+
 if Pacpack.Tap('vim-alith')
   augroup vimrc_alith
     autocmd ColorScheme * highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
   augroup END
   highlight AlithMatchHead gui=reverse cterm=reverse term=reverse
 endif
+
 if Pacpack.Tap('vim-backpair')
   def BackpairCursorForward(): string
     var m = "\<Cmd>call backpair#clear_state()\<CR>"
@@ -1303,6 +1307,7 @@ if Pacpack.Tap('vim-backpair')
     autocmd User backpair-initialize BackpairConfig()
   augroup END
 endif
+
 if Pacpack.Tap('vim-charjump')
   noremap f <Plug>(charjump-inclusive-forward)
   noremap F <Plug>(charjump-inclusive-backward)
@@ -1311,6 +1316,7 @@ if Pacpack.Tap('vim-charjump')
   noremap ; <Plug>(charjump-repeat-obverse)
   noremap , <Plug>(charjump-repeat-reverse)
 endif
+
 if Pacpack.Tap('vim-cmdhistory')
   augroup vimrc-cmdhistory
     autocmd User cmdhistory-initialize SetupCmdhistory()
@@ -1321,6 +1327,7 @@ if Pacpack.Tap('vim-cmdhistory')
     cmdhistory#MapAction('<C-@>', ['no-operation'])
   enddef
 endif
+
 if Pacpack.Tap('vim-cobachi')
   g:cobachi_default_opts = {
     filter: (text: string, items: list<string>): list<any> => cobachi#filter#Regex(text, items),
@@ -1350,6 +1357,7 @@ if Pacpack.Tap('vim-cobachi')
 
   command! CobachiMru CobachiMru()
 endif
+
 if Pacpack.Tap('vim-gyoza')
   g:gyoza_disable_auto_setup = 1
 
@@ -1374,12 +1382,15 @@ if Pacpack.Tap('vim-gyoza')
     autocmd FileType bash,zsh ++once GyozaExtendRules(expand('<amatch>'), 'sh')
   augroup END
 endif
+
 if Pacpack.Tap('vim-wispath')
   imap <C-l><C-f> <Plug>(wispath-complete)
 endif
+
 if Pacpack.Tap('vim-jplus')
   map J <Plug>(jplus)
 endif
+
 if Pacpack.Tap('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
@@ -1387,6 +1398,7 @@ if Pacpack.Tap('previm')
     g:previm_open_cmd = '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe'
   endif
 endif
+
 if Pacpack.Tap('vim-ambicmd')
   def AmbicmdExpand(key: string): string
     const expander = ambicmd#expand(key)
@@ -1426,6 +1438,7 @@ if Pacpack.Tap('vim-ambicmd')
   enddef
   g:ambicmd#build_rule = AmbicmdBuildRule
 endif
+
 if Pacpack.Tap('vim-quickrun')
   g:quickrun_config = {}
   g:quickrun_config['_'] = {
@@ -1557,6 +1570,7 @@ if Pacpack.Tap('vim-quickrun')
     }
   augroup END
 endif
+
 if Pacpack.Tap('capture.vim')
   augroup vimrc
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
@@ -1747,6 +1761,7 @@ if Pacpack.Tap('asyncomplete.vim')
   g:asyncomplete_preprocessor = [AsyncompletePreprocessor]
   g:asyncomplete_auto_completeopt = 0
 endif
+
 if Pacpack.Tap('vim-lsp')
   # Lazy-loading
   augroup vimrc_lsp_lazyload
@@ -1924,6 +1939,7 @@ if Pacpack.Tap('vim-lsp')
     autocmd User lsp_buffer_disabled call LspDisableForBuffer()
   augroup END
 endif
+
 if Pacpack.Tap('vim-lsp-settings')
   def LspUpdateAllServers()
     if !exists('g:loaded_lsp_settings')
@@ -1967,6 +1983,7 @@ if Pacpack.Tap('vim-lsp-settings')
 
   command! -bar LspUpdateAllServers LspUpdateAllServers()
 endif
+
 if Pacpack.Tap('vim-suda')
   if !Pacpack.plugin.IsLoaded()
     command! -nargs=? -complete=file SudaRead
@@ -1975,12 +1992,14 @@ if Pacpack.Tap('vim-suda')
           \ Pacpack.Load('suda.vim')|SudaWrite <args>
   endif
 endif
+
 if Pacpack.Tap('helpful.vim')
   if !Pacpack.plugin.IsLoaded()
     command! -nargs=+ -complete=help HelpfulVersion
           \ Pacpack.Load('helpful.vim')|HelpfulVersion <args>
   endif
 endif
+
 # Textobj/Operator-user plugins
 # @param
 # - plugin_name: the name of plugin
@@ -2036,6 +2055,7 @@ enddef
 if Pacpack.Tap('vim-operator-replace')
   MapOperator('vim-operator-replace', {lhs: 'ms', rhs: '<Plug>(operator-replace)'})
 endif
+
 if Pacpack.Tap('vim-sandwich')
   g:textobj_sandwich_no_default_key_mappings = 1
   g:operator_sandwich_no_default_key_mappings = 1
@@ -2050,6 +2070,7 @@ if Pacpack.Tap('vim-sandwich')
   MapOperator('vim-sandwich',
       {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
 endif
+
 if Pacpack.Tap('caw.vim')
   inoremap <Plug>(vimrc:caw:prefix) <C-g>u<ESC>
   inoremap <silent> <Plug>(vimrc:caw:comment:here)
@@ -2088,19 +2109,23 @@ if Pacpack.Tap('caw.vim')
   g:caw_hatpos_sp = ' '
   g:caw_zeropos_sp = ' '
 endif
+
 if Pacpack.Tap('vim-operator-swap')
   MapOperator('vim-operator-swap', {lhs: 'my', rhs: '<Plug>(operator-swap-marking)'})
   MapOperator('vim-operator-swap', {lhs: 'mp', rhs: '<Plug>(operator-swap)'})
 endif
+
 if Pacpack.Tap('vim-operator-jump_side')
   MapOperator('vim-operator-jump_side', {lhs: '<C-p>', rhs: '<Plug>(operator-jump-head)'})
   MapOperator('vim-operator-jump_side', {lhs: '<C-n>', rhs: '<Plug>(operator-jump-tail)'})
 endif
+
 if Pacpack.Tap('vim-textobj-entire')
   MapTextobj('vim-textobj-entire', {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'})
   MapTextobj('vim-textobj-entire', {lhs: 'ia', rhs: '<Plug>(textobj-entire-i)'})
   g:textobj_entire_no_default_key_mappings = 1
 endif
+
 if Pacpack.Tap('vim-textobj-function')
   augroup vim_textobj_function
     autocmd Filetype c,java,vim ++once {
@@ -2121,6 +2146,7 @@ if Pacpack.Tap('vim-textobj-function')
     {lhs: 'if', rhs: '<Plug>(textobj-function-i)'})
   g:textobj_function_no_default_key_mappings = 1
 endif
+
 if Pacpack.Tap('vim-textobj-indent')
   MapTextobj('vim-textobj-indent', {lhs: 'ai', rhs: '<Plug>(textobj-indent-a)'})
   MapTextobj('vim-textobj-indent', {lhs: 'aI', rhs: '<Plug>(textobj-indent-same-a)'})
@@ -2128,11 +2154,13 @@ if Pacpack.Tap('vim-textobj-indent')
   MapTextobj('vim-textobj-indent', {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'})
   g:textobj_indent_no_default_key_mappings = 1
 endif
+
 if Pacpack.Tap('vim-textobj-line')
   MapTextobj('vim-textobj-line', {lhs: 'al', rhs: '<Plug>(textobj-line-a)'})
   MapTextobj('vim-textobj-line', {lhs: 'il', rhs: '<Plug>(textobj-line-i)'})
   g:textobj_line_no_default_key_mappings = 1
 endif
+
 if Pacpack.Tap('vim-textobj-commentblock')
   MapTextobj('vim-textobj-commentblock',
         {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'})
@@ -2168,6 +2196,7 @@ if Pacpack.Tap('vim-textobj-between')
   vmap i/ id/
   vmap a/ ad/
 endif
+
 if Pacpack.Tap('denops.vim')
   if IsWindows
     g:denops_server_addr = '127.0.0.1:32123'
@@ -2418,6 +2447,7 @@ if Pacpack.Tap('vim-mr')
   g:mr_mrr_disabled = true
   g:mr_mrd_disabled = true
 endif
+
 if Pacpack.Tap('skkeleton')
   inoremap <expr> <C-e> pumvisible() ? '<C-e>' : '<Plug>(skkeleton-toggle)'
 
@@ -2478,6 +2508,7 @@ if Pacpack.Tap('skkeleton')
     autocmd User skkeleton-mode-changed SkkeletonOnModeChanged()
   augroup END
 endif
+
 if Pacpack.Tap('vim-gin')
   # g:gin_log_default_args = ['--oneline']
   # g:gin_log_persistent_args = ['++opener=noomdeline\ edit']
