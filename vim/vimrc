@@ -1240,8 +1240,17 @@ endif
 
 if Pacpack.Tap('vim-findent')
   augroup vimrc_findent
-    autocmd FileType * if &l:modifiable && &l:filetype !=# 'help' | execute 'Findent' | endif
+    autocmd FileType * MayDoFindent()
   augroup END
+
+  def MayDoFindent()
+    const rejectBuftypes = ['quickfix', 'help', 'terminal', 'prompt', 'popup']
+    if !&l:modifiable || &l:filetype ==# 'help' || index(rejectBuftypes, &l:buftype) != -1
+      return
+    endif
+
+    execute 'Findent'
+  enddef
 endif
 
 if Pacpack.Tap('vim-alith')
