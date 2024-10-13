@@ -1065,7 +1065,7 @@ def Filter(bang: bool, pat: string, ...cmd: list<string>)
   endif
 enddef
 
-def FindGitroot(arg_target: string = bufname('%')): string
+def FindGitroot(arg_target: string = bufname('%')->fnamemodify(':p')): string
   const target: string = resolve(arg_target)
   const git_dir: string = finddir('.git', target .. ';')
   if git_dir ==# ''
@@ -1111,13 +1111,15 @@ if Pacpack.Tap('vim-cursorword')
   augroup END
   doautocmd vimrc_cursorword ColorScheme
 endif
+
 if Pacpack.Tap('vim-altr')
   command! -bar AlterForward call altr#forward()
   command! -bar AlterBack call altr#back()
 endif
+
 if Pacpack.Tap('vim-ripgrep')
   def RipGrep(argsGiven: string)
-    var cwd = getcwd(winnr())
+    var cwd = FindGitroot() ?? getcwd(winnr())
     cwd = Input('Grep here? ', cwd, 'dir')->expand()
     if !cwd->isdirectory()
       EchomsgError($'Directory not exist: {cwd}')
