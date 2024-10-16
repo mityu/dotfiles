@@ -130,8 +130,8 @@ def FindSnipFuzzy(comparison: string): list<string>
     for snip in snips
       snipmap[snip[0]] = snip
     endfor
-    var candidates: list<string> = keys(snipmap)
-              ->matchfuzzy(comparison, {matchseq: true})
+    var candidates: list<string> =
+      keys(snipmap)->matchfuzzy(comparison, {matchseq: true})
     if !empty(candidates)
       return snipmap[candidates[0]]
     endif
@@ -410,8 +410,7 @@ SnipFiletype('vim')
     var autoload_name =
       fnamemodify(fname, ':r')
       ->strpart(strridx + 9)  # Skip 'autoload/' or 'autoload\'
-      ->split('[/\\]')
-      ->join('#') .. '#'
+      ->substitute('[/\\]\+\|$', '#', 'g')
 
     var snip =
       substitute(strpart(getline('.'), 0, curidx), '^\s*', '', '') ..
@@ -422,10 +421,37 @@ SnipFiletype('vim')
 
     return true
   })
+  ->AddSnip((_: string): bool => {
+    # `function ` --> `function foo#bar#`
+    const [prefix, _] = GetlineDividedByCursor()
+    if prefix !~# '^fu\%[nction]\s\+$'
+      return false
+    endif
+
+    const fname = expand('%:p')
+    const strridx = strridx(fname, 'autoload')
+    if fnamemodify(fname, ':e') !=# 'vim' || strridx == -1
+      return false
+    endif
+
+    const autoload_name =
+      fnamemodify(fname, ':r')
+      ->strpart(strridx + 9)  # Skip 'autoload/' or 'autoload\'
+      ->substitute('[/\\]\+\|$', '#', 'g')
+
+    const curline = getline('.')->substitute('^\s*', '', '')
+    const suffix = strpart(curline, stridx(curline, prefix) + strlen(prefix))
+
+    const snip = prefix .. autoload_name .. CursorPlaceholder .. suffix
+    ApplySnip([snip])
+
+    return true
+  })
   ->AddSnip((comparison: string): bool => {
+    # `fu` --> `function`
     var r = '^\v(leg%[acy]\s*)?(fu%[nction])(!?\s*.*$)'
     var m = matchlist(comparison, r)
-    if empty(m)
+    if empty(m) || m[2] ==# 'function'
       return false
     endif
 
