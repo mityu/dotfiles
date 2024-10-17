@@ -49,6 +49,10 @@ def ApplySnip(snip_arg: list<string>)
   append('.', snip)
   delete _
   cursor(line('.') + cursor_line, cursor_col)
+
+  if exists('#User#PinsnipApplyPost')
+    doautocmd <nomodeline> User PinsnipApplyPost
+  endif
 enddef
 
 def GetOneIndentString(): string
