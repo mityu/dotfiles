@@ -523,6 +523,88 @@ FuzzySnipList['java'] = [
   ['public static void main(String[] args) {' .. CursorPlaceholder],
 ]
 
+SnipFiletype('typescript')
+  ->AddSnip((line: string): bool => {
+    # Complete `import` statement.
+    const r = '\v^im%[port]%(\s*(\{[^}]*}|\*\s+as\s+\w+))?%(\s+f%[rom])?\s*("[^"]*"?)?\s*;?\s*$'
+    const m = matchlist(line, r)
+    if empty(m)
+      return false
+    endif
+
+    var [imports, path] = m[1 : 2]
+    var needCursorPlaceHolder = true
+    if path !~# '^".*"$'
+      if path ==# ''
+        path = $'"{CursorPlaceholder}"'
+      else
+        path ..= CursorPlaceholder .. '"'
+      endif
+      needCursorPlaceHolder = false
+    endif
+
+    if imports ==# ''
+      if needCursorPlaceHolder
+        imports = '{' .. CursorPlaceholder .. '}'
+        needCursorPlaceHolder = false
+      else
+        imports = '{}'
+      endif
+    elseif needCursorPlaceHolder
+      echom imports
+      if imports =~# '^{'
+        const [pre, suf] = split(imports, '\ze\s*}$')
+        imports = pre .. CursorPlaceholder .. suf
+      else
+        imports ..= CursorPlaceholder
+      endif
+      needCursorPlaceHolder = false
+    endif
+
+    const snip = $'import {imports} from {path};'
+    ApplySnip([snip])
+    return true
+  })
+  ->AddSnip((line: string): bool => {
+    if line !~# '\v^await\s+b%[atch]%(\s*\(\s*%[denops])?'
+      return false
+    endif
+    const snip =
+      ['await batch(denops, async(denops) => {', $"\t{CursorPlaceholder}", '});']
+    ApplySnip(snip)
+    return true
+  })
+  ->AddSnip((_: string): bool => {
+    # `(...)` --> `(...) => {}`, etc
+    const comparison = GetlineDividedByCursor()[0]
+    const r = '\v^(.*)(\([^(]*\))(\s*:\s*[^=]*)?%(\s*%[\=\>]\s*\{?)?$'
+    const m = matchlist(comparison, r)
+    if empty(m)
+      return false
+    endif
+
+    const [prefix, params, rettype] = m[1 : 3]
+    const suffix = GetlineDividedByCursor()[1]
+    const fnbody = printf(' => {%s}', CursorPlaceholder)
+    const snip = prefix .. params .. rettype .. fnbody .. suffix
+
+    ApplySnip([snip])
+
+    return true
+  })
+  ->AddSnip((_: string): bool => {
+    # `map(` --> `map((v) => {})`
+    const comparison = GetlineDividedByCursor()[0]
+    if comparison !~# '\v%(map|reduce|filter|find)\s*\(\s*$'
+      return false
+    endif
+    const [prefix, suffix] = GetlineDividedByCursor()
+    const lambda = printf('(v) => {%s}', CursorPlaceholder)
+    const postlambda = suffix =~# '^\s*)' ? '' : ')'
+    ApplySnip([prefix .. lambda .. postlambda .. suffix])
+    return true
+  })
+
 SnipFiletype('help')
   ->AddSnip((_: string): bool => {
     # Add modeline text when there's no modeline and cursor is at the EOF.
