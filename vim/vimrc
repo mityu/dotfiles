@@ -1040,7 +1040,7 @@ command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>
 command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
 command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '' : 'setfiletype <args>')
-command! -bar -nargs=+ -complete=dir Open vimrc#DefineOpenCommand()|Open <args>
+command! -bar -nargs=+ -complete=dir SysOpen vimrc#DefineOpenCommand()|SysOpen <args>
 command! -bar Hlgroup vimrc#ShowHighlightGroup()
 command! -bar HighlightGroup Hlgroup
 command! -bar RTP echo &runtimepath->split(',')->join("\n")

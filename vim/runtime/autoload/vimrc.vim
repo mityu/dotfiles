@@ -178,10 +178,10 @@ export def DefineOpenCommand()
   endif
 
   if cmd ==# ''
-    command! -bar -nargs=* -complete=dir Open
-          \ Vimrc.EchomsgWarning(':Open command is not supported on this platform.')
+    command! -bar -nargs=* -complete=dir SysOpen
+          \ Vimrc.EchomsgWarning(':SysOpen command is not supported on this platform.')
   else
-    execute 'command! -bar -nargs=+ -complete=dir Open ' ..
+    execute 'command! -bar -nargs=+ -complete=dir SysOpen ' ..
       $'call system("{cmd} " .. shellescape(<q-args>))'
   endif
 enddef
