@@ -1985,9 +1985,9 @@ endif
 if Pacpack.Tap('vim-suda')
   if !Pacpack.GetPlugin('vim-suda').IsLoaded()
     command! -nargs=? -complete=file SudaRead
-          \ Pacpack.Load('suda.vim')|SudaRead <args>
+          \ Pacpack.Load('vim-suda')|SudaRead <args>
     command! -nargs=? -complete=file SudaWrite
-          \ Pacpack.Load('suda.vim')|SudaWrite <args>
+          \ Pacpack.Load('vim-suda')|SudaWrite <args>
   endif
 endif
 
