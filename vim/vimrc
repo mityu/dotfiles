@@ -2205,6 +2205,7 @@ if Pacpack.Tap('vim-textobj-between')
 endif
 
 if Pacpack.Tap('denops.vim')
+  $DENOPS_TEST_DENOPS_PATH = Pacpack.GetPlugin('denops.vim').path
   if IsWindows
     g:denops_server_addr = '127.0.0.1:32123'
   endif
