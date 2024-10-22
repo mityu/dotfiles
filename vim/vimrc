@@ -1292,12 +1292,16 @@ if Pacpack.Tap('vim-backpair')
     backpair#add_pair('\(', '\)')
     backpair#add_pair('\%(', '\)')
     backpair#add_pair('[[', ']]')
+    backpair#add_pair('({', '})')
+    backpair#add_pair('{', '})', {skip_if_ongoing: ['({})']})
     backpair#add_pair('`', '`', {condition: (): bool => trim(getline('.')) !=# '``'})
     backpair#add_pair('(', ');')
     backpair#add_pair('[', '];')
     backpair#add_pair('{', '};')
     backpair#add_pair('"', '";')
     backpair#add_pair("'", "';")
+    backpair#add_pair('({', '});')
+    backpair#add_pair('{', '});', {skip_if_ongoing: ['({});']})
   enddef
 
   augroup vimrc-plugin-backpair
