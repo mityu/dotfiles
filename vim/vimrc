@@ -1044,14 +1044,7 @@ command! -bar -nargs=+ -complete=dir SysOpen vimrc#DefineOpenCommand()|SysOpen <
 command! -bar Hlgroup vimrc#ShowHighlightGroup()
 command! -bar HighlightGroup Hlgroup
 command! -bar RTP echo &runtimepath->split(',')->join("\n")
-
-# Plugin Shortcuts
 command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
-command! -bar -bang -nargs=? -complete=dir Ls call vimrc#shcmd#ls(<bang>0, <f-args>)
-command! -bar -bang -nargs=+ -complete=dir Mkdir call vimrc#shcmd#mkdir(<bang>0, <f-args>)
-command! -bar -nargs=+ -complete=dir Touch call vimrc#shcmd#touch(<f-args>)
-command! -bar -nargs=+ -complete=dir CpFile call vimrc#shcmd#cpfile(<f-args>)
-command! -bar -bang -nargs=+ -complete=file Rm call vimrc#shcmd#rm(<bang>0, <f-args>)
 
 def Filter(bang: bool, pat: string, ...cmd: list<string>)
   const output = execute(join(cmd, ' '))
