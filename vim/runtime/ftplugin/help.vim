@@ -1,9 +1,3 @@
-scriptencoding utf-8
-" if exists('b:did_ftplugin_after')
-"   finish
-" endif
-" let b:did_ftplugin_after = 1
-
 SetUndoFtplugin delcommand HelpEdit | delcommand HelpView | set spell<
 SetUndoFtplugin nunmap <buffer> <C-n>
 SetUndoFtplugin nunmap <buffer> <C-p>
@@ -13,7 +7,6 @@ if &modifiable
 endif
 
 " Thanks to thinca!
-" Global
 function! s:option_to_view()
   setlocal buftype=help nomodifiable readonly
   setlocal nolist
@@ -40,14 +33,18 @@ command! -buffer -bar HelpEdit call s:option_to_edit()
 command! -buffer -bar HelpView call s:option_to_view()
 
 function! s:resize()
-  " Resize only when window isn't split vertically and there's one help
-  " window.
-  if (&l:textwidth * 2) <= winwidth(0) &&
-        \ len(filter(range(1,winnr('$')),
-        \ 'getwinvar(v:val,"&buftype")==#"help"')) == 1
-    wincmd L
-    execute 'vertical resize' (&l:textwidth+5)
+  " Do not resize if
+  " - window is too wide.
+  " - there're already two or more help windows.
+  " - the previous buffer of this window is also a help window.
+  if &l:textwidth * 2 > winwidth(0) ||
+    \ tabpagebuflist()->filter('getbufvar(v:val, "&buftype") ==# "help"')->len() > 1 ||
+    \ getbufvar('#', '&buftype') ==# 'help'
+    return
   endif
+
+  wincmd L
+  execute $'vertical resize {&l:textwidth + 5}'
 endfunction
 
 if &buftype ==# 'help'
@@ -57,7 +54,7 @@ if &buftype ==# 'help'
   nnoremap <buffer> <C-\> <C-]>
 
   call s:resize()
-  augroup vimrc_ftplugin_vim
+  augroup vimrc-ftplugin-help
       autocmd! BufWinEnter <buffer>
       autocmd BufWinEnter <buffer> call s:resize()
   augroup END
@@ -149,17 +146,15 @@ else
   endfunction
 endif
 
-if !exists('*' .. expand('<SID>') .. 'search_link')
-  function s:search_link(go_up) abort
-    let l:SearchSkip = {->
-          \ synID(line('.'), col('.'), 1)->synIDattr('name') !~#
-          \ '\v^%(helpOption|helpHyperTextJump)$'}
+if !exists('*s:search_link')
+  function s:search_link_skip() abort
+    const syngroup = synID(line('.'), col('.'), 1)->synIDattr('name')
+    return syngroup !~# '\v^%(helpOption|helpHyperTextJump)$'
+  endfunction
 
-    let flags = 'W'
-    if a:go_up
-      let flags ..= 'b'
-    endif
-    call search('[''|]\zs.', flags, 0, 0, l:SearchSkip)
+  function s:search_link(go_up) abort
+    const flags = 'W' .. (a:go_up ? 'b' : '')
+    call search('[''|]\zs.', flags, 0, 0, function('s:search_link_skip'))
   endfunction
 endif
 
