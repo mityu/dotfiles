@@ -208,6 +208,8 @@ enddef
 export def FindProjectRoot(path: string): string
   if path ==# ''
     return ''
+  elseif !isabsolutepath(path)
+    throw $'Path should be absolute: {path}'
   endif
 
   const rootMarkerDirs = [
