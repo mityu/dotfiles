@@ -1455,10 +1455,6 @@ if Pacpack.Tap('vim-quickrun')
   g:quickrun_config.cpp = {
     cmdopt: '-std=c++20'
   }
-  g:quickrun_config['cpp/sfml'] = {
-    type: 'cpp',
-    cmdopt: '-std=c++20 -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window',
-  }
   g:quickrun_config.go = {
     command: 'go',
     cmdopt: '-mod=mod',
@@ -1605,24 +1601,7 @@ if Pacpack.Tap('open-browser.vim') && !v:vim_did_enter
     openbrowser#open(uri)
   enddef
 endif
-if Pacpack.Tap('vim-vim9skk')
-  if !exists('g:vim9skk')
-    g:vim9skk = {}
-  endif
-  if !g:vim9skk->has_key('keymap')
-    g:vim9skk.keymap = {}
-  endif
-  g:vim9skk.disable_default_mappings = true
-  g:vim9skk.keymap = {
-    toggle: '<C-e>',
-    next: '<C-n>',
-    prev: '<C-p>',
-    complete: ['<C-y>', '<C-j>', '<CR>'],
-    cancel: '<C-e>',
-    select: ['<C-n>', '<Space>'],
-  }
-  g:vim9skk.recent = 0
-endif
+
 if Pacpack.Tap('autofmt')
   Set formatexpr=autofmt#japanese#formatexpr()
 endif
@@ -2897,46 +2876,6 @@ enddef
 augroup vimrc_additional_plugins
   autocmd FileType filore call FiloreMapping()
 augroup END
-
-# git
-def GitDiffGetcmd(arg_target: string): string
-  const target: string = resolve(arg_target)
-  const gitroot: string = FindGitroot(target)
-  if gitroot ==# ''
-    return ''
-  endif
-  return $'git -C {gitroot} --no-pager diff --no-color {target}'
-enddef
-
-def GitDiff(arg_target: string)
-  var target: string
-  if arg_target ==# ''
-    target = bufname('%')
-  else
-    target = arg_target
-  endif
-  target = resolve(target)
-  if getftype(target) ==# ''
-    EchomsgError('File or directory does not exists: ' .. target)
-    return
-  endif
-  const cmd = GitDiffGetcmd(target)
-  if cmd ==# ''
-    EchomsgWarning('Not a git repository: ' .. target)
-    return
-  endif
-  const bufnr = term_start(cmd, {
-          term_name: '[git diff] ' .. fnamemodify(target, ':~:.'),
-          norestore: 1,
-        })
-  if bufnr != 0
-    setlocal nocursorline nocursorcolumn filetype=diff
-    nnoremap <buffer> <nowait> q <Cmd>quit<CR>
-    cursor(1, 0)
-  endif
-  return
-enddef
-command! -nargs=? -complete=file GitDiff call GitDiff(<q-args>)
 
 # splash
 command! Splash call vimrc#splash#Show()
