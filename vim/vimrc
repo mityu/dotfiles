@@ -749,13 +749,13 @@ def ValidateFilename(filename: string)
   const invalid_chars = '!&()[]{}<>^*=+:;''",`~?|'
   for char in invalid_chars
     if stridx(filename, char) >= 0
-      throw 'Filename has invalid char: ' .. filename
+      throw $'Filename has invalid char: {filename}'
     endif
   endfor
 
   const valid_pattern = '\.\?[[:alnum:]]\+$'
   if filename !~? valid_pattern
-    throw 'Filename is invalid format: ' .. filename
+    throw $'Filename is invalid format: {filename}'
   endif
 enddef
 
@@ -966,6 +966,7 @@ def CmdwinEnter()
   if Pacpack.Tap('vim-cmdhistory')
     nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
   endif
+
   if Pacpack.Tap('vim-winc')
     winc#Setup()
   endif
@@ -985,6 +986,7 @@ def CmdwinEnter()
     endif
   endif
 enddef
+
 def CmdwinCompletion(select_next: bool): string
   if pumvisible()
     return select_next ? "\<C-n>" : "\<C-p>"
@@ -1567,6 +1569,7 @@ if Pacpack.Tap('capture.vim')
     autocmd Filetype capture nnoremap <buffer> q <C-w>q
   augroup END
 endif
+
 if Pacpack.Tap('open-browser.vim') && !v:vim_did_enter
   augroup vimrc_openbrowser
     autocmd SourcePost */plugin/openbrowser.vim
