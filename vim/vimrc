@@ -1386,11 +1386,11 @@ if Pacpack.Tap('vim-gyoza')
 endif
 
 if Pacpack.Tap('vim-wispath')
-  imap <C-l><C-f> <Plug>(wispath-complete)
+  inoremap <C-l><C-f> <Plug>(wispath-complete)
 endif
 
 if Pacpack.Tap('vim-jplus')
-  map J <Plug>(jplus)
+  noremap J <Plug>(jplus)
 endif
 
 if Pacpack.Tap('previm')
