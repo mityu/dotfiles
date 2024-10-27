@@ -53,58 +53,28 @@ auto_mkdir (){
 
 auto_mkdir $CONFIG_DIR
 
-echo "Deploying .bashrc"
 ln -sn $SCRIPT_DIR/bashrc ~/.bashrc
-
-echo "Deploying .zshrc"
 ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
-
-echo "Deploying .vim/"
 ln -snfv ${SCRIPT_DIR}/vim ~/.vim
-
-echo "Deploying nvim/"
 ln -snfv $SCRIPT_DIR/nvim $CONFIG_DIR/nvim
-
-echo "Deploying .alacritty"
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
-
-echo "Deploying wezterm/"
 ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
-
-echo "Deploying blesh/"
 ln -snfv $SCRIPT_DIR/blesh $CONFIG_DIR/blesh
-
-echo "Deploying efm-langserver/"
 ln -snfv $SCRIPT_DIR/efm-langserver $CONFIG_DIR/efm-langserver
 
 if $IS_MAC; then
-	echo "Deploying karabiner/"
 	ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner
-
-	echo "Deploying .mlterm/"
 	ln -snfv $SCRIPT_DIR/mlterm ~/.mlterm
 fi
 
 if $IS_LINUX; then
-	echo "Deploying i3/"
 	ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
-
-	echo "Deploying i3blocks/"
 	ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
-
-	echo "Deploying xkeysnail/"
 	ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
-
-	echo "Deploying xremap/"
 	ln -snfv ${SCRIPT_DIR}/xremap $CONFIG_DIR/xremap
-
-	echo "Deploygin dunst/"
 	ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
-
-	echo "Deploying libinput-gestures.conf"
 	ln -snfv $SCRIPT_DIR/libinput-gestures/libinput-gestures.conf \
 		$CONFIG_DIR/libinput-gestures.conf
-
 	ln -snfv $SCRIPT_DIR/rofi $CONFIG_DIR/rofi
 
 	if type pacman &> /dev/null; then
