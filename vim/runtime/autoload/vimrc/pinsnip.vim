@@ -574,7 +574,7 @@ SnipFiletype('typescript')
       return false
     endif
     const snip =
-      ['await batch(denops, async(denops) => {', $"\t{CursorPlaceholder}", '});']
+      ['await batch(denops, async (denops) => {', $"\t{CursorPlaceholder}", '});']
     ApplySnip(snip)
     return true
   })
