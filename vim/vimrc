@@ -842,8 +842,8 @@ nnoremap <Space>f <Cmd>call vimrc#filore#start()<CR>
 nnoremap m <Nop>
 vnoremap m <Nop>
 
-nnoremap % <Cmd>packadd matchit<CR><Cmd>normal %<CR>
-xnoremap % <Cmd>packadd matchit<CR><Cmd>normal %<CR>
+nnoremap % <Cmd>packadd matchit<CR><Plug>(MatchitNormalForward)
+xnoremap % <Cmd>packadd matchit<CR><Plug>(MatchitVisualForward)
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
