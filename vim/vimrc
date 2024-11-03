@@ -2504,10 +2504,20 @@ if Pacpack.Tap('vim-gin')
   g:gin_proxy_apply_without_confirm = true
   nnoremap <Space>g <Cmd>GinStatus<CR>
 
+  def GinStatusOpened()
+    nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
+    nnoremap <buffer> <C-l> <Cmd>call gin#util#reload()<CR>
+  enddef
+
+  def GinLogOpened()
+    nnoremap <buffer> <C-l> <Cmd>call gin#util#reload()<CR>
+    nnoremap <buffer> <C-p> <Cmd>call search('^commit\s\w\+', 'bW')<CR>
+    nnoremap <buffer> <C-n> <Cmd>call search('^commit\s\w\+', 'W')<CR>
+  enddef
+
   augroup vimrc-gin
-    autocmd BufReadCmd ginstatus://* nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
-    autocmd BufReadCmd gin{status,branch,log}://*
-          \ nnoremap <buffer> <Tab> <Plug>(gin-action-choice)
+    autocmd BufReadCmd ginstatus://* GinStatusOpened()
+    autocmd BufReadcmd ginlog://* GinLogOpened()
     autocmd BufReadCmd gin*://* setlocal nomodeline
   augroup END
 endif
