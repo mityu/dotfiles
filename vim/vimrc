@@ -530,15 +530,11 @@ Pacpack.Add('https://github.com/vim-jp/vital.vim')
 Pacpack.Add('https://github.com/vim-scripts/autodate.vim')
 Pacpack.Add('https://github.com/whonore/Coqtail')
 
-Pacpack.Add('https://github.com/yegappan/lsp')
-Pacpack.Add('https://github.com/mattn/vim-lsp-settings')
-Pacpack.Add('https://github.com/normen/vim-lsp-settings-adapter')
-
 Pacpack.AddLazy('https://github.com/4513ECHO/nvim-keycastr')
 Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
-# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete-lsp.vim')
-# Pacpack.AddLazy('https://github.com/prabirshrestha/asyncomplete.vim')
 # Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
+# Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
+Pacpack.Add('https://github.com/kuuote/lspoints')
 Pacpack.AddLazy('https://github.com/tweekmonster/helpful.vim')
 Pacpack.AddLazy('https://github.com/y0za/vim-reading-vimrc')
 
@@ -745,6 +741,7 @@ endif
 augroup vimrc-validate-filename
   autocmd BufWritePre * ValidateFilename(expand('<afile>:t'))
 augroup END
+
 def ValidateFilename(filename: string)
   const invalid_chars = '!&()[]{}<>^*=+:;''",`~?|'
   for char in invalid_chars
@@ -1602,6 +1599,130 @@ if Pacpack.Tap('autofmt')
   Set formatexpr=autofmt#japanese#formatexpr()
 endif
 
+if Pacpack.Tap('lspoints')
+  var LspointsAttachRequests: list<dict<any>> = []
+
+  def LspointsExecCmd(...cmd: list<any>)
+    denops#notify('lspoints', 'executeCommand', cmd)
+  enddef
+
+  def LspointsExecCmdSync(...cmd: list<any>)
+    denops#request('lspoints', 'executeCommand', cmd)
+  enddef
+
+  def LspointsGetAttachParams(): dict<any>
+    return {
+      bufnr: bufnr('%'),
+      bufname: expand('%:p'),
+      filetype: &l:filetype,
+      pwd: getcwd(0),
+    }
+  enddef
+
+  def LspointsAttachLater(ctx: dict<any>)
+    LspointsAttachRequests->add(ctx)
+  enddef
+
+  def LspointsAttachPostponed()
+    var requests = []
+    var fired = {}
+
+    for r in LspointsAttachRequests->reverse()
+      if fired->has_key(r.bufnr) || !bufexists(r.bufnr)
+        continue
+      endif
+      fired[r.bufnr] = true
+      requests->add(r)
+    endfor
+
+    for r in requests->reverse()
+      LspointsAttach(r)
+    endfor
+  enddef
+
+  def LspointsAttach(ctx: dict<any>)
+    LspointsExecCmd('config', 'attachLsp', ctx)
+  enddef
+
+  def LspointsOnAttach()
+    const [server, bufnrStr] =
+      expand('<amatch>')->matchlist('^LspointsAttach:\(.*\):\(\d*\)$')[1 : 2]
+    const bufnr = str2nr(bufnrStr)
+
+    if Pacpack.Tap('vim-notification')
+      notification#show($"{pathshorten(bufname(bufnr))}\nServer attached: {server}")
+    else
+      echo 'Server attached:' server
+    endif
+
+    if bufnr == bufnr()
+      LspointsConfigForBuffer(server)
+    else
+      augroup vimrc-lspoints
+        execute $'autocmd! BufEnter <buffer={bufnr}>'
+        execute $'autocmd BufEnter <buffer={bufnr}> LspointsConfigForBuffer("{server}")'
+      augroup END
+    endif
+  enddef
+
+  def LspointsOnDetach()
+    const server = expand('<amatch>')->matchstr('^LspointsDetach:\zs.*$')
+    if Pacpack.Tap('vim-notification')
+      notification#show($'Server detached: {server}')
+    else
+      echo 'Server detached:' server
+    endif
+  enddef
+
+  def LspointsConfigForBuffer(server: string)
+    nnoremap <buffer> <C-g> <Cmd>call <SID>LspointsExecCmd('hover', 'float')<CR><C-g>
+    nnoremap <buffer> <Space>i <Cmd>call <SID>LspointsExecCmd('signatureHelp', 'float')<CR>
+    autocmd vimrc-lspoints CursorHold <buffer>
+      \ LspointsExecCmd('diagnostics', 'show', {
+      \   silent: true,
+      \   previewer: "popup",
+      \ })
+
+    if server =~# '\v^%(denols|gopls|rust-analyzer)$'
+      autocmd vimrc-lspoints BufWritePre <buffer> LspFmt
+    elseif server ==# 'clangd'
+      if findfile('.clang-format', $'{expand('%:p')};') !=# ''
+        autocmd vimrc-lspoints BufWritePre <buffer> LspFmt
+      endif
+    endif
+  enddef
+
+  g:lspoints#extensions = ['diagnostics', 'format', 'hover', 'signature_help', 'config']
+
+  command! -bar LspFmt LspointsExecCmdSync('format', 'execute', bufnr())|redraw
+  command! -bar LspAttach LspointsExecCmd('config', 'attachLsp', LspointsGetAttachParams())
+  command! -bar LspointsRestart lspoints#reload()
+  command! -bar -nargs=? LspShowDiag LspointsExecCmd('diagnostics', 'show', {previewer: <q-args> ?? "popup"})
+
+  def LspointsSetupAttachAutocmds()
+    augroup vimrc-lspoints
+      autocmd!
+      autocmd User DenopsReady lspoints#denops#register()
+      autocmd User LspointsAttach:* LspointsOnAttach()
+      autocmd User LspointsDetach:* LspointsOnDetach()
+      autocmd User DenopsPluginUnloadPre:lspoints LspointsSetupAttachAutocmds()
+
+      if !v:vim_did_enter || !denops#plugin#is_loaded('lspoints')
+        autocmd FileType * LspointsAttachLater(LspointsGetAttachParams())
+        autocmd User DenopsPluginPost:lspoints {
+          LspointsAttachPostponed()
+          autocmd! vimrc-lspoints FileType
+          autocmd vimrc-lspoints FileType * LspointsAttach(LspointsGetAttachParams())
+        }
+      else
+        autocmd FileType * LspointsAttach(LspointsGetAttachParams())
+      endif
+    augroup END
+  enddef
+
+  LspointsSetupAttachAutocmds()
+endif
+
 if Pacpack.Tap('lsp')
   augroup vimrc
     autocmd ColorScheme * LspHighlight()
@@ -2203,7 +2324,12 @@ if Pacpack.Tap('ddu.vim')
     ddu#load('source', ['mr', 'file', 'file_rec'])
     ddu#load('filter', ['matcher_multi_regex'])
 
-    # g:ddu_source_lsp_clientName = 'vim-lsp'
+    if Pacpack.Tap('lspoints')
+      g:ddu_source_lsp_clientName = 'lspoints'
+    elseif Pacpack.Tap('vim-lsp')
+      g:ddu_source_lsp_clientName = 'vim-lsp'
+    endif
+
     ddu#custom#patch_local('pack-files', {
       sources:
         [
