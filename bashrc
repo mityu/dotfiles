@@ -202,6 +202,10 @@ if bashrc_in_vim_terminal; then
 		cd "$cwd"
 	}
 
+	function clear-vimenv() {
+		export VIM= VIMRUNTIME=
+	}
+
 	if bashrc_has_cmd nvim; then
 		alias nvim='VIM= VIMRUNTIME= nvim'
 	fi
