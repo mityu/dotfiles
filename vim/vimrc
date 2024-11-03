@@ -584,6 +584,14 @@ Pacpack.Add('https://github.com/shun/ddu-source-rg')
 Pacpack.Add('https://github.com/tennashi/ddu-source-git')
 Pacpack.Add('https://github.com/uga-rosa/ddu-source-lsp')
 
+# Ddc plugins
+Pacpack.Add('https://github.com/Shougo/ddc.vim')
+Pacpack.Add('https://github.com/Shougo/ddc-ui-native')
+Pacpack.Add('https://github.com/Shougo/ddc-source-lsp')
+Pacpack.Add('https://github.com/Shougo/ddc-source-vim')
+Pacpack.Add('https://github.com/Shougo/ddc-source-around')
+Pacpack.Add('https://github.com/tani/ddc-fuzzy')
+
 # Options {{{
 if !exists('g:colors_name')  # Don't override colorscheme
   colorscheme domusaurea
@@ -968,6 +976,14 @@ def CmdwinEnter()
     winc#Setup()
   endif
 
+  # Disable auto completions in cmdwin.
+  if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
+    asyncomplete#disable_for_buffer()
+  endif
+  if Pacpack.Tap('ddc.vim')
+    ddc#custom#patch_buffer('specialBufferCompletion', false)
+  endif
+
   const cmdwin_type = expand('<afile>')
   if cmdwin_type ==# ':'
     inoremap <expr> <buffer> <C-p> <SID>CmdwinCompletion(0)
@@ -977,9 +993,6 @@ def CmdwinEnter()
       execute $':silent! :1,$-{&cmdwinheight} delete _'
       normal! G
       &undolevels = &undolevels  # Separate undo sequence
-    endif
-    if exists('g:asyncomplete_loaded') && g:asyncomplete_loaded
-      asyncomplete#disable_for_buffer()
     endif
   endif
 enddef
@@ -2544,6 +2557,39 @@ if Pacpack.Tap('ddu.vim')
     autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once delcommand DduRg
   endif
 endif
+
+if Pacpack.Tap('ddc.vim')
+  def DdcConfig()
+    ddc#custom#load_config(Fs.JoinPath(Stdpath.dotvim, 'ddc', 'config.ts'))
+
+    var engine = ''
+    if Pacpack.Tap('lspoints')
+      engine = 'lspoints'
+    elseif Pacpack.Tap('vim-lsp')
+      engine = 'vim-lsp'
+    endif
+    ddc#custom#patch_global('sourceParams', {lsp: {lspEngine: engine}})
+
+    ddc#enable()
+    set completefunc=<SID>DdcCompletefunc
+  enddef
+
+  def DdcCompletefunc(findstart: number, base: string): any
+    if !!findstart
+      defer call('ddc#map#manual_complete', [])
+      return -3
+    else
+      return []
+    endif
+  enddef
+
+  if !v:vim_did_enter
+    augroup vimrc-ddc
+      autocmd User DenopsReady ++once DdcConfig()
+    augroup END
+  endif
+endif
+
 if Pacpack.Tap('vim-mr')
   def MrPredicate(filename: string): bool
     if filename =~# '\.git\%([\/]\%(config\|hooks\)\>\)\@!\>'
