@@ -2880,26 +2880,27 @@ augroup vimrc_showmode
 augroup END
 
 # statusline
+var StatuslineGitBranchProvider = () => 'no-gin'
+
+def StatuslineGitBranch(): string
+  return StatuslineGitBranchProvider()
+enddef
+
 if Pacpack.Tap('vim-gin')
-  augroup vimrc-gin
-    autocmd User GinComponentPost ++nested {
-      if mode() !=# 'r'
-        redrawstatus
-      endif
-    }
-  augroup END
-  def StatuslineGitBranch(): string
+  def StatuslineGitBranchByGin(): string
     const branch = gin#component#branch#unicode()
     if branch ==# ''
       return 'no-git'
     endif
     return branch .. gin#component#traffic#unicode()
   enddef
-else
-  def StatuslineGitBranch(): string
-    return 'no-gin'
-  enddef
+
+  augroup vimrc
+    autocmd User DenopsPluginPost:gin
+      \ StatuslineGitBranchProvider = StatuslineGitBranchByGin
+  augroup END
 endif
+
 def StatuslineGenerator(): string
   const statusline =
     '%m' ..
