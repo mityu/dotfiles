@@ -2623,8 +2623,9 @@ if Pacpack.Tap('skkeleton')
     const plugin = Pacpack.GetPlugin('skkeleton')
 
     if Pacpack.Tap('dict')
+      const dictrepo = Pacpack.GetPlugin('dict')
       config.globalDictionaries = ['SKK-JISYO.L.json']
-        ->map((_: number, v: string): string => Fs.JoinPath(plugin.path, 'json', v))
+        ->map((_: number, v: string): string => Fs.JoinPath(dictrepo.path, 'json', v))
     endif
 
     skkeleton#config(config)
