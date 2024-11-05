@@ -2111,74 +2111,71 @@ if Pacpack.Tap('helpful.vim')
   endif
 endif
 
-# Textobj/Operator-user plugins
-# @param
-# - plugin_name: the name of plugin
-# - info: mapping-information. The keys are:
-#   - rhs (string)
-#   - lhs (string)
-#   - modes (string)
-def MapOperator(plugin_name: string, info_arg: dict<string>)
-  const info = extend(info_arg, {modes: 'nxo'}, 'keep')
-  MapTextModifierPlugin(plugin_name, info)
+def MapOperator(plugin_name: string, mapsGiven: list<dict<string>>)
+  const maps = mapsGiven->mapnew('extend(v:val, {modes: "nxo"}, "keep")')
+  MapTextModifierPlugin(plugin_name, maps)
 enddef
 
-def MapTextobj(plugin_name: string, info_arg: dict<string>)
-  const info = extend(info_arg, {modes: 'xo'}, 'keep')
-  MapTextModifierPlugin(plugin_name, info)
+def MapTextobj(plugin_name: string, mapsGiven: list<dict<string>>)
+  const maps = mapsGiven->mapnew('extend(v:val, {modes: "xo"}, "keep")')
+  MapTextModifierPlugin(plugin_name, maps)
 enddef
 
 def MapTextModifierPlugin(
-      plugin_name: string, info: dict<string>)
+      plugin_name: string, maps: list<dict<string>>)
   # When the plugin is already loaded, do not use loader mapping. This load
   # guard is mainly for vimrc-reloading
   if Pacpack.IsLoaded(plugin_name)
     return
   endif
 
-  for key in ['rhs', 'lhs', 'modes']
-    if !has_key(info, key)
-      EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
-      return
-    endif
+  # Config validation
+  for map in maps
+    for key in ['rhs', 'lhs', 'modes']
+      if !has_key(map, key)
+        EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
+        return
+      endif
+    endfor
   endfor
 
-  const loadermap = printf('<SID>LoadTextModifierPlugin("%s", %s)',
-            plugin_name, string(info)->substitute('<', '<lt>', 'g'))
-  for mode in info.modes
-    execute mode .. 'map <expr>' info.lhs loadermap
+  for map in maps
+    const loadermap =
+      $'<SID>LoadTextModifierPlugin({string(plugin_name)}, {map->string()->keytrans()})'
+    for mode in map.modes
+      execute $'{mode}map <expr> {map.lhs} {loadermap}'
+    endfor
   endfor
 enddef
 
-def LoadTextModifierPlugin(plugin: string, info: dict<string>): string
+def LoadTextModifierPlugin(plugin: string, map: dict<string>): string
   Pacpack.Load(plugin)
 
-  # "\<Plug>" -> '<Plug>'
-  const rhs = info.rhs->substitute("\\C\<Plug>", '<Plug>', 'g')
-  for mode in info.modes
-    execute mode .. 'map' info.lhs rhs
+  for mode in map.modes
+    execute $'{mode}map {map.lhs} {map.rhs}'
   endfor
 
-  # '<Plug>' -> "\<Plug>"
-  return info.rhs->substitute('\c<Plug>', "\<Plug>", 'g')
+  return ReplaceTermcodes(map.rhs)
 enddef
 
 if Pacpack.Tap('vim-operator-replace')
-  MapOperator('vim-operator-replace', {lhs: 'ms', rhs: '<Plug>(operator-replace)'})
+  MapOperator('vim-operator-replace', [{lhs: 'ms', rhs: '<Plug>(operator-replace)'}])
 endif
 
 if Pacpack.Tap('vim-sandwich')
   g:textobj_sandwich_no_default_key_mappings = 1
   g:operator_sandwich_no_default_key_mappings = 1
+
+  MapOperator('vim-sandwich', [
+    {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'},
+    {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'},
+    {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'},
+  ])
+
   def SandwichConfig()
     operator#sandwich#set('all', 'all', 'highlight', 0)
   enddef
-  MapOperator('vim-sandwich',
-      {lhs: 'ma', rhs: '<Plug>(operator-sandwich-add)'})
-  MapOperator('vim-sandwich',
-      {lhs: 'md', rhs: '<Plug>(operator-sandwich-delete)'})
-  MapOperator('vim-sandwich',
-      {lhs: 'mr', rhs: '<Plug>(operator-sandwich-replace)'})
+
   augroup vimrc-custom-operator
     autocmd SourcePost */plugin/sandwich.vim SandwichConfig()
   augroup END
@@ -2214,12 +2211,11 @@ if Pacpack.Tap('caw.vim')
   enddef
   imap <expr> <Plug>(vimrc:caw:map) <SID>CawMap()
 
-  MapOperator('caw.vim',
-    {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
-  MapOperator('caw.vim',
-    {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'})
-  MapTextModifierPlugin('caw.vim',
-    {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'})
+  MapOperator('caw.vim', [
+    {lhs: 'mc', rhs: '<Plug>(caw:hatpos:toggle:operator)'},
+    {lhs: 'm/', rhs: '<Plug>(caw:hatpos:toggle:operator)'},
+    {lhs: '<C-l><C-j>', rhs: '<Plug>(vimrc:caw:map)', modes: 'i'},
+  ])
   g:caw_no_default_keymappings = 1
   g:caw_dollarpos_sp_left = '  '
   g:caw_dollarpos_sp_right = ' '
@@ -2228,18 +2224,24 @@ if Pacpack.Tap('caw.vim')
 endif
 
 if Pacpack.Tap('vim-operator-swap')
-  MapOperator('vim-operator-swap', {lhs: 'my', rhs: '<Plug>(operator-swap-marking)'})
-  MapOperator('vim-operator-swap', {lhs: 'mp', rhs: '<Plug>(operator-swap)'})
+  MapOperator('vim-operator-swap', [
+    {lhs: 'my', rhs: '<Plug>(operator-swap-marking)'},
+    {lhs: 'mp', rhs: '<Plug>(operator-swap)'},
+  ])
 endif
 
 if Pacpack.Tap('vim-operator-jump_side')
-  MapOperator('vim-operator-jump_side', {lhs: '<C-p>', rhs: '<Plug>(operator-jump-head)'})
-  MapOperator('vim-operator-jump_side', {lhs: '<C-n>', rhs: '<Plug>(operator-jump-tail)'})
+  MapOperator('vim-operator-jump_side', [
+    {lhs: '<C-p>', rhs: '<Plug>(operator-jump-head)'},
+    {lhs: '<C-n>', rhs: '<Plug>(operator-jump-tail)'},
+  ])
 endif
 
 if Pacpack.Tap('vim-textobj-entire')
-  MapTextobj('vim-textobj-entire', {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'})
-  MapTextobj('vim-textobj-entire', {lhs: 'ia', rhs: '<Plug>(textobj-entire-i)'})
+  MapTextobj('vim-textobj-entire', [
+    {lhs: 'aa', rhs: '<Plug>(textobj-entire-a)'},
+    {lhs: 'ia', rhs: '<Plug>(textobj-entire-i)'},
+  ])
   g:textobj_entire_no_default_key_mappings = 1
 endif
 
@@ -2257,32 +2259,36 @@ if Pacpack.Tap('vim-textobj-function')
       \ autocmd! vimrc-textobj-function
   augroup END
 
-  MapTextobj('vim-textobj-function',
-    {lhs: 'af', rhs: '<Plug>(textobj-function-a)'})
-  MapTextobj('vim-textobj-function',
-    {lhs: 'if', rhs: '<Plug>(textobj-function-i)'})
+  MapTextobj('vim-textobj-function', [
+    {lhs: 'af', rhs: '<Plug>(textobj-function-a)'},
+    {lhs: 'if', rhs: '<Plug>(textobj-function-i)'},
+  ])
   g:textobj_function_no_default_key_mappings = 1
 endif
 
 if Pacpack.Tap('vim-textobj-indent')
-  MapTextobj('vim-textobj-indent', {lhs: 'ai', rhs: '<Plug>(textobj-indent-a)'})
-  MapTextobj('vim-textobj-indent', {lhs: 'aI', rhs: '<Plug>(textobj-indent-same-a)'})
-  MapTextobj('vim-textobj-indent', {lhs: 'ii', rhs: '<Plug>(textobj-indent-i)'})
-  MapTextobj('vim-textobj-indent', {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'})
+  MapTextobj('vim-textobj-indent', [
+    {lhs: 'ai', rhs: '<Plug>(textobj-indent-a)'},
+    {lhs: 'aI', rhs: '<Plug>(textobj-indent-same-a)'},
+    {lhs: 'ii', rhs: '<Plug>(textobj-indent-i)'},
+    {lhs: 'iI', rhs: '<Plug>(textobj-indent-same-i)'},
+  ])
   g:textobj_indent_no_default_key_mappings = 1
 endif
 
 if Pacpack.Tap('vim-textobj-line')
-  MapTextobj('vim-textobj-line', {lhs: 'al', rhs: '<Plug>(textobj-line-a)'})
-  MapTextobj('vim-textobj-line', {lhs: 'il', rhs: '<Plug>(textobj-line-i)'})
+  MapTextobj('vim-textobj-line', [
+    {lhs: 'al', rhs: '<Plug>(textobj-line-a)'},
+    {lhs: 'il', rhs: '<Plug>(textobj-line-i)'},
+  ])
   g:textobj_line_no_default_key_mappings = 1
 endif
 
 if Pacpack.Tap('vim-textobj-commentblock')
-  MapTextobj('vim-textobj-commentblock',
-        {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'})
-  MapTextobj('vim-textobj-commentblock',
-        {lhs: 'ic', rhs: '<Plug>(textobj-commentblock-i)'})
+  MapTextobj('vim-textobj-commentblock', [
+    {lhs: 'ac', rhs: '<Plug>(textobj-commentblock-a)'},
+    {lhs: 'ic', rhs: '<Plug>(textobj-commentblock-i)'},
+  ])
   g:textobj_commentblock_no_default_key_mapings = 1
 
   def TextobjCommentblockPickerCaw()
@@ -2307,8 +2313,10 @@ if Pacpack.Tap('vim-textobj-commentblock')
 endif
 
 if Pacpack.Tap('vim-textobj-between')
-  MapTextobj('vim-textobj-between', {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'})
-  MapTextobj('vim-textobj-between', {lhs: 'id', rhs: '<Plug>(textobj-between-i)'})
+  MapTextobj('vim-textobj-between', [
+    {lhs: 'ad', rhs: '<Plug>(textobj-between-a)'},
+    {lhs: 'id', rhs: '<Plug>(textobj-between-i)'},
+  ])
   g:textobj_between_no_default_key_mappings = 1
 
   omap i/ id/
