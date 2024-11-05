@@ -2939,11 +2939,9 @@ enddef
 # tabline
 &tabline = printf('%%!%sTabline()', SIDPrefix())
 def GenerateTabinfo(tabnr: number): string
-  var tablist = tabpagebuflist(tabnr)
-  var info = ''
-  info ..= len(filter(copy(tablist), 'getbufvar(v:val, "&mod")')) > 0 ? '[+]' : ''
-  info ..= '[' .. tabpagewinnr(tabnr, '$') .. ']'
-  return info
+  const dirty =
+    !tabpagebuflist(tabnr)->filter('getbufvar(v:val, "&modified")')->empty()
+  return $'{dirty ? '[+]' : ''}[{tabpagewinnr(tabnr, '$')}]'
 enddef
 def Tabline(): string
   var tabline = '%#TabLine#|'
