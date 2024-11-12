@@ -268,12 +268,6 @@ function install-bash-plugins() {
 	local gitstatus_repo_dir=$bashrc_plugin_dir/gitstatus
 	git clone https://github.com/romkatv/gitstatus $gitstatus_repo_dir
 	$gitstatus_repo_dir/build -w
-
-	# local git_prompt_script=$bashrc_plugin_dir/git-promopt.sh
-	# if [[ ! -f $git_prompt_script ]]; then
-	# 	curl -o $git_prompt_script \
-	# 		https://raw.githubusercontent.com/git/git/master/contrib/completion/git-prompt.sh
-	# fi
 }
 
 function update-bash-plugins() {
