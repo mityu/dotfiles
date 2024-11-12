@@ -124,6 +124,7 @@ fi
 
 
 alias dotfiles=". $(which dotfiles)"
+alias update-softwares=". $(which update-softwares)"
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias no-ble-bash='NO_BLE=true exec bash'
