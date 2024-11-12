@@ -27,24 +27,21 @@ class FallSubmode
   enddef
 
   def NormalMode()
+    const cancelKey = '###DenopsStdHelperInputCancelled###'
     this._clearMappings()
     autocmd vimrc-fall-submode KeyInputPre c Invoke('ThrowAwayUnmappedKeyTypes')
-    # We need to map <ESC>/<C-c> with <buffer> since denops input() helper
-    # defines an original <ESC> mapping for the current buffer.
-    # Note that mapping to <C-c> won't work.  Maybe Vim doesn't set up the
-    # got_int flag if it is given via mappings or feedkeys.
-    cnoremap <buffer> <ESC> <Cmd>call interrupt()<CR>
-    cnoremap <buffer> <C-c> <Cmd>call interrupt()<CR>
-    cnoremap q <Cmd>call interrupt()<CR>
+    execute $'cnoremap <ESC> <C-e><C-u>{cancelKey}<CR>'
+    execute $'cnoremap <C-c> <C-e><C-u>{cancelKey}<CR>'
+    execute $'cnoremap q <C-e><C-u>{cancelKey}<CR>'
     cnoremap i <Cmd>call <SID>Invoke('InsertMode')<CR>
-    cnoremap j <Plug>(fall-cursor-next)
-    cnoremap k <Plug>(fall-cursor-prev)
+    cnoremap j <Plug>(fall-next)
+    cnoremap k <Plug>(fall-prev)
     cnoremap m <Plug>(fall-select)
     cnoremap * <Plug>(fall-select-all)
-    cnoremap <CR> <Plug>(fall-action-default)
+    cnoremap <CR> <Cmd>call fall#action('')<CR>
     cnoremap a <Plug>(fall-action-select)
     cnoremap <Tab> <Plug>(fall-action-select)
-    highlight! link FallQueryCursor FallNormal
+    highlight! link FallInputCursor FallNormal
     redraw
   enddef
 
@@ -59,7 +56,7 @@ class FallSubmode
     cnoremap <C-n> <Down>
     cnoremap <C-b> <Left>
     cnoremap <C-a> <C-b>
-    highlight! link FallQueryCursor Cursor
+    highlight! link FallInputCursor Cursor
     redraw
   enddef
 
@@ -84,21 +81,22 @@ class FallSubmode
 endclass
 
 export def Setup()
-  if !exists('b:fall_submode')
-    b:fall_submode = []
+  if !exists('g:fall_submode')
+    g:fall_submode = []
   endif
-  b:fall_submode->add(FallSubmode.new())
+  g:fall_submode->add(FallSubmode.new())
   Invoke('SetupSubmode')
 enddef
 
 export def Shutdown()
   Invoke('ShutdownSubmode')
-  b:fall_submode->remove(-1)
+  g:fall_submode->remove(-1)
 enddef
 
 def Invoke(fn: string)
-  if !exists('b:fall_submode') || empty(b:fall_submode)
-    Vimrc.EchomsgError('Internal error: b:fall_submode does not exist.')
+  if !exists('g:fall_submode') || empty(g:fall_submode)
+    Vimrc.EchomsgError('Internal error: g:fall_submode does not exist.')
+    return
   endif
-  execute $'b:fall_submode[-1].{fn}()'
+  execute $'g:fall_submode[-1].{fn}()'
 enddef

@@ -562,7 +562,7 @@ Pacpack.Add('https://github.com/vim-denops/denops-shared-server.vim')
 Pacpack.Add('https://github.com/vim-skk/skkeleton')
 Pacpack.Add('https://github.com/skk-dev/dict')
 Pacpack.Add('https://github.com/lambdalisue/vim-gin')
-Pacpack.Add('https://github.com/lambdalisue/vim-fall')
+Pacpack.Add('https://github.com/vim-fall/fall')
 
 # Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/vim-mr')
@@ -2337,6 +2337,7 @@ if Pacpack.Tap('denops.vim')
   endif
   command! -bar DenoUpdateCache denops#cache#update({reload: true})
 endif
+
 if Pacpack.Tap('ddu.vim')
   def DduConfig()
     # Pre-load some custom modules.
@@ -2703,13 +2704,13 @@ if Pacpack.Tap('vim-gin')
   augroup END
 endif
 
-if Pacpack.Tap('vim-fall')
+if Pacpack.Tap('fall')
   augroup vimrc-fall
     autocmd User FallPickerEnter:* vimrc#fall#Setup()
     autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
-    autocmd ColorScheme * highlight link FallSelectMatch Special
+    autocmd ColorScheme * highlight link FallListMatch Special
   augroup END
-  highlight link FallSelectMatch Special
+  highlight link FallListMatch Special
 
   g:fall_disable_default_mapping = true
 endif
