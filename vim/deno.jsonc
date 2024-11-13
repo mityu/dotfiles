@@ -1,9 +1,9 @@
 {
   "lock": false,
   "tasks": {
-    "check": "deno check runtime/denops/**/*.ts ddu/*.ts",
-    "lint": "deno lint runtime/denops ddu",
-    "lint-fix": "deno lint --fix runtime/denops",
+    "check": "deno check runtime/denops ddu ddc",
+    "lint": "deno lint runtime/denops ddu ddc",
+    "lint-fix": "deno lint --fix runtime/denops ddu ddc",
     "fmt": "deno fmt runtime/denops",
     "test": "deno test -A --doc --parallel --shuffle runtime/denops/**/*.ts",
     "upgrade": "deno run -A jsr:@molt/cli **/*.ts --write"
