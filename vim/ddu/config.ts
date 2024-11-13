@@ -1,22 +1,22 @@
 import {
   BaseConfig,
   type ConfigArguments,
-} from "jsr:@shougo/ddu-vim@~6.2.0/config";
+} from "jsr:@shougo/ddu-vim@~6.4.0/config";
 import {
   type ActionArguments,
   ActionFlags,
-} from "jsr:@shougo/ddu-vim@~6.2.0/types";
+} from "jsr:@shougo/ddu-vim@~6.4.0/types";
 import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.4.0";
 import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.9.0";
-import type { Denops } from "jsr:@denops/std@~7.2.0";
-import { exists as vimFnExists } from "jsr:@denops/std@~7.2.0/function";
-import { go } from "jsr:@denops/std@~7.2.0/variable";
+import type { Denops } from "jsr:@denops/std@~7.3.0";
+import { execute } from "jsr:@denops/std@~7.3.0/function";
+import { go } from "jsr:@denops/std@~7.3.0/variable";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { as } from "jsr:@core/unknownutil@~4.3.0/as";
 import { assert } from "jsr:@core/unknownutil@~4.3.0/assert";
 import { ensure } from "jsr:@core/unknownutil@~4.3.0/ensure";
-import { type PredicateType } from "jsr:@core/unknownutil@~4.3.0/type";
-import { assertType, Has } from "jsr:@std/testing@~1.0.0/types";
+import type { PredicateType } from "jsr:@core/unknownutil@~4.3.0/type";
+import { assertType, type Has } from "jsr:@std/testing@~1.0.0/types";
 import { dirname } from "jsr:@std/path@~1.0.0/dirname";
 
 type Params = Record<string, unknown>;
