@@ -67,8 +67,6 @@ export class Stdpath
   static const dotfiles = $MYVIMRC->fnamemodify(':h:h')
 endclass
 
-$DOT_VIM = Stdpath.dotvim
-
 export def SIDPrefix(): string
   # Returns "<SNR>{script-ID}_"
   return expand('<SID>')
