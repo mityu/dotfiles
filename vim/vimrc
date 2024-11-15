@@ -5,9 +5,6 @@ vim9script noclear
 if !v:vim_did_enter
   set encoding=utf-8
   $MYVIMRC = resolve(expand('<sfile>'))
-  if has('win32')
-    $MYVIMRC = expand('<sfile>')
-  endif
   if $NVIM !=# '' && !($VIM ==# '' && $VIMRUNTIME ==# '') # In Neovim's terminal now.
     const installPrefix = exepath(v:progpath)->fnamemodify(':h:h')
     const sep = installPrefix->fnamemodify(':p')[-1]
@@ -63,7 +60,7 @@ endclass
 
 export class Stdpath
   static const cache = (IsWindows ? '~\.cache\vim' : '~/.cache/vim')->expand()
-  static const dotvim = (IsWindows ? '~\vimfiles' : '~/.vim')->expand()
+  static const dotvim = $MYVIMRC->fnamemodify(':h')
   static const dotfiles = $MYVIMRC->fnamemodify(':h:h')
 endclass
 
@@ -202,7 +199,7 @@ if !v:vim_did_enter
     }
   endif
 
-  # disable modifyOtherKeys
+  # Disable modifyOtherKeys and kitty keyboard protocol
   &t_TI = ''
   &t_TE = ''
 
@@ -223,7 +220,7 @@ if !v:vim_did_enter
 
   &runtimepath = &runtimepath->split(',')->filter('isdirectory(v:val)')->join(',')
   &packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
-  &runtimepath ..= ',' .. escape(Fs.JoinPath($DOT_VIM, 'runtime'), ' \')
+  &runtimepath ..= ',' .. escape(Fs.JoinPath(Stdpath.dotvim, 'runtime'), ' \')
   &packpath = Stdpath.cache .. ',' .. &packpath
 
   # Set environmental variables on gVim.
