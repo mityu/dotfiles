@@ -194,9 +194,11 @@ export class Config extends BaseConfig {
       uiParams: { ff: { displayTree: true } },
     });
 
-    if (await vimFnExists(args.denops, "#User#vimrc:dduConfigPost")) {
-      await args.denops.cmd("doautocmd User vimrc:dduConfigPost");
-    }
+    await execute(args.denops, [
+      "if exists('#User#vimrc:dduConfigPost')",
+      "  doautocmd User vimrc:dduConfigPost",
+      "endif",
+    ], "");
 
     return Promise.resolve();
   }
