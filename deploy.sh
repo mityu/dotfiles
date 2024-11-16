@@ -1,14 +1,5 @@
 #!/bin/bash
 
-if [[ $(uname -o) == Msys ]]; then
-	if ! openfiles &> /dev/null; then
-		powershell start-process \"$(cygpath -w /msys2_shell.cmd)\" \
-			-Verb runas -ArgumentList ^-mingw64,$(readlink -f $0)
-		exit 0
-	fi
-	# export MSYS=winsymlinks:nativestrict
-fi
-
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 
 if [[ $(uname -o) == Msys ]]; then
@@ -19,17 +10,16 @@ if [[ $(uname -o) == Msys ]]; then
 	link-file () {
 		local src=$(cygpath -w $1)
 		local dst=$(cygpath -w $2)
-		invoke-cmd mklink $dst $src
+		invoke-cmd mklink /H $dst $src
 	}
 	link-dir () {
 		local src=$(cygpath -w $1)
 		local dst=$(cygpath -w $2)
-		invoke-cmd mklink /D $dst $src
+		invoke-cmd mklink /J $dst $src
 	}
 	link-file $SCRIPT_DIR/bashrc $HOME/.bashrc
 	link-file $SCRIPT_DIR/zshrc $HOME/.zshrc
-	link-dir $SCRIPT_DIR/vim $HOME/.vim
-	read  # Key wait...
+	link-file $SCRIPT_DIR/vim/bootstrap.vim $HOME/.vimrc
 	exit 0
 fi
 
@@ -55,7 +45,8 @@ auto_mkdir $CONFIG_DIR
 
 ln -sn $SCRIPT_DIR/bashrc ~/.bashrc
 ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
-ln -snfv ${SCRIPT_DIR}/vim ~/.vim
+# ln -snfv ${SCRIPT_DIR}/vim ~/.vim
+ln -sn $SCRIPT_DIR/vim/bootstrap.vim ~/.vimrc
 ln -snfv $SCRIPT_DIR/nvim $CONFIG_DIR/nvim
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
 ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm

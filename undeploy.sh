@@ -9,7 +9,7 @@ rm-link () {
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}
 rm-link ~/.bashrc
 rm-link ~/.zshrc
-rm-link ~/.vim
+rm-link ~/.vimrc
 rm-link ~/.mlterm
 rm-link $CONFIG_DIR/alacritty
 rm-link $CONFIG_DIR/i3
