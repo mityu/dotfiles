@@ -128,7 +128,7 @@ export class Config extends BaseConfig {
           ignoreDirectories: ["node_modules", ".git", "dist", ".vscode"],
         },
         rg: {
-          args: ["--json"],
+          args: ["--json", "--no-messages"],
           highlights: {
             path: "Preproc",
             lineNr: "Normal",
