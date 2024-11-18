@@ -184,14 +184,20 @@ export class Config extends BaseConfig {
     });
     args.contextBuilder.patchLocal("lsp-documentSymbol", {
       sources: [{ name: "lsp_documentSymbol" }],
-      uiParams: { ff: { displayTree: true } },
+      uiParams: {
+        ff: { displayTree: true },
+        ff_vim_popup: { displayTree: true },
+      },
     });
     args.contextBuilder.patchLocal("lsp-callHierarchy", {
       sources: [{
         name: "lsp_callHierarchy",
         params: { method: "callHierarchy/outgoingCalls" },
       }],
-      uiParams: { ff: { displayTree: true } },
+      uiParams: {
+        ff: { displayTree: true },
+        ff_vim_popup: { displayTree: true },
+      },
     });
 
     await execute(args.denops, [
