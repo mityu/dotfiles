@@ -57,6 +57,8 @@ function do-update {
 		popd
 	fi
 
+	has-cmd rustup && rustup update
+
 	if has-cmd opam; then
 		opam update && opam upgrade --yes
 	fi
