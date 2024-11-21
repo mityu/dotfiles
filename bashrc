@@ -70,6 +70,9 @@ bashrc_prepend_PATH "$HOME/.nodebrew/current/bin"
 if bashrc_has_cmd cargo; then
 	bashrc_prepend_PATH "$HOME/.cargo/bin"
 fi
+if [[ -f "$HOME/.cargo/env" ]]; then
+	. "$HOME/.cargo/env"
+fi
 
 if bashrc_has_cmd go; then
 	function bashrc_get_gobin() {
