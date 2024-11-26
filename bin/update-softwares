@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function has-cmd() {
 	type $1 &> /dev/null

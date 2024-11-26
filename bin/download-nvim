@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/usr/bin/env bash -eu
 if [[ "${1:-}" == "" || "$1" == "-h" || "$1" == "--help" ]]; then
 	echo "Usage: `basename $0` <version>|--help|-h"
 	echo "			Extract NeoVim package into ./nvim-<version>."

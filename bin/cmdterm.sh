@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 launcher_path=$(dirname $(dirname $(readlink -f $0)))/batfiles/cmdterm.bat
 

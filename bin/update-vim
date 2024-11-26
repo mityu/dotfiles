@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/usr/bin/env bash -xe
 
 # Use build script on native Windows when building Vim for MinGW on MSYS2.
 if [[ "$(uname)" == "MINGW"* ]]; then

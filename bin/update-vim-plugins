@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function dotfiles-path() {
 	echo $(cd $(dirname $(dirname $(readlink -f ${BASH_SOURCE[0]}))); pwd)
