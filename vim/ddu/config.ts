@@ -125,7 +125,13 @@ export class Config extends BaseConfig {
       },
       sourceParams: {
         file_rec: {
-          ignoreDirectories: ["node_modules", ".git", "dist", ".vscode"],
+          ignoredDirectories: [
+            "node_modules",
+            ".git",
+            "dist",
+            ".vscode",
+            ".deps",
+          ],
         },
         rg: {
           args: ["--json", "--no-messages"],
