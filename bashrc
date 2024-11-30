@@ -35,14 +35,8 @@ function bashrc_XDG_CACHE_HOME() {
 	echo ${XDG_CACHE_HOME:-$HOME/.cache}
 }
 
-function bashrc_prepend_PATH() {
-	if [[ $1 != "" && ! $PATH =~ "$1" ]]; then
-		export PATH=$1:$PATH
-	fi
-}
-
 function bashrc_has_cmd() {
-	which $1 &> /dev/null
+	type $1 &> /dev/null
 }
 
 function bashrc_print_error() {
@@ -54,56 +48,66 @@ function bashrc_ask_yesno() {
 	read -q
 }
 
+__bashrc_dotfiles_path=`dotfiles-path`
+
 # Set environmental variables (Only when outside of Vim.)
 if ! (bashrc_in_vim_terminal || bashrc_in_neovim_terminal) && [[ -f ~/.envrc ]]; then
 	source ~/.envrc
 fi
 
 # Environmental variables
-export LANG=en_US.UTF-8
-export CLICOLOR=auto
-export LSCOLORS=gxexfxdxcxahadacagacad
-bashrc_prepend_PATH "$(dotfiles-path)/bin"
-bashrc_prepend_PATH "$HOME/.local/bin"
-bashrc_prepend_PATH "$HOME/.nodebrew/current/bin"
-
-if bashrc_has_cmd cargo; then
-	bashrc_prepend_PATH "$HOME/.cargo/bin"
-fi
-if [[ -f "$HOME/.cargo/env" ]]; then
-	. "$HOME/.cargo/env"
-fi
-
-if bashrc_has_cmd go; then
-	function bashrc_get_gobin() {
-		local gobin
-		gobin=$(go env GOBIN)
-		gobin=${gobin:-$(go env GOPATH)/bin}
-		if bashrc_is_msys; then
-			gobin=$(cygpath -u $gobin)
+if shopt -q login_shell; then
+	function bashrc_prepend_PATH() {
+		if [[ $1 != "" && ! $PATH =~ "$1" ]]; then
+			export PATH=$1:$PATH
 		fi
-		echo $gobin
 	}
-	bashrc_prepend_PATH $(bashrc_get_gobin)
-fi
 
-bashrc_has_cmd ros && bashrc_prepend_PATH "$HOME/.roswell/bin"
-bashrc_has_cmd opam && eval $(opam env)
+	export LANG=en_US.UTF-8
+	export CLICOLOR=auto
+	export LSCOLORS=gxexfxdxcxahadacagacad
+	bashrc_prepend_PATH "$__bashrc_dotfiles_path/bin"
+	bashrc_prepend_PATH "$HOME/.local/bin"
+	bashrc_prepend_PATH "$HOME/.nodebrew/current/bin"
 
-if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
-	export SDKROOT=$(xcrun --show-sdk-path)
-	export CPATH=$CPATH:$SDKROOT/usr/include
-	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
-	# TODO: How can I set framework search path?
-	if [[ -d "$(brew --prefix)/opt/llvm" ]]; then
-		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
+	# if bashrc_has_cmd cargo; then
+	# 	bashrc_prepend_PATH "$HOME/.cargo/bin"
+	# fi
+	if [[ -f "$HOME/.cargo/env" ]]; then
+		. "$HOME/.cargo/env"
 	fi
-	if [[ -d "$(brew --prefix)/opt/gcc" ]]; then
-		alias gcc="$(ls $(brew --prefix)/bin | grep '^gcc-\d\+')"
-		alias g++="$(ls $(brew --prefix)/bin | grep '^g++-\d\+')"
+
+	if bashrc_has_cmd go; then
+		function __bashrc_get_gobin() {
+			local gobin
+			gobin=$(go env GOBIN)
+			gobin=${gobin:-$(go env GOPATH)/bin}
+			if bashrc_is_msys; then
+				gobin=$(cygpath -u $gobin)
+			fi
+			echo $gobin
+		}
+		bashrc_prepend_PATH $(__bashrc_get_gobin)
+	fi
+
+	bashrc_has_cmd ros && bashrc_prepend_PATH "$HOME/.roswell/bin"
+	bashrc_has_cmd opam && eval $(opam env)
+
+	if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
+		__bashrc_brew_prefix=$(brew --prefix)
+		export SDKROOT=$(xcrun --show-sdk-path)
+		export CPATH=$CPATH:$SDKROOT/usr/include
+		export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
+		export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:$SDKROOT/System/Library/Frameworks
+		if [[ -d "$__bashrc_brew_prefix/opt/llvm" ]]; then
+			export PATH=$__bashrc_brew_prefix/opt/llvm/bin:$PATH
+		fi
+		if [[ -d "$__bashrc_brew_prefix/opt/gcc" ]]; then
+			alias gcc="$(ls $__bashrc_brew_prefix/bin | grep '^gcc-\d\+')"
+			alias g++="$(ls $__bashrc_brew_prefix/bin | grep '^g++-\d\+')"
+		fi
 	fi
 fi
-
 
 
 shopt -s nocaseglob
@@ -145,6 +149,10 @@ elif bashrc_has_cmd xsel; then
 	bashrc_has_cmd pbcopy || alias pbcopy='xsel -bi'
 fi
 
+if bashrc_has_cmd rlwrap; then
+	bashrc_has_cmd ocaml && alias ocaml='rlwrap ocaml'
+fi
+
 if bashrc_has_cmd eza; then
 	function ls() {
 		if [[ -t 1 ]]; then
@@ -157,9 +165,9 @@ if bashrc_has_cmd eza; then
 fi
 
 if bashrc_has_cmd vim; then
-	alias vi="vim -u $(dotfiles-path)/vim/vimrc_stable"
+	alias vi="vim -u $__bashrc_dotfiles_path/vim/vimrc_stable"
 	alias vim-stable='vi'
-	alias profile-vimrc="vim --cmd 'source $(dotfiles-path)/vim/misc/profile_vimrc.vim'"
+	alias profile-vimrc="vim --cmd 'source $__bashrc_dotfiles_path/vim/misc/profile_vimrc.vim'"
 	export MANPAGER='vim -M +MANPAGER -'
 	export EDITOR=vim
 	export GIT_EDITOR=vim
