@@ -31,9 +31,8 @@ function blerc/hook-keymap-vi-load {
 blehook/eval-after-load keymap_vi blerc/hook-keymap-vi-load
 
 function blerc/hook-complete-load {
-	ble-bind -m auto_complete -f 'C-i' auto_complete/insert
-	ble-bind -m auto_complete -f 'TAB' auto_complete/insert
-	ble-bind -m auto_complete -f 'C-e' auto_complete/cancel
+	ble-bind -m auto_complete -f 'C-e' auto_complete/insert
+	ble-bind -m auto_complete -f 'C-g' auto_complete/cancel
 }
 blehook/eval-after-load complete blerc/hook-complete-load
 
