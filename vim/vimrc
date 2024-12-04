@@ -1137,31 +1137,71 @@ endif
 
 if Pacpack.Tap('vim-fern')
   g:fern#disable_default_mappings = 1
+  g:fern#enable_textprop_support = 1
   g:fern#default_exclude = '.DS_Store'
-  g:fern#renderer = 'nerdfont'
-  g:fern#renderer#nerdfont#padding = '  '
 
+  def FernInit()
+    if Pacpack.Tap('vim-fern-renderer-nerdfont')
+      Pacpack.Load('vim-fern-renderer-nerdfont')
+      g:fern#renderer = 'nerdfont'
+      g:fern#renderer#nerdfont#padding = '  '
+    endif
 
-  def FernOnOpen()
-    nnoremap <buffer> <expr> o fern#smart#leaf(
-          \ '<Nop>',
-          \ '<Plug>(fern-action-expand:stay)',
-          \ '<Plug>(fern-action-collapse)'
-          \ )
-    nnoremap <buffer> h <Plug>(fern-action-leave)
-    nnoremap <buffer> l <Plug>(fern-action-enter)
-    nnoremap <buffer> <CR> <Plug>(fern-action-open:edit-or-error)
-    nnoremap <buffer> x <Plug>(fern-action-hidden:toggle)
-    nnoremap <buffer> m <Plug>(fern-action-mark:toggle)
-    nnoremap <buffer> <Tab> <Plug>(fern-action-choice)
-    nnoremap <buffer> <C-l> <Plug>(fern-action-reload:all)
-    nnoremap <buffer> <expr> <silent> <C-g> fern#smart#scheme('<C-g>',
-          \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
-    nnoremap <buffer> q <Cmd>call <SID>FernClose()<CR>
+    const hookId = 'vimrc:fern:hookid'
+    const hooks = [
+      ['viewer:ready', (_) => FernSetAltbuf()],
+      ['viewer:highlight', (_) => FernOnHighlight()],
+    ]
+
+    # Remove hooks at first.
+    hooks->mapnew((_, v) => v[0])->sort()->uniq()
+      ->foreach((_, v) => fern#hook#remove(v, hookId))
+
+    # And then add hooks.
+    for hook in hooks
+      fern#hook#add(hook[0], hook[1], {id: hookId})
+    endfor
+  enddef
+
+  def FernSetAltbuf()
+    if exists('w:vimrc_fern_altbuf')
+      return
+    endif
+
+    const altwin = win_getid(winnr('#'))
+    const altbuf = bufnr('#')
+    if getbufvar(altbuf, '&filetype') ==# 'fern'
+      # The alternative buffer is fern buffer.  Must be opened by directory
+      # change or viewer duplication.
+      if win_findbuf(altbuf)->index(altwin) != -1
+        # Alternative buffer is shown in another window.  This buffer must be
+        # opened by clone.
+        w:vimrc_fern_altbuf = getwinvar(altwin, 'vimrc_fern_altbuf', -1)
+      else
+        w:vimrc_fern_altbuf = -1
+      endif
+    else
+      w:vimrc_fern_altbuf = altbuf
+    endif
+  enddef
+
+  def FernOnBufWinEnter()
+    if exists('w:vimrc_fern_altbuf') && bufname() !~# '^fern://'
+      unlet w:vimrc_fern_altbuf
+    endif
+  enddef
+
+  def FernClose()
+    if exists('w:vimrc_fern_altbuf') &&
+        buflisted(w:vimrc_fern_altbuf)
+      execute 'buffer' w:vimrc_fern_altbuf
+    else
+      enew
+    endif
   enddef
 
   def FernOnHighlight()
-    if g:fern#renderer ==# 'nerdfont'
+    if g:fern#renderer =~# '\v<%(nerdfont|nf)>'
       if g:colors_name !=# 'domusaurea'
         highlight! link FernLeafSymbol Directory
         highlight! link FernBranchSymbol Directory
@@ -1173,44 +1213,26 @@ if Pacpack.Tap('vim-fern')
       highlight! link FernBranchText Directory
     endif
     highlight! link FernRootText Normal
+    highlight! link FernBranchText Normal
   enddef
 
-  def FernSetAltbufOnOpen()
-    if !exists('w:vimrc_fern_altbuf')
-      var altbuf = bufnr('#')
-      if altbuf == bufnr('%')
-        altbuf = -1
-      endif
-      w:vimrc_fern_altbuf = altbuf
-    endif
-  enddef
-
-  def FernSetAltbufOnClone()
-    if !exists('w:vimrc_fern_altbuf')
-      const altbuf = win_getid(winnr('#'))->getwinvar('vimrc_fern_altbuf', null)
-      if altbuf != null
-        w:vimrc_fern_altbuf = altbuf
-      endif
-    endif
-  enddef
-
-  def FernUnsetAltbufOnLeave()
-    # BufWinLeave is also happens when entering another directory.  Postpone
-    # unletting w:vimrc_fern_altbuf by the next BufEnter autocmd.
-    autocmd vimrc-fern BufEnter * ++once {
-      if exists('w:vimrc_fern_altbuf') && bufname() !~# '^fern://'
-        unlet w:vimrc_fern_altbuf
-      endif
-    }
-  enddef
-
-  def FernClose()
-    if exists('w:vimrc_fern_altbuf') &&
-        buflisted(w:vimrc_fern_altbuf)
-      execute 'buffer' w:vimrc_fern_altbuf
-    else
-      enew
-    endif
+  def FernOnOpen()
+    nnoremap <buffer> <expr> o fern#smart#leaf(
+          \ '<Nop>',
+          \ '<Plug>(fern-action-expand:stay)',
+          \ '<Plug>(fern-action-collapse)'
+          \ )
+    nnoremap <buffer> h <Plug>(fern-action-leave)
+    nnoremap <buffer> l <Plug>(fern-action-enter)
+    nnoremap <buffer> <CR> <Plug>(fern-action-open:edit-or-error)
+    nnoremap <buffer> x <Plug>(fern-action-hidden:toggle)
+    nnoremap <buffer><nowait> m <Plug>(fern-action-mark:toggle)
+    nnoremap <buffer> a <Plug>(fern-action-choice)
+    nnoremap <buffer> <C-l> <Plug>(fern-action-reload:all)
+    nnoremap <buffer> <expr> <silent> <C-g> fern#smart#scheme('<C-g>',
+          \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
+    nnoremap <buffer> q <Cmd>call <SID>FernClose()<CR>
+    nnoremap <buffer> <Space>f <Cmd>call <SID>Echo('Fern is already open.')<CR>
   enddef
 
   def FernShowRootPath(helper: dict<any>)
@@ -1225,16 +1247,9 @@ if Pacpack.Tap('vim-fern')
   enddef
 
   augroup vimrc-fern
-    # User configuration.
+    autocmd BufReadCmd fern://* ++once FernInit()
+    autocmd BufWinEnter * FernOnBufWinEnter()
     autocmd FileType fern FernOnOpen()
-    autocmd User FernHighlight FernOnHighlight()
-
-    # Manage alternative buffer number.
-    # NOTE: It seems WinNew autocmd for fern:// buffer is fired before
-    # FileType autocmd for fern.
-    autocmd WinNew fern://* FernSetAltbufOnClone()
-    autocmd FileType fern FernSetAltbufOnOpen()
-    autocmd BufWinLeave fern//* FernUnsetAltbufOnLeave()
   augroup END
 
   nnoremap <Space>f <Cmd>Fern `=<SID>FernGetLaunchPath()`<CR>
