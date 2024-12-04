@@ -725,6 +725,9 @@ augroup vimrc
   autocmd BufRead .envrc set filetype=sh
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
   autocmd VimResized * wincmd =
+  if !v:vim_did_enter
+    autocmd StdinReadPost * ++once set nomodified
+  endif
 augroup END
 
 if executable('chmod')
