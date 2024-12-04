@@ -2353,9 +2353,9 @@ if Pacpack.Tap('ddu.vim')
   def DduConfig()
     # Pre-load some custom modules.
     ddu#custom#load_config(Fs.JoinPath(Stdpath.dotvim, 'ddu', 'config.ts'))
-    ddu#load('ui', ['ff_vim_popup'])
-    ddu#load('source', ['mr', 'file', 'file_rec'])
-    ddu#load('filter', ['matcher_multi_regex'])
+    ddu#load('default', 'ui', ['ff_vim_popup'])
+    ddu#load('default', 'source', ['mr', 'file', 'file_rec'])
+    ddu#load('default', 'filter', ['matcher_multi_regex'])
 
     if Pacpack.Tap('lspoints')
       g:ddu_source_lsp_clientName = 'lspoints'
