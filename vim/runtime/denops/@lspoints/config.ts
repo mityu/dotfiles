@@ -1,4 +1,4 @@
-import type { Denops } from "jsr:@denops/std@~7.3.0";
+import type { Denops } from "jsr:@denops/std@~7.4.0";
 import { BaseExtension, type Lspoints } from "jsr:@kuuote/lspoints@~0.1.0";
 import { assert as assertType } from "jsr:@core/unknownutil@~4.3.0/assert";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";

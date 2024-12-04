@@ -1,16 +1,16 @@
 import {
   BaseConfig,
   type ConfigArguments,
-} from "jsr:@shougo/ddu-vim@~6.4.0/config";
+} from "jsr:@shougo/ddu-vim@~9.0.0/config";
 import {
   type ActionArguments,
   ActionFlags,
-} from "jsr:@shougo/ddu-vim@~6.4.0/types";
-import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.4.0";
+} from "jsr:@shougo/ddu-vim@~9.0.0/types";
+import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.5.0";
 import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.9.0";
-import type { Denops } from "jsr:@denops/std@~7.3.0";
-import { execute } from "jsr:@denops/std@~7.3.0/function";
-import { go } from "jsr:@denops/std@~7.3.0/variable";
+import type { Denops } from "jsr:@denops/std@~7.4.0";
+import { execute } from "jsr:@denops/std@~7.4.0/function";
+import { go } from "jsr:@denops/std@~7.4.0/variable";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { as } from "jsr:@core/unknownutil@~4.3.0/as";
 import { assert } from "jsr:@core/unknownutil@~4.3.0/assert";
@@ -29,7 +29,7 @@ assertType<Has<FileActionData, PredicateType<typeof isFileActionData>>>(true);
 
 export class Config extends BaseConfig {
   override async config(args: ConfigArguments): Promise<void> {
-    args.setAlias("source", "file_git", "file_external");
+    args.setAlias("default", "source", "file_git", "file_external");
 
     args.contextBuilder.patchGlobal({
       ui: "ff_vim_popup",

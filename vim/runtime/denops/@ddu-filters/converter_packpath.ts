@@ -1,9 +1,9 @@
-import type { Denops } from "jsr:@denops/std@~7.3.0";
+import type { Denops } from "jsr:@denops/std@~7.4.0";
 import {
   DduItem,
   SourceOptions,
-} from "jsr:@shougo/ddu-vim@~6.4.0/types";
-import { BaseFilter } from "jsr:@shougo/ddu-vim@~6.4.0/filter";
+} from "jsr:@shougo/ddu-vim@~9.0.0/types";
+import { BaseFilter } from "jsr:@shougo/ddu-vim@~9.0.0/filter";
 import { SEPARATOR_PATTERN } from "jsr:@std/path@~1.0.2";
 
 type Params = {
