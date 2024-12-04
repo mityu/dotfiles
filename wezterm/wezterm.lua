@@ -121,6 +121,7 @@ if isWindows then
     "-defterm", "-no-start", "-use-full-path"
   }
 elseif isMac then
+  config.default_prog = { "/usr/bin/env", "PATH=/opt/homebrew/bin", "fish", "-l" }
   config.initial_cols = 206
   config.initial_rows = 58
 end
