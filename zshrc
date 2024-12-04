@@ -76,6 +76,7 @@ if zshrc_has_cmd eza; then
 fi
 
 alias dotfiles=". $(dotfiles-path)/bin/dotfiles"
+alias update-softwares="update-zsh-plugins; $(dotfiles-path)/bin/update-softwares"
 
 zshrc_has_cmd opam && eval $(opam env)
 
