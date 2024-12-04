@@ -59,6 +59,14 @@ function do-update {
 
 	has-cmd rustup && rustup update
 
+	if cargo install-update --version &> /dev/null; then
+		local arg=
+		if cargo +nightly --version &> /dev/null; then
+			arg='+nightly'
+		fi
+		cargo $arg install-update --git --all
+	fi
+
 	if has-cmd opam; then
 		opam update && opam upgrade --yes
 	fi
