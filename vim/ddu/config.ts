@@ -1,11 +1,11 @@
 import {
   BaseConfig,
   type ConfigArguments,
-} from "jsr:@shougo/ddu-vim@~9.0.0/config";
+} from "jsr:@shougo/ddu-vim@~9.0.1/config";
 import {
   type ActionArguments,
   ActionFlags,
-} from "jsr:@shougo/ddu-vim@~9.0.0/types";
+} from "jsr:@shougo/ddu-vim@~9.0.1/types";
 import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~1.5.0";
 import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.9.0";
 import type { Denops } from "jsr:@denops/std@~7.4.0";
