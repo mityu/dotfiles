@@ -74,8 +74,16 @@ if status is-interactive
 end
 
 function fishrc_ask_yesno
-  echo -n "$1 [y/N]: "
-  read -q
+  while true
+    read -l -P "$argv[1] [y/N]: " confirm
+
+    switch $confirm
+      case Y y
+        return 0
+      case '' N n
+        return 1
+    end
+  end
 end
 
 set fish_color_cwd yellow
@@ -122,7 +130,7 @@ if command -q vim
 end
 
 function gitinit
-  if git rev-parse 2> /dev/null; then
+  if git rev-parse 2> /dev/null
     fishrc_ask_yesno 'In a git repository. continue?' || return 1
   end
   git init --initial-branch main
