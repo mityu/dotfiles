@@ -40,6 +40,11 @@ function fish_prompt --description 'Write out the prompt'
   end
   set prompt_status $status_color "#" $last_status $normal
 
-  echo -s (set_color magenta) "fish " $normal (prompt_login) ' ' $prompt_status ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal
+  set -l prompt_loginuser ''
+  if set -q SSH_TTY
+    set prompt_loginuser "SSH:$(prompt_login) "
+  end
+
+  echo -s (set_color magenta) "fish " $normal $prompt_loginuser $prompt_status ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal
   echo -n -s $suffix ' '
 end
