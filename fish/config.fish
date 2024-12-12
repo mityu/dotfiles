@@ -120,7 +120,6 @@ if $is_msys
 end
 
 if command -q vim
-  # alias vim="SHELL=fish vim"
   alias vi="vim -u $dotfiles_path/vim/vimrc_stable"
   alias vim-stable='vi'
   alias profile-vimrc="vim --cmd 'source $dotfiles_path/vim/misc/profile_vimrc.vim'"
@@ -136,11 +135,3 @@ function gitinit
   git init --initial-branch main
   git commit --allow-empty -m "Initial commit"
 end
-
-# function ocaml
-#   functions -e ocaml
-#   if command -q rlwrap
-#     alias ocaml='rlwrap ocaml'
-#   end
-#   ocaml $argv
-# end
