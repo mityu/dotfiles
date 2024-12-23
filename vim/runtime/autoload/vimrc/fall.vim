@@ -34,8 +34,8 @@ class FallSubmode
     execute $'cnoremap <C-c> <C-e><C-u>{cancelKey}<CR>'
     execute $'cnoremap q <C-e><C-u>{cancelKey}<CR>'
     cnoremap i <Cmd>call <SID>Invoke('InsertMode')<CR>
-    cnoremap j <Plug>(fall-next)
-    cnoremap k <Plug>(fall-prev)
+    cnoremap j <Plug>(fall-list-next)
+    cnoremap k <Plug>(fall-list-prev)
     cnoremap m <Plug>(fall-select)
     cnoremap * <Plug>(fall-select-all)
     cnoremap <CR> <Cmd>call fall#action('')<CR>
