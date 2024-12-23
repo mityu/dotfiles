@@ -189,6 +189,10 @@ async function attachLsp(
         texlab: { build: { executable: "latexmk", "args": [] } },
       },
     });
+  } else if (matchFiletype(["typst"])) {
+    await attach("tinymist", {
+      rootPath: await findProjectRoot(genericMarkers, workDir),
+    });
   }
 }
 
@@ -276,6 +280,9 @@ export class Extension extends BaseExtension {
         },
         texlab: {
           cmd: ["texlab"],
+        },
+        tinymist: {
+          cmd: ["tinymist"],
         },
       },
     });
