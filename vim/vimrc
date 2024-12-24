@@ -62,6 +62,7 @@ export class Stdpath
   static const cache = (IsWindows ? '~\.cache\vim' : '~/.cache/vim')->expand()
   static const dotvim = $MYVIMRC->fnamemodify(':h')
   static const dotfiles = $MYVIMRC->fnamemodify(':h:h')
+  static const localpack = Fs.JoinPath(expand('~'), 'dev', 'vim')
 endclass
 
 export def SIDPrefix(): string
@@ -2112,9 +2113,9 @@ endif
 if Pacpack.Tap('vim-suda')
   if !Pacpack.GetPlugin('vim-suda').IsLoaded()
     command! -nargs=? -complete=file SudaRead
-          \ Pacpack.Load('vim-suda')|SudaRead <args>
+      \ Pacpack.Load('vim-suda')|SudaRead <args>
     command! -nargs=? -complete=file SudaWrite
-          \ Pacpack.Load('vim-suda')|SudaWrite <args>
+      \ Pacpack.Load('vim-suda')|SudaWrite <args>
   endif
 endif
 
@@ -2370,8 +2371,8 @@ if Pacpack.Tap('ddu.vim')
       sources:
         [
           PacPath,
-          Fs.JoinPath(Stdpath.cache, 'pack', 'local', 'start'),
-          Fs.JoinPath(Stdpath.cache, 'pack', 'local', 'opt'),
+          Fs.JoinPath(Stdpath.localpack, 'start'),
+          Fs.JoinPath(Stdpath.localpack, 'opt'),
         ]
         ->filter('isdirectory(v:val)')
         ->mapnew('{"name": "file_rec", "options": {"path": v:val}}'),

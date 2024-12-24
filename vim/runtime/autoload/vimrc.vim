@@ -146,8 +146,8 @@ export def UpdateLocalPackages()
   endif
   var packDir = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'pack')
   var dirs: list<string>
-  dirs = Vimrc.Fs.JoinPath(packDir, 'local', 'start', '*', '.git')->glob(true, true)
-  dirs += Vimrc.Fs.JoinPath(packDir, 'local', 'opt', '*', '.git')->glob(true, true)
+  dirs = Vimrc.Fs.JoinPath(Vimrc.Stdpath.localpack, 'start', '*', '.git')->glob(true, true)
+  dirs += Vimrc.Fs.JoinPath(Vimrc.Stdpath.localpack, 'opt', '*', '.git')->glob(true, true)
   var cmds: list<string>
   for dir in dirs
     cmds->add('git -C ' .. dir->fnamemodify(':h')->shellescape() .. ' pull')
