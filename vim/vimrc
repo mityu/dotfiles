@@ -532,6 +532,7 @@ Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
 # Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
 # Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
 Pacpack.Add('https://github.com/kuuote/lspoints')
+Pacpack.AddLazy('https://github.com/sedm0784/vim-rainbow-trails')
 Pacpack.AddLazy('https://github.com/tweekmonster/helpful.vim')
 Pacpack.AddLazy('https://github.com/y0za/vim-reading-vimrc')
 
@@ -2123,6 +2124,32 @@ if Pacpack.Tap('vim-suda')
       \ Pacpack.Load('vim-suda')|SudaRead <args>
     command! -nargs=? -complete=file SudaWrite
       \ Pacpack.Load('vim-suda')|SudaWrite <args>
+  endif
+endif
+
+if Pacpack.Tap('vim-rainbow-trails')
+  augroup vimrc
+    autocmd SourcePost */plugin/rainbow_trails.vim ++once RainbowTrailsHighlight()
+    autocmd ColorScheme * RainbowTrailsHighlight()
+  augroup END
+
+  def RainbowTrailsHighlight()
+    highlight RainbowRed guibg=#808080 ctermbg=244
+    highlight RainbowOrange guibg=#6c6c6c ctermbg=242
+    highlight RainbowYellow guibg=#585858 ctermbg=240
+    highlight RainbowGreen guibg=#444444 ctermbg=238
+    highlight RainbowBlue guibg=#303030 ctermbg=236
+    highlight RainbowIndigo guibg=#1c1c1c ctermbg=234
+    highlight RainbowViolet guibg=#080808 ctermbg=232
+  enddef
+
+  def LoadRainbowTrails()
+    delcommand RainbowTrails
+    Pacpack.Load('vim-rainbow-trails')
+  enddef
+
+  if !Pacpack.IsLoaded('vim-rainbow-trails')
+    command -bar -bang RainbowTrails LoadRainbowTrails()|RainbowTrails<bang>
   endif
 endif
 
