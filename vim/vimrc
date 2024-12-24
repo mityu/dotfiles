@@ -2457,7 +2457,7 @@ if Pacpack.Tap('ddu.vim')
 
   def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
     if pathGiven ==# ''
-      return FindGitroot() ?? getcwd(winnr())
+      return vimrc#FindProjectRoot(bufname('%')->fnamemodify(':p')) ?? getcwd(winnr())
     endif
 
     const path = pathGiven->expand()

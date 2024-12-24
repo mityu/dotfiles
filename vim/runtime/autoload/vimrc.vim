@@ -205,6 +205,17 @@ export def ShowHighlightGroup()
   endfor
 enddef
 
+def FindMarker(marker: string, path: string, isDir: bool): string
+  const d = isDir ? finddir(marker, path) : findfile(marker, path)
+  if d ==# ''
+    return ''
+  elseif isDir
+    return d->fnamemodify(':p:h:h')
+  else
+    return d->fnamemodify(':p:h')
+  endif
+enddef
+
 export def FindProjectRoot(path: string): string
   if path ==# ''
     return ''
@@ -214,25 +225,26 @@ export def FindProjectRoot(path: string): string
 
   const rootMarkerDirs = [
     '.git',
-    'autoload', 'plugin',
+    'autoload', 'plugin', 'denops',
   ]
   const rootMarkerFiles = [
     'go.mod',
     'compile_flags.txt', 'compile_commands.json', '.clang-format',
     'Cargo.toml',
     'dune-project',
+    'deno.json', 'deno.jsonc', 'import_map.json',
   ]
 
   var root = ''
   const parent = path .. ';'
   for marker in rootMarkerDirs
-    const d = finddir(marker, parent)->fnamemodify(':h')
+    const d = FindMarker(marker, parent, true)
     if strlen(d) > strlen(root)
       root = d
     endif
   endfor
   for marker in rootMarkerFiles
-    const d = findfile(marker, parent)->fnamemodify(':h')
+    const d = FindMarker(marker, parent, false)
     if strlen(d) > strlen(root)
       root = d
     endif
