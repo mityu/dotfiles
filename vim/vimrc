@@ -487,7 +487,6 @@ Pacpack.Add('https://github.com/kana/vim-textobj-user')
 Pacpack.Add('https://github.com/kawarimidoll/autoplay.vim')
 Pacpack.Add('https://github.com/kyoh86/vim-ripgrep')
 Pacpack.Add('https://github.com/lambdalisue/vim-fern')
-Pacpack.Add('https://github.com/lambdalisue/vim-fern-renderer-nerdfont')
 Pacpack.Add('https://github.com/lambdalisue/vim-fern-hijack')
 Pacpack.Add('https://github.com/lambdalisue/vim-nerdfont')
 Pacpack.Add('https://github.com/lambdalisue/vim-findent')
@@ -509,6 +508,7 @@ Pacpack.Add('https://github.com/mityu/vital-vim9context')
 Pacpack.Add('https://github.com/ogaken-1/vim-vimscript-gd')
 Pacpack.Add('https://github.com/osyo-manga/vim-jplus')
 Pacpack.Add('https://github.com/previm/previm')
+Pacpack.Add('https://github.com/psosera/ott-vim')
 Pacpack.Add('https://github.com/seroqn/foldmaker.vim')
 Pacpack.Add('https://github.com/thinca/vim-ambicmd')
 Pacpack.Add('https://github.com/thinca/vim-ft-help_fold')
@@ -520,7 +520,6 @@ Pacpack.Add('https://github.com/thinca/vim-themis')
 Pacpack.Add('https://github.com/tikhomirov/vim-glsl')
 Pacpack.Add('https://github.com/tyru/capture.vim')
 Pacpack.Add('https://github.com/tyru/open-browser.vim')
-# Pacpack.Add('https://github.com/utubo/vim-vim9skk')
 Pacpack.Add('https://github.com/vim-jp/autofmt')
 Pacpack.Add('https://github.com/vim-jp/vimdoc-ja')
 Pacpack.Add('https://github.com/vim-jp/vital.vim')
@@ -528,6 +527,7 @@ Pacpack.Add('https://github.com/vim-scripts/autodate.vim')
 Pacpack.Add('https://github.com/whonore/Coqtail')
 
 Pacpack.AddLazy('https://github.com/4513ECHO/nvim-keycastr')
+Pacpack.AddLazy('https://github.com/lambdalisue/vim-fern-renderer-nerdfont')
 Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
 # Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
 # Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
@@ -559,7 +559,7 @@ Pacpack.Add('https://github.com/vim-denops/denops-shared-server.vim')
 Pacpack.Add('https://github.com/vim-skk/skkeleton')
 Pacpack.Add('https://github.com/skk-dev/dict')
 Pacpack.Add('https://github.com/lambdalisue/vim-gin')
-Pacpack.Add('https://github.com/vim-fall/fall')
+Pacpack.Add('https://github.com/vim-fall/fall.vim')
 
 # Ddu plugins
 Pacpack.Add('https://github.com/lambdalisue/vim-mr')
@@ -2718,11 +2718,16 @@ if Pacpack.Tap('vim-gin')
   augroup END
 endif
 
-if Pacpack.Tap('fall')
+if Pacpack.Tap('fall.vim')
+  def FallDefColors()
+    highlight link FallListMatch Special
+    highlight link FallBorder Normal
+  enddef
+
   augroup vimrc-fall
     autocmd User FallPickerEnter:* vimrc#fall#Setup()
     autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
-    autocmd ColorScheme * highlight link FallListMatch Special
+    autocmd ColorScheme * FallDefColors()
   augroup END
   highlight link FallListMatch Special
 
