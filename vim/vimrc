@@ -1400,7 +1400,9 @@ if Pacpack.Tap('vim-gyoza')
     autocmd FileType * GyozaLoadRules(expand('<amatch>'))
     autocmd FileType vimspec ++once GyozaExtendRules('vimspec', 'vim')
     autocmd FileType cpp ++once GyozaExtendRules('cpp', 'c')
+    autocmd FileType otex ++once GyozaExtendRules('otex', 'tex')
     autocmd FileType bash,zsh ++once GyozaExtendRules(expand('<amatch>'), 'sh')
+    autocmd User PinsnipApplyPost gyoza#update_context()
   augroup END
 endif
 
