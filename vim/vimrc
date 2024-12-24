@@ -810,6 +810,7 @@ nnoremap <expr> I getline('.') ==# '' && &l:modifiable ? "\"_S" : 'I'
 nnoremap <expr> a getline('.') ==# '' && &l:modifiable ? "\"_S" : 'a'
 nnoremap <expr> A getline('.') ==# '' && &l:modifiable ? "\"_S" : 'A'
 nnoremap <CR> o<ESC>
+nnoremap <Space><CR> i<CR><ESC>
 nnoremap Y y$
 nnoremap <C-h> <Cmd>nohlsearch<CR>
 nnoremap <C-w>s <Cmd>belowright wincmd s<CR>
@@ -1807,8 +1808,8 @@ if Pacpack.Tap('lsp')
     if &l:filetype !~# '\<vim\%(spec\)\?\>'
       nnoremap <buffer> gd <Cmd>LspGotoDeclaration<CR>
       setlocal keywordprg=:LspHover
-      SetUndoFtplugin nunmap <buffer> gd
-      SetUndoFtplugin setlocal keywordprg<
+      # SetUndoFtplugin nunmap <buffer> gd
+      # SetUndoFtplugin setlocal keywordprg<
     endif
 
     augroup vimrc-lsp-buffer
@@ -1817,12 +1818,12 @@ if Pacpack.Tap('lsp')
       autocmd BufWritePre <buffer> LspNotifyDiagnosticCount()
     augroup END
 
-    SetUndoFtplugin setlocal omnifunc< tagfunc<
-    SetUndoFtplugin nunmap <buffer> <Space>i
-    SetUndoFtplugin nunmap <buffer> <Up>
-    SetUndoFtplugin nunmap <buffer> <Down>
-    SetUndoFtplugin nunmap <buffer> <C-g>
-    SetUndoFtplugin autocmd! vimrc-lsp-buffer
+    # SetUndoFtplugin setlocal omnifunc< tagfunc<
+    # SetUndoFtplugin nunmap <buffer> <Space>i
+    # SetUndoFtplugin nunmap <buffer> <Up>
+    # SetUndoFtplugin nunmap <buffer> <Down>
+    # SetUndoFtplugin nunmap <buffer> <C-g>
+    # SetUndoFtplugin autocmd! vimrc-lsp-buffer
   enddef
 
   def LspHighlight()
@@ -2041,7 +2042,7 @@ if Pacpack.Tap('vim-lsp')
   def LspEnableForBuffer()
     setlocal omnifunc=lsp#complete
     nnoremap <buffer> <silent> gd <Plug>(lsp-declaration)zv
-    nnoremap <buffer> <Space>i <Plug>(lsp-hover-float)
+    nnoremap <buffer> <C-g> <Plug>(lsp-hover-float)<C-g>
     nnoremap <buffer> <Up> <Plug>(lsp-previous-error)zv
     nnoremap <buffer> <Down> <Plug>(lsp-next-error)zv
 
@@ -2051,7 +2052,7 @@ if Pacpack.Tap('vim-lsp')
   def LspDisableForBuffer()
     setlocal omnifunc=
     nunmap <buffer> gd
-    nunmap <buffer> <Space>i
+    nunmap <buffer> <C-g>
     nunmap <buffer> <Up>
     nunmap <buffer> <Down>
 
