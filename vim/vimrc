@@ -1731,10 +1731,15 @@ if Pacpack.Tap('lspoints')
   def LspointsSetupAttachAutocmds()
     augroup vimrc-lspoints
       autocmd!
-      autocmd User DenopsReady lspoints#denops#register()
+      if !v:vim_did_enter && Pacpack.Tap('ddu.vim')
+        autocmd User DenopsPluginPost:ddu timer_start(1, (_) => lspoints#denops#register())
+      else
+        autocmd User DenopsReady lspoints#denops#register()
+      endif
       autocmd User LspointsAttach:* LspointsOnAttach()
       autocmd User LspointsDetach:* LspointsOnDetach()
       autocmd User DenopsPluginUnloadPre:lspoints LspointsSetupAttachAutocmds()
+      autocmd User DenopsProcessStopped:* LspointsSetupAttachAutocmds()
 
       if !v:vim_did_enter || !denops#plugin#is_loaded('lspoints')
         autocmd FileType * LspointsAttachLater(LspointsGetAttachParams())
@@ -2577,10 +2582,11 @@ if Pacpack.Tap('ddu.vim')
     autocmd User Ddu:ui:ff_vim_popup:openWindowPre DduMapFFVimPopup()
   augroup END
 
-  if !v:vim_did_enter
-    autocmd vimrc-ddu User vimrc_initialize ++once DduConfig()
-    autocmd vimrc-ddu SourcePost */plugin/ddu_rg.vim ++once delcommand DduRg
-  endif
+    if !v:vim_did_enter
+      autocmd User DenopsReady ++once DduConfig()
+      autocmd SourcePost */plugin/ddu_rg.vim ++once delcommand DduRg
+    endif
+  augroup END
 endif
 
 if Pacpack.Tap('ddc.vim')
