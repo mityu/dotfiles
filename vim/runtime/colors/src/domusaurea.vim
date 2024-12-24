@@ -9,6 +9,7 @@ Gen.Hi('Normal', '#fff8dc', '#1f1f1f')
 Gen.HiLink('ModeMsg', 'Normal')
 Gen.HiLink('Terminal', 'Normal')
 Gen.HiLink('MsgArea', 'Normal')
+Gen.HiLink('Conceal', 'Normal')
 
 Gen.Hi('Comment', '#ffd700', '')
 Gen.Hi('Todo', '#ff7f00', '')
@@ -24,7 +25,7 @@ Gen.Hi('String', '#ffa500', '', '')
 Gen.HiLink('Character', 'String')
 Gen.HiLink('Title', 'String')
 
-Gen.Hi('PreProc', '#b0c4de', '', '')
+Gen.Hi('PreProc', '#99bbdf', '', '')
 Gen.HiLink('Include', 'PreProc')
 Gen.HiLink('Define', 'PreProc')
 Gen.HiLink('Macro', 'PreProc')
@@ -112,17 +113,31 @@ Gen.HiLink('SpellRare', 'SpellBad')
 Gen.Hi('Underlined', '', '', 'underline')
 Gen.Hi('Ignore', 'NONE', '', '')
 Gen.Hi('SpecialKey', '#bebebe', '', '')
-Gen.Hi('VertSplit', '#fff8dc', '#fff8dc', '')
+Gen.Hi('VertSplit', '#fff8dc', '', '')
 Gen.Hi('MatchParen', 'NONE', '#a020f0', '')
 Gen.Hi('ColorColumn', '', '#40250a', '')
 
 Gen.Hi('vimStringUrlGithub', '#b28214', '', '')  # Gen.BlendColor('#ffa500', '#003344', 0.3)
 
-# Gen.Hi('FernBranchText', '#aba7a0', '', '')
-Gen.Hi('FernBranchSymbol', '#70c0ba', '', '')
-Gen.HiLink('FernLeafSymbol', 'FernBranchSymbol')
+Gen.Hi('FernLeafSymbol', '#808077', '', '')
+Gen.Hi('FernBranchSymbol', '#70c0ca', '', '')
 Gen.HiLink('FernLeaderSymbol', 'FernBranchSymbol')
-Gen.HiLink('FernBranchText', 'FernBranchSymbol')
+Gen.HiLink('FernRootSymbol', 'FernBranchSymbol')
+Gen.HiLink('FernBranchText', 'Normal')
+Gen.HiLink('FernRootText', 'Normal')
+Gen.HiLink('FernLeafText', 'Normal')
+
+Gen.HiLink('ottPuncuation', 'Keyword')
+
+Gen.Hi('otexOttMacro', '#88aacc', '', '')
+
+# Gen.HiLink('texSection', 'Statement')
+# Gen.HiLink('texBeginEndName', 'Normal')
+
+# Gen.Hi('typescriptCall', '#b0c4de', '', '')
+# Gen.HiLink('typescriptFuncCallArg', 'typescriptCall')
+# Gen.HiLink('ocamlFullMod', 'typescriptCall')
+# Gen.HiLink('ocamlModPath', 'ocamlFullMod')
 
 const ansiColors = [
  '#000000',

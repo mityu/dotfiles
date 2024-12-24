@@ -608,7 +608,6 @@ if v:vim_did_enter
 else
   command! -nargs=+ -bar Set set <args>
 endif
-Set relativenumber number
 Set wrap
 # Set breakindent
 Set noequalalways
@@ -643,7 +642,7 @@ Set noesckeys timeoutlen=3000 ttimeoutlen=100
 Set isfname-==
 Set spelllang& spelllang+=cjk
 setglobal fileformat=unix
-# Set fillchars& fillchars+=vert:\\u02502  # TODO: Set this once?
+Set fillchars=vert:\\u2502
 &listchars = 'tab:|-'
 g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
