@@ -2,6 +2,7 @@ set -l dotfiles_path $HOME/dotfiles
 set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
+set -l in_vscode_terminal test $TERM_PROGRAM = "vscode"
 
 if $in_vim_terminal || $in_neovim_terminal
   set -e VIM
@@ -111,6 +112,10 @@ if $in_vim_terminal
     printf "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
     read cwd
     cd "$cwd"
+  end
+else if $in_vscode_terminal
+  function drop
+    code --reuse-window "$(builtin realpath $argv[1])"
   end
 end
 
