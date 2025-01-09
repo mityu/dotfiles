@@ -258,3 +258,19 @@ export def CdProjectRoot(cdcmd: string)
     execute cdcmd fnameescape(root)
   endif
 enddef
+
+def FindCommon(findfn: string, args: list<any>): string
+  const file = call(findfn, args)
+  if file ==# ''
+    return ''
+  endif
+  return fnamemodify(file, ':p')
+enddef
+
+export def Findfile(name: string, ...args: list<any>): string
+  return FindCommon('findfile', [name] + args)
+enddef
+
+export def Finddir(name: string, ...args: list<any>): string
+  return FindCommon('finddir', [name] + args)
+enddef
