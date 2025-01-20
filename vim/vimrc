@@ -848,8 +848,8 @@ nnoremap <Space>f <Cmd>call vimrc#filore#start()<CR>
 nnoremap m <Nop>
 vnoremap m <Nop>
 
-nnoremap % <Cmd>packadd matchit<CR><Plug>(MatchitNormalForward)
-xnoremap % <Cmd>packadd matchit<CR><Plug>(MatchitVisualForward)
+nnoremap % <Cmd>call <SID>LoadMatchitPlugin()<CR><Plug>(MatchitNormalForward)
+xnoremap % <Cmd>call <SID>LoadMatchitPlugin()<CR><Plug>(MatchitVisualForward)
 
 inoremap <C-m> <C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
@@ -903,6 +903,16 @@ if IsMac && has('gui_running')
   noremap! <D-[> <ESC>
 endif
 # }}}
+
+if !exists('g:loaded_matchit')
+  g:loaded_matchit = 'dummy-set-by-vimrc'
+endif
+def LoadMatchitPlugin()
+  if get(g:, 'loaded_matchit', '') ==# 'dummy-set-by-vimrc'
+    unlet g:loaded_matchit
+    packadd matchit
+  endif
+enddef
 
 augroup vimrc
   autocmd User vimrc_initialize ++once DefineLoopMappings()
