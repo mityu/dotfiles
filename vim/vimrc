@@ -647,6 +647,7 @@ Set fillchars=vert:\\u2502
 &listchars = 'tab:|-'
 g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
+g:tex_conceal = ''  # Disable default conceals for TeX
 # }}}
 
 
@@ -774,7 +775,16 @@ augroup vimrc
         \ b:autofmt_allow_over_tw = 1
         \ | setlocal formatoptions+=mM
         \ | autocmd Filetype <buffer> ++once HelpEdit
+  autocmd BufReadPost */dev/tex/* LoadTexConfig()
 augroup END
+
+def LoadTexConfig()
+  # Load */dev/tex/*/ftplugin.vim
+  const script = vimrc#Findfile('ftplugin.vim', '.;')
+  if script->fnamemodify(':h:h') =~# 'dev[/\\]tex$'
+    source `=script`
+  endif
+enddef
 
 # Mapping {{{
 nnoremap : q:A
