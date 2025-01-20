@@ -2570,6 +2570,8 @@ if Pacpack.Tap('ddu.vim')
       DduStartSync({sources: [{name: 'help'}]})
     elseif cmd ==# 'man'
       DduStartSync({sources: [{name: 'man'}]})
+    elseif cmd ==# 'runtime-files'
+      DduFiles($VIMRUNTIME)
     endif
   enddef
 
@@ -2584,6 +2586,7 @@ if Pacpack.Tap('ddu.vim')
         'live-grep',
         'files',
         'help',
+        'runtime-files',
       ]->filter((_: number, v: string): bool => stridx(v, argLead) == 0)
     else
       const cmd = cmdLine->split()[1]
