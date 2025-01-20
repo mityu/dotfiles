@@ -2670,7 +2670,7 @@ if Pacpack.Tap('skkeleton')
   inoremap <expr> <C-e> pumvisible() ? '<C-e>' : '<Plug>(skkeleton-toggle)'
 
   def SkkeletonInit()
-    var config: dict<any> = {eggLikeNewline: true}
+    var config: dict<any> = {}
     const plugin = Pacpack.GetPlugin('skkeleton')
 
     if Pacpack.Tap('dict')
@@ -2681,51 +2681,98 @@ if Pacpack.Tap('skkeleton')
 
     skkeleton#config(config)
 
-    extend(g:skkeleton#mapped_keys, ['<C-n>', '<C-p>', '<C-y>', '<C-e>'])
+    extend(g:skkeleton#mapped_keys, [
+      '<C-n>', '<C-p>', '<C-y>', '<CR>', '<C-j>',
+    ])
     skkeleton#register_keymap('input', ';', 'henkanPoint')
     skkeleton#register_keymap('input', '<C-n>', 'henkanFirst')
+    skkeleton#register_keymap('input', '<C-y>', 'kakutei')
+    skkeleton#register_keymap('input', '<C-j>', 'kakutei')
+    skkeleton#register_keymap('input', '<CR>', 'newline')
     skkeleton#register_keymap('henkan', '<C-p>', 'henkanBackward')
     skkeleton#register_keymap('henkan', '<C-n>', 'henkanForward')
     skkeleton#register_keymap('henkan', '<C-y>', 'kakutei')
-    skkeleton#register_keymap('henkan', '<C-e>', 'cancel')
+    skkeleton#register_keymap('henkan', '<C-j>', 'kakutei')
+    skkeleton#register_keymap('henkan', '<CR>', 'newline')
   enddef
 
-  def SkkeletonOnEnable()
-    popup_create('あ', {
-      line: 'cursor+1',
-      col: 'cursor',
-      time: 1000,
-    })
+  def SkkeletonOnEnablePost()
+    inoremap <expr> <buffer> <CR> SkkeletonKakuteiOrNewline()
+    inoremap <expr> <buffer> <C-h> SkkeletonDeleteChar()
+    inoremap <expr> <buffer> <Space> SkkeletonStartHenkan()
+    inoremap <buffer> ;
+      \ <Cmd>call skkeleton#handle('handleKey', {
+      \  'key': g:skkeleton#state.phase ==# 'input:okuriari' ? '<lt>c-y>' : ';'
+      \ })<CR>
   enddef
 
-  def SkkeletonOnDisable()
-    popup_create('A', {
-      line: 'cursor+1',
-      col: 'cursor',
-      time: 1000,
-    })
+  def SkkeletonKakuteiOrNewline(): string
+    const kakutei = "\<Cmd>call skkeleton#handle('handleKey', {'key': '<c-y>'})\<CR>"
+    const newline = "\<Cmd>call skkeleton#handle('handleKey', {'key': '<cr>'})\<CR>"
+
+    if g:skkeleton#state.phase =~# '^\%(input:\|henkan\)' && !SkkeletonIsPreeditEmpty()
+      return kakutei
+    else
+      return newline
+    endif
   enddef
 
-  def SkkeletonOnModeChanged()
-    const modemap = {
-      hira: 'あ',
-      kata: 'ア',
-      hankata: 'ｱ',
-      zenkaku: '全A',
-      abbrev: 'abbr',
-    }
+  def SkkeletonDeleteChar(): string
+    const deleteChar = "\<Cmd>call skkeleton#handle('handleKey', {'key': '<c-h>'})\<CR>"
+    if g:skkeleton#state.phase =~# '^\%(input:\|henkan\)' && SkkeletonIsPreeditEmpty()
+      # Remove markerHenkan and the character before the markerHenkan
+      return deleteChar .. deleteChar
+    else
+      return deleteChar
+    endif
+  enddef
 
-    popup_create(get(modemap, g:skkeleton#mode, 'A'), {
-      line: 'cursor+1',
-      col: 'cursor',
-      time: 1000,
-      moved: 'any',
-    })
+  def SkkeletonStartHenkan(): string
+    augroup vimrc-skkeleton-auto-henkan-state
+      autocmd!
+      autocmd KeyInputPre * SkkeletonOnKeyTypedWhileHenkanState()
+    augroup END
+    return "\<Cmd>call skkeleton#handle('handleKey', {'key': '<space>'})\<CR>"
+  enddef
+
+  def SkkeletonOnKeyTypedWhileHenkanState()
+    const ignoreKeys: list<string> = [
+      "\<C-g>", "\<CR>", "\<NL>", "\<Space>", 'X', 'x',
+      'q', 'l', ';', "\<C-y>", "\<C-n>", "\<C-p>", "\<C-e>",
+      "\<C-h>",
+    ]
+    if index(g:skkeleton#mapped_keys, v:event.typedchar) != -1 &&
+        index(ignoreKeys, v:event.typedchar) == -1 && v:char ==# "\<Cmd>"
+      while getcharstr() !=# "\<CR>"
+        # Throw away `<Cmd>call skkeleton#handle('henkanKey', {'key':'...'})<CR>`
+      endwhile
+      autocmd! vimrc-skkeleton-auto-henkan-state
+      feedkeys(';' .. v:event.typedchar, 'it')
+      v:char = "\<Ignore>"
+    endif
+  enddef
+
+  def SkkeletonOnHandled()
+    if g:skkeleton#state.phase !=# 'henkan'
+      augroup vimrc-skkeleton-auto-henkan-state
+        autocmd!
+      augroup END
+
+      if g:skkeleton#state.phase ==# 'input' && skkeleton#is_enabled()
+        feedkeys(';', 'i')
+      endif
+    endif
+  enddef
+
+  def SkkeletonIsPreeditEmpty(): bool
+    # 1 stands for the length of markerHenkan.
+    return denops#request('skkeleton', 'getPreEditLength', []) <= 1
   enddef
 
   augroup vimrc-skkeleton
     autocmd User skkeleton-initialize-pre SkkeletonInit()
-    autocmd User skkeleton-mode-changed SkkeletonOnModeChanged()
+    autocmd User skkeleton-enable-post SkkeletonOnEnablePost()
+    autocmd User skkeleton-handled SkkeletonOnHandled()
   augroup END
 endif
 
