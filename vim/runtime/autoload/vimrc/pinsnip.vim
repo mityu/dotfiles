@@ -37,8 +37,8 @@ def ApplySnip(snip_arg: list<string>)
     if idx >= 0
       cursor_col = idx
       snip[cursor_line] =
-          strpart(line, 0, idx) .. line[idx + strlen(CursorPlaceholder) :]
-      remove(snip, -1) # Remove the new line; It's not needed.
+          strpart(line, 0, idx) .. strpart(line, idx + strlen(CursorPlaceholder))
+      remove(snip, -1) # Remove the unnecessary new line.
       break
     endif
   endfor
@@ -149,7 +149,7 @@ enddef
 def GetlineDividedByCursor(): list<string>
   var col = col('.') - 1
   var line = getline('.')
-  var div = [strpart(line, 0, col), line[col :]]
+  var div = [strpart(line, 0, col), strpart(line, col)]
   div[0] = trim(div[0], " \t", 1)
   return div
 enddef
