@@ -5,6 +5,7 @@ import $MYVIMRC as Vimrc
 class FallSubmode
   var _pluginMappings: list<dict<any>> = []
   var _cmdline: list<any> = []
+  var RestoreSubmodeFn: func(): void = null_function
 
   def _inspectPluginMapping(idx: number, m: dict<any>): bool
     return m.mode ==# 'c' && m.lhs =~? '^<Plug>(\%(vimrc-\)\?fall-'
@@ -20,14 +21,24 @@ class FallSubmode
       autocmd CmdlineEnter @ ++once Invoke('NormalMode')
     augroup END
     this._savePluginMappings()
+    eval popup_list()
+      ->filter((_, id) => getwinvar(id, '&filetype') ==# 'fall-list')
+      ->foreach((_, id) => popup_setoptions(id, {cursorline: true}))
   enddef
 
   def ShutdownSubmode()
     this._clearMappings()
   enddef
 
+  def RestoreSubmode()
+    if this.RestoreSubmodeFn != null_function
+      this.RestoreSubmodeFn()
+    endif
+  enddef
+
   def NormalMode()
     const cancelKey = '###DenopsStdHelperInputCancelled###'
+    this.RestoreSubmodeFn = this.NormalMode
     this._clearMappings()
     autocmd vimrc-fall-submode KeyInputPre c Invoke('ThrowAwayUnmappedKeyTypes')
     execute $'cnoremap <ESC> <C-e><C-u>{cancelKey}<CR>'
@@ -40,12 +51,15 @@ class FallSubmode
     cnoremap * <Plug>(fall-select-all)
     cnoremap <CR> <Cmd>call fall#action('')<CR>
     cnoremap a <Plug>(fall-action-select)
-    cnoremap <Tab> <Plug>(fall-action-select)
+    cnoremap ? <Plug>(fall-help)
+    cnoremap <C-n> <Plug>(fall-preview-next:scroll)
+    cnoremap <C-p> <Plug>(fall-preview-prev:scroll)
     highlight! link FallInputCursor FallNormal
     redraw
   enddef
 
   def InsertMode()
+    this.RestoreSubmodeFn = this.InsertMode
     this._clearMappings()
     this._cmdline = [getcmdline(), getcmdpos()]
     cnoremap <buffer> <ESC> <Cmd>call <SID>Invoke('NormalMode')<CR>
@@ -91,6 +105,9 @@ enddef
 export def Shutdown()
   Invoke('ShutdownSubmode')
   g:fall_submode->remove(-1)
+  if !empty(g:fall_submode)
+    Invoke('RestoreSubmode')
+  endif
 enddef
 
 def Invoke(fn: string)

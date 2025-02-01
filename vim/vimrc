@@ -2828,6 +2828,7 @@ if Pacpack.Tap('fall.vim')
   def FallDefColors()
     highlight link FallListMatch Special
     highlight link FallBorder Normal
+    sign define FallListSelected text=>> linehl=Number
   enddef
 
   augroup vimrc-fall
@@ -2835,9 +2836,11 @@ if Pacpack.Tap('fall.vim')
     autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
     autocmd ColorScheme * FallDefColors()
   augroup END
-  highlight link FallListMatch Special
 
+  g:fall_custom_path = Fs.JoinPath(Stdpath.dotvim, 'fall', 'custom.ts')
   g:fall_disable_default_mapping = true
+
+  nnoremap <Space>k <Cmd>Fall mru<cR>
 endif
 
 # ReadingVimrc
