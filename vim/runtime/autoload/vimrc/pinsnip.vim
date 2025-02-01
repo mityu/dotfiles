@@ -635,6 +635,38 @@ SnipFiletype('help')
     return true
   })
 
+SnipFiletype('otex')
+  ->AddSnip((_: string): bool => {
+    const line = GetlineDividedByCursor()
+    if line[0] !~# '\[\[\s*$'
+      return false
+    endif
+    const [precursor, delim] = matchlist(line[0], '\(^.\{-}\)\(\$\{0,2}\)\[\[\s*$')[1 : 2]
+    ApplySnip([$'{precursor}{delim}[[ {CursorPlaceholder} ]]{delim}{line[1]}'])
+    return true
+  })
+
+SnipFiletype('tex')
+  ->AddSnip((line: string): bool => {
+    const regex = '^\\\?be\%[gin]\s\+\zs\S\+\ze'
+    if line !~# regex
+      return false
+    endif
+    const env = matchstr(line, regex)
+    ApplySnip([printf('\begin{%s}', env) .. CursorPlaceholder])
+    return true
+  })
+  ->AddSnip((line: string): bool => {
+    const regex = '^\\\?end\?\s\+\zs\S\+\ze'
+    if line !~# regex
+      return false
+    endif
+    const env = matchstr(line, regex)
+    ApplySnip([printf('\end{%s}', env) .. CursorPlaceholder])
+    return true
+  })
+eval ['plaintex', 'latex', 'otex']->foreach((_, ft) => SnipFiletype(ft)->MergeSnip('tex'))
+
 SnipFiletype('_')
   ->AddSnip((_: string): bool => {
     # foo()>|bar => foo(bar)
