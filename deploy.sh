@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 SCRIPT_DIR=$(cd $(dirname $0);pwd)
 
@@ -45,7 +45,6 @@ auto_mkdir $CONFIG_DIR
 
 ln -sn $SCRIPT_DIR/bashrc ~/.bashrc
 ln -sn ${SCRIPT_DIR}/zshrc ~/.zshrc
-# ln -snfv ${SCRIPT_DIR}/vim ~/.vim
 ln -sn $SCRIPT_DIR/vim/bootstrap.vim ~/.vimrc
 ln -snfv $SCRIPT_DIR/nvim $CONFIG_DIR/nvim
 ln -snfv ${SCRIPT_DIR}/alacritty $CONFIG_DIR/alacritty
