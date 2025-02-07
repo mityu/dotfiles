@@ -60,6 +60,7 @@ if isWindows then
 end
 
 local config = {
+  front_end = 'WebGpu',
   use_fancy_tab_bar = false,
   show_update_window = false,
   adjust_window_size_when_changing_font_size = false,
@@ -124,6 +125,8 @@ elseif isMac then
   config.default_prog = { "/usr/bin/env", "PATH=/opt/homebrew/bin", "fish", "-l" }
   config.initial_cols = 206
   config.initial_rows = 58
+else
+  config.default_prog = { "/usr/bin/env", "fish", "-l" }
 end
 
 return config
