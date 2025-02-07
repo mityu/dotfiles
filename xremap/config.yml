@@ -1,4 +1,5 @@
 # To check application names, run `wmctrl -x -l`
+# To see xremap debug logs, run `journalctl -u xremap`
 modmap:
   - name: Global
     remap:
@@ -15,7 +16,7 @@ modmap:
 keymap:
   - name: Browser
     application:
-      only: [firefox, Google-chrome, Chromium, Vivaldi-stable]
+      only: [firefox, Navigator.firefox, Google-chrome, Chromium, Vivaldi-stable]
     remap:
       Super-t: C-t
       Super-Shift-t: C-Shift-t
