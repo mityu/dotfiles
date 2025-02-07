@@ -29,11 +29,6 @@ let
     };
     cica-font = pkgs.callPackage cica-font-pkg { };
 in
-# let
-#   importYAML = file:
-#     lib.trivial.importJSON
-#       (pkgs.runCommand "yml" { nativeBuildInputs = [pkgs.yq-go] ;} ''yq -o json '${file}' > $out'');
-# in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -112,7 +107,6 @@ in
 
   # Enable sound.
   hardware.pulseaudio.enable = false;
-  # OR
   services.pipewire = {
     enable = true;
     pulse.enable = true;
@@ -131,15 +125,24 @@ in
     serviceMode = "system";
     withX11 = true;
     watch = true;
-    # config = importYAML ../xremap/config.yml;
     yamlConfig = builtins.readFile ../xremap/config.yml;
   };
 
+  systemd.user.services.set-xhost = {
+    description = "Run a one-shot command upon user login";
+    path = [ pkgs.xorg.xhost ];
+    wantedBy = [ "default.target" ];
+    script = "xhost +SI:localuser:root";
+    environment.DISPLAY = ":0.0";
+  };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  programs.fish.enable = true;
   users.users.mityu = {
     isNormalUser = true;
     initialPassword = "pass123";
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    shell = pkgs.fish;
   };
 
   # List packages installed in system profile. To search, run:
@@ -187,6 +190,11 @@ in
   nix = {
     settings = {
       experimental-features = ["nix-command" "flakes"];
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
     };
   };
 
