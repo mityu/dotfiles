@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 pactl $1 @DEFAULT_SINK@ $2
 
