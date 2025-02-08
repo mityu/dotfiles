@@ -62,7 +62,6 @@ end
 local config = {
   front_end = 'WebGpu',
   use_fancy_tab_bar = false,
-  show_update_window = false,
   adjust_window_size_when_changing_font_size = false,
   exit_behavior = "Close",
   font = wezterm.font_with_fallback({
