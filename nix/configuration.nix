@@ -68,7 +68,7 @@ in
       noto-fonts-cjk-serif
       noto-fonts-cjk-sans
       noto-fonts-emoji
-      nerdfonts
+      nerd-fonts.noto
       hackgen-nf-font
       cica-font
     ];
@@ -106,7 +106,7 @@ in
   # services.printing.enable = true;
 
   # Enable sound.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   services.pipewire = {
     enable = true;
     pulse.enable = true;
