@@ -21,9 +21,6 @@ class FallSubmode
       autocmd CmdlineEnter @ ++once Invoke('NormalMode')
     augroup END
     this._savePluginMappings()
-    eval popup_list()
-      ->filter((_, id) => getwinvar(id, '&filetype') ==# 'fall-list')
-      ->foreach((_, id) => popup_setoptions(id, {cursorline: true}))
   enddef
 
   def ShutdownSubmode()
