@@ -13,6 +13,7 @@ import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
 import { SEPARATOR } from "jsr:@std/path@^1.0.8/constants";
 import { matcherMultiRegexp } from "./matcher_multi_regexp.ts";
+import { actionOpenProjectRoot } from "./action_open_root.ts";
 
 // NOTE:
 //
@@ -77,6 +78,7 @@ const myPathActions = {
   ...builtin.action.defaultOpenActions,
   ...builtin.action.defaultSystemopenActions,
   ...builtin.action.defaultCdActions,
+  "open:project-root": actionOpenProjectRoot,
 };
 
 const myQuickfixActions = {
