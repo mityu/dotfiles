@@ -2642,7 +2642,6 @@ if Pacpack.Tap('ddu.vim')
   augroup vimrc-ddu
     autocmd FileType ddu-ff DduMapFF()
     autocmd User Ddu:ui:ff_vim_popup:openWindowPre DduMapFFVimPopup()
-  augroup END
 
     if !v:vim_did_enter
       autocmd User DenopsReady ++once DduConfig()
