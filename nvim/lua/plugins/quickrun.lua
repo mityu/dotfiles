@@ -6,7 +6,7 @@ return {
   keys = {
     {'<Space>r', '<Plug>(quickrun)', mode = {'n', 'v'} },
   },
-  cmd = 'Quickrun',
+  cmd = 'QuickRun',
   config = function()
     local config = {
       _ = {
