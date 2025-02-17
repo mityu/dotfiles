@@ -2323,9 +2323,9 @@ endif
 if Pacpack.Tap('vim-textobj-function')
   augroup vimrc-textobj-function
     autocmd Filetype * ++once {
-      packadd vim-textobj-function
+      Pacpack.Load('vim-textobj-function')
       for ft in split(&filetype, '.')
-        if ft =~# '\v^%(c|java|vim)$'
+        if ft =~# '\v^%(c|java|vim)$' && !exists('b:textobj_function_select')
           execute $'runtime ftplugin/vim-textobj-function/{expand('<amatch>')}/textobj-function.vim'
         endif
       endfor
