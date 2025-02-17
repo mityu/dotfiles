@@ -1091,13 +1091,13 @@ def Filter(bang: bool, pat: string, ...cmd: list<string>)
   endif
 enddef
 
-def FindGitroot(arg_target: string = bufname('%')->fnamemodify(':p')): string
-  const target: string = resolve(arg_target)
-  const git_dir: string = finddir('.git', target .. ';')
-  if git_dir ==# ''
+def FindGitroot(targetGiven: string = null_string): string
+  const target: string = resolve(targetGiven ?? bufname('%')->fnamemodify(':p'))
+  const gitDir: string = finddir('.git', target .. ';')
+  if gitDir ==# ''
     return ''
   endif
-  return fnamemodify(git_dir, ':p:h:h')
+  return fnamemodify(gitDir, ':p:h:h')
 enddef
 
 def Gof(path: string)
