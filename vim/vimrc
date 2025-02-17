@@ -2510,7 +2510,12 @@ if Pacpack.Tap('ddu.vim')
 
   def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
     if pathGiven ==# ''
-      return vimrc#FindProjectRoot(bufname('%')->fnamemodify(':p')) ?? getcwd(winnr())
+      const curbuf = expand('%:p')
+      if curbuf =~# '^gin[^:]*://'
+        return gin#util#worktree()
+      else
+        return vimrc#FindProjectRoot(curbuf) ?? getcwd(winnr())
+      endif
     endif
 
     const path = pathGiven->expand()
