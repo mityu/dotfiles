@@ -377,6 +377,7 @@ export class Pacpack
     overriddenPluginList[target] = uri->matchstr('/\zs[^/]\+$')
   enddef
 
+  # CAUTION: This function must be called at the last of vimrc.
   static def LoadNonLazyPlugins()
     const appendPath = pluginList
       ->values()
@@ -2029,22 +2030,34 @@ if Pacpack.Tap('vim-lsp')
     })
   enddef
 
+  def LspShouldAutoFormatting(): bool
+    if &filetype ==# '\v^%(typescript|go|rust)$'
+      return true
+    elseif &filetype ==# '\v^c%(pp)?$'
+      if findfile('.clang-format', $'{expand('%:p')};') !=# ''
+        return true
+      endif
+    endif
+    return false
+  enddef
+
   def LspDefineBufferAutocmds()
     LspClearBufferAutocmds()
 
-    if &filetype ==# 'go'
-      augroup vimrc_lsp_buffer_go
-        autocmd BufWritePre <buffer> silent LspDocumentFormatSync
-        autocmd BufWritePre <buffer> silent LspCodeActionSync source.organizeImports
-        autocmd Filetype <buffer> ++once LspClearBufferAutocmds()
-      augroup END
-    endif
-
     augroup vimrc_lsp_buffer
+      if LspShouldAutoFormatting()
+        autocmd BufWritePre <buffer> silent LspDocumentFormatSync
+      endif
+
+      if &filetype ==# 'go'
+        autocmd BufWritePre <buffer> silent LspCodeActionSync source.organizeImports
+      endif
+
       autocmd BufWritePost <buffer> LspNotifyDiagnosticCount()
       if Pacpack.Tap('vim-backpair')
         autocmd CompleteDone <buffer> LspDisableBackpairPluginTemporallyOnCompleteDone()
       endif
+      autocmd Filetype <buffer> ++once LspClearBufferAutocmds()
     augroup END
   enddef
 
@@ -2052,12 +2065,6 @@ if Pacpack.Tap('vim-lsp')
     augroup vimrc_lsp_buffer
       autocmd! * <buffer>
     augroup END
-
-    if &filetype ==# 'go'
-      augroup vimrc_lsp_buffer_go
-        autocmd! * <buffer>
-      augroup END
-    endif
   enddef
 
   def LspEnableForBuffer()
@@ -2087,6 +2094,8 @@ if Pacpack.Tap('vim-lsp')
         \ call feedkeys("\<Cmd>call backpair#enable()\<CR>", 'n')
     endif
   enddef
+
+  command! -bar LspFmt LspDocumentFormatSync
 
   augroup vimrc_lsp
     autocmd User lsp_buffer_enabled call LspEnableForBuffer()
