@@ -2,6 +2,8 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+NO_BLE=true
+
 # If bash is running interactively, launch ble.sh
 if [[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
 	[[ -z ${NO_BLE:-} ]] && [[ $(uname -o) != "Msys" ]]; then
