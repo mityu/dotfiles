@@ -1,8 +1,5 @@
 import type { Denops } from "jsr:@denops/std@~7.4.0";
-import {
-  DduItem,
-  SourceOptions,
-} from "jsr:@shougo/ddu-vim@~10.0.0/types";
+import { DduItem, SourceOptions } from "jsr:@shougo/ddu-vim@~10.0.0/types";
 import { BaseFilter } from "jsr:@shougo/ddu-vim@~10.0.0/filter";
 import * as fn from "jsr:@denops/std@~7.4.0/function";
 
