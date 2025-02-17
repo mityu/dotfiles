@@ -1,10 +1,11 @@
 {
   "lock": false,
   "tasks": {
-    "check": "deno check runtime/denops ddu ddc",
-    "lint": "deno lint runtime/denops ddu ddc",
-    "lint-fix": "deno lint --fix runtime/denops ddu ddc",
-    "fmt": "deno fmt runtime/denops",
+    "src-dirs": "echo 'runtime/denops ddu ddc fall'",
+    "check": "deno check $(deno task src-dirs)",
+    "lint": "deno lint $(deno task src-dirs)",
+    "lint-fix": "deno lint --fix $(deno task src-dirs)",
+    "fmt": "deno fmt $(deno task src-dirs)",
     "test": "deno test -A --doc --parallel --shuffle runtime/denops/**/*.ts",
     "upgrade": "deno run -A jsr:@molt/cli **/*.ts --write"
   }
