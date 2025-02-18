@@ -2880,11 +2880,41 @@ if Pacpack.Tap('vim-gin')
     endfor
   enddef
 
+  def GinDiffOpened()
+    command! -bar -bang -nargs=* -buffer GinPatch GinPatchCommandOnGinDiffWindow(<q-bang>, <q-mods>, [<f-args>])
+  enddef
+
+  def GinPatchCommandOnGinDiffWindow(bang: string, mods: string, args: list<string>)
+    var options: list<string> = []
+
+    var argsCopy = args
+    while !empty(argsCopy)
+      const arg = args[0]
+      if arg =~# '^++'
+        options->add(arg)
+      else
+        break
+      endif
+      args->remove(0)
+    endwhile
+
+    const path = argsCopy->join()->trim()
+
+    # Invoke :GinPatch here causes command execution recursion, so instead of
+    # fire the command, call the internal gin API directly.
+    if path =~# '^%\?$'
+      denops#request('gin', 'patch:command', [bang, mods, options + [gin#util#expand('%')]])
+    else
+      denops#request('gin', 'patch:command', [bang, mods, args])
+    endif
+  enddef
+
   augroup vimrc-gin
+    autocmd BufReadCmd gin*://* setlocal nomodeline
     autocmd BufReadCmd ginstatus://* GinStatusOpened()
     autocmd BufReadcmd ginlog://* GinLogOpened()
-    autocmd BufReadCmd gin*://* setlocal nomodeline
     autocmd BufReadCmd ginedit://* GinEditOpened()
+    autocmd BufReadCmd gindiff://* GinDiffOpened()
   augroup END
 endif
 
