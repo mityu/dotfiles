@@ -14,6 +14,7 @@ import * as extra from "jsr:@vim-fall/extra@^0.2.0";
 import { SEPARATOR } from "jsr:@std/path@^1.0.8/constants";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
+import { bindSourceArguments } from "./bind_source_args.ts";
 
 // NOTE:
 //
@@ -188,6 +189,25 @@ const myFilterDirectory = (path: string) => {
   return true;
 };
 
+const filePickerParams = {
+  matchers: [
+    matcherMultiRegexp,
+  ],
+  renderers: [
+    builtin.renderer.nerdfont,
+  ],
+  previewers: [
+    builtin.previewer.file,
+    builtin.previewer.noop,
+  ],
+  actions: {
+    ...myPathActions,
+    ...myQuickfixActions,
+    ...myMiscActions,
+  },
+  defaultAction: "open",
+} as const;
+
 export const main: Entrypoint = (
   {
     definePickerFromSource,
@@ -312,55 +332,54 @@ export const main: Entrypoint = (
     },
   );
 
+  const fileSource = builtin.source.file({
+    filterFile: myFilterFile,
+    filterDirectory: myFilterDirectory,
+    relativeFromBase: true,
+  });
+
+  // Search files in the parent directory.
   definePickerFromSource(
     "file",
-    refineSource(
-      builtin.source.file({
-        filterFile: myFilterFile,
-        filterDirectory: myFilterDirectory,
-        relativeFromBase: true,
-      }),
-      builtin.refiner.relativePath,
-    ),
-    {
-      matchers: [
-        builtin.matcher.substring,
-      ],
-      renderers: [
-        builtin.renderer.nerdfont,
-      ],
-      previewers: [
-        builtin.previewer.file,
-        builtin.previewer.noop,
-      ],
-      actions: {
-        ...myPathActions,
-        ...myQuickfixActions,
-        ...myMiscActions,
-      },
-      defaultAction: "open",
-    },
+    fileSource,
+    filePickerParams,
   );
 
+  // Search files in the parent directory, but don't pre-filter files.
   definePickerFromSource(
     "file:all",
     refineSource(
       builtin.source.file,
       builtin.refiner.relativePath,
     ),
-    {
-      matchers: [builtin.matcher.substring],
-      renderers: [
-        builtin.renderer.nerdfont,
-      ],
-      previewers: [builtin.previewer.file],
-      actions: {
-        ...myPathActions,
-        ...myQuickfixActions,
-        ...myMiscActions,
+    filePickerParams,
+  );
+
+  // Search files in the current project directory.
+  definePickerFromSource(
+    "file:project",
+    bindSourceArguments(
+      fileSource,
+      async (
+        denops,
+      ) => [await denops.call("FallGetSearchRootPath", "") as string],
+    ),
+    filePickerParams,
+  );
+
+  definePickerFromSource(
+    "runtime-files",
+    bindSourceArguments(
+      fileSource,
+      (_) => {
+        const dir = Deno.env.get("VIMRUNTIME");
+        if (!dir) {
+          throw Error("$VIMRUNTIME is not set");
+        }
+        return [dir];
       },
-      defaultAction: "open",
-    },
+    ),
+    filePickerParams,
   );
 
   definePickerFromSource("line", builtin.source.line, {
