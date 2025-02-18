@@ -78,9 +78,14 @@ const matcherMultiRegexp = matcherMultiRegexpBase({ ignoreCase: true });
 
 const myPathActions = {
   ...builtin.action.defaultOpenActions,
+  "open:tab": builtin.action.open({
+    opener: "tab",
+    splitter: "vsplit",
+    mods: "botright",
+  }),
+  "open:project-root": actionOpenProjectRoot,
   ...builtin.action.defaultSystemopenActions,
   ...builtin.action.defaultCdActions,
-  "open:project-root": actionOpenProjectRoot,
 };
 
 const myQuickfixActions = {
@@ -93,6 +98,7 @@ const myQuickfixActions = {
 const myMiscActions = {
   ...builtin.action.defaultEchoActions,
   ...builtin.action.defaultYankActions,
+  "sub:multi-regexp": builtin.action.submatch([matcherMultiRegexp]),
   ...builtin.action.defaultSubmatchActions,
 };
 
