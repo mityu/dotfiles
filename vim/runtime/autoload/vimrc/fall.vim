@@ -44,6 +44,8 @@ class FallSubmode
     cnoremap i <Cmd>call <SID>Invoke('InsertMode')<CR>
     cnoremap j <Plug>(fall-list-next)
     cnoremap k <Plug>(fall-list-prev)
+    cnoremap gg <Plug>(fall-list-first)
+    cnoremap G <Plug>(fall-list-last)
     cnoremap m <Plug>(fall-select)
     cnoremap * <Plug>(fall-select-all)
     cnoremap <CR> <Cmd>call fall#action('')<CR>
