@@ -2841,6 +2841,38 @@ if Pacpack.Tap('fall.vim')
     sign define FallListSelected text=>> linehl=Number
   enddef
 
+  def g:FallGetSearchRootPath(pathGiven: string, silent: bool = false): string
+    if pathGiven ==# ''
+      const curbuf = expand('%:p')
+      if curbuf =~# '^gin[^:]*://'
+        return gin#util#worktree()
+      else
+        return vimrc#FindProjectRoot(curbuf) ?? getcwd(winnr())
+      endif
+    endif
+
+    const path = pathGiven->expand()
+    if !path->isdirectory()
+      if !silent
+        EchomsgError($'Directory not found: {path}')
+      endif
+      return ''
+    endif
+
+    return path
+  enddef
+
+  def g:FallGetStdpath(kind: string): string
+    if kind ==# 'dotfiles'
+      return Stdpath.dotfiles
+    elseif kind ==# 'localpack'
+      return Stdpath.localpack
+    elseif kind ==# 'packpath'
+      return PacPath
+    endif
+    throw $'Unknown kind: {kind}'
+  enddef
+
   augroup vimrc-fall
     autocmd User FallPickerEnter:* vimrc#fall#Setup()
     autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
@@ -2850,7 +2882,8 @@ if Pacpack.Tap('fall.vim')
   g:fall_custom_path = Fs.JoinPath(Stdpath.dotvim, 'fall', 'custom.ts')
   g:fall_disable_default_mapping = true
 
-  nnoremap <Space>k <Cmd>Fall mru<cR>
+  nnoremap <Space>k <Cmd>Fall mru<CR>
+  nnoremap <Space>j <Cmd>Fall file:project<CR>
 endif
 
 # ReadingVimrc

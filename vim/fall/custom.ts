@@ -1,6 +1,6 @@
 import type { Entrypoint } from "jsr:@vim-fall/custom@^0.1.0";
 import {
-  composeActions,
+  composeSources,
   Coordinator,
   defineRefiner,
   Layout,
@@ -16,7 +16,7 @@ import { isAbsolute } from "jsr:@std/path@~1.0.0/is-absolute";
 import { which } from "jsr:@david/which@~0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
-import { bindSourceArguments } from "./bind_source_args.ts";
+import * as fileSource from "./source_file.ts";
 
 // NOTE:
 //
@@ -210,6 +210,12 @@ const myFilterDirectory = (path: string) => {
   return true;
 };
 
+const fileFilterOpts = {
+  filterFile: myFilterFile,
+  filterDirectory: myFilterDirectory,
+  relativeFromBase: true,
+} as const;
+
 const filePickerParams = {
   matchers: [
     matcherMultiRegexp,
@@ -290,11 +296,77 @@ export const main: Entrypoint = async (
     },
   );
 
+  // definePickerFromSource(
+  //   "mrr",
+  //   extra.source.mr({ type: "mrr" }),
+  //   {
+  //     matchers: [builtin.matcher.substring],
+  //     renderers: [
+  //       builtin.renderer.nerdfont,
+  //     ],
+  //     actions: {
+  //       ...myPathActions,
+  //       ...myQuickfixActions,
+  //       ...myMiscActions,
+  //       ...extra.action.defaultMrDeleteActions,
+  //       "cd-and-open": composeActions(
+  //         builtin.action.cd,
+  //         builtin.action.open,
+  //       ),
+  //     },
+  //     defaultAction: "cd-and-open",
+  //     coordinator: coordinator({
+  //       hidePreview: true,
+  //     }),
+  //   },
+  // );
+
+  // Search files in the parent directory.
+  definePickerFromSource(
+    "file",
+    fileSource.file(fileFilterOpts),
+    filePickerParams,
+  );
+
+  // Search files in the parent directory, but don't pre-filter files.
+  definePickerFromSource(
+    "file:all",
+    builtin.source.file({ relativeFromBase: true }),
+    filePickerParams,
+  );
+
+  // Search files in the current project directory.
+  definePickerFromSource(
+    "file:project",
+    fileSource.project(fileFilterOpts),
+    filePickerParams,
+  );
+
+  // Search files of plugins.
+  definePickerFromSource(
+    "file:pack",
+    composeSources(
+      fileSource.minpac(fileFilterOpts),
+      fileSource.localpack(fileFilterOpts),
+    ),
+    filePickerParams,
+  );
+
+  definePickerFromSource(
+    "runtime-files",
+    fileSource.runtimeFiles(fileFilterOpts),
+    filePickerParams,
+  );
+
   definePickerFromSource(
     "mru",
-    refineSource(
-      extra.source.mr,
-      refinerReplaceHomepath,
+    composeSources(
+      refineSource(
+        extra.source.mr,
+        refinerReplaceHomepath,
+      ),
+      fileSource.project(fileFilterOpts),
+      fileSource.dotfiles(fileFilterOpts),
     ),
     {
       matchers: [matcherMultiRegexp],
@@ -310,81 +382,6 @@ export const main: Entrypoint = async (
       },
       defaultAction: "open",
     },
-  );
-
-  definePickerFromSource(
-    "mrr",
-    extra.source.mr({ type: "mrr" }),
-    {
-      matchers: [builtin.matcher.substring],
-      renderers: [
-        builtin.renderer.nerdfont,
-      ],
-      actions: {
-        ...myPathActions,
-        ...myQuickfixActions,
-        ...myMiscActions,
-        ...extra.action.defaultMrDeleteActions,
-        "cd-and-open": composeActions(
-          builtin.action.cd,
-          builtin.action.open,
-        ),
-      },
-      defaultAction: "cd-and-open",
-      coordinator: coordinator({
-        hidePreview: true,
-      }),
-    },
-  );
-
-  const fileSource = builtin.source.file({
-    filterFile: myFilterFile,
-    filterDirectory: myFilterDirectory,
-    relativeFromBase: true,
-  });
-
-  // Search files in the parent directory.
-  definePickerFromSource(
-    "file",
-    fileSource,
-    filePickerParams,
-  );
-
-  // Search files in the parent directory, but don't pre-filter files.
-  definePickerFromSource(
-    "file:all",
-    refineSource(
-      builtin.source.file,
-      builtin.refiner.relativePath,
-    ),
-    filePickerParams,
-  );
-
-  // Search files in the current project directory.
-  definePickerFromSource(
-    "file:project",
-    bindSourceArguments(
-      fileSource,
-      async (
-        denops,
-      ) => [await denops.call("FallGetSearchRootPath", "") as string],
-    ),
-    filePickerParams,
-  );
-
-  definePickerFromSource(
-    "runtime-files",
-    bindSourceArguments(
-      fileSource,
-      (_) => {
-        const dir = Deno.env.get("VIMRUNTIME");
-        if (!dir) {
-          throw Error("$VIMRUNTIME is not set");
-        }
-        return [dir];
-      },
-    ),
-    filePickerParams,
   );
 
   definePickerFromSource("line", builtin.source.line, {
