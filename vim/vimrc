@@ -2702,8 +2702,15 @@ if Pacpack.Tap('vim-mr')
 
   g:mr#mru#predicates = [MrPredicate]
   g:mr#mrw#predicates = [MrPredicate]
+  g:vimrc#mruw#predicates = [MrPredicate]
   g:mr_mrr_disabled = true
   g:mr_mrd_disabled = true
+
+  if !v:vim_did_enter
+    augroup vimrc
+      autocmd SourcePost */plugin/mr.vim ++once vimrc#mruw#start_recording()
+    augroup END
+  endif
 endif
 
 if Pacpack.Tap('skkeleton')
