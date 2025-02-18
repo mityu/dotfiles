@@ -480,8 +480,14 @@ export const main: Entrypoint = async (
   );
 
   definePickerFromSource(
-    "runtime-files",
+    "file:runtime",
     fileSource.runtimeFiles(fileFilterOpts),
+    filePickerParams,
+  );
+
+  definePickerFromSource(
+    "file:dotfiles",
+    fileSource.dotfiles(fileFilterOpts),
     filePickerParams,
   );
 
