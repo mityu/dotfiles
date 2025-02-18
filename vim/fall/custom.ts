@@ -12,6 +12,8 @@ import {
 import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
 import { SEPARATOR } from "jsr:@std/path@^1.0.8/constants";
+import { isAbsolute } from "jsr:@std/path@~1.0.0/is-absolute";
+import { which } from "jsr:@david/which@~0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
 import { bindSourceArguments } from "./bind_source_args.ts";
@@ -23,6 +25,25 @@ import { bindSourceArguments } from "./bind_source_args.ts";
 // Install https://github.com/thinca/vim-qfreplace to use 'Qfreplace'
 //
 //
+
+async function isExecutable(cmd: string): Promise<boolean> {
+  if (isAbsolute(cmd)) {
+    try {
+      const info = await Deno.stat(cmd);
+      if (info.mode != null) {
+        return (info.mode & 0o100) !== 0;
+      } else {
+        // On Windows, info.mode is not available.  Only check if it is a file
+        // or not.
+        return info.isFile;
+      }
+    } catch (_) {
+      return false;
+    }
+  } else {
+    return !!await which(cmd);
+  }
+}
 
 type CoordinateOptions = builtin.coordinator.ModernOptions;
 
@@ -208,7 +229,7 @@ const filePickerParams = {
   defaultAction: "open",
 } as const;
 
-export const main: Entrypoint = (
+export const main: Entrypoint = async (
   {
     definePickerFromSource,
     definePickerFromCurator,
@@ -225,10 +246,14 @@ export const main: Entrypoint = (
   });
   refineActionPicker({ matchers: [matcherMultiRegexp] });
 
+  const grepCurator = await isExecutable("rg")
+    ? builtin.curator.rg
+    : builtin.curator.grep;
+
   definePickerFromCurator(
     "grep",
     refineCurator(
-      builtin.curator.grep,
+      grepCurator,
       builtin.refiner.relativePath,
     ),
     {
@@ -249,26 +274,6 @@ export const main: Entrypoint = (
     "git-grep",
     refineCurator(
       builtin.curator.gitGrep,
-      builtin.refiner.relativePath,
-    ),
-    {
-      renderers: [
-        builtin.renderer.nerdfont,
-      ],
-      previewers: [builtin.previewer.file],
-      actions: {
-        ...myPathActions,
-        ...myQuickfixActions,
-        ...myMiscActions,
-      },
-      defaultAction: "open",
-    },
-  );
-
-  definePickerFromCurator(
-    "rg",
-    refineCurator(
-      builtin.curator.rg,
       builtin.refiner.relativePath,
     ),
     {
