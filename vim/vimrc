@@ -2546,7 +2546,8 @@ if Pacpack.Tap('ddu.vim')
       sleep 1m
     endwhile
     if keyTypes !=# ''
-      feedkeys(keyTypes .. "\<Cmd>redraw\<CR>", 'it')
+      feedkeys(keyTypes, 'it')
+      timer_start(10, (_) => execute('redraw'))
     endif
   enddef
 
