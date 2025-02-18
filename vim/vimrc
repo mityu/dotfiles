@@ -2642,7 +2642,7 @@ if Pacpack.Tap('ddu.vim')
   nnoremap <Space>b <Cmd>call <SID>DduStartSync({'name': 'buffer'})<CR>
   command! PackFiles DduStartSync({'name': 'pack-files'})
   command! Dotfiles DduStartSync({'name': 'dotfiles'})
-  command! -nargs=? -complete=dir Files DduFiles(<q-args>)
+  command! -nargs=? -complete=dir FileRec DduFiles(<q-args>)
   command! -nargs=? -complete=dir LiveGrep call DduLiveGrep(<q-args>)
   command! -nargs=+ -complete=customlist,DduCommandComplete Ddu DduCommand(<f-args>)
 
