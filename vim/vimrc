@@ -2028,9 +2028,9 @@ if Pacpack.Tap('vim-lsp')
   enddef
 
   def LspShouldAutoFormatting(): bool
-    if &filetype ==# '\v^%(typescript|go|rust)$'
+    if &filetype =~# '\v^%(typescript|go|rust)$'
       return true
-    elseif &filetype ==# '\v^c%(pp)?$'
+    elseif &filetype =~# '\v^c%(pp)?$'
       if findfile('.clang-format', $'{expand('%:p')};') !=# ''
         return true
       endif
