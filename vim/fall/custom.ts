@@ -4,6 +4,7 @@ import {
   Coordinator,
   defineRefiner,
   defineRenderer,
+  defineSource,
   Detail,
   Layout,
   refineCurator,
@@ -11,6 +12,7 @@ import {
   refineSource,
   Renderer,
   Size,
+  Source,
 } from "jsr:@vim-fall/std@^0.10.0";
 import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
@@ -179,6 +181,45 @@ const rendererShowPackpath = (
         }))),
       ];
     });
+  });
+};
+
+const sourceMr = (
+  options: { headMruEntryCount: number },
+): Source<{ path: string }> => {
+  const { headMruEntryCount = 1 } = options;
+
+  return defineSource(async function* (denops) {
+    const mrw = await denops.dispatch("mr", "mrw:list") as string[];
+    const mru = await denops.dispatch("mr", "mru:list") as string[];
+    const provided = new Set<string>();
+
+    const buildItem = (() => {
+      let id = 0;
+      return (path: string, type: "mru" | "mrw") => {
+        return {
+          id: id++,
+          value: path,
+          detail: { path, mr: { type } },
+        };
+      };
+    })();
+
+    for (const path of mru.slice(0, headMruEntryCount)) {
+      provided.add(path);
+      yield buildItem(path, "mru");
+    }
+
+    for (const path of mrw.filter((v) => !provided.has(v))) {
+      provided.add(path);
+      yield buildItem(path, "mrw");
+    }
+
+    for (
+      const path of mru.slice(headMruEntryCount).filter((v) => !provided.has(v))
+    ) {
+      yield buildItem(path, "mru");
+    }
   });
 };
 
@@ -448,7 +489,8 @@ export const main: Entrypoint = async (
     "mru",
     composeSources(
       refineSource(
-        extra.source.mr,
+        // extra.source.mr,
+        sourceMr({ headMruEntryCount: 5 }),
         refinerReplaceHomepath,
       ),
       refineSource(
