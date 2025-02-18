@@ -2722,7 +2722,7 @@ if Pacpack.Tap('skkeleton')
     skkeleton#config(config)
 
     extend(g:skkeleton#mapped_keys, [
-      '<C-n>', '<C-p>', '<C-y>', '<CR>', '<C-j>',
+      '<C-n>', '<C-p>', '<C-y>', '<CR>', '<C-j>', '<C-d>',
     ])
     skkeleton#register_keymap('input', ';', 'henkanPoint')
     skkeleton#register_keymap('input', '<C-n>', 'henkanFirst')
@@ -2734,6 +2734,7 @@ if Pacpack.Tap('skkeleton')
     skkeleton#register_keymap('henkan', '<C-y>', 'kakutei')
     skkeleton#register_keymap('henkan', '<C-j>', 'kakutei')
     skkeleton#register_keymap('henkan', '<CR>', 'newline')
+    skkeleton#register_keymap('henkan', '<C-d>', 'purgeCandidate')
   enddef
 
   def SkkeletonOnEnablePost()
