@@ -2604,6 +2604,10 @@ if Pacpack.Tap('ddu.vim')
       DduStartSync({sources: [{name: 'man'}]})
     elseif cmd ==# 'runtime-files'
       DduFiles($VIMRUNTIME)
+    elseif cmd ==# 'mru'
+      DduMru()
+    else
+      EchomsgError($'Unknown Ddu subcommand: {cmd}')
     endif
   enddef
 
@@ -2619,6 +2623,8 @@ if Pacpack.Tap('ddu.vim')
         'files',
         'help',
         'runtime-files',
+        'mru',
+        'man',
       ]->filter((_: number, v: string): bool => stridx(v, argLead) == 0)
     else
       const cmd = cmdLine->split()[1]
