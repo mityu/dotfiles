@@ -12,7 +12,7 @@ import {
 import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
 import { SEPARATOR } from "jsr:@std/path@^1.0.8/constants";
-import { matcherMultiRegexp } from "./matcher_multi_regexp.ts";
+import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
 
 // NOTE:
@@ -73,6 +73,8 @@ const refinerReplaceHomepath = (): Refiner<{ path: string }> => {
     }
   });
 };
+
+const matcherMultiRegexp = matcherMultiRegexpBase({ ignoreCase: true });
 
 const myPathActions = {
   ...builtin.action.defaultOpenActions,
@@ -185,6 +187,7 @@ export const main: Entrypoint = (
     definePickerFromSource,
     definePickerFromCurator,
     refineSetting,
+    refineActionPicker,
   },
 ) => {
   refineSetting({
@@ -194,6 +197,7 @@ export const main: Entrypoint = (
     }),
     theme: builtin.theme.MODERN_THEME,
   });
+  refineActionPicker({ matchers: [matcherMultiRegexp] });
 
   definePickerFromCurator(
     "grep",
@@ -262,7 +266,7 @@ export const main: Entrypoint = (
       refinerReplaceHomepath,
     ),
     {
-      matchers: [matcherMultiRegexp({ ignoreCase: true })],
+      matchers: [matcherMultiRegexp],
       renderers: [
         // builtin.renderer.nerdfont,
       ],
