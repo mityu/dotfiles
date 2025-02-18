@@ -3318,7 +3318,7 @@ if has('gui_running')
     if IsWSL
       # Avoid too large window.
       set lines=35 columns=100
-    elseif IsLinux && executable('i3')
+    elseif IsLinux && (executable('awesome') || executable('i3'))
       # It seems that too large window on i3 does not work properly.
       set lines=50 columns=200
     else
