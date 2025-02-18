@@ -2825,9 +2825,8 @@ if Pacpack.Tap('skkeleton')
 endif
 
 if Pacpack.Tap('vim-gin')
-  # g:gin_log_default_args = ['--oneline']
-  # g:gin_log_persistent_args = ['++opener=noomdeline\ edit']
   g:gin_patch_persistent_args = ['++opener=tabedit', '++no-head']
+  g:gin_chaperon_persistent_args = ['++opener=tabedit']
   g:gin_proxy_apply_without_confirm = true
   nnoremap <Space>g <Cmd>GinStatus<CR>
 
@@ -2842,10 +2841,50 @@ if Pacpack.Tap('vim-gin')
     nnoremap <buffer> <C-n> <Cmd>call search('^commit\s\w\+', 'W')<CR>
   enddef
 
+  def GinEditOpened()
+    if !&modifiable
+      return
+    endif
+
+    # This buffer may opened by :GinPatch.
+    # Check if the local file is opened in the same tab.
+    const bufnr = gin#util#expand('%')->bufnr()
+    if index(tabpagebuflist(), bufnr) == -1
+      # The local file is not opened in this tab.  Exit.
+      return
+    endif
+
+    # This buffer must be opened by :GinPatch.  Unset unnecessary default
+    # mappings for the local file's buffer.
+    const winid = bufwinid(bufnr)
+    eval ['do', 'dor', 'dol', 'dp']
+      ->map((i, v) => $'xunmap <buffer> {v}')
+      ->join("\n")
+      ->win_execute(winid, 'silent!')
+
+    # Setup autocmd to remove all :GinPatch related mappings on closing the tab.
+    autocmd_add([{
+      group: 'vimrc-gin-patch-remove-mappings',
+      event: 'TabClosed',
+      bufnr: bufnr,
+      cmd: $'call {SIDPrefix()}GinRemoveBufferLocalMappings()',
+      once: true,
+      replace: true,
+    }])
+  enddef
+
+  def GinRemoveBufferLocalMappings()
+    const maps = maplist()->filter((_, m) => m.buffer && m.rhs =~? '^<Plug>(gin-')
+    for map in maps
+      execute $'{map.mode}unmap <buffer> {map.lhs}'
+    endfor
+  enddef
+
   augroup vimrc-gin
     autocmd BufReadCmd ginstatus://* GinStatusOpened()
     autocmd BufReadcmd ginlog://* GinLogOpened()
     autocmd BufReadCmd gin*://* setlocal nomodeline
+    autocmd BufReadCmd ginedit://* GinEditOpened()
   augroup END
 endif
 
