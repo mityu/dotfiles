@@ -3,15 +3,18 @@ import {
   composeSources,
   Coordinator,
   defineRefiner,
+  defineRenderer,
+  Detail,
   Layout,
   refineCurator,
   Refiner,
   refineSource,
+  Renderer,
   Size,
 } from "jsr:@vim-fall/std@^0.10.0";
 import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
-import { SEPARATOR } from "jsr:@std/path@^1.0.8/constants";
+import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
 import { isAbsolute } from "jsr:@std/path@~1.0.0/is-absolute";
 import { which } from "jsr:@david/which@~0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
@@ -44,6 +47,11 @@ async function isExecutable(cmd: string): Promise<boolean> {
     return !!await which(cmd);
   }
 }
+
+const strByteLen = (() => {
+  const encoder = new TextEncoder();
+  return (s: string) => encoder.encode(s).length;
+})();
 
 type CoordinateOptions = builtin.coordinator.ModernOptions;
 
@@ -93,6 +101,84 @@ const refinerReplaceHomepath = (): Refiner<{ path: string }> => {
         yield item;
       }
     }
+  });
+};
+
+const refinerAddSourceName = (
+  sourceName: string,
+): Refiner<Detail & { sourceName?: string }> => {
+  return defineRefiner(async function* (_denops, { items }, { signal }) {
+    for await (const item of items) {
+      signal?.throwIfAborted();
+      yield {
+        ...item,
+        detail: {
+          ...item.detail,
+          sourceName,
+        },
+      };
+    }
+  });
+};
+
+const rendererShowSourceName = (
+  highlight: string = "Normal",
+): Renderer<Detail & { sourceName?: string }> => {
+  return defineRenderer((_denops, { items }, { signal }) => {
+    const strlen = (() => {
+      const encoder = new TextEncoder();
+      return (s: string) => encoder.encode(s).length;
+    })();
+    items.forEach((item) => {
+      if (!item.detail.sourceName) {
+        return;
+      }
+      signal?.throwIfAborted();
+      const prefixLen = strlen(item.detail.sourceName) + 2;
+      const decoration = {
+        column: 1,
+        length: prefixLen,
+        highlight,
+      };
+      const label = item.label ?? item.value;
+      item.label = `(${item.detail.sourceName}) ${label}`;
+      item.decorations = [
+        decoration,
+        ...((item.decorations ?? []).map((v) => ({
+          ...v,
+          column: v.column + prefixLen + 1,
+        }))),
+      ];
+    });
+  });
+};
+
+const rendererShowPackpath = (
+  highlight: string = "Normal",
+): Renderer<{ path: string }> => {
+  const getPackagePlace = (path: string): string => {
+    const elems = path.split(SEPARATOR_PATTERN);
+    const idx = elems.findIndex((e: string) => e === "start" || e === "opt");
+    if (idx <= 0) {
+      return "no-information";
+    }
+    return elems.slice(idx - 1, idx + 1).join("/");
+  };
+
+  return defineRenderer((_denops, { items }, { signal }) => {
+    items.forEach((item) => {
+      signal?.throwIfAborted();
+      const hint = `(${getPackagePlace(item.detail.path)})`;
+      const hintLength = strByteLen(hint);
+      item.label = `${hint} ${item.label ?? item.value}`;
+      item.decorations = [
+        { column: 1, length: hintLength, highlight },
+        ...((item.decorations ?? []).map((v) => ({
+          ...v,
+          column: v.column + hintLength + 1,
+        }))),
+      ];
+    });
   });
 };
 
@@ -349,7 +435,7 @@ export const main: Entrypoint = async (
       fileSource.minpac(fileFilterOpts),
       fileSource.localpack(fileFilterOpts),
     ),
-    filePickerParams,
+    { ...filePickerParams, renderers: [rendererShowPackpath("LineNr")] },
   );
 
   definePickerFromSource(
@@ -365,13 +451,19 @@ export const main: Entrypoint = async (
         extra.source.mr,
         refinerReplaceHomepath,
       ),
-      fileSource.project(fileFilterOpts),
-      fileSource.dotfiles(fileFilterOpts),
+      refineSource(
+        fileSource.project(fileFilterOpts),
+        refinerAddSourceName("project"),
+      ),
+      refineSource(
+        fileSource.dotfiles(fileFilterOpts),
+        refinerAddSourceName("dotfiles"),
+      ),
     ),
     {
       matchers: [matcherMultiRegexp],
       renderers: [
-        // builtin.renderer.nerdfont,
+        rendererShowSourceName("LineNr"),
       ],
       previewers: [builtin.previewer.file],
       actions: {
