@@ -638,7 +638,7 @@ Set hidden
 Set autoread
 Set diffopt=internal,algorithm:histogram
 Set virtualedit=block
-Set complete=.,i,d,w,b,u completeopt=menuone,noselect pumheight=10
+Set complete=.,i,d,w,b,u completeopt=menuone,noselect,popup pumheight=10
 Set noimdisable
 Set lazyredraw
 Set termwinkey=<C-w>
@@ -2840,8 +2840,9 @@ if Pacpack.Tap('skkeleton')
 endif
 
 if Pacpack.Tap('vim-gin')
-  g:gin_patch_persistent_args = ['++opener=tabedit', '++no-head']
-  g:gin_chaperon_persistent_args = ['++opener=tabedit']
+  g:gin_patch_default_args = ['++opener=tabedit']
+  g:gin_patch_persistent_args = ['++no-head']
+  g:gin_chaperon_default_args = ['++opener=tabedit']
   g:gin_proxy_apply_without_confirm = true
   nnoremap <Space>g <Cmd>GinStatus<CR>
 
