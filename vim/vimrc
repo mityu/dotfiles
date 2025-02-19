@@ -1084,7 +1084,7 @@ command! -bar RTP echo &runtimepath->split(',')->join("\n")
 command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
 
 def Filter(bang: bool, pat: string, ...cmd: list<string>)
-  const output = execute(join(cmd, ' '))
+  const output = execute('legacy ' .. join(cmd, ' '))
                 ->split("\n")
                 ->filter((_: number, val: string): bool => val =~? pat)
                 ->join("\n")
