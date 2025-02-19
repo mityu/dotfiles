@@ -379,12 +379,14 @@ export class Pacpack
 
   # CAUTION: This function must be called at the last of vimrc.
   static def LoadNonLazyPlugins()
-    const appendPath = pluginList
+    const pluginPath = pluginList
       ->values()
       ->filter((_: number, p: Plugin): bool => !p.isLazy && p.isExists)
       ->mapnew((_: number, p: Plugin): string => p.path)
-      ->join(',')
-    execute 'set runtimepath+=' .. appendPath
+    const afterPluginPath = pluginPath
+      ->mapnew((_: number, v: string): string => Fs.JoinPath(v, 'after'))
+      ->filter((_: number, v: string): bool => isdirectory(v))
+    execute 'set runtimepath+=' .. (pluginPath + afterPluginPath)->join(',')
 
     # Enable ftplugin and syntax highlighting.  Note that this order DOES MATTER.
     filetype plugin indent on
@@ -479,6 +481,7 @@ command! -bar PackClean  Pacpack.Clean()
 command! -bar PackStatus Pacpack.Status()
 
 Pacpack.AddLazy('https://github.com/k-takata/minpac')
+Pacpack.Add('https://github.com/bfrg/vim-qf-preview')
 Pacpack.Add('https://github.com/itchyny/vim-cursorword')
 Pacpack.Add('https://github.com/itchyny/vim-qfedit')
 Pacpack.Add('https://github.com/kamichidu/vim-textobj-function-go')
@@ -1131,6 +1134,19 @@ def g:Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
 enddef
 
 # Installed plugins
+if Pacpack.Tap('vim-qf-preview')
+  def QfPreviewColor()
+    highlight! link QfPreview Normal
+  enddef
+
+  augroup vimrc
+    autocmd FileType qf nnoremap <buffer> p <Plug>(qf-preview-open)
+    autocmd ColorScheme * QfPreviewColor()
+  augroup END
+
+  QfPreviewColor()
+endif
+
 if Pacpack.Tap('vim-cursorword')
   g:cursorword_highlight = 0
   augroup vimrc_cursorword
