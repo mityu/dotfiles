@@ -1829,7 +1829,7 @@ if Pacpack.Tap('lsp')
     g:LspOptionsSet({
       autoPopulateDiags: true,
       completionMatcher: 'fuzzy',
-      diagVirtualTextAlign: 'after',
+      diagVirtualTextAlign: 'right',
       diagVirtualTextWrap: 'truncate',
       showDiagWithVirtualText: true,
     })
