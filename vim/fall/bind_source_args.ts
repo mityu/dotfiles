@@ -1,6 +1,6 @@
-import type { Denops } from "jsr:@denops/std@~7.4.0";
-import type { Source } from "jsr:/@vim-fall/core@^0.2.1/source";
-import type { Detail } from "jsr:/@vim-fall/core@^0.2.1/item";
+import type { Denops } from "jsr:@denops/std@^7.4.0";
+import type { Source } from "jsr:@vim-fall/core@^0.3.0/source";
+import type { Detail } from "jsr:@vim-fall/core@^0.3.0/item";
 import type { Derivable } from "jsr:@vim-fall/custom@^0.1.0/derivable";
 import { defineSource } from "jsr:@vim-fall/std@^0.10.0/source";
 

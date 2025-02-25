@@ -8,9 +8,9 @@ import {
 } from "jsr:@shougo/ddu-vim@~10.0.0/types";
 import { Params as FFParams } from "jsr:@shougo/ddu-ui-ff@~2.0.0";
 import { type ActionData as FileActionData } from "jsr:@shougo/ddu-kind-file@~0.9.0";
-import type { Denops } from "jsr:@denops/std@~7.4.0";
-import { execute } from "jsr:@denops/std@~7.4.0/function";
-import { go } from "jsr:@denops/std@~7.4.0/variable";
+import type { Denops } from "jsr:@denops/std@~7.5.0";
+import { execute } from "jsr:@denops/std@~7.5.0/function";
+import { go } from "jsr:@denops/std@~7.5.0/variable";
 import { is } from "jsr:@core/unknownutil@~4.3.0/is";
 import { as } from "jsr:@core/unknownutil@~4.3.0/as";
 import { assert } from "jsr:@core/unknownutil@~4.3.0/assert";
