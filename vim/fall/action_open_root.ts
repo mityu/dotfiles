@@ -24,7 +24,7 @@ export function actionOpenProjectRoot(
 
       for (const item of items.filter((v) => !!v)) {
         const root = ensure(
-          await denops.call("vimrc#FindProjectRoot", item.detail.path),
+          await denops.call("vimrc#SearchProjectRoot", item.detail.path),
           isString,
         );
         if (root === "") {

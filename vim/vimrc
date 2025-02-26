@@ -2529,7 +2529,7 @@ if Pacpack.Tap('ddu.vim')
       if curbuf =~# '^gin[^:]*://'
         return gin#util#worktree()
       else
-        return vimrc#FindProjectRoot(curbuf) ?? getcwd(winnr())
+        return vimrc#SearchProjectRoot(curbuf) ?? getcwd(winnr())
       endif
     endif
 
@@ -2947,7 +2947,7 @@ if Pacpack.Tap('fall.vim')
       if curbuf =~# '^gin[^:]*://'
         return gin#util#worktree()
       else
-        return vimrc#FindProjectRoot(curbuf) ?? getcwd(winnr())
+        return vimrc#SearchProjectRoot(curbuf) ?? getcwd(winnr())
       endif
     endif
 

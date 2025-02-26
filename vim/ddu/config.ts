@@ -252,7 +252,7 @@ async function actionKindFileSearchFilesInContainedProject(
     }
 
     const root = ensure(
-      await args.denops.call("vimrc#FindProjectRoot", path),
+      await args.denops.call("vimrc#SearchProjectRoot", path),
       is.String,
     );
     if (root !== "") {

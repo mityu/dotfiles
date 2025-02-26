@@ -205,7 +205,7 @@ export def ShowHighlightGroup()
   endfor
 enddef
 
-def FindMarker(marker: string, path: string, isDir: bool): string
+def SearchMarker(marker: string, path: string, isDir: bool): string
   const d = isDir ? finddir(marker, path) : findfile(marker, path)
   if d ==# ''
     return ''
@@ -216,7 +216,7 @@ def FindMarker(marker: string, path: string, isDir: bool): string
   endif
 enddef
 
-export def FindProjectRoot(path: string): string
+export def SearchProjectRoot(path: string): string
   if path ==# ''
     return ''
   elseif !isabsolutepath(path)
@@ -238,13 +238,13 @@ export def FindProjectRoot(path: string): string
   var root = ''
   const parent = path .. ';'
   for marker in rootMarkerDirs
-    const d = FindMarker(marker, parent, true)
+    const d = SearchMarker(marker, parent, true)
     if strlen(d) > strlen(root)
       root = d
     endif
   endfor
   for marker in rootMarkerFiles
-    const d = FindMarker(marker, parent, false)
+    const d = SearchMarker(marker, parent, false)
     if strlen(d) > strlen(root)
       root = d
     endif
@@ -253,7 +253,7 @@ export def FindProjectRoot(path: string): string
 enddef
 
 export def CdProjectRoot(cdcmd: string)
-  const root = FindProjectRoot(expand('%:p:h'))
+  const root = SearchProjectRoot(expand('%:p:h'))
   if root !=# ''
     execute cdcmd fnameescape(root)
   endif
