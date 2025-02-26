@@ -252,6 +252,34 @@ export def SearchProjectRoot(path: string): string
   return root
 enddef
 
+export def FindProjectRoot(pathGiven: string = '', silent: bool = false): string
+  if pathGiven ==# ''
+    const curbuf = expand('%:p')
+    if curbuf =~# '^gin[^:]*://'
+      return gin#util#worktree()
+    elseif curbuf =~# '^fern://'
+      const fern = fern#helper#new()
+      if fern.sync.get_scheme() ==# 'file'
+        return fern.sync.get_root_node()._path
+      else
+        return getcwd(winnr())
+      endif
+    else
+      return SearchProjectRoot(curbuf) ?? getcwd(winnr())
+    endif
+  endif
+
+  const path = pathGiven->expand()
+  if !path->isdirectory()
+    if !silent
+      Vimrc.EchomsgError($'Directory not found: {path}')
+    endif
+    return ''
+  endif
+
+  return path
+enddef
+
 export def CdProjectRoot(cdcmd: string)
   const root = SearchProjectRoot(expand('%:p:h'))
   if root !=# ''

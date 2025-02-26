@@ -22,7 +22,7 @@ export const file = fileBase;
 export const project = (options: FileOptions = {}) => {
   return bindSourceArguments(
     file(options),
-    async (denops) => [await callVim(denops, "FallGetSearchRootPath", "")],
+    async (denops) => [await callVim(denops, "vimrc#FindProjectRoot", "")],
   );
 };
 

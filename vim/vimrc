@@ -2523,27 +2523,6 @@ if Pacpack.Tap('ddu.vim')
     MapAction('i', '<C-u>', 'deleteToHead')
   enddef
 
-  def DduGetSearchRootPath(pathGiven: string, silent: bool = false): string
-    if pathGiven ==# ''
-      const curbuf = expand('%:p')
-      if curbuf =~# '^gin[^:]*://'
-        return gin#util#worktree()
-      else
-        return vimrc#SearchProjectRoot(curbuf) ?? getcwd(winnr())
-      endif
-    endif
-
-    const path = pathGiven->expand()
-    if !path->isdirectory()
-      if !silent
-        EchomsgError($'Directory not found: {path}')
-      endif
-      return ''
-    endif
-
-    return path
-  enddef
-
   var dduWaitingUiOpen = false
   def DduOnUiReady()
     dduWaitingUiOpen = false
@@ -2567,7 +2546,7 @@ if Pacpack.Tap('ddu.vim')
   enddef
 
   def DduLiveGrep(pathGiven: string = '')
-    var path = DduGetSearchRootPath(pathGiven)
+    var path = vimrc#FindProjectRoot(pathGiven)
     if path !=# ''
       if pathGiven ==# ''
         path = Input('live-grep: ', path, 'dir')->expand()
@@ -2581,7 +2560,7 @@ if Pacpack.Tap('ddu.vim')
   enddef
 
   def DduFiles(pathGiven: string = '')
-    const path = DduGetSearchRootPath(pathGiven)
+    const path = vimrc#FindProjectRoot(pathGiven)
     if path !=# ''
       DduStartSync({name: 'file-rec', sourceOptions: {file_rec: {path: path}}})
     endif
@@ -2592,7 +2571,7 @@ if Pacpack.Tap('ddu.vim')
       name: 'mru',
       sources: [
         {name: 'mr'},
-        {name: 'file', options: {path: DduGetSearchRootPath('')}},
+        {name: 'file', options: {path: vimrc#FindProjectRoot('')}},
         {name: 'file_rec', options: {path: Stdpath.dotfiles}},
       ],
     })
@@ -2939,27 +2918,6 @@ if Pacpack.Tap('fall.vim')
     highlight link FallListMatch Special
     highlight link FallBorder Normal
     sign define FallListSelected text=>> linehl=Number
-  enddef
-
-  def g:FallGetSearchRootPath(pathGiven: string, silent: bool = false): string
-    if pathGiven ==# ''
-      const curbuf = expand('%:p')
-      if curbuf =~# '^gin[^:]*://'
-        return gin#util#worktree()
-      else
-        return vimrc#SearchProjectRoot(curbuf) ?? getcwd(winnr())
-      endif
-    endif
-
-    const path = pathGiven->expand()
-    if !path->isdirectory()
-      if !silent
-        EchomsgError($'Directory not found: {path}')
-      endif
-      return ''
-    endif
-
-    return path
   enddef
 
   def g:FallGetStdpath(kind: string): string
