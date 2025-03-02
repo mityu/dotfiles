@@ -4,7 +4,6 @@ import {
   Coordinator,
   defineRefiner,
   defineRenderer,
-  defineSource,
   Detail,
   Layout,
   refineCurator,
@@ -12,13 +11,13 @@ import {
   refineSource,
   Renderer,
   Size,
-  Source,
 } from "jsr:@vim-fall/std@^0.10.0";
 import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
+import { mrMixed } from "jsr:@mityu/fall-source-mr-mixed@^0.1.0";
 import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
-import { isAbsolute } from "jsr:@std/path@~1.0.0/is-absolute";
-import { which } from "jsr:@david/which@~0.4.1";
+import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
+import { which } from "jsr:@david/which@^0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
 import * as fileSource from "./source_file.ts";
@@ -181,45 +180,6 @@ const rendererShowPackpath = (
         }))),
       ];
     });
-  });
-};
-
-const sourceMr = (
-  options: { headMruEntryCount: number },
-): Source<{ path: string }> => {
-  const { headMruEntryCount = 1 } = options;
-
-  return defineSource(async function* (denops) {
-    const mrw = await denops.dispatch("mr", "mrw:list") as string[];
-    const mru = await denops.dispatch("mr", "mru:list") as string[];
-    const provided = new Set<string>();
-
-    const buildItem = (() => {
-      let id = 0;
-      return (path: string, type: "mru" | "mrw") => {
-        return {
-          id: id++,
-          value: path,
-          detail: { path, mr: { type } },
-        };
-      };
-    })();
-
-    for (const path of mru.slice(0, headMruEntryCount)) {
-      provided.add(path);
-      yield buildItem(path, "mru");
-    }
-
-    for (const path of mrw.filter((v) => !provided.has(v))) {
-      provided.add(path);
-      yield buildItem(path, "mrw");
-    }
-
-    for (
-      const path of mru.slice(headMruEntryCount).filter((v) => !provided.has(v))
-    ) {
-      yield buildItem(path, "mru");
-    }
   });
 };
 
@@ -496,7 +456,7 @@ export const main: Entrypoint = async (
     composeSources(
       refineSource(
         // extra.source.mr,
-        sourceMr({ headMruEntryCount: 5 }),
+        mrMixed({ headMruEntryCount: 5 }),
         refinerReplaceHomepath,
       ),
       refineSource(
