@@ -456,7 +456,7 @@ export const main: Entrypoint = async (
     composeSources(
       refineSource(
         // extra.source.mr,
-        mrMixed({ headMruEntryCount: 5 }),
+        mrMixed,
         refinerReplaceHomepath,
       ),
       refineSource(
