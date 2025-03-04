@@ -1,6 +1,6 @@
 import type { Denops } from "jsr:@denops/std@~7.5.0";
-import { DduItem, SourceOptions } from "jsr:@shougo/ddu-vim@~10.0.0/types";
-import { BaseFilter } from "jsr:@shougo/ddu-vim@~10.0.0/filter";
+import { DduItem, SourceOptions } from "jsr:@shougo/ddu-vim@~10.1.0/types";
+import { BaseFilter } from "jsr:@shougo/ddu-vim@~10.1.0/filter";
 import * as fn from "jsr:@denops/std@~7.5.0/function";
 
 type Params = Record<string, never>;

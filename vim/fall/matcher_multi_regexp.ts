@@ -1,4 +1,4 @@
-import { defineMatcher, Matcher } from "jsr:@vim-fall/std@^0.10.0/matcher";
+import { defineMatcher, Matcher } from "jsr:@vim-fall/std@^0.11.0/matcher";
 
 function splitUserInput(input: string): string[] {
   const sep = /(?<!(?<=(?:^|[^\\])(?:\\\\)*)\\)\s/;

@@ -11,8 +11,8 @@ import {
   refineSource,
   Renderer,
   Size,
-} from "jsr:@vim-fall/std@^0.10.0";
-import * as builtin from "jsr:@vim-fall/std@^0.10.0/builtin";
+} from "jsr:@vim-fall/std@^0.11.0";
+import * as builtin from "jsr:@vim-fall/std@^0.11.0/builtin";
 import * as extra from "jsr:@vim-fall/extra@^0.2.0";
 import { mrMixed } from "jsr:@mityu/fall-source-mr-mixed@^0.1.0";
 import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";

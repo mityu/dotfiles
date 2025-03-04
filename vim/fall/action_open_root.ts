@@ -1,5 +1,5 @@
-import { OpenOptions } from "jsr:@vim-fall/std@^0.10.0/builtin/action/open";
-import { type Action, defineAction } from "jsr:@vim-fall/std@^0.10.0/action";
+import { OpenOptions } from "jsr:@vim-fall/std@^0.11.0/builtin/action/open";
+import { type Action, defineAction } from "jsr:@vim-fall/std@^0.11.0/action";
 import { ensure } from "jsr:@core/unknownutil@4.3.0/ensure";
 import { isString } from "jsr:@core/unknownutil@4.3.0/is/string";
 import { open as openBuffer } from "jsr:@denops/std@^7.4.0/buffer";
