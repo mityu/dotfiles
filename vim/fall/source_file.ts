@@ -2,7 +2,7 @@ import type { Denops } from "jsr:@denops/std@^7.4.0";
 import { ensure } from "jsr:@core/unknownutil@^4.3.0/ensure";
 import { isString } from "jsr:@core/unknownutil@^4.3.0/is/string";
 import { composeSources } from "jsr:@vim-fall/std@^0.11.0/source";
-import { bindSourceArguments } from "./bind_source_args.ts";
+import { bindSourceArgs } from "jsr:@vim-fall/std@^0.11.0";
 import { join } from "jsr:@std/path@^1.0.0/join";
 import {
   file as fileBase,
@@ -20,14 +20,14 @@ const callVim = async (
 export const file = fileBase;
 
 export const project = (options: FileOptions = {}) => {
-  return bindSourceArguments(
+  return bindSourceArgs(
     file(options),
     async (denops) => [await callVim(denops, "vimrc#FindProjectRoot", "")],
   );
 };
 
 export const runtimeFiles = (options: FileOptions = {}) => {
-  return bindSourceArguments(
+  return bindSourceArgs(
     file(options),
     (_) => {
       const dir = Deno.env.get("VIMRUNTIME");
@@ -40,14 +40,14 @@ export const runtimeFiles = (options: FileOptions = {}) => {
 };
 
 export const dotfiles = (options: FileOptions = {}) => {
-  return bindSourceArguments(
+  return bindSourceArgs(
     file(options),
     async (denops) => [await callVim(denops, "FallGetStdpath", "dotfiles")],
   );
 };
 
 export const minpac = (options: FileOptions = {}) => {
-  return bindSourceArguments(
+  return bindSourceArgs(
     file(options),
     async (denops) => [await callVim(denops, "FallGetStdpath", "packpath")],
   );
@@ -55,7 +55,7 @@ export const minpac = (options: FileOptions = {}) => {
 
 export const localpack = (options: FileOptions = {}) => {
   return composeSources(
-    bindSourceArguments(
+    bindSourceArgs(
       file(options),
       async (
         denops,
@@ -63,7 +63,7 @@ export const localpack = (options: FileOptions = {}) => {
         join(await callVim(denops, "FallGetStdpath", "localpack"), "start"),
       ],
     ),
-    bindSourceArguments(
+    bindSourceArgs(
       file(options),
       async (
         denops,
