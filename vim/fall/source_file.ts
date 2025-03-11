@@ -23,6 +23,9 @@ const callVim = async (
 
 const findDir = async (name: string, basePath: string) => {
   name = name.replace(/\/$/, "");
+  if (await exists(basePath, { isFile: true })) {
+    basePath = dirname(basePath);
+  }
   for (;;) {
     if (await exists(join(basePath, name), { isDirectory: true })) {
       return basePath;
