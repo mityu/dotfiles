@@ -460,8 +460,8 @@ export const main: Entrypoint = async (
         refinerReplaceHomepath,
       ),
       refineSource(
-        fileSource.project(fileFilterOpts),
-        refinerAddSourceName("project"),
+        fileSource.gitrepo(fileFilterOpts),
+        refinerAddSourceName("repo"),
       ),
       refineSource(
         fileSource.dotfiles(fileFilterOpts),
