@@ -21,6 +21,8 @@ import { which } from "jsr:@david/which@^0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
 import { actionOpenProjectRoot } from "./action_open_root.ts";
 import * as fileSource from "./source_file.ts";
+import { ginAction } from "./source/gin.ts";
+import { defaultGinActions } from "./action/gin.ts";
 
 // NOTE:
 //
@@ -530,5 +532,19 @@ export const main: Entrypoint = async (
       ...myMiscActions,
     },
     defaultAction: "open",
+  });
+
+  definePickerFromSource("gin-action", ginAction, {
+    matchers: [matcherMultiRegexp],
+    previewers: [],
+    actions: {
+      ...defaultGinActions,
+    },
+    defaultAction: "execute",
+    coordinator: coordinator({
+      heightRatio: 0.4,
+      widthRatio: 0.4,
+      hidePreview: true,
+    }),
   });
 };
