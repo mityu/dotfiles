@@ -122,8 +122,8 @@ if isWindows then
   }
 elseif isMac then
   config.default_prog = { "/usr/bin/env", "PATH=/opt/homebrew/bin", "fish", "-l" }
-  config.initial_cols = 206
-  config.initial_rows = 58
+  config.initial_cols = 110
+  config.initial_rows = 35
 end
 
 return config
