@@ -9,7 +9,7 @@ export type Detail = {
 
 async function listGinMaps(denops: Denops) {
   return await denops.eval(
-    "maplist()->filter({_, v -> stridx(v.lhs, '<Plug>(gin-action') == 0})->map({_, v -> v.lhs})",
+    "maplist()->filter({_, v -> stridx(v.lhs, '<Plug>(gin-action-') == 0})->map({_, v -> v.lhs})",
   ) as string[];
 }
 
