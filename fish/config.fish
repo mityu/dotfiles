@@ -72,6 +72,8 @@ if status is-interactive
   set fish_cursor_replace underscore
 
   string match -q "WezTerm" -- $TERM_PROGRAM && set fish_vi_force_cursor true
+  string match -q "alacritty" -- $TERM_PROGRAM && set fish_vi_force_cursor true
+
 end
 
 function fishrc_ask_yesno
