@@ -10,6 +10,7 @@ Gen.HiLink('ModeMsg', 'Normal')
 Gen.HiLink('Terminal', 'Normal')
 Gen.HiLink('MsgArea', 'Normal')
 Gen.HiLink('Conceal', 'Normal')
+Gen.HiLink('vimVarScope', 'Normal')
 
 Gen.Hi('Comment', '#ffd700', '')
 Gen.Hi('Todo', '#ff7f00', '')
