@@ -1,6 +1,6 @@
 function dotfiles-path() {
 	local thisfile=$(whence -v $0 | awk '{print $NF}')
-	echo $(cd $(dirname $(readlink -f $thisfile)); pwd)
+	echo $(cd $(dirname $(realpath $thisfile)); pwd)
 }
 
 function gobin-path() {

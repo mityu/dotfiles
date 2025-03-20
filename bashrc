@@ -14,7 +14,7 @@ elif tput -T xterm longname &> /dev/null; then
 fi
 
 function dotfiles-path() {
-	echo $(cd $(dirname $(readlink -f ${BASH_SOURCE[0]})); pwd)
+	echo $(cd $(dirname $(realpath ${BASH_SOURCE[0]})); pwd)
 }
 
 function bashrc_is_msys() {
