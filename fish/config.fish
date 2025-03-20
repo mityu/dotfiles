@@ -1,8 +1,14 @@
-set -l dotfiles_path $HOME/dotfiles
 set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
 set -l in_vscode_terminal test $TERM_PROGRAM = "vscode"
+
+# Define "dotfiles-path" function to return the dotfiles path
+eval "
+function dotfiles-path
+  echo $(path dirname (path dirname (realpath (status current-filename))))
+end"
+set -l dotfiles_path (dotfiles-path)
 
 if $in_vim_terminal || $in_neovim_terminal
   set -e VIM
@@ -13,6 +19,8 @@ if status is-login
   set -gx LANG en_US.UTF-8
   set -gx CLICOLOR auto
   set -gx LSCOLORS gxexfxdxcxahadacagacad
+
+  # Make sure the $SHELL environmental variable is fish.
   string match -rq 'fish$' -- $SHELL || set -gx SHELL (status fish-path)
 
   if command -q xcrun && command -q brew
@@ -74,6 +82,24 @@ if status is-interactive
   string match -q "WezTerm" -- $TERM_PROGRAM && set fish_vi_force_cursor true
   string match -q "alacritty" -- $TERM_PROGRAM && set fish_vi_force_cursor true
 
+  function dotfiles --description "Manage dotfiles"
+    switch $argv[1]
+      case cd
+        cd (dotfiles-path)
+      case update pull
+        git -C (dotfiles-path) pull
+      case '' 'help' '-h' '--help'
+        echo 'Usage: dotfiles <cmds>'
+        echo ''
+        echo '<cmds>:'
+        echo '  cd     Change the cwd to the dotfiles directory.'
+        echo '  pull   Pull the upstream changes.'
+        echo '  help   Show this help.'
+      case '*'
+        echo "Invalid argument: $argv"
+        dotfiles --help
+    end
+  end
 end
 
 function fishrc_ask_yesno
