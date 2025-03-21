@@ -27,7 +27,33 @@ let
         platforms = platforms.all;
       };
     };
-    cica-font = pkgs.callPackage cica-font-pkg { };
+  awesome-deficient-pkg = { lua, stdenvNoCC, fetchFromGitHub }:
+    stdenvNoCC.mkDerivation rec {
+      pname = "awesome-deficient";
+      version = "22ad2bea198f0c231afac0b7197d9b4eb6d80da3";
+
+      src = fetchFromGitHub {
+        owner = "deficient";
+        repo = "deficient";
+        rev = version;
+        hash = "sha256-INZx053s/PIbRw3mLCobybVuuJENjhyxnsv3LDzi/AI=";
+      };
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out/lib/lua/${lua.luaversion}/
+        cp -r . $out/lib/lua/${lua.luaversion}/deficient/
+        runHook postInstall
+      '';
+
+      meta = with lib; {
+        license = licenses.unlicense;
+        homepage = "https://github.com/deficient/deficient";
+        platforms = platforms.all;
+      };
+    };
+  cica-font = pkgs.callPackage cica-font-pkg { };
+  awesome-deficient = pkgs.callPackage awesome-deficient-pkg { };
 in
 {
   imports =
@@ -57,11 +83,11 @@ in
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-  # i18n.inputMethod = {
-  #   enabled = true;
-  #   type = "fcitx5";
-  #   fcitx5.addons = [pkgs.fcitx5-mozc];
-  # };
+  i18n.inputMethod = {
+    enable = true;
+    type = "fcitx5";
+    fcitx5.addons = [ pkgs.fcitx5-mozc pkgs.fcitx5-gtk ];
+  };
 
   fonts = {
     packages = with pkgs; [
@@ -89,13 +115,26 @@ in
   # };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
+  services.xserver = {
+    enable = true;
 
+    displayManager = {
+      lightdm.enable = true;
+    };
 
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.lightdm.enable = true;
-  # services.xserver.desktopManager.xfce.enable = true;
-  services.xserver.windowManager.i3.enable = true;
+    desktopManager = {
+      xfce.enable = false;
+    };
+
+    windowManager = {
+      i3.enable = false;
+      awesome.enable = true;
+
+      awesome = {
+        luaModules = (with pkgs.luaPackages; [ vicious ]) ++ [ awesome-deficient ];
+      };
+    };
+  };
 
 
   # Configure keymap in X11
@@ -136,6 +175,13 @@ in
     environment.DISPLAY = ":0.0";
   };
 
+  # systemd.user.services.set-fcitx5 = {
+  #   description = "Run a one-shot command upon user login";
+  #   path = [ pkgs.fcitx5 ];
+  #   wantedBy = [ "default.target" ];
+  #   script = "fcitx5";
+  # };
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   programs.fish.enable = true;
   users.users.mityu = {
@@ -151,8 +197,7 @@ in
     git
     wget
     libinput
-    i3
-    i3blocks
+    awesome
   ];
 
   environment.shellAliases = {

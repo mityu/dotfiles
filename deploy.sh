@@ -61,6 +61,7 @@ fi
 if $IS_LINUX; then
 	ln -snfv ${SCRIPT_DIR}/i3 $CONFIG_DIR/i3
 	ln -snfv ${SCRIPT_DIR}/i3blocks $CONFIG_DIR/i3blocks
+	ln -snfv ${SCRIPT_DIR}/awesome $CONFIG_DIR/awesome
 	ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
 	ln -snfv ${SCRIPT_DIR}/xremap $CONFIG_DIR/xremap
 	ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
