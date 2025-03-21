@@ -82,10 +82,21 @@ if status is-interactive
   string match -q "WezTerm" -- $TERM_PROGRAM && set fish_vi_force_cursor true
   string match -q "alacritty" -- $TERM_PROGRAM && set fish_vi_force_cursor true
 
+  function cd --description "enhanced interactive cd"
+    if test (count $argv) -eq 0
+      set -l path (interactive-cd-selector)
+      if string length -q -- "$path"
+        builtin cd "$path"
+      end
+    else
+      builtin cd $argv
+    end
+  end
+
   function dotfiles --description "Manage dotfiles"
     switch $argv[1]
       case cd
-        cd (dotfiles-path)
+        builtin cd (dotfiles-path)
       case update pull
         git -C (dotfiles-path) pull
       case '' 'help' '-h' '--help'
@@ -139,7 +150,7 @@ if $in_vim_terminal
     set -l cwd
     printf "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
     read cwd
-    cd "$cwd"
+    builtin cd "$cwd"
   end
 else if $in_vscode_terminal
   function drop

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+function parent-dir {
+	echo $(dirname $(realpath ${BASH_SOURCE[0]}))
+}
+
+function target-dirs {
+	echo `dirname $(parent-dir)`
+	echo ${XDG_CONFIG_HOME:-$HOME/.config}
+	echo ${XDG_CACHE_HOME:-$HOME/.cache}
+	echo "$HOME/dev"
+}
+
+function main {
+	local directories=$(target-dirs | tr '\n' ' ')
+	local cmd="`parent-dir`/walkfs --only-dirs $directories"
+	if type sk &>/dev/null; then
+		sk --reverse --no-sort --no-multi -c "$cmd"
+	elif type fzf &>/dev/null; then
+		"$cmd" | fzf --reverse --no-sort --no-multi
+	else
+		echo 'No fuzzy finder available: skim, fzf' 1>&2
+		exit 1
+	fi
+}
+
+main

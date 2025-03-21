@@ -1,0 +1,160 @@
+#!/bin/bash
+
+only_dirs=false
+absolute_path=false
+
+function usage {
+	local name=$(basename ${BASH_SOURCE[0]})
+	echo "$name: List files/dirs under specified directories"
+	echo ''
+	echo "Usage: $name [<options>] <dirs...>"
+	echo ''
+	echo '<options>:'
+	echo '  -d, --only-dirs        List only directories'
+	echo '  -a, --absolute-path    Display every result in absolute path'
+	echo '  -w, --walker <walker>  Specify which program to use to list files/dirs'
+	echo '                         Available walkers: fd, files, deno, find'
+}
+
+# Walk by github.com/mattn/files
+function walk-by-files {
+	local opt=$($only_dirs && echo '-d' || echo '')
+	opt=$($absolute_path && echo '-a' || echo '')
+	for d in $@; do
+		files $opt $d &
+	done
+	wait
+}
+
+# Walk by github.com/sharkdp/fd
+function walk-by-fd {
+	local opt=$($only_dirs && echo '--type d' || echo '')
+	opt="$opt $($absolute_path && echo '--absolute-path' || echo '')"
+	fd --color never $opt --format '{}' '' $@
+}
+
+# Walk by github.com/denoland/deno
+function walk-by-deno {
+	local include_file=`$only_dirs && echo 'false' || echo 'true'`
+	local src=$(cat <<-EOF
+	function walk(root: string): Promise<void> {
+		return new Promise((resolve, _reject) => resolve(Deno.readDir(root)))
+			.then((r) => walker(root, r as AsyncIterable<Deno.DirEntry>));
+	}
+
+	async function walker(
+		root: string,
+		iterable: AsyncIterable<Deno.DirEntry>,
+	): Promise<void> {
+		const promises = [] as Promise<void>[];
+		const entries = [] as string[];
+		for await (const entry of iterable) {
+			if (entry.name.startsWith(".")) {
+				continue;
+			}
+			const path = \`\${root}/\${entry.name}\`;
+			// Follow symbolic links to dive into symlinked directories
+			let isDirectory = entry.isDirectory;
+			if (entry.isSymlink) {
+				try {
+					const fileInfo = await Deno.stat(path);
+					isDirectory = fileInfo.isDirectory;
+				} catch {
+					// ignore
+				}
+			}
+			if (isDirectory) {
+				promises.push(walk(path));
+				entries.push(path);
+			} else if ($include_file) {
+				entries.push(path);
+			}
+		}
+		if (entries.length !== 0) {
+			console.log(entries.join("\n"));
+		}
+		return Promise.all(promises) as unknown as Promise<void>;
+	}
+
+	if (import.meta.main) {
+		await Promise.all(Deno.args.map((d) => {
+			if ($absolute_path) {
+				return Deno.realPath(d).then((d) => walk(d)).catch((e) => {});
+			} else {
+				return walk(d).catch((e) => {});
+			}
+		}));
+	}
+EOF
+	)
+	deno eval --no-check "$src" $@
+}
+
+# Walk by POSIX find
+function walk-by-find {
+	local opt=$($only_dirs && echo '-type d' || echo '')
+	local directories=$($absolute_path && echo $(echo $@ | xargs realpath) || echo $@)
+	find $directories $opt -not -path '*/\.git/*'
+	# FIXME: find includes the given directories themselves in the result.
+}
+
+function main {
+	local directories=()
+	local walker=''
+	while (( $# > 0 )); do
+		case $1 in
+			-d|--only-dirs)
+				only_dirs=true
+				;;
+			-a|--absolute-path)
+				absolute_path=true
+				;;
+			-w|--walker|--walk-by)
+				shift
+				walker=$1
+				;;
+			-h|--help)
+				usage
+				;;
+			-*)
+				echo "Invalid option: $1"
+				usage
+				exit 1
+				;;
+			*)
+				directories+=($1)
+				;;
+		esac
+		shift
+	done
+
+	if ! (( ${#directories[@]} )); then
+		echo 'No directory is given.'
+		usage
+		exit 1
+	fi
+
+	local args=${directories[@]}
+	if test -n "$walker"; then
+		if ! type "walk-by-$walker" &>/dev/null; then
+			echo "No such walker: $walker"
+			exit 1
+		elif ! type "$walker" &>/dev/null; then
+			echo "Command not found: $walker"
+			exit 1
+		fi
+		walk-by-$walker $args
+	else
+		for c in fd deno files find; do
+			if type $c &>/dev/null; then
+				walk-by-$c $args
+				exit 0
+			fi
+		done
+	fi
+}
+
+main $@
+
+# Bench (fish):
+# hyperfine -w 3 -r 10 (for w in fd deno files; echo "walkfs -w $w ~/dev ~/dotfiles ~/dotfiles"; end)
