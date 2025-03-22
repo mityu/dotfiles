@@ -57,6 +57,10 @@ end
 
 if status is-interactive
   abbr --add g git
+  abbr --add --command git s status
+  abbr --add --command git sw switch
+  abbr --add --command git a add
+  abbr --add --command git c commit
 
   function fish_hybrid_key_bindings --description \
       "Vi-style bindings that inherit emacs-style bindings in all modes"
