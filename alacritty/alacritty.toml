@@ -2,6 +2,10 @@
 live_config_reload = true
 working_directory = "None"
 
+[terminal.shell]
+program = "/usr/bin/env"
+args = ["PATH=/opt/homebrew/bin", "fish", "-l"]
+
 [bell]
 animation = "EaseOutExpo"
 color = "#ffffff"
