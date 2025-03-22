@@ -242,14 +242,7 @@ if bashrc_has_cmd sk; then
 			command cd "$@"
 			return $?
 		fi
-		local directories=(
-			`dotfiles-path`
-			`bashrc_XDG_CONFIG_HOME`
-			`bashrc_XDG_CACHE_HOME`
-			"$HOME/dev"
-		)
-		local cmd="find ${directories[@]} -type d -not -path '*/\.git/*'"
-		local path=$(sk --no-multi -c "$cmd")
+		local path=$(interactive-cd-selector)
 		if [[ $path != "" ]]; then
 			command cd $path
 		fi
