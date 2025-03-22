@@ -183,3 +183,9 @@ function gitinit
   git init --initial-branch main
   git commit --allow-empty -m "Initial commit"
 end
+
+if command -q cargo
+  function cargoinit
+    gitinit && cargo init
+  end
+end
