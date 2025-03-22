@@ -475,11 +475,11 @@ decorations = "full"
 dynamic_padding = false
 dynamic_title = true
 opacity = 0.99
-startup_mode = "Maximized"
+# startup_mode = "Maximized"
 
 [window.dimensions]
-columns = 0
-lines = 0
+columns = 110
+lines = 35
 
 [window.padding]
 x = 0
