@@ -23,6 +23,8 @@ import { actionOpenProjectRoot } from "./action_open_root.ts";
 import * as fileSource from "./source_file.ts";
 import { ginAction } from "./source/gin.ts";
 import { defaultGinActions } from "./action/gin.ts";
+import { fernAction } from "./source/fern_action.ts";
+import { defaultFernActions } from "./action/fern_action.ts";
 
 // NOTE:
 //
@@ -539,6 +541,20 @@ export const main: Entrypoint = async (
     previewers: [],
     actions: {
       ...defaultGinActions,
+    },
+    defaultAction: "execute",
+    coordinator: coordinator({
+      heightRatio: 0.4,
+      widthRatio: 0.4,
+      hidePreview: true,
+    }),
+  });
+
+  definePickerFromSource("fern-action", fernAction, {
+    matchers: [matcherMultiRegexp],
+    previewers: [],
+    actions: {
+      ...defaultFernActions,
     },
     defaultAction: "execute",
     coordinator: coordinator({
