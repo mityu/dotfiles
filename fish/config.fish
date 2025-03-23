@@ -51,6 +51,7 @@ if status is-login
   fish_add_path --prepend ~/.nodebrew/current/bin
   fish_add_path --prepend ~/.roswell/bin
   fish_add_path --prepend /opt/homebrew/bin
+  fish_add_path --prepend /opt/homebrew/opt/trash/bin
   fish_add_path --prepend $dotfiles_path/bin
   fish_add_path --prepend ~/.local/bin
 end
@@ -136,6 +137,28 @@ set fish_color_cwd yellow
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias themis-nvim='THEMIS_VIM=nvim themis'
+
+if command -q trash
+  function trash
+    if command trash | grep 'http://hasseg.org/trash' &> /dev/null
+      # Homebrew's trash.
+      function trash
+        if test (count $argv) -eq 0
+          command trash
+        else
+          command trash -F $argv
+        end
+      end
+    else
+      # macOS's built-in trash.
+      functions -e trash
+    end
+
+    trash $argv
+  end
+  alias gomi='trash'
+  alias rm='echo "Use \"trash\" instead."; false'
+end
 
 if command -q rlwrap
   command -q ocaml && alias ocaml='rlwrap ocaml'
