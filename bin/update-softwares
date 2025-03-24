@@ -75,7 +75,10 @@ function do-update {
 		pip3 list --outdated --format json | python3 <(cat <<- EOF
 			import sys
 			import json
-			list(map(lambda x: print(x['name']), json.loads(sys.stdin.read())))
+			excludes = ['pip', 'wheel', 'idle', 'pydoc']  # Modules managed by Homebrew.
+			data = json.loads(sys.stdin.read())
+			pkgs = filter(lambda pkg: not pkg in excludes, map(lambda x: x['name'], data))
+			list(map(lambda x: print(x), pkgs))
 			EOF
 			) | xargs pip3 install -U
 	fi
