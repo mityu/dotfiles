@@ -1183,6 +1183,7 @@ if Pacpack.Tap('vim-fern')
   g:fern#enable_textprop_support = 1
   g:fern#default_exclude = '.DS_Store'
 
+  # NOTE: FernInit() must be safe to reload.
   def FernInit()
     if Pacpack.Tap('vim-fern-renderer-nerdfont')
       Pacpack.Load('vim-fern-renderer-nerdfont')
@@ -1290,10 +1291,19 @@ if Pacpack.Tap('vim-fern')
   enddef
 
   augroup vimrc-fern
-    autocmd BufReadCmd fern://* ++once FernInit()
     autocmd BufWinEnter * FernOnBufWinEnter()
     autocmd FileType fern FernOnOpen()
   augroup END
+
+  if v:vim_did_enter
+    # Do initialization immediately when reloading vimrc because the
+    # initialization autocmd established here will be invoked after the
+    # plugin's autocmds are all processed at the next launch of fern.vim and
+    # it's too late to reflect the configuration changes well.
+    FernInit()
+  else
+    autocmd vimrc-fern BufReadCmd fern://* ++once FernInit()
+  endif
 
   nnoremap <Space>f <Cmd>Fern `=<SID>FernGetLaunchPath()`<CR>
 endif
