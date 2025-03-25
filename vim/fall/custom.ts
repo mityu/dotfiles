@@ -60,6 +60,10 @@ const strByteLen = (() => {
 
 type CoordinateOptions = builtin.coordinator.ModernOptions;
 
+/**
+ * A custom coordinator that usually show all the panels (input/list/preview),
+ * but omits the preview panel when the window width is small.
+ */
 const coordinator = (
   options?: CoordinateOptions,
 ): Coordinator => {
@@ -462,6 +466,7 @@ export const main: Entrypoint = async (
         // extra.source.mr,
         mrMixed,
         refinerReplaceHomepath,
+        refinerAddSourceName("mru"),
       ),
       refineSource(
         fileSource.gitrepo(fileFilterOpts),
