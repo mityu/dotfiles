@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+set -e
+
+function usage() {
+	echo 'update-nix [flake|home|system|help|-h|--help]'
+}
+
+function do-nix-update() {
+	pushd $(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
+	case $1 in
+		"flake")
+			nix flake update
+			;;
+		"home")
+			nix run nixpkgs#home-manager -- switch -b backup --flake .#myHome
+			;;
+		"system")
+			sudo nixos-rebuild switch --flake .#myNixOS
+			;;
+		*)
+			echo 'unreachable'
+			exit 1
+			;;
+	esac
+	popd
+}
+
+case $1 in
+	"flake" | "home" | "system")
+		do-nix-update $1;;
+	"help" | "--help" | "-h")
+		usage;;
+	*)
+		echo "Invalid argument: $*"
+		usage
+		;;
+esac
+
