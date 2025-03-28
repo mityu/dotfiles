@@ -135,4 +135,18 @@ in
       };
     };
   };
+
+  # TODO: audio applet
+  systemd.user.services.launch-applets = {
+    Unit = {
+      Description = "Run a one-shot command upon user login to launch applets";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet";
+      Environment = [ "DISPLAY=:0.0" ];
+    };
+  };
 }
