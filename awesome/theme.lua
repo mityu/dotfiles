@@ -9,12 +9,13 @@ local dpi = xresources.apply_dpi
 local gears = require("gears")
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
+local getfont = function(name, size) return name .. ' ' .. dpi(size) end
 
 local theme = {}
 
-theme.font = "noto 12"
+theme.font = getfont("noto", 12)
 
-theme.editor_font = "Cica 13"
+theme.editor_font = getfont("Cica", 13)
 theme.editor_bg = "#1f1f1f"
 theme.editor_fg = "#fff8dc"
 
@@ -49,7 +50,7 @@ theme.border_marked = "#91231c"
 --theme.taglist_bg_focus = "#ff0000"
 theme.titlebar_bg_focus = "#eeeeeef0"
 theme.titlebar_bg_normal = "#999999f0"
-theme.hotkeys_font = "cica 13"
+theme.hotkeys_font = getfont("Cica", 14)
 theme.hotkeys_bg = theme.editor_bg
 theme.hotkeys_description_font = theme.editor_font
 theme.hotkeys_fg = theme.editor_fg
@@ -57,7 +58,7 @@ theme.hotkeys_modifiers_fg = theme.editor_fg
 theme.prompt_font = theme.editor_font
 theme.prompt_bg = theme.editor_bg
 theme.prompt_fg = theme.editor_fg
--- theme.tooltip_font = 'noto 12'
+-- theme.tooltip_font = getfont("noto", 12)
 -- theme.tooltip_opacity = 0.9
 
 -- Generate taglist squares:
@@ -71,7 +72,7 @@ theme.taglist_squares_unsel =
 -- notification_[bg|fg]
 -- notification_[width|height|margin]
 -- notification_[border_color|border_width|shape|opacity]
-theme.notification_font = "noto 13"
+theme.notification_font = getfont("noto", 13)
 theme.notification_shape = gears.shape.rounded_rect
 theme.notification_fg = "#1f1f1f"
 theme.notification_bg = "#eeeeee"
