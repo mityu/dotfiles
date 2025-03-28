@@ -13,6 +13,8 @@ rm-link ~/.vimrc
 rm-link ~/.mlterm
 rm-link $CONFIG_DIR/alacritty
 rm-link $CONFIG_DIR/i3
+rm-link $CONFIG_DIR/i3blocks
+rm-link $CONFIG_DIR/awesome
 rm-link $CONFIG_DIR/wezterm
 rm-link $CONFIG_DIR/xkeysnail
 rm-link $CONFIG_DIR/xremap
