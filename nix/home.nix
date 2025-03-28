@@ -1,9 +1,10 @@
 { inputs, pkgs, ... }:
+let username = "mityu"; in
 let
   vim-overlay = final: prev:
     let
       overlayed = inputs.vim-overlay.overlays.features {
-        compiledby = "mityu-nix";
+        compiledby = "${username}-nix";
         python3 = true;
       } final prev;
     in
@@ -28,8 +29,10 @@ in
     ];
   };
 
-  home = rec {
-    username = "mityu";
+  imports = [ inputs.nur.modules.homeManager.default ];
+
+  home = {
+    username = "${username}";
     homeDirectory = "/home/${username}";
     stateVersion = "22.11";
   };
@@ -46,7 +49,6 @@ in
     deno
     efm-langserver
     eza
-    firefox
     fish
     gauche
     gdb
@@ -70,7 +72,45 @@ in
 
   programs.wezterm = {
     package = inputs.wezterm.packages.${pkgs.system}.default;
-    # enable = true;
-    # extraConfig = builtins.readFile /home/mityu/dotfiles/wezterm/wezterm.lua;
+  };
+
+  programs.firefox = {
+    enable = true;
+    languagePacks = [ "ja" ];
+    profiles.${username} = {
+      id = 0;
+      isDefault = true;
+      settings = {
+        "general.smoothScroll" = true;
+        "tabs.groups.enabled" = true;
+        "browser.toolbars.bookmarks.visibility" = "never";
+        "sidebar.verticalTabs" = true;
+        "sidebar.main.tools" = "history,bookmarks,syncedtabs,aichat";
+        "sidebar.revamp" = true;
+        "sidebar.position_start" = false;
+        "general.useragent.locale" = "ja";
+        "font.language.group" = "ja";
+        "layout.css.devPixelsPerPx" = 1.25;
+        # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+      };
+      extensions = {
+        force = true;
+        packages = with pkgs.nur.repos.rycee.firefox-addons; [
+          ublock-origin
+          ublacklist
+        ];
+        settings = {
+          "@ublacklist".settings = {
+            subscriptions = [
+              {
+                name = "";
+                url = "https://raw.githubusercontent.com/108EAA0A/ublacklist-programming-school/main/uBlacklist.txt";
+                enabled = true;
+              }
+            ];
+          };
+        };
+      };
+    };
   };
 }
