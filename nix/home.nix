@@ -41,32 +41,54 @@ in
 
   home.packages = with pkgs; [
     bat
-    # binutils  # Conflict with clang-tools
     bashInteractive
+    brightnessctl
+    btop
     cargo
     cmake
     curl
     deno
     efm-langserver
     eza
+    fd
     fish
     gauche
+    gcc
     gdb
     gh
+    ghc
+    gnumake
     go
+    hwloc
+    hyperfine
     jq
     libgcc
-    llvmPackages_19.clang-tools
-    llvmPackages_19.libcxxClang
+    (lib.hiPrio clang-tools)
+    (lib.hiPrio llvmPackages.libcxxClang)
+    llvmPackages.mlir
+    lua
+    nautilus
+    networkmanagerapplet
     ninja
     ocaml
     opam
     ripgrep
+    rlwrap
     rofi
+    serie
     skim
+    stylua
+    # swift
+    tdf
+    tinymist
+    tokei
+    typst
     vhs
     vim
+    vim-startuptime
+    vscode
     wezterm
+    yazi
     yq-go
   ];
 
