@@ -162,4 +162,27 @@ in
       Environment = [ "DISPLAY=:0.0" ];
     };
   };
+
+  gtk = {
+    enable = true;
+    cursorTheme = {
+      package = pkgs.whitesur-cursors;
+      name = "WhiteSur Cursors";
+    };
+    font = {
+      package = pkgs.noto-fonts-cjk-sans;
+      name = "Noto Sans CJK JP";
+      size = 9;
+    };
+    # theme = {
+    #   package = pkgs.whitesur-gtk-theme;
+    #   name = "WhiteSur-Light";
+    # };
+    iconTheme = {
+      package = pkgs.kdePackages.breeze-icons;
+      name = "breeze-dark";
+    };
+    # gtk3.bookmarks = [
+    # ];
+  };
 }
