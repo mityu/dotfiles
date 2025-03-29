@@ -152,6 +152,11 @@ in
     enable = true;
     touchpad = {
       naturalScrolling = true;
+      tappingDragLock = false;
+      additionalOptions = ''
+        Option "TappingDrag" "false"
+        Option "ScrollPixelDistance" "50"
+      '';
     };
   };
 
