@@ -18,11 +18,11 @@ import { mrMixed } from "jsr:@mityu/fall-source-mr-mixed@^0.1.0";
 import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
 import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
 import { which } from "jsr:@david/which@^0.4.1";
-import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher_multi_regexp.ts";
-import { actionOpenProjectRoot } from "./action_open_root.ts";
-import * as fileSource from "./source_file.ts";
-import { ginAction } from "./source/gin.ts";
-import { defaultGinActions } from "./action/gin.ts";
+import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher/multi_regexp.ts";
+import { actionOpenProjectRoot } from "./action/path_project_root.ts";
+import * as fileSource from "./source/file.ts";
+import { ginAction } from "./source/gin_action.ts";
+import { defaultGinActions } from "./action/gin_action.ts";
 import { fernAction } from "./source/fern_action.ts";
 import { defaultFernActions } from "./action/fern_action.ts";
 
