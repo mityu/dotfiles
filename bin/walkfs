@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 only_dirs=false
 absolute_path=false
