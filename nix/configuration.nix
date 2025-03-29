@@ -115,6 +115,7 @@ in
   # };
 
   # Enable the X11 windowing system.
+  programs.dconf.enable = true;
   services.xserver = {
     enable = true;
 
