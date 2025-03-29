@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+function has-cmd {
+	type $1 &> /dev/null
+}
+
+function echo-err {
+	printf "\033[1m\033[31mError:\033[0m \033[1m%s\033[m\n" "$@" 1>&2
+}
+
+function die {
+	echo-err "$@"
+	exit 1
+}
+
+if [[ $(uname) == Linux ]]; then
+	if [[ $XDG_SESSION_TYPE == x11 ]]; then
+		if has-cmd xdotool; then
+			xdotool key Caps_Lock
+		elif has-cmd nix; then
+			nix run nixpkgs#xdotool -- key Caps_Lock
+		else
+			die 'No way to change capslock state.'
+		fi
+	elif [[ $XDG_SESSION_TYPE == wayland ]]; then
+		die 'Wayland is not supported yet.'
+	else
+		die "Unknown window system: $XDG_SESSION_TYPE"
+	fi
+else
+	die "Unsupported platform: $(uname)"
+fi
