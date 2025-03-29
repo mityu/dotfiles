@@ -705,6 +705,20 @@ awful.rules.rules = {
     },
   },
 
+  -- Workaround: Firefox opens a new wrong sized window when its maximized on
+  -- startup.  In order to fix that, hook the new window creation by firefox
+  -- and re-maximize the window.
+  {
+    rule = { class = "firefox" },
+    properties = {},
+    callback = function(c)
+      if c.maximized == true then
+        c.maximized = false
+        c.maximized = true
+      end
+    end
+  },
+
   -- Floating clients.
   {
     rule_any = {
