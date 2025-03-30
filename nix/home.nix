@@ -60,6 +60,7 @@ in
     ghc
     gnumake
     go
+    gtrash
     hwloc
     hyperfine
     jq
