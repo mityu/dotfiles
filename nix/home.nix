@@ -48,6 +48,7 @@ in
     cmake
     curl
     deno
+    discord
     efm-langserver
     eza
     fd
@@ -78,6 +79,7 @@ in
     rofi
     serie
     skim
+    slack
     stylua
     # swift
     tdf
