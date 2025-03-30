@@ -52,8 +52,35 @@ let
         platforms = platforms.all;
       };
     };
+  awesome-awmtt-pkg = { stdenvNoCC, fetchFromGitHub }:
+    stdenvNoCC.mkDerivation rec {
+      pname = "awesome-awmtt";
+      version = "92ababc7616bff1a7ac0a8e75e0d20a37c1e551e";
+
+      src = fetchFromGitHub {
+        owner = "gmdfalk";
+        repo = "awmtt";
+        rev = version;
+        hash = "sha256-3IpCuLIdN4t4FzFSHAlJ9FW9Y8UcWIqXG9DfiAwZoMY=";
+      };
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out/bin
+        cp ./awmtt.sh $out/bin/awmtt
+        chmod u+x $out/bin/awmtt
+        runHook postInstall
+      '';
+
+      meta = with lib; {
+        homepage = "https://github.com/gmdfalk/awmtt";
+        license = licenses.mit;
+        platforms = platforms.linux;
+      };
+    };
   cica-font = pkgs.callPackage cica-font-pkg { };
   awesome-deficient = pkgs.callPackage awesome-deficient-pkg { };
+  awesome-awmtt = pkgs.callPackage awesome-awmtt-pkg { };
 in
 {
   imports =
@@ -193,6 +220,7 @@ in
     wget
     libinput
     awesome
+    awesome-awmtt
   ];
 
   environment.shellAliases = {
