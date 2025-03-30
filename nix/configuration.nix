@@ -112,6 +112,10 @@ in
       inputs.xremap.nixosModules.default
     ];
 
+  nixpkgs.overlays = [
+    (self: super: { awesome = super.awesome.override { gtk3Support = true; }; })
+  ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
