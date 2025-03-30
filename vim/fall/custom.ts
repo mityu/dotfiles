@@ -19,7 +19,10 @@ import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
 import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
 import { which } from "jsr:@david/which@^0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher/multi_regexp.ts";
-import { actionOpenProjectRoot } from "./action/path_project_root.ts";
+import {
+  actionOpenProjectRoot,
+  actionSearchProjectRoot,
+} from "./action/path_project_root.ts";
 import * as fileSource from "./source/file.ts";
 import { ginAction } from "./source/gin_action.ts";
 import { defaultGinActions } from "./action/gin_action.ts";
@@ -201,6 +204,7 @@ const myPathActions = {
     mods: "botright",
   }),
   "open:project-root": actionOpenProjectRoot,
+  "search:project-root": actionSearchProjectRoot("file"),
   ...builtin.action.defaultSystemopenActions,
   ...builtin.action.defaultCdActions,
 };
