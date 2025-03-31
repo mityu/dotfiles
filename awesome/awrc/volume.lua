@@ -5,38 +5,12 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 
 local function get_icons(width)
-  local lgi = require("lgi")
-  local cairo = lgi.cairo
-  local rsvg = lgi.Rsvg
-  local gtk = lgi.Gtk
-  local theme = gtk.IconTheme.get_default()
-
-  local get_icon_surface = function(name, width)
-    local flags = gtk.IconLookupFlags
-    local info = theme:lookup_icon(name, 64, { flags.LOOKUP_FORCE_SVG })
-    if not info then
-      return nil
-    end
-
-    local svg = rsvg.Handle.new_from_file(info:get_filename())
-
-    local size = svg:get_dimensions()
-    local scale = width / size.width
-    local height = size.height * scale
-
-    local surface = cairo.ImageSurface(cairo.Format.ARGB32, width, height)
-    local cr = cairo.Context(surface)
-    cr:set_antialias(cairo.Antialias.BEST)
-    cr:scale(scale, scale)
-    svg:render_cairo(cr)
-
-    -- Change icon color
-    return gears.color.recolor_image(surface, "#444444")
-  end
+  local gtk_icon = require('awrc.internal.gtk_icon')
 
   local icons = {}
   for _, type in pairs({ "high", "medium", "low", "muted" }) do
-    icons[type] = get_icon_surface(string.format("audio-volume-%s", type), width)
+    local path = string.format("audio-volume-%s", type)
+    icons[type] = gtk_icon.load(path, { width = width, color = '#444444' })
   end
 
   return icons
