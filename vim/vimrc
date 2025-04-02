@@ -3210,7 +3210,7 @@ augroup END
 # EmphasisIndent
 highlight link VimrcEmphasisIndent CursorLine
 augroup vimrc_emphasize_indent
-  autocmd WinEnter * EmphasizeIndent()
+  autocmd WinEnter,BufWinEnter * EmphasizeIndent()
   autocmd OptionSet expandtab,smarttab,tabstop,shiftwidth EmphasizeIndent()
   autocmd User vimrc_initialize ++once EmphasizeIndent()
   autocmd ColorScheme * highlight link VimrcEmphasisIndent CursorLine
