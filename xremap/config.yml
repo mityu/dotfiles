@@ -68,7 +68,7 @@ keymap:
     remap:
       Super-q: C-q
 
-  - name: i3's kill
+  - name: awesome's kill
     remap:
       Super-q:
-        launch: ["i3-msg", "-q", "kill"]
+        launch: ["awesome-client", "client.focus:kill()"]

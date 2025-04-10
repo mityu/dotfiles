@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+function has-cmd() {
+	type $1 &> /dev/null
+}
+
+function launch() {
+	if has-cmd i3-msg; then
+		i3-msg -q exec $*
+	elif has-cmd awesome-client; then
+		awesome-client "require('awful').spawn([[ $* ]])"
+	fi
+}
+
 if [ $# -eq 0 ]; then
 	cat <<EOF
 wezterm
@@ -11,9 +23,9 @@ reboot
 suspend
 lock
 logout
-restart-xremap
 wezterm-float
 clipbuffer
+firefox-private
 EOF
 	exit 0
 fi
@@ -25,9 +37,9 @@ case $@ in
 	lock) dm-tool lock ;;
 	reboot) systemctl reboot ;;
 	logout) i3-msg exit ;;  # TODO: Confirm?
-	restart-xremap) systemctl --user restart xremap ;;
-	wezterm-float) i3-msg -q exec ~/.config/i3/open-floating-app.sh wezterm ;;
+	wezterm-float) launch ~/.config/i3/open-floating-app.sh wezterm ;;
 	clipbuffer) i3-msg -q "exec --no-startup-id gvim -S ~/.config/i3/clipbuffer.vim" ;;
-	*) i3-msg -q exec $@ ;;
+	firefox-private) launch firefox --private-window ;;
+	*) launch $@ ;;
 esac
 exit 0

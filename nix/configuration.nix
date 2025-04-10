@@ -221,6 +221,13 @@ in
     yamlConfig = builtins.readFile ../xremap/config.yml;
   };
 
+  # systemd.user.services.xremap = {
+  #   description = "Startup xremap";
+  #   path = [ inputs.xremap.xremap-x11 ];
+  #   wantedBy = [ "default.target" ];
+  #   script = [ "xremap --watch" ];
+  # };
+
   systemd.user.services.set-xhost = {
     description = "Run a one-shot command upon user login";
     path = [ pkgs.xorg.xhost ];
@@ -228,6 +235,13 @@ in
     script = "xhost +SI:localuser:root";
     environment.DISPLAY = ":0.0";
   };
+
+  # systemd.user.services.set-fcitx5 = {
+  #   description = "Run a one-shot command upon user login";
+  #   path = [ pkgs.fcitx5 ];
+  #   wantedBy = [ "default.target" ];
+  #   script = "fcitx5";
+  # };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   programs.fish.enable = true;
