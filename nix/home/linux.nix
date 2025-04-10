@@ -1,4 +1,4 @@
-{ inputs, pkgs, username, ... }:
+{ inputs, pkgs, username, ... }@allInputs:
 let
   vim-overlay = final: prev:
     let
@@ -202,3 +202,4 @@ in
     # ];
   };
 }
+

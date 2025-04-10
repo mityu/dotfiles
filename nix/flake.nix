@@ -60,7 +60,7 @@
             inherit inputs;
             inherit username;
           };
-          modules = [ ./home.nix ];
+          modules = [ ./home/linux.nix ];
         };
       };
     };
