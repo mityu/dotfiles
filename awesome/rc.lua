@@ -23,7 +23,7 @@ local awrc = require("awrc")
 
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
-require("awful.hotkeys_popup.keys")
+-- require("awful.hotkeys_popup.keys")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -388,9 +388,6 @@ globalkeys = gears.table.join(
   awful.key({ "Control" }, "space", function()
     awful.spawn("rofi -show combi")
   end, { description = "start rofi application launcher", group = "launcher" }),
-  -- awful.key({ modkey }, "r", function()
-  -- 	awful.spawn("rofi -show combi")
-  -- end),
 
   awful.key({ modkey }, "x", function()
     awful.prompt.run({
