@@ -138,27 +138,58 @@ local function create_maximize_button(size, current_client)
     end
     cr:set_source_rgb(0, 0, 0)
 
-    local weight = math.sqrt(2) * 0.5 * 0.65
-    local topleft = {
-      x = (width - size * weight) * 0.5 * 0.97,
-      y = (height - size * weight) * 0.5 * 0.97,
-    }
-    local bottomright = {
-      x = width - topleft.x,
-      y = height - topleft.y,
-    }
-
     local triangle_size = size * 0.41
-    draw_triangle(
-      topleft,
-      { x = topleft.x + triangle_size, y = topleft.y },
-      { x = topleft.x, y = topleft.y + triangle_size }
-    )
-    draw_triangle(
-      bottomright,
-      { x = bottomright.x - triangle_size, y = bottomright.y },
-      { x = bottomright.x, y = bottomright.y - triangle_size }
-    )
+    if current_client.maximized then
+      -- Draw minimize button
+      --
+      --      /|
+      --     / |
+      --    /__|
+      --      topleft
+      --        bottomright
+      --           ___
+      --          |  /
+      --          | /
+      --          |/
+      --
+      local topleft = {
+        x = width * 0.5,
+        y = height * 0.5,
+      }
+      local bottomright = topleft
+      draw_triangle(
+        topleft,
+        { x = topleft.x - triangle_size, y = topleft.y },
+        { x = topleft.x, y = topleft.y - triangle_size }
+      )
+      draw_triangle(
+        bottomright,
+        { x = bottomright.x + triangle_size, y = bottomright.y },
+        { x = bottomright.x, y = bottomright.y + triangle_size }
+      )
+    else
+      -- Draw maximize button
+      local weight = math.sqrt(2) * 0.5 * 0.65
+      local topleft = {
+        x = (width - size * weight) * 0.5 * 0.97,
+        y = (height - size * weight) * 0.5 * 0.97,
+      }
+      local bottomright = {
+        x = width - topleft.x,
+        y = height - topleft.y,
+      }
+
+      draw_triangle(
+        topleft,
+        { x = topleft.x + triangle_size, y = topleft.y },
+        { x = topleft.x, y = topleft.y + triangle_size }
+      )
+      draw_triangle(
+        bottomright,
+        { x = bottomright.x - triangle_size, y = bottomright.y },
+        { x = bottomright.x, y = bottomright.y - triangle_size }
+      )
+    end
   end
 
   return create_circle_button(size.button, current_client, "#19c43d", callback, overlay_drawer)
