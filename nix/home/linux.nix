@@ -1,100 +1,38 @@
 { inputs, pkgs, username, ... }@allInputs:
-let
-  vim-overlay = final: prev:
-    let
-      overlayed = inputs.vim-overlay.overlays.features {
-        compiledby = "${username}-nix";
-        python3 = true;
-      } final prev;
-    in
-    {
-      # Enable GUI and clipboards
-      vim = overlayed.vim.overrideAttrs (oldAttrs: {
-        buildInputs = (oldAttrs.buildInputs or [ ]) ++ [
-          pkgs.gtk3
-          pkgs.xorg.libXmu
-          pkgs.xorg.libXpm
-        ];
-        configureFlags = (oldAttrs.configureFlags or [ ]) ++ [
-          "--enable-gui"
-        ];
-      });
-    };
-in
 {
-  nixpkgs = {
-    overlays = [
-      vim-overlay
-    ];
-  };
+  imports = [
+    inputs.nur.modules.homeManager.default
+    (import ./pkgs/vim.nix allInputs)
+    ./common.nix
+  ];
 
-  imports = [ inputs.nur.modules.homeManager.default ];
-
+  programs.home-manager.enable = true;
   home = {
     username = "${username}";
     homeDirectory = "/home/${username}";
     stateVersion = "22.11";
   };
 
-  programs.home-manager.enable = true;
-
   home.packages = with pkgs; [
-    bat
     bashInteractive
     brightnessctl
-    btop
     cargo
-    cmake
-    curl
-    deno
     discord
-    efm-langserver
-    eza
-    fd
-    fish
-    gauche
-    gcc
     gdb
-    gh
-    ghc
     gnumake
-    go
     gtrash
     hwloc
-    hyperfine
-    jq
-    libgcc
-    (lib.hiPrio clang-tools)
-    (lib.hiPrio llvmPackages.libcxxClang)
-    llvmPackages.mlir
-    lua
     nautilus
     networkmanagerapplet
-    ninja
-    ocaml
-    opam
     pasystray
-    ripgrep
-    rlwrap
     rofi
-    serie
-    skim
     slack
-    stylua
     # swift
-    tdf
-    tlrc
-    tinymist
-    tokei
-    typst
     udisks
-    vhs
     vim
     vim-startuptime
     vscode
     wezterm
-    yazi
-    yq-go
   ];
 
   programs.wezterm = {
