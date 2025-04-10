@@ -30,29 +30,38 @@
     };
   };
 
-  outputs = inputs: {
-    nixosConfigurations = {
-      myNixOS = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ./configuration.nix
-        ];
-        specialArgs = {
-          inherit inputs;
-        };
-      };
-    };
-    homeConfigurations = {
-      myHome = inputs.home-manager.lib.homeManagerConfiguration {
-        pkgs = import inputs.nixpkgs {
+  outputs = inputs:
+    let username = "mityu"; in
+    {
+      nixosConfigurations = {
+        myNixOS = inputs.nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          config.allowUnfree = true;
+          modules = [
+            ./configuration.nix
+          ];
+          specialArgs = {
+            inherit inputs;
+            inherit username;
+            windowManager = {
+              module = ./nixos/awesome-wm.nix;
+              X11 = true;
+              Wayland = false;
+            };
+          };
         };
-        extraSpecialArgs = {
-          inherit inputs;
+      };
+      homeConfigurations = {
+        myHome = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = import inputs.nixpkgs {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+          extraSpecialArgs = {
+            inherit inputs;
+            inherit username;
+          };
+          modules = [ ./home.nix ];
         };
-        modules = [ ./home.nix ];
       };
     };
-  };
 }

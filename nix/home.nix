@@ -1,5 +1,4 @@
-{ inputs, pkgs, ... }:
-let username = "mityu"; in
+{ inputs, pkgs, username, ... }:
 let
   vim-overlay = final: prev:
     let

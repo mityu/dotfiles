@@ -2,29 +2,15 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ inputs, config, lib, pkgs, ... }:
-let
-  localpkgs = import ./localpkgs { inherit pkgs; };
-  awesome-luaModules = [
-    pkgs.luaPackages.vicious
-    pkgs.luaPackages.lgi
-    localpkgs.awesome.deficient
-  ];
-  awesome-awmtt = localpkgs.awesome.awmtt awesome-luaModules;
-in
+{ inputs, config, lib, pkgs, username, windowManager, ... }@allInputs:
 {
   imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ] ++ (with inputs.nixos-hardware.nixosModules; [
-      common-pc-ssd
-    ]) ++ [
+    [
+      ./hardware-configuration.nix  # Include the results of the hardware scan.
       inputs.xremap.nixosModules.default
+      inputs.nixos-hardware.nixosModules.common-pc-ssd
+      (import (windowManager.module) allInputs)
     ];
-
-  nixpkgs.overlays = [
-    (self: super: { awesome = super.awesome.override { gtk3Support = true; }; })
-  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -58,7 +44,7 @@ in
       nerd-fonts.noto
       hackgen-nf-font
       ipaexfont
-    ] ++ [ localpkgs.cica-font ];
+    ] ++ [ (import ./localpkgs/cica-font.nix pkgs) ];
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
@@ -74,25 +60,6 @@ in
   #   keyMap = "us";
   #   useXkbConfig = true; # use xkb.options in tty.
   # };
-
-  # Enable the X11 windowing system.
-  programs.dconf.enable = true;
-  services.xserver = {
-    enable = true;
-
-    displayManager = {
-      lightdm.enable = true;
-    };
-
-    windowManager = {
-      i3.enable = false;
-      awesome.enable = true;
-
-      awesome = {
-        luaModules = awesome-luaModules;
-      };
-    };
-  };
 
 
   # Configure keymap in X11
@@ -122,15 +89,15 @@ in
     };
   };
 
-  services.xremap = {
-    userName = "mityu";
+  services.xremap = pkgs.lib.mkIf windowManager.X11 {
+    userName = username;
     serviceMode = "system";
     withX11 = true;
     watch = true;
     yamlConfig = builtins.readFile ../xremap/config.yml;
   };
 
-  systemd.user.services.set-xhost = {
+  systemd.user.services.set-xhost = pkgs.lib.mkIf windowManager.X11 {
     description = "Run a one-shot command upon user login";
     path = [ pkgs.xorg.xhost ];
     wantedBy = [ "default.target" ];
@@ -140,7 +107,7 @@ in
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   programs.fish.enable = true;
-  users.users.mityu = {
+  users.users.${username} = {
     isNormalUser = true;
     initialPassword = "pass123";
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
@@ -153,8 +120,6 @@ in
     git
     wget
     libinput
-    awesome
-    awesome-awmtt
   ];
 
   environment.shellAliases = {
