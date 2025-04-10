@@ -4,103 +4,13 @@
 
 { inputs, config, lib, pkgs, ... }:
 let
-  cica-font-pkg = { lib, stdenvNoCC, fetchzip }:
-    stdenvNoCC.mkDerivation rec {
-      pname = "cica";
-      version = "5.0.3";
-
-      src = fetchzip {
-        url = "https://github.com/miiton/Cica/releases/download/v${version}/Cica_v${version}.zip";
-        hash = "sha256-BtDnfWCfD9NE8tcWSmk8ciiInsspNPTPmAdGzpg62SM=";
-        stripRoot = false;
-      };
-
-      installPhase = ''
-        runHook preInstall
-        install -Dm644 *.ttf -t $out/share/fonts/Cica
-        runHook postInstall
-      '';
-
-      meta = with lib; {
-        license = licenses.ofl;
-        homepage = "https://github.com/miiton/Cica";
-        platforms = platforms.all;
-      };
-    };
-  awesome-deficient-pkg = { lua, stdenvNoCC, fetchFromGitHub }:
-    stdenvNoCC.mkDerivation rec {
-      pname = "awesome-deficient";
-      version = "22ad2bea198f0c231afac0b7197d9b4eb6d80da3";
-
-      src = fetchFromGitHub {
-        owner = "deficient";
-        repo = "deficient";
-        rev = version;
-        hash = "sha256-INZx053s/PIbRw3mLCobybVuuJENjhyxnsv3LDzi/AI=";
-      };
-
-      installPhase = ''
-        runHook preInstall
-        mkdir -p $out/lib/lua/${lua.luaversion}/
-        cp -r . $out/lib/lua/${lua.luaversion}/deficient/
-        runHook postInstall
-      '';
-
-      meta = with lib; {
-        license = licenses.unlicense;
-        homepage = "https://github.com/deficient/deficient";
-        platforms = platforms.all;
-      };
-    };
-  awesome-awmtt-pkg = { lua, stdenvNoCC, fetchFromGitHub, luaModules, makeWrapper }:
-    let mkSearchPathAdder = modules:
-      let
-        mkSearchPath = module: place: "${module}/${place}/lua/${lua.luaversion}";
-
-        # The last space is necessary because awmtt concatenates arguments
-        # given via "-a" without any white spaces.
-        mkFlag = module: place: "--add-flags '-a \"--search ${mkSearchPath module place} \"'";
-        flags = builtins.concatMap (v: builtins.map (mkFlag v) [ "lib" "share" ]) modules;
-      in
-      builtins.toString flags;
-    in
-    stdenvNoCC.mkDerivation rec {
-      pname = "awesome-awmtt";
-      version = "92ababc7616bff1a7ac0a8e75e0d20a37c1e551e";
-
-      src = fetchFromGitHub {
-        owner = "gmdfalk";
-        repo = "awmtt";
-        rev = version;
-        hash = "sha256-3IpCuLIdN4t4FzFSHAlJ9FW9Y8UcWIqXG9DfiAwZoMY=";
-      };
-
-      nativeBuildInputs = [ makeWrapper ];
-
-      installPhase = ''
-        runHook preInstall
-        mkdir -p $out/bin
-        cp ./awmtt.sh $out/bin/.awmtt-wrapped
-        chmod u+x $out/bin/.awmtt-wrapped
-        makeWrapper "$out/bin/.awmtt-wrapped" "$out/bin/awmtt" \
-          ${mkSearchPathAdder luaModules}
-        runHook postInstall
-      '';
-
-      meta = with lib; {
-        homepage = "https://github.com/gmdfalk/awmtt";
-        license = licenses.mit;
-        platforms = platforms.linux;
-      };
-    };
-  cica-font = pkgs.callPackage cica-font-pkg { };
-  awesome-deficient = pkgs.callPackage awesome-deficient-pkg { };
+  localpkgs = import ./localpkgs { inherit pkgs; };
   awesome-luaModules = [
     pkgs.luaPackages.vicious
     pkgs.luaPackages.lgi
-    awesome-deficient
+    localpkgs.awesome.deficient
   ];
-  awesome-awmtt = pkgs.callPackage awesome-awmtt-pkg { luaModules = awesome-luaModules; };
+  awesome-awmtt = localpkgs.awesome.awmtt awesome-luaModules;
 in
 {
   imports =
@@ -147,9 +57,8 @@ in
       noto-fonts-emoji
       nerd-fonts.noto
       hackgen-nf-font
-      cica-font
       ipaexfont
-    ];
+    ] ++ [ localpkgs.cica-font ];
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
