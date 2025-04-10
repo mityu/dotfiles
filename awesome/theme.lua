@@ -83,9 +83,14 @@ theme.notification_margin = dpi(25)
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 -- theme.menu_font = theme.font
-theme.menu_submenu_icon = themes_path .. "default/submenu.png"
+theme.menu_submenu = '>'
+-- theme.menu_submenu = '❯'
 theme.menu_height = dpi(32)
 theme.menu_width = dpi(150)
+theme.menu_bg_normal = '#dbe3e6'
+theme.menu_bg_focus = '#2b63dd'
+theme.menu_fg_normal = '#1f1f1f'
+theme.menu_fg_focus = '#ffffff'
 
 -- You can add as many variables as
 -- you wish and access them by using
