@@ -84,9 +84,11 @@ in
     stylua
     # swift
     tdf
+    tlrc
     tinymist
     tokei
     typst
+    udisks
     vhs
     vim
     vim-startuptime
@@ -137,6 +139,17 @@ in
             ];
           };
         };
+      };
+    };
+  };
+
+  programs.thunderbird = {
+    enable = true;
+    profiles.${username} = {
+      isDefault = true;
+      settings = {
+        "general.smoothScroll" = true;
+        "layout.css.devPixelsPerPx" = 1.25;
       };
     };
   };
