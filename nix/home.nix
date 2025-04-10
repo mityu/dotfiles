@@ -116,6 +116,7 @@ in
         "sidebar.position_start" = false;
         "general.useragent.locale" = "ja";
         "font.language.group" = "ja";
+        "font.cjk_pref_fallback_order" = "ja,zh-cn,zh-hk,zh-tw,ko";
         "layout.css.devPixelsPerPx" = 1.25;
         # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
       };
