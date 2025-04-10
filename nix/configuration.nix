@@ -148,6 +148,7 @@ in
       nerd-fonts.noto
       hackgen-nf-font
       cica-font
+      ipaexfont
     ];
     fontDir.enable = true;
     fontconfig = {
