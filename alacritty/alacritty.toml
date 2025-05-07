@@ -455,6 +455,12 @@ key = "Return"
 mode = "Search|~Vi"
 mods = "Shift"
 
+# FIXME: On macOS with Japanese keyboard, the yen character appears on the
+# backslash key press.
+[[keyboard.bindings]]
+key = "¥"
+chars = "\\"
+
 [mouse]
 hide_when_typing = true
 
