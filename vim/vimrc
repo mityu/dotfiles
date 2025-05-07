@@ -790,6 +790,12 @@ def LoadTexConfig()
   endif
 enddef
 
+# Load built-in hlyank plugin
+augroup vimrc-hlyank
+  autocmd KeyInputPre * packadd hlyank
+augroup END
+g:hlyank_duration = 100
+
 # Mapping {{{
 nnoremap : q:A
 vnoremap : q:A
