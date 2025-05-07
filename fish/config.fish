@@ -165,6 +165,7 @@ end
 
 if command -q rlwrap
   command -q ocaml && alias ocaml='rlwrap ocaml'
+  command -q cargo && alias cargo='rlwrap cargo'
 end
 
 command -q eza && alias ls='eza --group-directories-first --icons'
