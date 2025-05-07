@@ -1283,6 +1283,8 @@ if Pacpack.Tap('vim-fern')
           \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
     nnoremap <buffer> q <Cmd>call <SID>FernClose()<CR>
     nnoremap <buffer> <Space>f <Cmd>call <SID>Echo('Fern is already open.')<CR>
+    nnoremap <buffer> / <Plug>(fern-action-include)
+    nnoremap <buffer> <C-h> <Plug>(fern-action-include=)<C-e><C-u><CR>
   enddef
 
   def FernShowRootPath(helper: dict<any>)
