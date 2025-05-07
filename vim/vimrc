@@ -2949,6 +2949,20 @@ if Pacpack.Tap('fall.vim')
     throw $'Unknown kind: {kind}'
   enddef
 
+  def FallLiveGrep(curator: string, pathGiven: string = '')
+    var path = vimrc#FindProjectRoot(pathGiven)
+    if path !=# ''
+      if pathGiven ==# ''
+        path = Input('Grep here?: ', path, 'dir')->expand()
+        if !path->isdirectory()
+          EchomsgError($'Directory not found: {path}')
+          return
+        endif
+      endif
+    endif
+    execute $'Fall {curator} {fnameescape(path)}'
+  enddef
+
   augroup vimrc-fall
     autocmd User FallPickerEnter:* vimrc#fall#Setup()
     autocmd User FallPickerLeave:* vimrc#fall#Shutdown()
@@ -2960,6 +2974,11 @@ if Pacpack.Tap('fall.vim')
 
   nnoremap <Space>k <Cmd>Fall mru<CR>
   nnoremap <Space>j <Cmd>Fall file:project<CR>
+  nnoremap <Space>b <Cmd>Fall buffer<CR>
+  nnoremap <Space>l <Cmd>Fall line<CR>
+  command! PackFiles Fall file:pack
+  command! Dotfiles Fall file:dotfiles
+  command! -nargs=? -complete=dir LiveGrep FallLiveGrep('grep', <q-args>)
 endif
 
 # ReadingVimrc
