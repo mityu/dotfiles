@@ -45,17 +45,17 @@ def FoldExpr(): any
   endif
 enddef
 
-def AbbrevDirectiveFunction(): string
+def AbbrevDirectiveFunction(trigger: string): string
   const word = getline('.')->strpart(0, col('.') - 1)
   if word =~# '^\s*fu\%[nctio]$'
     return 'function'
   else
-    return word
+    return trigger
   endif
 enddef
 
 # 'function' is not need to be expanded.
 for word in range(2, strlen('functio'))->mapnew('strpart("functio", 0, v:val)')
-  execute $'iabbrev <expr> <buffer> {word} AbbrevDirectiveFunction()'
+  execute $'iabbrev <expr> <buffer> {word} AbbrevDirectiveFunction("{word}")'
   execute $'SetUndoFtplugin iunabbrev <buffer> {word}'
 endfor
