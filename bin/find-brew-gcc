@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+function main {
+	local target=${1:-gcc}
+	if test -d /opt/homebrew/opt/gcc/bin; then
+		local bin=$(ls /opt/homebrew/opt/gcc/bin | grep "^$target-\d\+$" | head -n 1)
+		if [[ ! -z "$bin" ]]; then
+			echo "/opt/homebrew/opt/gcc/bin/$bin"
+			return
+		fi
+	fi
+	echo $(which -a $target | head -n 2 | tail -n 1)
+}
+
+main $1
