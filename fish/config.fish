@@ -48,6 +48,7 @@ if status is-login
   command -q opam && eval (opam env)
   test -f ~/.cargo/env.fish && source ~/.cargo/env.fish
 
+  fish_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
   fish_add_path --prepend ~/.nodebrew/current/bin
   fish_add_path --prepend ~/.roswell/bin
   fish_add_path --prepend /opt/homebrew/bin
@@ -133,7 +134,6 @@ end
 
 set fish_color_cwd yellow
 
-# alias dotfiles="source $dotfiles_path/bin/dotfiles"
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias themis-nvim='THEMIS_VIM=nvim themis'
