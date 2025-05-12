@@ -566,26 +566,6 @@ Pacpack.Add('https://github.com/skk-dev/dict')
 Pacpack.Add('https://github.com/lambdalisue/vim-gin')
 Pacpack.Add('https://github.com/vim-fall/fall.vim')
 
-# Ddu plugins
-Pacpack.Add('https://github.com/lambdalisue/vim-mr')
-Pacpack.Add('https://github.com/Shougo/ddu.vim')
-Pacpack.Add('https://github.com/Shougo/ddu-ui-ff')
-Pacpack.Add('https://github.com/Shougo/ddu-kind-file')
-Pacpack.Add('https://github.com/Shougo/ddu-source-action')
-Pacpack.Add('https://github.com/Shougo/ddu-source-file')
-Pacpack.Add('https://github.com/Shougo/ddu-source-file_rec')
-Pacpack.Add('https://github.com/Shougo/ddu-source-line')
-Pacpack.Add('https://github.com/kuuote/ddu-source-mr')
-Pacpack.Add('https://github.com/matsui54/ddu-source-file_external')
-Pacpack.Add('https://github.com/matsui54/ddu-source-help')
-Pacpack.Add('https://github.com/matsui54/ddu-source-man')
-Pacpack.Add('https://github.com/mityu/ddu-filter-matcher_multi_regex')
-Pacpack.Add('https://github.com/mityu/ddu-ui-ff_vim_popup')
-Pacpack.Add('https://github.com/shun/ddu-source-buffer')
-Pacpack.Add('https://github.com/shun/ddu-source-rg')
-Pacpack.Add('https://github.com/tennashi/ddu-source-git')
-Pacpack.Add('https://github.com/uga-rosa/ddu-source-lsp')
-
 # Ddc plugins
 Pacpack.Add('https://github.com/Shougo/ddc.vim')
 Pacpack.Add('https://github.com/Shougo/ddc-ui-native')
@@ -1788,8 +1768,8 @@ if Pacpack.Tap('lspoints')
   def LspointsSetupAttachAutocmds()
     augroup vimrc-lspoints
       autocmd!
-      if !v:vim_did_enter && Pacpack.Tap('ddu.vim')
-        autocmd User DenopsPluginPost:ddu timer_start(1, (_) => lspoints#denops#register())
+      if !v:vim_did_enter && Pacpack.Tap('fall.vim')
+        autocmd User DenopsPluginPost:fall timer_start(1, (_) => lspoints#denops#register())
       else
         autocmd User DenopsReady lspoints#denops#register()
       endif
