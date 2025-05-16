@@ -498,7 +498,7 @@ export const main: Entrypoint = async (
   );
 
   definePickerFromSource("line", builtin.source.line, {
-    matchers: [builtin.matcher.substring],
+    matchers: [matcherMultiRegexp],
     previewers: [builtin.previewer.buffer],
     actions: {
       ...myQuickfixActions,
@@ -513,7 +513,7 @@ export const main: Entrypoint = async (
     "buffer",
     builtin.source.buffer({ filter: "bufloaded" }),
     {
-      matchers: [builtin.matcher.substring],
+      matchers: [matcherMultiRegexp],
       previewers: [builtin.previewer.buffer],
       actions: {
         ...myQuickfixActions,
@@ -526,7 +526,7 @@ export const main: Entrypoint = async (
   );
 
   definePickerFromSource("help", builtin.source.helptag, {
-    matchers: [builtin.matcher.substring],
+    matchers: [matcherMultiRegexp],
     previewers: [builtin.previewer.helptag],
     actions: {
       ...myMiscActions,
@@ -536,7 +536,7 @@ export const main: Entrypoint = async (
   });
 
   definePickerFromSource("quickfix", builtin.source.quickfix, {
-    matchers: [builtin.matcher.substring],
+    matchers: [matcherMultiRegexp],
     previewers: [builtin.previewer.buffer],
     actions: {
       ...builtin.action.defaultOpenActions,
