@@ -21,6 +21,7 @@ if [ $HASH == $(git rev-parse HEAD) ]; then
 	exit 0
 fi
 export CONF_OPT_COMPBY="--with-compiledby=mityu"
+export CONF_ARGS1='CC=/usr/bin/clang'
 make -j4
 if [ $? -ne 0 ]; then
 	make distclean && make -j4
