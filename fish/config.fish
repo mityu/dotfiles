@@ -92,6 +92,7 @@ if status is-interactive
     if test (count $argv) -eq 0
       set -l path (interactive-cd-selector)
       if string length -q -- "$path"
+        history append "cd $(fishrc_format_path $path)"
         builtin cd "$path"
       end
     else
@@ -116,6 +117,18 @@ if status is-interactive
         echo "Invalid argument: $argv"
         dotfiles --help
     end
+  end
+end
+
+# Replace $HOME at the head of path into "~", and then escape white-spaces,
+# etc, in order to make the argument be treated as strictly one argument.
+function fishrc_format_path
+  set -l len (string length -- $HOME)
+  if test (string sub --length $len -- $argv) = $HOME
+    set -l subpath (string trim --left --chars '/' (string sub --start (math $len + 1) $argv))
+    echo "~/$(string escape --no-quoted -- $subpath)"
+  else
+    echo (string escape --no-quoted -- $argv)
   end
 end
 
