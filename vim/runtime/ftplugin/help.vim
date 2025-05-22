@@ -153,7 +153,7 @@ if !exists('*s:search_link')
   endfunction
 
   function s:search_link(go_up) abort
-    const flags = 'W' .. (a:go_up ? 'b' : '')
+    const flags = 'Ws' .. (a:go_up ? 'b' : '')
     call search('[''|]\zs.', flags, 0, 0, function('s:search_link_skip'))
   endfunction
 endif
