@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+function main {
+	if ! type ghq &>/dev/null; then
+		echo '"ghq" command not found.' 1>&2
+		exit 1
+	fi
+
+	local preview=
+	if type bat &>/dev/null; then
+		preview="bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.*"
+	else
+		preview="cat $(ghq root)/{}/README.* | head -n 80"
+	fi
+
+	if type sk &>/dev/null; then
+		sk --reverse --no-sort --no-multi -c 'ghq list' --preview "$preview"
+	elif type fzf &>/dev/null; then
+		ghq list | fzf --reverse --no-sort --no-multi --preview "$preview"
+	else
+		echo 'No fuzzy finder available: skim, fzf' 1>&2
+		exit 1
+	fi
+}
+
+main

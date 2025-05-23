@@ -100,6 +100,17 @@ if status is-interactive
     end
   end
 
+  function repo --description 'interactively select and cd repository from "ghq list"'
+    set -l path (interactive-ghq-selector)
+    if string length -q -- "$path"
+      set path "$(ghq root)/$path"
+      history append "cd $(fishrc_format_path $path)"
+      builtin cd "$path"
+    else
+      echo 'Canceled.'
+    end
+  end
+
   function dotfiles --description "Manage dotfiles"
     switch $argv[1]
       case cd
