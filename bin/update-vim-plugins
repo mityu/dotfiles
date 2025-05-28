@@ -22,6 +22,10 @@ function UpdatePlugins()
 	call minpac#update("", {"do": "call PostUpdatePlugins()"})
 endfunction
 function PostUpdatePlugins()
+	call minpac#status({"open": "tab"})
+	tabprevious
+	%print
+	tabnext
 	%print
 	quitall!
 endfunction
