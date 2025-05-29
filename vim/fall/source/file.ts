@@ -6,7 +6,7 @@ import { isString } from "jsr:@core/unknownutil@^4.3.0/is/string";
 import { composeSources, defineSource } from "jsr:@vim-fall/std@^0.11.0/source";
 import { bindSourceArgs } from "jsr:@vim-fall/std@^0.11.0";
 import { join } from "jsr:@std/path@^1.0.0/join";
-import { dirname } from "jsr:@std/path@^1.0.0/unstable-dirname";
+import { dirname } from "jsr:@std/path@^1.0.0/dirname";
 import { exists } from "jsr:@std/fs@^1.0.0/exists";
 import {
   file as fileBase,
