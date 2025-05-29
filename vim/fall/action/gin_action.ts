@@ -1,7 +1,7 @@
 import { useEval } from "jsr:@denops/std@^7.5.0/eval/use-eval";
 import { feedkeys } from "jsr:@denops/std@^7.5.0/function";
 import { type Action, defineAction } from "jsr:@vim-fall/std@^0.11.0/action";
-import type { Detail } from "../source/gin.ts";
+import type { Detail } from "../source/gin_action.ts";
 
 export function execute(): Action<Detail> {
   return defineAction<Detail>(
