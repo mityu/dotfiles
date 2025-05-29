@@ -2,17 +2,6 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
-NO_BLE=true
-
-# If bash is running interactively, launch ble.sh
-if [[ $- == *i* ]] && [[ -f "$HOME/.local/share/blesh/ble.sh" ]] && \
-	[[ -z ${NO_BLE:-} ]] && [[ $(uname -o) != "Msys" ]]; then
-	source "$HOME/.local/share/blesh/ble.sh" --noattach
-elif tput -T xterm longname &> /dev/null; then
-	# Fix cursor shape (it's maybe different when bash is launched via "no-ble-bash")
-	printf "\e[2 q"
-fi
-
 function dotfiles-path() {
 	echo $(cd $(dirname $(realpath ${BASH_SOURCE[0]})); pwd)
 }
@@ -136,7 +125,6 @@ alias dotfiles=". $(which dotfiles)"
 alias update-softwares=". $(which update-softwares)"
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
-alias no-ble-bash='NO_BLE=true exec bash'
 alias themis-nvim='THEMIS_VIM=nvim themis'
 
 bashrc_has_cmd bat && alias cat='bat --style plain --theme ansi'
@@ -260,53 +248,6 @@ elif bashrc_has_cmd fzf; then
 	}
 fi
 
-# Plugins
-bashrc_plugin_dir=`bashrc_XDG_CACHE_HOME`/bash
-
-function install-bash-plugins() {
-	local blesh_repo_dir=$bashrc_plugin_dir/ble.sh
-	if [[ ! -d $blesh_repo_dir ]]; then
-		git clone --recursive https://github.com/akinomyoga/ble.sh.git \
-			$blesh_repo_dir
-		# Build ble.sh and install to ~/.local/share/blesh
-		make -C $blesh_repo_dir && make -C $blesh_repo_dir install
-	fi
-
-	local gitstatus_repo_dir=$bashrc_plugin_dir/gitstatus
-	git clone https://github.com/romkatv/gitstatus $gitstatus_repo_dir
-	$gitstatus_repo_dir/build -w
-}
-
-function update-bash-plugins() {
-	local blesh_bin="$HOME/.local/share/blesh/ble.sh"
-	if [[ ${BLE_VERSION-} ]]; then
-		ble-update
-	elif [[ -f $blesh_bin ]]; then
-		bash $blesh_bin --update
-	fi
-
-	if [[ -d $bashrc_plugin_dir/gitstatus ]]; then
-		pushd $bashrc_plugin_dir/gitstatus
-		local hash=$(git rev-parse HEAD)
-		git pull
-		if [[ $hash != $(git rev-parse HEAD) ]]; then
-			./build -w
-		fi
-		popd
-	fi
-}
-
-if [[ ! -d $bashrc_plugin_dir ]]; then
-	echo 'Start installing bash plugins.'
-	mkdir -p $bashrc_plugin_dir
-	install-bash-plugins
-fi
-
-if [[ -f $bashrc_plugin_dir/gitstatus/gitstatus.plugin.sh ]]; then
-	source $bashrc_plugin_dir/gitstatus/gitstatus.plugin.sh
-	gitstatus_stop && gitstatus_start
-fi
-
 PROMPT_COMMAND=__bashrc_update_prompt
 
 declare -A __bashrc_prompt_colors=(
@@ -403,5 +344,3 @@ fi
 # Default to human readable figures
 # alias df='df -h'
 # alias du='du -h'
-
-[[ ${BLE_VERSION-} ]] && ble-attach || true  # Do not leave error exit status.
