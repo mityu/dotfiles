@@ -100,6 +100,7 @@ if status is-interactive
     end
   end
 
+  alias repos=repo
   function repo --description 'interactively select and cd repository from "ghq list"'
     set -l path (interactive-ghq-selector)
     if string length -q -- "$path"
