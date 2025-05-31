@@ -1,0 +1,11 @@
+---
+registries:
+  - type: standard
+    ref: v4.373.0 # renovate: depName=aquaproj/aqua-registry
+
+packages:
+  - name: BurntSushi/ripgrep@14.1.1
+  - name: denoland/deno@v2.3.3
+  - name: fish-shell/fish-shell@4.0.2
+  - name: skim-rs/skim@v0.17.3
+  - name: zellij-org/zellij@v0.42.2

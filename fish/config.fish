@@ -55,6 +55,11 @@ if status is-login
   fish_add_path --prepend /opt/homebrew/opt/trash/bin
   fish_add_path --prepend $dotfiles_path/bin
   fish_add_path --prepend ~/.local/bin
+
+  if command -q aqua
+    fish_add_path --prepend --move (aqua root-dir)
+    set -gx AQUA_GLOBAL_CONFIG $dotfiles_path/aqua/aqua.yaml
+  end
 end
 
 if status is-interactive

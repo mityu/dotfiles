@@ -98,6 +98,11 @@ if shopt -q login_shell; then
 			alias g++="$(ls $__bashrc_brew_prefix/bin | grep '^g++-\d\+')"
 		fi
 	fi
+
+	if bashrc_has_cmd aqua; then
+		bashrc_prepend_PATH $(aqua root-dir)
+		export AQUA_GLOBAL_CONFIG=$__bashrc_dotfiles_path/aqua/aqua.yaml
+	fi
 fi
 
 
