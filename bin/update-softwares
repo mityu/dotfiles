@@ -83,8 +83,6 @@ function do-update {
 			) | xargs pip3 install -U
 	fi
 
-	has-cmd update-zsh-plugins && update-zsh-plugins
-	has-cmd update-bash-plugins && update-bash-plugins
 	has-cmd update-vim-plugins && update-vim-plugins
 }
 
