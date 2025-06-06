@@ -2938,16 +2938,20 @@ if Pacpack.Tap('vim-gin')
   def GinPatchCommandOnGinDiffWindow(bang: string, mods: string, args: list<string>)
     var options: list<string> = []
 
-    var argsCopy = args
+    var argsCopy = copy(args)
     while !empty(argsCopy)
-      const arg = args[0]
+      const arg = argsCopy[0]
       if arg =~# '^++'
         options->add(arg)
       else
         break
       endif
-      args->remove(0)
+      argsCopy->remove(0)
     endwhile
+
+    if indexof(options, (_, v) => v =~# '^++opener') == -1
+      options->add('++opener=tabedit')
+    endif
 
     const path = argsCopy->join()->trim()
 
