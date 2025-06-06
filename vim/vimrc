@@ -1669,6 +1669,7 @@ if Pacpack.Tap('vim-rayterm') || true
     autocmd Filetype rayterm SetupRayterm()
     autocmd ExitPre * rayterm#StopAllWithConfirmation()
   augroup END
+  nnoremap <C-w><C-e> <Cmd>call rayterm#Open()<CR>
 endif
 
 if Pacpack.Tap('capture.vim')
