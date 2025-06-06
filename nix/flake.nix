@@ -31,8 +31,46 @@
   };
 
   outputs = inputs:
-    let username = "mityu"; in
+    let
+      username = "mityu";
+      # buildNixosConfigurations =
+      #   {
+      #     nixosSystem,
+      #     configSet,
+      #     lib,
+      #     username,
+      #   }:
+      #   let
+      #     buildOneConfig = name: params:
+      #       let drv = nixosSystem {
+      #         system = "x86_64-linux";
+      #         modules = [
+      #           ./configuration.nix
+      #         ];
+      #         specialArgs = {
+      #           inherit inputs;
+      #           inherit username;
+      #           windowManager = params;
+      #         };
+      #       };
+      #       in
+      #       nameValuePair name drv;
+      #   in
+      #   lib.attrsets.mapAttrs' buildOneConfig configSet;
+      # osConfigSet = {
+      #   awesome = {
+      #     module = ./nixos/awesome-wm.nix;
+      #     X11 = true;
+      #     Wayland = false;
+      #   };
+      # };
+    in
     {
+      # nixosConfigurations = buildNixosConfigurations {
+      #   nixosSystem = inputs.nixpkgs.lib.nixosSystem;
+      #   lib = inputs.pkgs.lib;
+      #   inherit username;
+      # };
       nixosConfigurations = {
         myNixOS = inputs.nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -43,7 +81,7 @@
             inherit inputs;
             inherit username;
             windowManager = {
-              module = ./nixos/awesome-wm.nix;
+              module = ./nixos/wm/awesome.nix;
               X11 = true;
               Wayland = false;
             };

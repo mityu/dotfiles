@@ -1,12 +1,12 @@
 { pkgs, ... }:
   let
-    localpkgs = import ../localpkgs { inherit pkgs; };
+    deps = import ./awesome { inherit pkgs; };
     luaModules = [
       pkgs.luaPackages.vicious
       pkgs.luaPackages.lgi
-      localpkgs.awesome.deficient
+      deps.deficient
     ];
-    awmtt = localpkgs.awesome.awmtt luaModules;
+    awmtt = deps.awmtt luaModules;
   in
   {
     nixpkgs.overlays = [
