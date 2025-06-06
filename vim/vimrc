@@ -156,6 +156,11 @@ def g:Tapi_drop(bufnr: number, arglist: list<any>)
   if bufwinnr(bufnr(filepath)) == -1
     opencmd = 'split'
   endif
+
+  if exists('*rayterm#IsRaytermPopup') && rayterm#IsRaytermPopup()
+    rayterm#Hide()
+  endif
+
   execute opencmd fnameescape(filepath)
 enddef
 
@@ -506,6 +511,7 @@ Pacpack.Add('https://github.com/mityu/vim-cmdhistory')
 Pacpack.Add('https://github.com/mityu/vim-cobachi')
 Pacpack.Add('https://github.com/mityu/vim-gyoza')
 Pacpack.Add('https://github.com/mityu/vim-quickrun-hook-auto_run_in_vim9')
+Pacpack.Add('https://github.com/mityu/vim-rayterm')
 Pacpack.Add('https://github.com/mityu/vim-winc')
 Pacpack.Add('https://github.com/mityu/vim-wispath')
 Pacpack.Add('https://github.com/mityu/vital-keymapper')
@@ -1625,6 +1631,37 @@ if Pacpack.Tap('vim-quickrun')
       matchadd('Conceal', '\e[\d\+m', 10, -1, {conceal: ''})
       setlocal conceallevel=3 concealcursor=nvic
     }
+  augroup END
+endif
+
+if Pacpack.Tap('vim-rayterm') || true
+  def RaytermSmartMap(onPopup: string, inWindow: string): string
+    if rayterm#IsRaytermPopup()
+      return onPopup
+    else
+      return inWindow
+    endif
+  enddef
+
+  def SetupRayterm()
+    nnoremap <expr> <buffer> <C-h> rayterm#HideOr('<C-h>')
+    nnoremap <expr> <buffer> <C-w><C-e> rayterm#HideOr('<C-w><C-e>')
+    tnoremap <expr> <buffer> <C-w><C-e> rayterm#HideOr('<C-w><C-e>')
+    nnoremap <expr> <buffer> <C-w><C-h> rayterm#HideOr('<C-w><C-h>')
+    tnoremap <expr> <buffer> <C-w><C-h> rayterm#HideOr('<C-w><C-h>')
+
+    for c in ':/?'
+      execute $'nnoremap <expr> <buffer> {c} <SID>RaytermSmartMap("{c}", "q{c}A")'
+    endfor
+    for c in ':/?'
+      const rhs = $'<SID>RaytermSmartMap(''<C-w>{c}'', ''<C-w>{c}<C-f>A'')'
+      execute $'tnoremap <expr> <buffer> <C-w>{c} {rhs}'
+    endfor
+  enddef
+
+  augroup vimrc-rayterm
+    autocmd Filetype rayterm SetupRayterm()
+    autocmd ExitPre * rayterm#StopAllWithConfirmation()
   augroup END
 endif
 
