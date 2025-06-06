@@ -2861,6 +2861,25 @@ if Pacpack.Tap('vim-gin')
   g:gin_proxy_apply_without_confirm = true
   nnoremap <Space>g <Cmd>GinStatus<CR>
 
+  def GinBufferOpened()
+    setlocal nomodeline
+
+    if Pacpack.Tap('fall.vim')
+      # Postpone the mapping definition a bit later in order to make sure the
+      # mappings be defined after gin's built-in ftplugins are loaded.
+      autocmd vimrc-gin FileType <buffer> ++once timer_start(0, (_) => {
+        if &l:filetype =~# '^gin'
+          nnoremap <buffer> a <Cmd>Fall gin-action<CR>
+          nnoremap <buffer> A <Plug>(gin-action-choice)
+        endif
+      })
+    endif
+
+    if stridx(bufname('%'), 'vimdoc-ja-working') != -1
+      setlocal tabstop=8
+    endif
+  enddef
+
   def GinStatusOpened()
     nnoremap <buffer> <Space>g <Cmd>Gin commit<CR>
     nnoremap <buffer> <C-l> <Cmd>call gin#util#reload()<CR>
@@ -2870,6 +2889,7 @@ if Pacpack.Tap('vim-gin')
     nnoremap <buffer> <C-l> <Cmd>call gin#util#reload()<CR>
     nnoremap <buffer> <C-p> <Cmd>call search('^commit\s\w\+', 'bW')<CR>
     nnoremap <buffer> <C-n> <Cmd>call search('^commit\s\w\+', 'W')<CR>
+    nnoremap <buffer> <Plug>(gin-action-diff:HEAD) <Cmd>call <SID>GinLogDiff('HEAD')<CR>
   enddef
 
   def GinEditOpened()
@@ -2940,8 +2960,17 @@ if Pacpack.Tap('vim-gin')
     endif
   enddef
 
+  def GinLogDiff(compareTo: string)
+    const hash = getline('.')->matchstr('^commit\s\+\zs\<\w\+\>')
+    if hash ==# ''
+      Echo('Failed to find commit hash.')
+      return
+    endif
+    execute $'GinDiff {hash}..{compareTo}'
+  enddef
+
   augroup vimrc-gin
-    autocmd BufReadCmd gin*://* setlocal nomodeline
+    autocmd BufReadCmd gin*://* GinBufferOpened()
     autocmd BufReadCmd ginstatus://* GinStatusOpened()
     autocmd BufReadcmd ginlog://* GinLogOpened()
     autocmd BufReadCmd ginedit://* GinEditOpened()
