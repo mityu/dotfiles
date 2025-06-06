@@ -1264,7 +1264,6 @@ if Pacpack.Tap('vim-fern')
     nnoremap <buffer> <CR> <Plug>(fern-action-open:edit-or-error)
     nnoremap <buffer> x <Plug>(fern-action-hidden:toggle)
     nnoremap <buffer><nowait> m <Plug>(fern-action-mark:toggle)
-    nnoremap <buffer> a <Plug>(fern-action-choice)
     nnoremap <buffer> <C-l> <Plug>(fern-action-reload:all)
     nnoremap <buffer> <expr> <silent> <C-g> fern#smart#scheme('<C-g>',
           \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
@@ -1272,6 +1271,13 @@ if Pacpack.Tap('vim-fern')
     nnoremap <buffer> <Space>f <Cmd>call <SID>Echo('Fern is already open.')<CR>
     nnoremap <buffer> / <Plug>(fern-action-include)
     nnoremap <buffer> <C-h> <Plug>(fern-action-include=)<C-e><C-u><CR>
+
+    if Pacpack.Tap('fall.vim')
+      nnoremap <buffer> a <Cmd>Fall fern-action<CR>
+      nnoremap <buffer> A <Plug>(fern-action-choice)
+    else
+      nnoremap <buffer> a <Plug>(fern-action-choice)
+    endif
   enddef
 
   def FernShowRootPath(helper: dict<any>)
