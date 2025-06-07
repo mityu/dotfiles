@@ -197,9 +197,19 @@ end
 if command -q rlwrap
   command -q ocaml && alias ocaml='rlwrap ocaml'
   command -q cargo && alias cargo='rlwrap cargo'
+  command -q dune && alias dune='rlwrap dune'
 end
 
-command -q eza && alias ls='eza --group-directories-first --icons'
+if command -q eza
+  function ls
+    if test -t 1
+      eza --group-directories-first --icons $argv
+    else
+      command ls $argv
+    end
+  end
+end
+
 command -q bat && alias cat='bat --style plain --theme ansi'
 command -q sudoedit || alias sudoedit='sudo -e'
 
