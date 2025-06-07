@@ -1640,7 +1640,7 @@ if Pacpack.Tap('vim-quickrun')
   augroup END
 endif
 
-if Pacpack.Tap('vim-rayterm') || true
+if Pacpack.Tap('vim-rayterm')
   def RaytermSmartMap(onPopup: string, inWindow: string): string
     if rayterm#IsRaytermPopup()
       return onPopup
