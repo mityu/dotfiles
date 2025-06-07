@@ -58,7 +58,7 @@ if status is-login
   fish_add_path --prepend ~/.local/bin
 
   if command -q aqua
-    fish_add_path --prepend --move (aqua root-dir)
+    fish_add_path --prepend --move "$(aqua root-dir)/bin"
     set -gx AQUA_GLOBAL_CONFIG $dotfiles_path/aqua/aqua.yaml
   end
 end
