@@ -81,16 +81,17 @@ alias update-softwares="update-zsh-plugins; $(dotfiles-path)/bin/update-software
 zshrc_has_cmd opam && eval $(opam env)
 
 if zshrc_has_cmd xcrun && zshrc_has_cmd brew; then
+	__zshrc_brew_prefix=$(brew --prefix)
 	export SDKROOT=$(xcrun --show-sdk-path)
 	export CPATH=$CPATH:$SDKROOT/usr/include
 	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
 	# TODO: How can I set framework search path?
-	if [ -d "$(brew --prefix)/opt/llvm" ]; then
+	if [ -d "$__zshrc_brew_prefix/opt/llvm" ]; then
 		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
 	fi
-	if [ -d "$(brew --prefix)/opt/gcc" ]; then
-		alias gcc="$(ls $(brew --prefix)/bin | grep '^gcc-\d\+')"
-		alias g++="$(ls $(brew --prefix)/bin | grep '^g++-\d\+')"
+	if [ -d "$__zshrc_brew_prefix/opt/gcc" ]; then
+		zshrc_prepend_PATH "$__zshrc_brew_prefix/opt/gcc/bin"
+		zshrc_prepend_PATH "$(dotfiles-path)/opt/gcc/bin"
 	fi
 fi
 

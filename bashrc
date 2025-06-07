@@ -91,11 +91,11 @@ if shopt -q login_shell; then
 		export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
 		export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:$SDKROOT/System/Library/Frameworks
 		if [[ -d "$__bashrc_brew_prefix/opt/llvm" ]]; then
-			export PATH=$__bashrc_brew_prefix/opt/llvm/bin:$PATH
+			bashrc_prepend_PATH "$__bashrc_brew_prefix/opt/llvm/bin"
 		fi
 		if [[ -d "$__bashrc_brew_prefix/opt/gcc" ]]; then
-			alias gcc="$(ls $__bashrc_brew_prefix/bin | grep '^gcc-\d\+')"
-			alias g++="$(ls $__bashrc_brew_prefix/bin | grep '^g++-\d\+')"
+			bashrc_prepend_PATH "$__bashrc_brew_prefix/opt/gcc/bin"
+			bashrc_prepend_PATH "$__bashrc_dotfiles_path/bin/macos"
 		fi
 	fi
 

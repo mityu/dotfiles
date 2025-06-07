@@ -36,6 +36,7 @@ if status is-login
 
     if test -d "$brew_prefix/opt/gcc"
       fish_add_path --prepend $brew_prefix/opt/gcc/bin
+      fish_add_path --prepend $dotfiles_path/bin/macos
     end
   end
 
