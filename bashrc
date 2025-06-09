@@ -108,23 +108,6 @@ fi
 
 shopt -s nocaseglob
 set -o vi
-if ! type ble &> /dev/null; then
-	bind 'set show-mode-in-prompt on'
-	bind 'set vi-ins-mode-string -'
-	bind 'set vi-cmd-mode-string :'
-	bind 'set keymap vi-command'
-	bind 'k: history-search-backward'
-	bind 'j: history-search-forward'
-	bind 'set keymap vi-insert'
-	bind '\C-p: history-search-backward'
-	bind '\C-n: history-search-forward'
-	bind '\C-b: backward-char'
-	bind '\C-f: forward-char'
-	bind '\C-a: beginning-of-line'
-	bind '\C-e: end-of-line'
-	bind '\C-w: kill-word'
-fi
-
 
 alias dotfiles=". $(which dotfiles)"
 alias update-softwares=". $(which update-softwares)"
@@ -284,27 +267,8 @@ function __bashrc_update_prompt() {
 		PS1+="${__bashrc_prompt_colors[red]}#\$?$reset"
 	fi
 	PS1+=" ${__bashrc_prompt_colors[yellow]}\w$reset "
-	if type gitstatus_query &> /dev/null && gitstatus_query && \
-		[[ "$VCS_STATUS_RESULT" == ok-sync ]]; then
-		local branch=$VCS_STATUS_LOCAL_BRANCH
-		[[ -z $branch ]] && branch="@$VCS_STATUS_COMMIT"
-		local dirty
-		(( dirty = VCS_STATUS_NUM_STAGED + VCS_STATUS_NUM_UNSTAGED + VCS_STATUS_NUM_UNTRACKED ))
-
-		PS1+=" ${__bashrc_prompt_colors[gray]}$branch$reset"
-		(( dirty )) && PS1+="${__bashrc_prompt_colors[pink]}*$reset"
-		(( VCS_STATUS_COMMITS_AHEAD )) && PS1+="${__bashrc_prompt_colors[cyan]}⇡$VCS_STATUS_COMMITS_AHEAD$reset"
-		(( VCS_STATUS_COMMITS_BEHIND )) && PS1+="${__bashrc_prompt_colors[cyan]}⇣$VCS_STATUS_COMMITS_BEHIND$reset"
-		(( VCS_STATUS_STASHES )) && PS1+="${__bashrc_prompt_colors[cyan]}≡$reset"
-		if [[ -n ${VCS_STATUS_REMOTE_NAME:-} ]]; then
-			PS1+="${__bashrc_prompt_colors[gray]} → $VCS_STATUS_REMOTE_NAME"
-			[[ -n ${VCS_STATUS_REMOTE_BRANCH:-} ]] && PS1+="/$VCS_STATUS_REMOTE_BRANCH"
-			PS1+="$reset"
-		fi
-	else
-		local branch=$(git branch --show-current 2> /dev/null || echo '')
-		[[ -n $branch ]] && PS1+=" ${__bashrc_prompt_colors[gray]}$branch$reset (no-status)"
-	fi
+	local branch=$(git branch --show-current 2> /dev/null || echo '')
+	[[ -n $branch ]] && PS1+="${__bashrc_prompt_colors[gray]}($branch)$reset"
 	PS1+='\n'
 	[[ $(id -u) == 0 ]] && PS1+='# ' || PS1+='$ '
 	return $exit_code
