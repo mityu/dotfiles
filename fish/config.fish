@@ -78,6 +78,7 @@ if status is-interactive
     fish_vi_key_bindings --no-erase
   end
   set -g fish_key_bindings fish_hybrid_key_bindings
+  bind --user -M insert ctrl-n down-or-search
 
   # Use block cursor in the normal and visual mode.
   # Also use block cursor while executing commands.
