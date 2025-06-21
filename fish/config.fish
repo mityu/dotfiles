@@ -3,6 +3,11 @@ set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
 set -l in_vscode_terminal test $TERM_PROGRAM = "vscode"
 
+set -gx XDG_CONFIG_HOME $HOME/.config
+set -gx XDG_CACHE_HOME $HOME/.cache
+set -gx XDG_DATA_HOME $HOME/.local/share
+set -gx XDG_STATE_HOME $HOME/.local/state
+
 # Define "dotfiles-path" function to return the dotfiles path
 eval "
 function dotfiles-path
@@ -69,6 +74,8 @@ if status is-interactive
   abbr --add --command git sw switch
   abbr --add --command git a add
   abbr --add --command git c commit
+
+  set -gx SQLITE_HISTORY $XDG_CACHE_HOME/sqlite_history
 
   function fish_hybrid_key_bindings --description \
       "Vi-style bindings that inherit emacs-style bindings in all modes"
@@ -199,6 +206,7 @@ if command -q rlwrap
   command -q ocaml && alias ocaml='rlwrap ocaml'
   command -q cargo && alias cargo='rlwrap cargo'
   command -q dune && alias dune='rlwrap dune'
+  set -gx RLWRAP_HOME $XDG_STATE_HOME/rlwrap
 end
 
 if command -q eza
