@@ -126,6 +126,17 @@ if status is-interactive
     end
   end
 
+  alias repo-print=repo-echo
+  function repo-echo --description 'interactively select repositories from "ghq list"'
+    set -l path (interactive-ghq-selector)
+    if string length -q -- "$path"
+      echo "$(ghq root)/$path"
+    else
+      echo 'Canceled.' 1>&2
+      return 1
+    end
+  end
+
   function dotfiles --description "Manage dotfiles"
     switch $argv[1]
       case cd
