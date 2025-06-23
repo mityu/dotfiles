@@ -10,7 +10,7 @@
       inputs.xremap.nixosModules.default
       inputs.nixos-hardware.nixosModules.common-pc-ssd
       windowManager.module
-      ./nixos/app/virtualbox.nix
+      ./app/virtualbox.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -45,7 +45,7 @@
       nerd-fonts.noto
       hackgen-nf-font
       ipaexfont
-    ] ++ [ (import ./localpkgs/cica-font.nix pkgs) ];
+    ] ++ [ (import ../localpkgs/cica-font.nix pkgs) ];
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
@@ -95,7 +95,7 @@
     serviceMode = "system";
     withX11 = true;
     watch = true;
-    yamlConfig = builtins.readFile ../xremap/config.yml;
+    yamlConfig = builtins.readFile ../../xremap/config.yml;
   };
 
   systemd.user.services.set-xhost = pkgs.lib.mkIf windowManager.X11 {
