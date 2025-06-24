@@ -1,4 +1,5 @@
 { pkgs, ... }:
+  let uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; }; in
   {
     home.packages = with pkgs; [
       bat
@@ -38,5 +39,5 @@
       vhs
       yazi
       yq-go
-    ];
+    ] ++ [ (lib.hiPrio uutils-coreutils) ];
   }
