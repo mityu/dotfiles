@@ -220,7 +220,38 @@ if command -q rlwrap
   set -gx RLWRAP_HOME $XDG_STATE_HOME/rlwrap
 end
 
-if command -q eza
+if command -q coreutils
+  set __fishrc_coreutils_overrides \
+    arch base32 base64 basename date df dirname groups head id nproc readlink \
+    realpath seq tail tr tty uname uniq uptime wc who whoami yes
+
+  function coreutils-alias
+    for cmd in $__fishrc_coreutils_overrides
+      eval "alias $cmd='coreutils $cmd'"
+    end
+    set -g __fish_ls_command coreutils ls
+    set -g __fish_ls_color_opt --color
+    set -g __fish_ls_indicators_opt -F
+  end
+  coreutils-alias
+
+  function coreutils-unalias
+    if test (count $argv) -eq 0
+      for cmd in $__fishrc_coreutils_overrides
+        functions -e $cmd
+      end
+      coreutils-unalias ls
+    else
+      for cmd in $argv
+        if test $cmd = 'ls'
+          set -e -g __fish_ls_command
+        else
+          functions -e $cmd
+        end
+      end
+    end
+  end
+else if command -q eza
   function ls
     if test -t 1
       eza --group-directories-first --icons $argv
