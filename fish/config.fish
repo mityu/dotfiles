@@ -1,7 +1,7 @@
 set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
-set -l in_vscode_terminal test $TERM_PROGRAM = "vscode"
+set -l in_vscode_terminal test "$TERM_PROGRAM" = "vscode"
 
 set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_CACHE_HOME $HOME/.cache
