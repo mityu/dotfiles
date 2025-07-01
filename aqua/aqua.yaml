@@ -3,14 +3,14 @@
 # https://aquaproj.github.io/
 registries:
   - type: standard
-    ref: v4.379.0 # renovate: depName=aquaproj/aqua-registry
+    ref: v4.381.0 # renovate: depName=aquaproj/aqua-registry
 
 packages:
   - import: aqua-minimal.yaml
-  - name: Myriad-Dreamin/tinymist@v0.13.12
+  - name: Myriad-Dreamin/tinymist@v0.13.14
   - name: XAMPPRocky/tokei@v12.1.2
   - name: ajeetdsouza/zoxide@v0.9.8
-  - name: aquaproj/aqua-installer@v4.0.0
+  - name: aquaproj/aqua-installer@v4.0.2
   - name: aquaproj/registry-tool@v0.3.5
   - name: aristocratos/btop@v1.4.3
   - name: b3nj5m1n/xdg-ninja@v0.2.0.2
@@ -22,7 +22,7 @@ packages:
   - name: itchyny/mmv@v0.1.6
   - name: jqlang/jq@jq-1.8.0
   - name: mattn/efm-langserver@v0.0.54
-  - name: nektos/act@v0.2.78
+  - name: nektos/act@v0.2.79
   - name: rhysd/actionlint@v1.7.7
   - name: rhysd/hgrep@v0.3.8
   - name: rhysd/vim-startuptime@v1.3.2
