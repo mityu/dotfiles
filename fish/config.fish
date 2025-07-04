@@ -209,7 +209,7 @@ if command -q trash
   alias gomi='trash'
   alias rm='echo "Use \"trash\" instead."; false'
 else if command -q gtrash
-  alias gomi='grash put'
+  alias gomi='gtrash put'
   alias rm='echo "Use \"gtrash\" instead."; false'
 end
 
