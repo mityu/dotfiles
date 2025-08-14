@@ -1,7 +1,22 @@
 #!/usr/bin/env bash
 
+shopt -s extglob
+
 function has-cmd() {
 	type $1 &> /dev/null
+}
+
+function ask() {
+	read -p "$1 (yes/no): " answer
+	case "$answer" in
+		[yY]?([eE][sS]))  # Matches "y" or "yes" with ignoring cases.
+			true;;
+		[nN]?([oO]))  # Matches "n" or "no" with ignoreing cases.
+			false;;
+		*)
+			echo "Invalid input: $answer"
+			ask $1;;
+	esac
 }
 
 function need-password() {
@@ -16,15 +31,21 @@ function gobin-path() {
 
 function do-update {
 	local password=''
+	local allow_sudo=false
 
 	if need-password; then
-		sudo -k  # Reset sudo credential cache
-		echo -n 'Password:'; read --silent password;
-		while ! sudo --stdin --validate --prompt='' &> /dev/null <<< $password; do
-			echo
-			echo 'Sorry, try again.'
+		allow_sudo=$(ask 'Allow sudo?' && echo 'true' || echo 'false')
+		if $allow_sudo; then
+			sudo -k  # Reset sudo credential cache
 			echo -n 'Password:'; read --silent password;
-		done
+			while ! sudo --stdin --validate --prompt='' &> /dev/null <<< $password; do
+				echo
+				echo 'Sorry, try again.'
+				echo -n 'Password:'; read --silent password;
+			done
+		else
+			echo 'Skip invoking update commands for package managers that require sudo.'
+		fi
 	fi
 
 	has-cmd update-vim && update-vim
@@ -39,7 +60,7 @@ function do-update {
 		fi
 	fi
 
-	if has-cmd pacman; then
+	if $allow_sudo && has-cmd pacman; then
 		if has-cmd yay; then
 			# Prefer using yay to pacman
 			yay -Syyu --noconfirm --sudoflags --stdin <<< $password
