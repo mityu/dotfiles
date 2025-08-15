@@ -2,11 +2,34 @@
 
 shopt -s extglob
 
-function has-cmd() {
+function has-cmd {
 	type $1 &> /dev/null
 }
 
-function ask() {
+function list-sudoists {
+	echo apt pacman
+}
+
+function need-password {
+	for c in $(list-sudoists); do
+		has-cmd $c && return $?
+	done
+	false
+}
+
+function should-update {
+	if has-cmd $1; then
+		if list-sudoists | grep $1 &> /dev/null; then
+			allow-sudo
+		else
+			true
+		fi
+	else
+		false
+	fi
+}
+
+function ask {
 	read -p "$1 (yes/no): " answer
 	case "$answer" in
 		[yY]?([eE][sS]))  # Matches "y" or "yes" with ignoring cases.
@@ -19,11 +42,23 @@ function ask() {
 	esac
 }
 
-function need-password() {
-	has-cmd pacman
+# This function will be overwritten in "confirm-allowing-sudo" function when
+# user allows to use sudo.  This provides just a default response of allowing
+# sudo.
+function allow-sudo {
+	false
 }
 
-function gobin-path() {
+function confirm-allowing-sudo {
+	if ask 'Allow sudo?'; then
+		function allow-sudo {
+			true
+		}
+	fi
+	allow-sudo
+}
+
+function gobin-path {
 	local gobin=$(go env GOBIN)
 	gobin=${gobin:-$(go env GOPATH)/bin}
 	echo $gobin
@@ -31,12 +66,10 @@ function gobin-path() {
 
 function do-update {
 	local password=''
-	local allow_sudo=false
 
 	if need-password; then
-		allow_sudo=$(ask 'Allow sudo?' && echo 'true' || echo 'false')
-		if $allow_sudo; then
-			sudo -k  # Reset sudo credential cache
+		if confirm-allowing-sudo; then
+			sudo --reset-timestamp
 			echo -n 'Password:'; read --silent password;
 			while ! sudo --stdin --validate --prompt='' &> /dev/null <<< $password; do
 				echo
@@ -44,15 +77,15 @@ function do-update {
 				echo -n 'Password:'; read --silent password;
 			done
 		else
-			echo 'Skip invoking update commands for package managers that require sudo.'
+			echo "Skip invoking update commands for package managers that require sudo: $(list-sudoists)"
 		fi
 	fi
 
-	has-cmd update-vim && update-vim
-	[[ $(uname -o) != "Msys" ]] && has-cmd update-neovim && update-neovim
-	has-cmd update-macvim && update-macvim
+	should-update update-vim && update-vim
+	[[ $(uname -o) != "Msys" ]] && should-update update-neovim && update-neovim
+	should-update update-macvim && update-macvim
 
-	if has-cmd brew; then
+	if should-update brew; then
 		brew upgrade
 		brew cleanup
 		if [[ "$(uname)" == "Darwin" ]]; then
@@ -60,25 +93,30 @@ function do-update {
 		fi
 	fi
 
-	if $allow_sudo && has-cmd pacman; then
+	if should-update apt; then
+		sudo --stdin apt update <<< $password
+		sudo --stdin apt upgrade <<< $password
+	fi
+
+	if should-update pacman; then
 		if has-cmd yay; then
 			# Prefer using yay to pacman
 			yay -Syyu --noconfirm --sudoflags --stdin <<< $password
 		else
-			sudo -S pacman -Syyu --noconfirm <<< $password
+			sudo --stdin pacman -Syyu --noconfirm <<< $password
 		fi
 	fi
 
-	if has-cmd go; then
+	if should-update go; then
 		pushd ~
-		find $(gobin-path) -type f	| while read file; do
+		find $(gobin-path) -type f | while read file; do
 			local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
 			go install "${pkg}@latest"
 		done
 		popd
 	fi
 
-	has-cmd rustup && rustup update
+	should-update rustup && rustup update
 
 	if cargo install-update --version &> /dev/null; then
 		local arg=
@@ -88,11 +126,11 @@ function do-update {
 		cargo $arg install-update --git --all
 	fi
 
-	if has-cmd opam; then
+	if should-update opam; then
 		opam update && opam upgrade --yes
 	fi
 
-	if has-cmd pip3; then
+	if should-update pip3; then
 		pip3 list --outdated --format json | python3 <(cat <<- EOF
 			import sys
 			import json
@@ -104,7 +142,7 @@ function do-update {
 			) | xargs pip3 install -U
 	fi
 
-	has-cmd update-vim-plugins && update-vim-plugins
+	should-update update-vim-plugins && update-vim-plugins
 }
 
 do-update
