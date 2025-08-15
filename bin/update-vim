@@ -4,7 +4,7 @@ set -xe
 
 if [[ "$(uname)" == "MINGW"* ]]; then
 	# Use build script on native Windows when building Vim for MinGW on MSYS2.
-	update-vim.bat $* && exit 0 || exit 1
+	update-vim.bat "$@" && exit 0 || exit 1
 elif [[ "$(uname)" == "Darwin" ]]; then
 	# Use clang on macOS
 	CC=clang
