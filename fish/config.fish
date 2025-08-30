@@ -183,6 +183,7 @@ function fishrc_ask_yesno
 end
 
 set fish_color_cwd yellow
+set fish_color_command blue
 
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
