@@ -8,10 +8,20 @@ set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_STATE_HOME $HOME/.local/state
 
-# Define "dotfiles-path" function to return the dotfiles path
+function dotfiles-path
+  # "realpath" is heavy so use some heuristic to detect dotfiles path faster.
+  set -l path $HOME/dotfiles
+  if string match -rq 'github\.com[/:]mityu/dotfiles' (git -C $path remote get-url origin)
+    echo $path
+    return
+  end
+  echo (path dirname (path dirname (realpath (status current-filename))))
+end
+
+# Re-define "dotfiles-path" function to return fixed dotfiles path.
 eval "
 function dotfiles-path
-  echo $(path dirname (path dirname (realpath (status current-filename))))
+  echo $(dotfiles-path)
 end"
 set -l dotfiles_path (dotfiles-path)
 
