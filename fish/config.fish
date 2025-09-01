@@ -198,6 +198,7 @@ set fish_color_command blue
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias themis-nvim='THEMIS_VIM=nvim themis'
+alias nix-run='nix run --extra-experimental-features nix-command --extra-experimental-features flakes'
 
 if command -q trash
   function trash
