@@ -25,6 +25,7 @@ Gen.HiLink('Question', 'Number')
 Gen.Hi('String', '#ffa500', '', '')
 Gen.HiLink('Character', 'String')
 Gen.HiLink('Title', 'String')
+Gen.HiLink('Special', 'String')
 
 Gen.Hi('PreProc', '#99bbdf', '', '')
 Gen.HiLink('Include', 'PreProc')
