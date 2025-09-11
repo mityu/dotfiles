@@ -10,8 +10,8 @@
       inputs.xremap.nixosModules.default
       inputs.nixos-hardware.nixosModules.common-pc-ssd
       windowManager.module
-      ./common.nix
-      ./app/virtualbox.nix
+      ../common.nix
+      ../../app/virtualbox.nix
     ];
 
   # Use the systemd-boot EFI boot loader.

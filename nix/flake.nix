@@ -75,7 +75,7 @@
         laptop-hp-envy-awesomewm = inputs.nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
-            ./nixos/configuration.nix
+            ./nixos/pc/laptop-hp-envy/configuration.nix
           ];
           specialArgs = {
             inherit inputs;
