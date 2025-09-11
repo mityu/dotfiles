@@ -14,6 +14,14 @@ function message-on-nix-failure() {
 	fi
 }
 
+function detect-nixos-build-target() {
+	local pc
+	pc=$(hostnamectl status | grep 'Hardware Model:' | sed 's/^[[:space:]]*Hardware[[:space:]]*Model:[[:space:]]*//')
+	if [[ "$pc" == "HP ENVY Laptop"* ]]; then
+		echo 'laptop-hp-envy-awesomewm'
+	fi
+}
+
 function do-nix-update() {
 	set +e
 	cd $(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
@@ -26,7 +34,7 @@ function do-nix-update() {
 			message-on-nix-failure $?
 			;;
 		"system")
-			sudo nixos-rebuild switch --flake .#myNixOS
+			sudo nixos-rebuild switch --flake .#$(detect-nixos-build-target)
 			message-on-nix-failure $?
 			;;
 		*)
@@ -38,7 +46,7 @@ function do-nix-update() {
 
 case $1 in
 	"flake" | "home" | "system")
-		do-nix-update $1;;
+		do-nix-update "$1";;
 	"help" | "--help" | "-h")
 		usage;;
 	*)
