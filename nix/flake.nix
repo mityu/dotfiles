@@ -30,63 +30,58 @@
     };
   };
 
-  outputs = inputs:
+  outputs =
+    inputs:
     let
       username = "mityu";
-      # buildNixosConfigurations =
-      #   {
-      #     nixosSystem,
-      #     configSet,
-      #     lib,
-      #     username,
-      #   }:
-      #   let
-      #     buildOneConfig = name: params:
-      #       let drv = nixosSystem {
-      #         system = "x86_64-linux";
-      #         modules = [
-      #           ./configuration.nix
-      #         ];
-      #         specialArgs = {
-      #           inherit inputs;
-      #           inherit username;
-      #           windowManager = params;
-      #         };
-      #       };
-      #       in
-      #       nameValuePair name drv;
-      #   in
-      #   lib.attrsets.mapAttrs' buildOneConfig configSet;
-      # osConfigSet = {
-      #   awesome = {
-      #     module = ./nixos/awesome-wm.nix;
-      #     X11 = true;
-      #     Wayland = false;
-      #   };
-      # };
-    in
-    {
-      # nixosConfigurations = buildNixosConfigurations {
-      #   nixosSystem = inputs.nixpkgs.lib.nixosSystem;
-      #   lib = inputs.pkgs.lib;
-      #   inherit username;
-      # };
-      nixosConfigurations = {
-        laptop-hp-envy-awesomewm = inputs.nixpkgs.lib.nixosSystem {
+      computers = {
+        laptop-hp-envy = {
           system = "x86_64-linux";
           modules = [
             ./nixos/pc/laptop-hp-envy/configuration.nix
           ];
-          specialArgs = {
-            inherit inputs;
-            inherit username;
-            windowManager = {
-              module = ./nixos/wm/awesome.nix;
-              X11 = true;
-              Wayland = false;
-            };
-          };
         };
+      };
+      windowManagers = {
+        awesomewm = {
+          module = ./nixos/wm/awesome.nix;
+          X11 = true;
+          Wayland = false;
+        };
+      };
+    in
+    let
+      lib = inputs.nixpkgs.lib;
+      attrToItems = attrs: builtins.attrValues (lib.mapAttrs (k: v: lib.nameValuePair k v) attrs);
+      pcList = attrToItems computers;
+      wmList = attrToItems windowManagers;
+
+      buildNixosConfig =
+        { username, lib }:
+        let
+          buildOneConfig =
+            pc: wm:
+            let
+              key = pc.name + "-" + wm.name;
+              param = pc.value // {
+                specialArgs = {
+                  inherit username;
+                  inherit inputs;
+                  windowManager = wm.value;
+                };
+              };
+            in
+            lib.nameValuePair key (lib.nixosSystem param);
+        in
+        let
+          configList = map (pc: map (wm: buildOneConfig pc wm) wmList) pcList;
+        in
+        lib.listToAttrs (lib.flatten configList);
+    in
+    {
+      nixosConfigurations = buildNixosConfig {
+        inherit username;
+        lib = inputs.nixpkgs.lib;
       };
       homeConfigurations = {
         myHome = inputs.home-manager.lib.homeManagerConfiguration {
