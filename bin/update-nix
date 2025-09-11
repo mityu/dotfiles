@@ -6,24 +6,34 @@ function usage() {
 	echo 'update-nix [flake|home|system|help|-h|--help]'
 }
 
+function message-on-nix-failure() {
+	if [[ $1 -ne 0 ]]; then
+		echo ''
+		echo 'Nix command failed.'
+		echo "Don't you forget 'git add'?"
+	fi
+}
+
 function do-nix-update() {
-	pushd $(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
+	set +e
+	cd $(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
 	case $1 in
 		"flake")
 			nix flake update
 			;;
 		"home")
 			nix run nixpkgs#home-manager -- switch -b backup --flake .#myHome
+			message-on-nix-failure $?
 			;;
 		"system")
 			sudo nixos-rebuild switch --flake .#myNixOS
+			message-on-nix-failure $?
 			;;
 		*)
 			echo 'unreachable'
 			exit 1
 			;;
 	esac
-	popd
 }
 
 case $1 in
