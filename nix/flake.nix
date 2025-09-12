@@ -48,6 +48,11 @@
           X11 = true;
           Wayland = false;
         };
+        xfce = {
+          module = ./nixos/de/xfce.nix;
+          X11 = true;
+          Wayland = false;
+        };
       };
     in
     let
