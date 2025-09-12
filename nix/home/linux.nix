@@ -1,8 +1,8 @@
-{ inputs, pkgs, username, ... }@allInputs:
+{ inputs, pkgs, username, ... }:
 {
   imports = [
     inputs.nur.modules.homeManager.default
-    (import ./pkgs/vim.nix allInputs)
+    ./pkgs/vim.nix
     ./common.nix
   ];
 
