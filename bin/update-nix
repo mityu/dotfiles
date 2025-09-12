@@ -18,7 +18,7 @@ function detect-nixos-build-target() {
 	local pc
 	pc=$(hostnamectl status | grep 'Hardware Model:' | sed 's/^[[:space:]]*Hardware[[:space:]]*Model:[[:space:]]*//')
 	if [[ "$pc" == "HP ENVY Laptop"* ]]; then
-		echo 'laptop-hp-envy-awesomewm'
+		echo 'laptop-hp-envy-awesome'
 	fi
 }
 

@@ -42,9 +42,9 @@
           ];
         };
       };
-      windowManagers = {
-        awesomewm = {
-          module = ./nixos/wm/awesome.nix;
+      des = {
+        awesome = {
+          module = ./nixos/de/awesome.nix;
           X11 = true;
           Wayland = false;
         };
@@ -54,7 +54,7 @@
       lib = inputs.nixpkgs.lib;
       attrToItems = attrs: builtins.attrValues (lib.mapAttrs (k: v: lib.nameValuePair k v) attrs);
       pcList = attrToItems computers;
-      wmList = attrToItems windowManagers;
+      deList = attrToItems des;
 
       buildNixosConfig =
         { username, lib }:
@@ -74,7 +74,7 @@
             lib.nameValuePair key (lib.nixosSystem param);
         in
         let
-          configList = map (pc: map (wm: buildOneConfig pc wm) wmList) pcList;
+          configList = map (pc: map (wm: buildOneConfig pc wm) deList) pcList;
         in
         lib.listToAttrs (lib.flatten configList);
     in

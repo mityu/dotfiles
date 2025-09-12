@@ -23,8 +23,6 @@
     gtrash
     hwloc
     nautilus
-    networkmanagerapplet
-    pasystray
     rofi
     slack
     # swift
@@ -88,32 +86,6 @@
         "general.smoothScroll" = true;
         "layout.css.devPixelsPerPx" = 1.25;
       };
-    };
-  };
-
-  systemd.user.services.nm-applet = {
-    Unit = {
-      Description = "Run a one-shot command upon user login to launch nm-applet";
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet";
-      Environment = [ "DISPLAY=:0.0" ];
-    };
-  };
-
-  systemd.user.services.pasystray = {
-    Unit = {
-      Description = "Run a one-shot command upon user login to launch pasystray";
-    };
-    Install = {
-      WantedBy = [ "default.target" ];
-    };
-    Service = {
-      ExecStart = "${pkgs.pasystray}/bin/pasystray";
-      Environment = [ "DISPLAY=:0.0" ];
     };
   };
 
