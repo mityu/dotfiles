@@ -1557,6 +1557,11 @@ if Pacpack.Tap('vim-quickrun')
     command: 'python3',
     ['hook/eval/template']: 'print(%s)',
   }
+  g:quickrun_config.nix = {
+    command: 'nix',
+    exec: '%c eval --file %s',
+    tempfile: '%{tempname()}.nix',
+  }
   if Pacpack.Tap('vim-quickrun-hook-auto_run_in_vim9')
     g:quickrun_config.vim = {
       ['hook/auto_run_in_vim9/enable']: 1,
