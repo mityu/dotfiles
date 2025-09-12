@@ -101,5 +101,6 @@
           modules = [ ./home/linux.nix ];
         };
       };
+      list-des = builtins.attrNames des;
     };
 }

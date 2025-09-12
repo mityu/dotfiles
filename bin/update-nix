@@ -2,8 +2,14 @@
 
 set -e
 
+config_dir=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
+
 function usage() {
-	echo 'update-nix [flake|home|system|help|-h|--help]'
+	echo 'update-nix [flake|home|system [DE]|help|-h|--help]'
+	echo ''
+	echo 'Available DEs:'
+	echo ''
+	echo "  $(cd "$config_dir"; nix eval .#list-des 2>/dev/null)"
 }
 
 function message-on-nix-failure() {
@@ -15,16 +21,23 @@ function message-on-nix-failure() {
 }
 
 function detect-nixos-build-target() {
+	local de
 	local pc
+
+	de=awesome
+	if [[ -n $1 ]]; then
+		de="$1"
+	fi
+
 	pc=$(hostnamectl status | grep 'Hardware Model:' | sed 's/^[[:space:]]*Hardware[[:space:]]*Model:[[:space:]]*//')
 	if [[ "$pc" == "HP ENVY Laptop"* ]]; then
-		echo 'laptop-hp-envy-awesome'
+		echo "laptop-hp-envy-$de"
 	fi
 }
 
 function do-nix-update() {
 	set +e
-	cd $(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
+	cd "$config_dir"
 	case $1 in
 		"flake")
 			nix flake update
@@ -34,7 +47,8 @@ function do-nix-update() {
 			message-on-nix-failure $?
 			;;
 		"system")
-			sudo nixos-rebuild switch --flake .#$(detect-nixos-build-target)
+			shift
+			sudo nixos-rebuild switch --flake .#$(detect-nixos-build-target "$@")
 			message-on-nix-failure $?
 			;;
 		*)
@@ -46,7 +60,7 @@ function do-nix-update() {
 
 case $1 in
 	"flake" | "home" | "system")
-		do-nix-update "$1";;
+		do-nix-update "$@";;
 	"help" | "--help" | "-h")
 		usage;;
 	*)
