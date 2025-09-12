@@ -4,6 +4,7 @@ return {
     'https://github.com/nvim-lua/plenary.nvim',
     'https://github.com/lambdalisue/mr.vim',
   },
+  enabled = false,
   cmd = 'Telescope',
   keys = { '<Space>b', '<Space>k' },
   config = function()
@@ -14,15 +15,17 @@ return {
     local function mru(opts_given)
       local opts = opts_given or {}
       local list = vim.fn['mr#mru#list']()
-      require('telescope.pickers').new(opts, {
-        prompt_title = 'MRU',
-        finder = require('telescope.finders').new_table({
-          results = list,
-          entry_maker = require('telescope.make_entry').gen_from_file(opts),
-        }),
-        previewer = config.values.file_previewer(opts),
-        sorter = config.values.file_sorter(opts),
-      }):find()
+      require('telescope.pickers')
+        .new(opts, {
+          prompt_title = 'MRU',
+          finder = require('telescope.finders').new_table({
+            results = list,
+            entry_maker = require('telescope.make_entry').gen_from_file(opts),
+          }),
+          previewer = config.values.file_previewer(opts),
+          sorter = config.values.file_sorter(opts),
+        })
+        :find()
     end
 
     telescope.setup({

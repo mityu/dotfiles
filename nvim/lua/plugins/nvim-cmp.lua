@@ -13,7 +13,11 @@ return {
     local luasnip = require('luasnip')
     local cmp = require('cmp')
     cmp.setup({
-      snippet = { expand = function(args) luasnip.lsp_expand(args.body) end },
+      snippet = {
+        expand = function(args)
+          luasnip.lsp_expand(args.body)
+        end,
+      },
       sources = cmp.config.sources({
         { name = 'nvim_lsp' },
       }, {
@@ -26,6 +30,11 @@ return {
         ['<C-y>'] = cmp.mapping(cmp.mapping.confirm()),
         ['<C-e>'] = cmp.mapping(cmp.mapping.close()),
       },
+      -- window = {
+      --   documentation = cmp.config.window.bordered({
+      --     winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
+      --   }),
+      -- }
     })
     vim.keymap.set('i', '<C-l><C-u>', cmp.complete)
   end,

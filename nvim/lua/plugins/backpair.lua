@@ -11,11 +11,14 @@ return {
     vim.fn['backpair#add_pair']("'", "'")
     vim.fn['backpair#add_pair']([[\(]], [[\)]])
     vim.fn['backpair#add_pair']([[\%(]], [[\)]])
-    vim.fn['backpair#add_pair']('[[', ']]',
-      {enable_filetypes = { 'lua', 'sh', 'bash', 'zsh', 'toml' }})
+    vim.fn['backpair#add_pair'](
+      '[[',
+      ']]',
+      { enable_filetypes = { 'lua', 'sh', 'bash', 'zsh', 'toml' } }
+    )
     vim.fn['backpair#add_pair']('`', '`', {
       condition = function()
-        return vim.fn.trim(vim.fn.getline('.')) ~= '``'
+        return vim.trim(vim.fn.getline('.')) ~= '``'
       end,
     })
   end,
