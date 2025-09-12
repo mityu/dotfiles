@@ -21,6 +21,16 @@ const callVim = async (
   return ensure(await denops.call(fn, ...args), isString);
 };
 
+const getStdpath = (denops: Denops, arg: string): Promise<string> => {
+  const fn = denops.meta.host === "vim" ? "FallGetStdpath" : "vimrc#fall#stdpath";
+  return callVim(denops, fn, arg);
+};
+
+const findProjectRoot = (denops: Denops): Promise<string> => {
+  const fn = denops.meta.host === "vim" ? "vimrc#FindProjectRoot" : "vimrc#fall#findProjectRoot";
+  return callVim(denops, fn, "");
+};
+
 const findDir = async (name: string, basePath: string) => {
   name = name.replace(/\/$/, "");
   if (await exists(basePath, { isFile: true })) {
@@ -44,7 +54,7 @@ export const file = fileBase;
 export const project = (options: FileOptions = {}) => {
   return bindSourceArgs(
     file(options),
-    async (denops) => [await callVim(denops, "vimrc#FindProjectRoot", "")],
+    async (denops) => [await findProjectRoot(denops)],
   );
 };
 
@@ -64,14 +74,14 @@ export const runtimeFiles = (options: FileOptions = {}) => {
 export const dotfiles = (options: FileOptions = {}) => {
   return bindSourceArgs(
     file(options),
-    async (denops) => [await callVim(denops, "FallGetStdpath", "dotfiles")],
+    async (denops) => [await getStdpath(denops, "dotfiles")],
   );
 };
 
 export const minpac = (options: FileOptions = {}) => {
   return bindSourceArgs(
     file(options),
-    async (denops) => [await callVim(denops, "FallGetStdpath", "packpath")],
+    async (denops) => [await getStdpath(denops, "packpath")],
   );
 };
 
@@ -82,14 +92,14 @@ export const localpack = (options: FileOptions = {}) => {
       async (
         denops,
       ) => [
-        join(await callVim(denops, "FallGetStdpath", "localpack"), "start"),
+        join(await getStdpath(denops, "localpack"), "start"),
       ],
     ),
     bindSourceArgs(
       file(options),
       async (
         denops,
-      ) => [join(await callVim(denops, "FallGetStdpath", "localpack"), "opt")],
+      ) => [join(await getStdpath(denops, "localpack"), "opt")],
     ),
   );
 };
