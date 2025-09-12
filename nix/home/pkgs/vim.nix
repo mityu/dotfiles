@@ -10,6 +10,9 @@
       {
         # Enable GUI and clipboards
         vim = overlayed.vim.overrideAttrs (oldAttrs: {
+          nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
+            pkgs.wayland-scanner
+          ];
           buildInputs = (oldAttrs.buildInputs or [ ]) ++ [
             # TODO: Check X11 or wayland
             pkgs.gtk3
