@@ -2,15 +2,9 @@
   {
     environment.systemPackages = [ pkgs.networkmanagerapplet ];
     systemd.user.services.nm-applet = {
-      Unit = {
-        Description = "Run a one-shot command upon user login to launch nm-applet";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.networkmanagerapplet}/bin/nm-applet";
-        Environment = [ "DISPLAY=:0.0" ];
-      };
+      description = "Run a one-shot command upon user login to launch nm-applet";
+      wantedBy = [ "default.target" ];
+      script = "${pkgs.networkmanagerapplet}/bin/nm-applet";
+      environment = { DISPLAY = ":0.0"; };
     };
   }

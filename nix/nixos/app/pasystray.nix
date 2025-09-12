@@ -2,15 +2,9 @@
   {
     environment.systemPackages = [ pkgs.pasystray ];
     systemd.user.services.pasystray = {
-      Unit = {
-        Description = "Run a one-shot command upon user login to launch pasystray";
-      };
-      Install = {
-        WantedBy = [ "default.target" ];
-      };
-      Service = {
-        ExecStart = "${pkgs.pasystray}/bin/pasystray";
-        Environment = [ "DISPLAY=:0.0" ];
-      };
+      description = "Run a one-shot command upon user login to launch pasystray";
+      wantedBy = [ "default.target" ];
+      script = "${pkgs.pasystray}/bin/pasystray";
+      environment = { DISPLAY = ":0.0"; };
     };
   }
