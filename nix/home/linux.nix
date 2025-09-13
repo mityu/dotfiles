@@ -111,5 +111,31 @@
     # gtk3.bookmarks = [
     # ];
   };
+
+  xfconf.settings = {
+    xfce4-panel = {
+      "panels/dark-mode" = false;
+      "panels/panel-1/size" = 26 * 1.25;
+      "panels/panel-1/icon-size" = 16 * 1.25;
+      "panels/panel-2/size" = 48 * 1.25;
+    };
+    xfce4-keyboard-shortcuts = {
+      # <Primary> is the CTRL key.
+      "commands/custom/<Primary>space" = "xfce4-appfinder";
+      "commands/custom/<Super>space" = "xfce4-appfinder";
+      "xfwm4/custom/<Super>Tab" = "cycle_windows_key";
+      "xfwm4/custom/<Super><Shift>Tab" = "cycle_reverse_windows_key";
+      "xfwm4/custom/<Alt>Tab" = "switch_window_key";
+      "xfwm4/custom/<Super>Left" = "left_workspace_key";
+      "xfwm4/custom/<Super>Right" = "right_workspace_key";
+    };
+    xfwm4 = {
+      "general/button_layout" = "CMHS|O";
+      "general/show_dock_shadow" = false;
+    };
+    xsettings = {
+      "Xft/DPI" = 96 * 1.25;
+    };
+  };
 }
 
