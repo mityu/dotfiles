@@ -89,6 +89,15 @@
     };
   };
 
+  services.gpg-agent = {
+    enable = true;
+    pinentry.package = pkgs.pinentry-tty;
+
+    # c.f.: https://wiki.archlinux.jp/index.php/GnuPG#gpg-agent
+    defaultCacheTtl = 60480000;
+    maxCacheTtl = 60480000;
+  };
+
   gtk = {
     enable = true;
     cursorTheme = {

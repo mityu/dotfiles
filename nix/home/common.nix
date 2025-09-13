@@ -16,6 +16,7 @@
       ghc
       go
       gcc
+      gnupg
       hyperfine
       jq
       libgcc
