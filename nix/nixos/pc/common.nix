@@ -1,5 +1,10 @@
 { pkgs, username, windowManager, ... }:
 {
+  imports =
+    [
+      ../app/xremap.nix
+    ];
+
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -92,22 +97,6 @@
         Option "ScrollPixelDistance" "50"
       '';
     };
-  };
-
-  services.xremap = pkgs.lib.mkIf windowManager.X11 {
-    userName = username;
-    serviceMode = "system";
-    withX11 = true;
-    watch = true;
-    yamlConfig = builtins.readFile ../../../xremap/config.yml;
-  };
-
-  systemd.user.services.set-xhost = pkgs.lib.mkIf windowManager.X11 {
-    description = "Run a one-shot command upon user login";
-    path = [ pkgs.xorg.xhost ];
-    wantedBy = [ "default.target" ];
-    script = "xhost +SI:localuser:root";
-    environment.DISPLAY = ":0.0";
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.

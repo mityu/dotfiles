@@ -1,5 +1,5 @@
-{ pkgs, windowManager, username }:
-  if windowManager.X11; then
+{ pkgs, windowManager, username, ... }:
+  if windowManager.X11 then
     {
       services.xremap = {
         userName = username;
@@ -16,7 +16,24 @@
         script = "xhost +SI:localuser:root";
         environment.DISPLAY = ":0.0";
       };
-    };
+    }
+  else if windowManager.NiriWM then
+    {
+      services.xremap = {
+        userName = username;
+        serviceMode = "system";
+        withNiri = true;
+        watch = true;
+        yamlConfig = builtins.readFile ../../../xremap/config.yml;
+      };
+    }
   else
     {
-    };
+      services.xremap = {
+        userName = username;
+        serviceMode = "system";
+        withWlroots = true;
+        watch = true;
+        yamlConfig = builtins.readFile ../../../xremap/config.yml;
+      };
+    }
