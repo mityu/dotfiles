@@ -47,6 +47,7 @@
         "general.smoothScroll" = true;
         "tabs.groups.enabled" = true;
         "browser.toolbars.bookmarks.visibility" = "never";
+        "browser.download.autohideButton" = false;
         "sidebar.verticalTabs" = true;
         "sidebar.main.tools" = "history,bookmarks,syncedtabs,aichat";
         "sidebar.revamp" = true;
@@ -54,8 +55,28 @@
         "general.useragent.locale" = "ja";
         "font.language.group" = "ja";
         "font.cjk_pref_fallback_order" = "ja,zh-cn,zh-hk,zh-tw,ko";
+        "intl.locale.requested" = "ja,en-US";
+        "browser.search.region" = "JP";
         "layout.css.devPixelsPerPx" = 1.25;
         # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "browser.uiCustomization.state" = builtins.toJSON ({
+            placements = {
+              nav-bar = [
+                "back-button"
+                "forward-button"
+                "urlbar-container"
+                "vertical-spacer"
+                "developer-button"
+                "firefox-view-button"
+                "alltabs-button"
+                "unified-extensions-button"
+                "downloads-button"
+                "history-panelmenu"
+                "preferences-button"
+                "sidebar-button"
+              ];
+            };
+          });
       };
       extensions = {
         force = true;
