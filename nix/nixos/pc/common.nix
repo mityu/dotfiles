@@ -1,10 +1,5 @@
-{ pkgs, username, windowManager, ... }:
+{ pkgs, username, platform, ... }:
 {
-  imports =
-    [
-      ../app/xremap.nix
-    ];
-
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -24,7 +19,7 @@
     type = "fcitx5";
     # enableGtk3 = true;
     fcitx5 = {
-      waylandFrontend = with windowManager; !X11 && Wayland;
+      waylandFrontend = with platform; !X11 && Wayland;
       addons = [ pkgs.fcitx5-mozc ];
       settings.globalOptions = {
         "Hotkey/TriggerKeys" = {};

@@ -1,6 +1,7 @@
-{ pkgs, windowManager, username, ... }:
-  if windowManager.X11 then
+{ pkgs, xremap, platform, username, ... }:
+  if platform.X11 then
     {
+      imports = [ xremap.nixosModules.default ];
       services.xremap = {
         userName = username;
         serviceMode = "system";
@@ -17,11 +18,12 @@
         environment.DISPLAY = ":0.0";
       };
     }
-  else if windowManager.NiriWM then
+  else if platform.NiriWM then
     {
+      imports = [ xremap.nixosModules.default ];
       services.xremap = {
         userName = username;
-        serviceMode = "system";
+        serviceMode = "user";
         withNiri = true;
         watch = true;
         yamlConfig = builtins.readFile ../../../xremap/config.yml;
@@ -29,9 +31,10 @@
     }
   else
     {
+      imports = [ xremap.nixosModules.default ];
       services.xremap = {
         userName = username;
-        serviceMode = "system";
+        serviceMode = "user";
         withWlroots = true;
         watch = true;
         yamlConfig = builtins.readFile ../../../xremap/config.yml;

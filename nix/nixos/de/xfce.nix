@@ -1,12 +1,16 @@
-{ pkgs, windowManager, ... }:
+{ pkgs, platform, ... }:
   {
+    imports = [
+      ../app/xremap.nix
+    ];
+
     services.xserver = {
       enable = true;
       desktopManager = {
         xterm.enable = false;
         xfce = {
           enable = true;
-          enableWaylandSession = windowManager.Wayland;
+          # enableWaylandSession = platform.Wayland;
         };
       };
       displayManager.lightdm.enable = true;

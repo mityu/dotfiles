@@ -30,64 +30,50 @@
     };
   };
 
-  outputs =
-    inputs:
+  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
     let
       username = "mityu";
-      computers = {
-        laptop-hp-envy = {
-          system = "x86_64-linux";
-          modules = [
-            ./nixos/pc/laptop-hp-envy/configuration.nix
-          ];
-        };
-      };
+      pcs = [ "laptop-hp-envy" ];
       des = {
-        awesome = {
-          module = ./nixos/de/awesome.nix;
-          X11 = true;
-          Wayland = false;
-        };
         xfce = {
-          module = ./nixos/de/xfce.nix;
-          X11 = true;
-          Wayland = false;
+          modules = [ ./nixos/de/xfce.nix ];
+          platform = "x11";
+        };
+        awesome = {
+          modules = [ ./nixos/de/awesome.nix ];
+          platform = "x11";
         };
       };
-    in
-    let
-      lib = inputs.nixpkgs.lib;
-      attrToItems = attrs: builtins.attrValues (lib.mapAttrs (k: v: lib.nameValuePair k v) attrs);
-      pcList = attrToItems computers;
-      deList = attrToItems des;
-
-      buildNixosConfig =
-        { username, lib }:
-        let
-          buildOneConfig =
-            pc: wm:
-            let
-              key = pc.name + "-" + wm.name;
-              param = pc.value // {
-                specialArgs = {
-                  inherit username;
-                  inherit inputs;
-                  windowManager = wm.value;
-                };
-              };
-            in
-            lib.nameValuePair key (lib.nixosSystem param);
-        in
-        let
-          configList = map (pc: map (wm: buildOneConfig pc wm) deList) pcList;
-        in
-        lib.listToAttrs (lib.flatten configList);
+      nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
     in
     {
-      nixosConfigurations = buildNixosConfig {
-        inherit username;
-        lib = inputs.nixpkgs.lib;
-      };
+      nixosConfigurations =
+        let
+          inherit (nixpkgs) lib;
+
+          getModuleOfPC = pc: ./nixos/pc/${pc}/configuration.nix;
+
+          # Make a derivation for the set of "pc" and "de(Desktop Environment)".
+          buildConfig = pc: de:
+            let
+              inherit (nixpkgs.lib) mkIf;
+              nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
+              modules = [ (getModuleOfPC pc) ] ++ de.modules;
+            in
+            nixosSystem {
+              inherit modules;
+              platform = de.platform;
+            } // mkIf (de ? system) { system = de.system; };
+
+          buildConfigsForPC = des: pc:
+            let f = deName: de:
+              let name = "${pc}-${deName}"; in
+              lib.nameValuePair name (buildConfig pc de);
+            in
+            lib.mapAttrs' f des;
+        in
+        lib.mergeAttrsList (map (buildConfigsForPC des) pcs);
+
       homeConfigurations = {
         myHome = inputs.home-manager.lib.homeManagerConfiguration {
           pkgs = import inputs.nixpkgs {

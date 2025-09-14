@@ -2,14 +2,12 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ inputs, config, lib, pkgs, username, windowManager, ... }:
+{ nixos-hardware, config, lib, pkgs, username, platform, ... }:
 {
   imports =
     [
       ./hardware-configuration.nix  # Include the results of the hardware scan.
-      inputs.xremap.nixosModules.default
-      inputs.nixos-hardware.nixosModules.common-pc-ssd
-      windowManager.module
+      nixos-hardware.nixosModules.common-pc-ssd
       ../common.nix
       ../../app/virtualbox.nix
     ];

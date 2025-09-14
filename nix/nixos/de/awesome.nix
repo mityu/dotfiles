@@ -4,5 +4,6 @@
       ../wm/awesome.nix
       ../app/nm-applet.nix
       ../app/pasystray.nix
+      ../app/xremap.nix
     ];
   }
