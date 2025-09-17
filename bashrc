@@ -181,6 +181,8 @@ function stdin() {
 }
 
 if bashrc_in_vim_terminal; then
+	export VIM= VIMRUNTIME=
+
 	function drop() {
 		printf "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
 	}
@@ -191,14 +193,6 @@ if bashrc_in_vim_terminal; then
 		read cwd
 		cd "$cwd"
 	}
-
-	function clear-vimenv() {
-		export VIM= VIMRUNTIME=
-	}
-
-	if bashrc_has_cmd nvim; then
-		alias nvim='VIM= VIMRUNTIME= nvim'
-	fi
 fi
 
 if bashrc_has_cmd sk; then
