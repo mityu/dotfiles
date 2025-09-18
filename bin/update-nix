@@ -40,6 +40,8 @@ function detect-nixos-build-target() {
 	pc=$(hostnamectl status | grep 'Hardware Model:' | sed 's/^[[:space:]]*Hardware[[:space:]]*Model:[[:space:]]*//')
 	if [[ "$pc" == "HP ENVY Laptop"* ]]; then
 		echo "laptop-hp-envy-$de"
+	elif [[ "$pc" == "Endeavor ST190E" ]]; then
+		echo "desktop-endeavor-$de"
 	fi
 }
 

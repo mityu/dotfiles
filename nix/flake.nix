@@ -33,7 +33,7 @@
   outputs = inputs@{ self, nixpkgs, home-manager, ... }:
     let
       username = "mityu";
-      pcs = [ "laptop-hp-envy" ];
+      pcs = [ "laptop-hp-envy"  "desktop-endeavor" ];
       des = {
         xfce = {
           modules = [ ./nixos/de/xfce.nix ];
