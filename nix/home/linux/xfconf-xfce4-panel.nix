@@ -11,23 +11,6 @@
 
     typePlugin = types.submodule {
       options = {
-        name = mkOption {
-          type = types.str;
-        };
-        package = mkOptionalOption {
-          type = types.package;
-        };
-        attrs = mkOption {
-          type = types.attrs;
-          default = { };
-        };
-      };
-    };
-
-    # Same as "typePlugin", but the "name" attribute can be omitted.  This is
-    # for the type of plugin definitions by users.
-    typePluginDef = types.submodule {
-      options = {
         name = mkOptionalOption {
           type = types.str;
         };
@@ -37,6 +20,9 @@
         attrs = mkOption {
           type = types.attrs;
           default = { };
+        };
+        configFile = mkOptionalOption {
+          type = types.lines;
         };
       };
     };
@@ -71,10 +57,11 @@
 
     normalizePluginDefs = pluginDefs:
       let
-        completeAttrs = name: value: {
-          name = if value.name != null then value.name else name;
-          attrs = value.attrs;
-        };
+        completeAttrs = name: value:
+          lib.updateManyAttrsByPath [ {
+              path = [ "name" ];
+              update = old: if old == null then name else old;
+            } ] value;
       in
       builtins.mapAttrs completeAttrs pluginDefs;
 
@@ -92,16 +79,27 @@
       builtins.listToAttrs (attrsToNameValuePairList prefix attrs);
 
     buildOnePanelSettings = givenPlugins: acc: panel:
+      let validatePlugins = plugins:
+        let noNamePlugins = lib.pipe plugins [
+            builtins.attrNames
+            (builtins.filter (n: plugins.${n}.name == null))
+          ];
+        in
+        if builtins.length noNamePlugins != 0 then
+          throw "Internal error: the 'name' attributes of these plugins are null: ${toString noNamePlugins}"
+        else
+          plugins;
+      in
       let
         panelConfigPrefix = "panels/panel-${toString acc.idx}";
-        plugins = panel.plugins givenPlugins;
+        plugins = panel.plugins (validatePlugins givenPlugins);  # List of plugins on this panel.
+        ids = builtins.genList (x: x + acc.pluginCount + 1) (builtins.length plugins);
+        foreachPlugins = fn:
+          let zip = lib.zipLists ids plugins; in
+          builtins.foldl' (acc: v: acc // (fn v.fst v.snd)) {} zip;
 
         pluginSettings =
           let
-            ids = builtins.genList (x: x + acc.pluginCount + 1) (builtins.length plugins);
-            foreachPlugins = fn:
-              let zip = lib.zipLists ids plugins; in
-              builtins.foldl' (acc: v: acc // (fn v.fst v.snd)) {} zip;
             pluginRegisterer = foreachPlugins (idx: plugin:
               let prefix = "plugins/plugin-${toString idx}"; in
               { ${prefix} = plugin.name; } //
@@ -111,19 +109,36 @@
           pluginRegisterer // { "${panelConfigPrefix}/plugin-ids" = ids; };
 
         otherSettings = attrsToConfig panelConfigPrefix (lib.filterAttrs (n: v: n != "plugins" && v != null) panel);
+
+        configFiles = foreachPlugins (idx: plugin:
+          if plugin.configFile == null then
+            {}
+          else
+            let rcName = "${plugin.name}-${toString idx}.rc"; in
+            {
+              "xfce4/panel/${rcName}" = {
+                force = true;
+                text = plugin.configFile; 
+              }; 
+            }
+        );
       in
       {
         idx = acc.idx + 1;
         pluginCount = acc.pluginCount + (builtins.length plugins);
         settings = acc.settings // pluginSettings // otherSettings;
+        configFiles = acc.configFiles // configFiles;
       };
 
     buildSettings = { panels, plugins, ... }:
       let
         normalizedPlugins = normalizePluginDefs plugins;
-        nul = { idx = 1; pluginCount = 0; settings = {}; };
+        nul = { idx = 1; pluginCount = 0; settings = {}; configFiles = {}; };
       in
-      (builtins.foldl' (buildOnePanelSettings normalizedPlugins) nul panels).settings;
+      lib.pipe panels [
+        (builtins.foldl' (buildOnePanelSettings normalizedPlugins) nul)
+        (lib.filterAttrs (n: v: builtins.elem n [ "settings" "configFiles" ]))
+      ];
   in
   {
     options.xfconf-xfce4-panel = {
@@ -132,7 +147,7 @@
         default = null;
       };
       plugins = mkOption {
-        type = types.attrsOf typePluginDef;
+        type = types.attrsOf typePlugin;
         default = { };
       };
       panels = mkOption {
@@ -145,16 +160,20 @@
       };
     };
 
-    config = {
+    config =
+      let settings = buildSettings cfg; in
+    {
       xfconf.settings.xfce4-panel = {
         "panels" = builtins.genList (x: x + 1) (builtins.length cfg.panels);
         "panels/dark-mode" = mkIf (cfg.dark-mode != null) cfg.dark-mode;
-      } // (buildSettings cfg) // (cfg.settings);
+      } // settings.settings // (cfg.settings);
 
       home.packages = lib.pipe cfg.plugins [
         builtins.attrValues
         (map (v: v.package))
         (builtins.filter (v: v != null))
       ];
+
+      xdg.configFile = settings.configFiles;
     };
   }
