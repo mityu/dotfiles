@@ -167,8 +167,6 @@
       # ];
     };
 
-    services.gnome-keyring.enable = true;
-
     # Clean /plugins property before apply this settings because all of the
     # entry in /plugins property of xfce4-panel channel should be completely
     # **replaced**.
