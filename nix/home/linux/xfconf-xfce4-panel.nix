@@ -14,6 +14,9 @@
         name = mkOption {
           type = types.str;
         };
+        package = mkOptionalOption {
+          type = types.package;
+        };
         attrs = mkOption {
           type = types.attrs;
           default = { };
@@ -25,9 +28,11 @@
     # for the type of plugin definitions by users.
     typePluginDef = types.submodule {
       options = {
-        name = mkOption {
-          type = types.nullOr types.str;
-          default = null;
+        name = mkOptionalOption {
+          type = types.str;
+        };
+        package = mkOptionalOption {
+          type = types.package;
         };
         attrs = mkOption {
           type = types.attrs;
@@ -73,7 +78,18 @@
       in
       builtins.mapAttrs completeAttrs pluginDefs;
 
-    attrsToConfig = prefix: lib.mapAttrs' (name: value: lib.nameValuePair "${prefix}/${name}" value);
+    attrsToConfig = prefix: attrs:
+      let attrsToNameValuePairList = prefix: attrs:
+        let mapf = v:
+            let key = "${prefix}/${v.name}"; in
+            if builtins.isAttrs v.value then
+              attrsToNameValuePairList key v.value
+            else 
+              [ (lib.nameValuePair key v.value) ];
+        in
+        builtins.concatMap mapf (lib.attrsToList attrs);
+      in
+      builtins.listToAttrs (attrsToNameValuePairList prefix attrs);
 
     buildOnePanelSettings = givenPlugins: acc: panel:
       let
@@ -134,5 +150,11 @@
         "panels" = builtins.genList (x: x + 1) (builtins.length cfg.panels);
         "panels/dark-mode" = mkIf (cfg.dark-mode != null) cfg.dark-mode;
       } // (buildSettings cfg) // (cfg.settings);
+
+      home.packages = lib.pipe cfg.plugins [
+        builtins.attrValues
+        (map (v: v.package))
+        (builtins.filter (v: v != null))
+      ];
     };
   }

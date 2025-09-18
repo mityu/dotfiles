@@ -180,6 +180,27 @@
     #   xfce4-panel -r
     # '';
 
+    # Write configuration file for xce4-netload-plugin.
+    xdg.configFile."xfce4/panel/netload-5.rc" = {
+      force = true;
+      text = ''
+        Use_Label=true
+        Show_Values=true
+        Show_Bars=true
+        Colorize_Values=false
+        Color_In=rgb(255,79,0)
+        Color_Out=rgb(53,132,228)
+        Text=net
+        Network_Device=eno1
+        Max_In=4096
+        Max_Out=4096
+        Auto_Max=false
+        Update_Interval=950
+        Values_As_Bits=false
+        Digits=2
+      '';
+    };
+
     xfconf-xfce4-panel = {
       dark-mode = false;
       plugins = {
@@ -225,6 +246,16 @@
         power-manager = {
           name = "power-manager-plugin";
         };
+        systemload = {
+          package = pkgs.xfce.xfce4-systemload-plugin;
+          attrs = {
+            uptime.enabled = false;
+            network.enabled = false;
+          };
+        };
+        netload = {
+          package = pkgs.xfce.xfce4-netload-plugin;
+        };
       };
       panels = let resize-factor = 1.25 * 1.25; in [
         {
@@ -237,7 +268,8 @@
             separator
             pager
             separator-expandable
-            separator
+            systemload
+            netload
             pulseaudio
             systray
             power-manager
