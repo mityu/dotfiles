@@ -30,7 +30,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
+  outputs = inputs@{ nixpkgs, home-manager, ... }:
     let
       username = "mityu";
       pcs = [ "laptop-hp-envy"  "desktop-endeavor" ];
@@ -44,7 +44,6 @@
           platform = "x11";
         };
       };
-      nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
     in
     {
       nixosConfigurations =
