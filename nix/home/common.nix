@@ -1,6 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
   let uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; }; in
   {
+    nixpkgs.overlays = [
+      inputs.neovim-nightly-overlay.overlays.default
+    ];
     home.packages = with pkgs; [
       bat
       btop
@@ -24,6 +27,7 @@
       (lib.hiPrio llvmPackages.libcxxClang)
       llvmPackages.mlir
       lua
+      neovim
       ninja
       ocaml
       opam
