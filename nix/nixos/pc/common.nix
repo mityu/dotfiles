@@ -1,9 +1,14 @@
-{ pkgs, username, platform, ... }:
+{
+  pkgs,
+  username,
+  platform,
+  ...
+}:
 {
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = "Asia/Tokyo";
@@ -22,7 +27,7 @@
       waylandFrontend = with platform; !X11 && Wayland;
       addons = [ pkgs.fcitx5-mozc ];
       settings.globalOptions = {
-        "Hotkey/TriggerKeys" = {};
+        "Hotkey/TriggerKeys" = { };
         "Hotkey/ActivateKeys" = {
           "0" = "Henkan";
         };
@@ -42,20 +47,32 @@
   };
 
   fonts = {
-    packages = with pkgs; [
-      noto-fonts-cjk-serif
-      noto-fonts-cjk-sans
-      noto-fonts-emoji
-      nerd-fonts.noto
-      hackgen-nf-font
-      ipaexfont
-    ] ++ [ (import ../../localpkgs/cica-font.nix pkgs) ];
+    packages =
+      with pkgs;
+      [
+        noto-fonts-cjk-serif
+        noto-fonts-cjk-sans
+        noto-fonts-emoji
+        nerd-fonts.noto
+        hackgen-nf-font
+        ipaexfont
+      ]
+      ++ [ (import ../../localpkgs/cica-font.nix pkgs) ];
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
-        serif = [ "Noto Serif CJK JP" "Noto Color Emoji" ];
-        sansSerif = [ "Noto Sans CJK JP" "Noto Color Emoji" ];
-        monospace = [ "Noto Sans Mono CJK JP" "Noto Color Emoji" ];
+        serif = [
+          "Noto Serif CJK JP"
+          "Noto Color Emoji"
+        ];
+        sansSerif = [
+          "Noto Sans CJK JP"
+          "Noto Color Emoji"
+        ];
+        monospace = [
+          "Noto Sans Mono CJK JP"
+          "Noto Color Emoji"
+        ];
         emoji = [ "Noto Color Emoji" ];
       };
     };
@@ -65,7 +82,6 @@
   #   keyMap = "us";
   #   useXkbConfig = true; # use xkb.options in tty.
   # };
-
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -166,7 +182,10 @@
 
   nix = {
     settings = {
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
     };
     gc = {
       automatic = true;

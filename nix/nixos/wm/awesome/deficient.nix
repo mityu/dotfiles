@@ -1,5 +1,12 @@
 { pkgs, ... }:
-  let awesome-deficient-pkg = { lib, lua, stdenvNoCC, fetchFromGitHub }:
+let
+  awesome-deficient-pkg =
+    {
+      lib,
+      lua,
+      stdenvNoCC,
+      fetchFromGitHub,
+    }:
     stdenvNoCC.mkDerivation rec {
       pname = "awesome-deficient";
       version = "22ad2bea198f0c231afac0b7197d9b4eb6d80da3";
@@ -24,5 +31,5 @@
         platforms = platforms.all;
       };
     };
-  in
-  pkgs.callPackage awesome-deficient-pkg { }
+in
+pkgs.callPackage awesome-deficient-pkg { }

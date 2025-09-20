@@ -12,9 +12,14 @@
 # ]
 # ```
 { lib, ... }:
-  attrset:
-    let op = acc: { name, value }:
-      let additions = map (v: { ${name} = v; }) value; in
-      lib.concatMap (accElem: map (v: accElem // v) additions) acc;
+attrset:
+let
+  op =
+    acc:
+    { name, value }:
+    let
+      additions = map (v: { ${name} = v; }) value;
     in
-    builtins.foldl' op [ { } ] (lib.attrsToList attrset)
+    lib.concatMap (accElem: map (v: accElem // v) additions) acc;
+in
+builtins.foldl' op [ { } ] (lib.attrsToList attrset)

@@ -1,15 +1,19 @@
 { pkgs, inputs, ... }:
-  let uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; }; in
-  {
-    imports = [
-      ./pkgs/vim.nix
-    ];
+let
+  uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
+in
+{
+  imports = [
+    ./pkgs/vim.nix
+  ];
 
-    nixpkgs.overlays = [
-      inputs.neovim-nightly-overlay.overlays.default
-    ];
+  nixpkgs.overlays = [
+    inputs.neovim-nightly-overlay.overlays.default
+  ];
 
-    home.packages = with pkgs; [
+  home.packages =
+    with pkgs;
+    [
       bat
       btop
       cmake
@@ -49,14 +53,15 @@
       vhs
       yazi
       yq-go
-    ] ++ [ (lib.hiPrio uutils-coreutils) ];
+    ]
+    ++ [ (lib.hiPrio uutils-coreutils) ];
 
-    programs.neovim = {
-      enable = true;
-      extraPackages = with pkgs; [
-        lua-language-server
-        gopls
-        nixd
-      ];
-    };
-  }
+  programs.neovim = {
+    enable = true;
+    extraPackages = with pkgs; [
+      lua-language-server
+      gopls
+      nixd
+    ];
+  };
+}

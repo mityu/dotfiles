@@ -1,5 +1,11 @@
 { pkgs, ... }:
-  let pkg = { lib, stdenvNoCC, fetchzip }:
+let
+  pkg =
+    {
+      lib,
+      stdenvNoCC,
+      fetchzip,
+    }:
     stdenvNoCC.mkDerivation rec {
       pname = "cica";
       version = "5.0.3";
@@ -22,5 +28,5 @@
         platforms = platforms.all;
       };
     };
-  in
-  pkgs.callPackage pkg { }
+in
+pkgs.callPackage pkg { }

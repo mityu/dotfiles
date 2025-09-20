@@ -5,12 +5,12 @@
 { pkgs, nixos-hardware, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      nixos-hardware.nixosModules.common-pc-ssd
-      ../common.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    nixos-hardware.nixosModules.common-pc-ssd
+    ../common.nix
+  ];
 
   # Bootloader.
   boot.loader.grub.enable = true;

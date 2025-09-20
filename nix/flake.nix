@@ -40,10 +40,20 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, nix-index-database, ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      home-manager,
+      nix-index-database,
+      ...
+    }:
     let
       username = "mityu";
-      pc = [ "laptop-hp-envy"  "desktop-endeavor" ];
+      pc = [
+        "laptop-hp-envy"
+        "desktop-endeavor"
+      ];
       des = {
         xfce = {
           modules = [ ./nixos/de/xfce.nix ];
@@ -55,9 +65,9 @@
         };
       };
       profiles = (import ./lib/mkCombination.nix { lib = nixpkgs.lib; }) {
-          inherit pc;
-          de = builtins.attrNames des;
-        };
+        inherit pc;
+        de = builtins.attrNames des;
+      };
     in
     {
       nixosConfigurations =
@@ -66,7 +76,8 @@
 
           getModuleOfPC = pc: ./nixos/pc/${pc}/configuration.nix;
 
-          buildConfig = { pc, de }:
+          buildConfig =
+            { pc, de }:
             let
               inherit (nixpkgs.lib) mkIf;
               nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
@@ -79,15 +90,19 @@
                 platform = deConfig.platform;
               };
             in
-            { "${pc}-${de}" = config; };
+            {
+              "${pc}-${de}" = config;
+            };
         in
         lib.mergeAttrsList (map buildConfig profiles);
 
       homeConfigurations =
         let
           getPlatformInfo = import ./lib/getPlatformInfo.nix;
-          buildConfig = { pc, de }:
-            let config = home-manager.lib.homeManagerConfiguration {
+          buildConfig =
+            { pc, de }:
+            let
+              config = home-manager.lib.homeManagerConfiguration {
                 pkgs = import nixpkgs {
                   system = "x86_64-linux";
                   config.allowUnfree = true;
@@ -99,12 +114,14 @@
                   platform = getPlatformInfo de;
                 };
                 modules = [
-                 ./home/linux.nix
+                  ./home/linux.nix
                   nix-index-database.homeModules.nix-index
                 ];
               };
             in
-            { "${pc}-${de}" = config; };
+            {
+              "${pc}-${de}" = config;
+            };
         in
         (nixpkgs.lib.mergeAttrsList (map buildConfig profiles))
         // {

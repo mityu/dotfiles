@@ -4,13 +4,12 @@
 
 { nixos-hardware, ... }:
 {
-  imports =
-    [
-      ./hardware-configuration.nix  # Include the results of the hardware scan.
-      nixos-hardware.nixosModules.common-pc-ssd
-      ../common.nix
-      ../../app/virtualbox.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix # Include the results of the hardware scan.
+    nixos-hardware.nixosModules.common-pc-ssd
+    ../common.nix
+    ../../app/virtualbox.nix
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -40,4 +39,3 @@
   system.stateVersion = "24.05"; # Did you read the comment?
 
 }
-
