@@ -1,4 +1,4 @@
-{ inputs, pkgs, username, ... }:
+{ inputs, pkgs, username, platform, ... }:
   let
     vim-overlay = final: prev:
       let
@@ -13,8 +13,7 @@
           nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
             pkgs.wayland-scanner
           ];
-          buildInputs = (oldAttrs.buildInputs or [ ]) ++ [
-            # TODO: Check X11 or wayland
+          buildInputs = (oldAttrs.buildInputs or [ ]) ++ builtins.filter (_: platform.X11) [
             pkgs.gtk3
             pkgs.xorg.libXmu
             pkgs.xorg.libXpm

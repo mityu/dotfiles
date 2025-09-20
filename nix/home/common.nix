@@ -1,9 +1,14 @@
 { pkgs, inputs, ... }:
   let uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; }; in
   {
+    imports = [
+      ./pkgs/vim.nix
+    ];
+
     nixpkgs.overlays = [
       inputs.neovim-nightly-overlay.overlays.default
     ];
+
     home.packages = with pkgs; [
       bat
       btop

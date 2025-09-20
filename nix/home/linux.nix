@@ -25,7 +25,6 @@
   {
     imports = [
       inputs.nur.modules.homeManager.default
-      ./pkgs/vim.nix
       ./linux/xfconf-xfce4-panel.nix
       ./common.nix
     ];
