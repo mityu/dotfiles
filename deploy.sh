@@ -52,6 +52,7 @@ ln -snfv ${SCRIPT_DIR}/wezterm $CONFIG_DIR/wezterm
 ln -snfv $SCRIPT_DIR/blesh $CONFIG_DIR/blesh
 ln -snfv $SCRIPT_DIR/efm-langserver $CONFIG_DIR/efm-langserver
 ln -snfv $SCRIPT_DIR/fish $CONFIG_DIR/fish
+ln -snfv $SCRIPT_DIR/nix $CONFIG_DIR/nix
 
 if $IS_MAC; then
 	ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner

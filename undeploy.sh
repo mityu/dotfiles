@@ -27,3 +27,4 @@ rm-link $CONFIG_DIR/blesh
 rm-link $CONFIG_DIR/efm-langserver
 rm-link $CONFIG_DIR/pacman
 rm-link $CONFIG_DIR/fish
+rm-link $CONFIG_DIR/nix
