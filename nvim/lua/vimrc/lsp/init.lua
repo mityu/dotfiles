@@ -84,6 +84,7 @@ set_fallback_cmd('lua_ls', 'nixpkgs#lua-language-server', '--version', function(
         },
       },
     },
+    filetypes = { 'lua' },
   })
   vim.lsp.enable(server)
 end)
