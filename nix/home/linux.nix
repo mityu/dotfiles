@@ -36,11 +36,8 @@ in
     ./common.nix
   ];
 
-  programs.home-manager.enable = true;
   home = {
-    username = "${username}";
     homeDirectory = "/home/${username}";
-    stateVersion = "22.11";
   };
 
   home.packages = with pkgs; [
@@ -52,6 +49,7 @@ in
     gnumake
     gtrash
     hwloc
+    libgcc
     nautilus
     rofi
     seahorse

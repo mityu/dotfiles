@@ -84,7 +84,8 @@ function do-nix-update {
 			;;
 		"home")
 			shift
-			nix-run nixpkgs#home-manager -- switch -b backup --flake .#$(detect-build-target "$@")
+			nix-run nixpkgs#home-manager -- switch -b backup --flake .#$(detect-build-target "$@") \
+					--extra-experimental-features nix-command --extra-experimental-features flakes
 			;;
 		"system")
 			if is-darwin; then
@@ -113,8 +114,10 @@ function do-nix-update-multi {
 		exec sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
 	else
 		[[ "$1" == "all" ]] && do-nix-update-with-message flake
-		do-nix-update-with-message system
-		sleep 1  # Network service maybe in reboot.  Give a bit time for it.
+		if ! is-darwin; then
+			do-nix-update-with-message system
+			sleep 1  # Network service maybe in reboot.  Give a bit time for it.
+		fi
 		do-nix-update-with-message home
 	fi
 }

@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, inputs, username, ... }:
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
 in
@@ -10,6 +10,12 @@ in
   nixpkgs.overlays = [
     inputs.neovim-nightly-overlay.overlays.default
   ];
+
+  programs.home-manager.enable = true;
+  home = {
+    username = "${username}";
+    stateVersion = "22.11";
+  };
 
   home.packages =
     with pkgs;
@@ -31,7 +37,7 @@ in
       gcc
       hyperfine
       jq
-      libgcc
+      # libgcc  # FIXME: I don't know why but this cause build failure on darwin.
       (lib.hiPrio clang-tools)
       (lib.hiPrio llvmPackages.libcxxClang)
       llvmPackages.mlir
