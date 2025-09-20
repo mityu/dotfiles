@@ -107,7 +107,24 @@
             { "${pc}-${de}" = config; };
         in
         (nixpkgs.lib.mergeAttrsList (map buildConfig profiles))
-        // { myHome = self.outputs.homeConfigurations.laptop-hp-envy-xfce; };
+        // {
+          darwin = home-manager.lib.homeManagerConfiguration {
+            pkgs = import nixpkgs {
+              system = "aarch64-darwin";
+              config.allowUnfree = true;
+            };
+            extraSpecialArgs = {
+              inherit inputs;
+              inherit username;
+              hardware = "mac";
+              platform = getPlatformInfo "darwin";
+            };
+            modules = [
+              ./home/darwin.nix
+              nix-index-database.homeModules.nix-index
+            ];
+          };
+        };
       list-des = builtins.attrNames des;
     };
 }
