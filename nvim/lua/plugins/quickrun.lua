@@ -14,6 +14,12 @@ return {
         runner = 'neovim_job',
         ['outputter/buffer/close_on_empty'] = true,
       },
+
+      nix = {
+        command = 'nix',
+        exec = '%c eval --file %s',
+        tempfile = '%{tempfile()}.nix',
+      },
     }
     vim.keymap.set('n', '<C-c>', function()
       if vim.fnok['quickrun#session#exists']() then
