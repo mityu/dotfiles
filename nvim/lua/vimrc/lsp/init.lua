@@ -84,14 +84,19 @@ set_fallback_cmd('lua_ls', 'nixpkgs#lua-language-server', '--version', function(
         },
       },
     },
-    filetypes = { 'lua' },
   })
   vim.lsp.enable(server)
 end)
 
+vim.lsp.config('nixd', {
+  settings = {
+    formatting = { command = { 'nixfmt' } },
+  },
+})
 vim.lsp.enable('clangd')
 vim.lsp.enable('gopls')
 vim.lsp.enable('denols')
+vim.lsp.enable('nixd')
 
 vim.diagnostic.config({
   -- virtual_lines = true,
