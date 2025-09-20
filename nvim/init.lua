@@ -136,6 +136,14 @@ local function smart_startinsert(key)
   end
 end
 
+local function operator_comment()
+  return require('vim._comment').operator()
+end
+
+local function textobj_comment()
+  return require('vim._comment').textobject()
+end
+
 vim.keymap.set({ 'n', 'v' }, ':', 'q:A')
 vim.keymap.set({ 'n', 'v' }, '<Space>:', 'q:k')
 vim.keymap.set({ 'n', 'v' }, '/', 'q/A')
@@ -143,11 +151,12 @@ vim.keymap.set({ 'n', 'v' }, '<Space>/', 'q/k')
 vim.keymap.set({ 'n', 'v' }, '?', 'q?A')
 vim.keymap.set({ 'n', 'v' }, '<Space>?', 'q?k')
 vim.keymap.set({ 'n', 'v' }, '<Space>;', ':')
-vim.keymap.set({ 'n', 'v' }, "'", ':', { noremap = false })
+vim.keymap.set({ 'n', 'v' }, "'", ':', { remap = true })
 vim.keymap.set({ 'n', 'v' }, 'k', 'gk')
 vim.keymap.set({ 'n', 'v' }, 'j', 'gj')
 vim.keymap.set({ 'n', 'v' }, 'gk', 'k')
 vim.keymap.set({ 'n', 'v' }, 'gj', 'j')
+vim.keymap.set({ 'n', 'x' }, 'm/', operator_comment, { expr = true })
 
 vim.keymap.set('n', 'i', smart_startinsert('i'), { expr = true })
 vim.keymap.set('n', 'I', smart_startinsert('I'), { expr = true })
@@ -195,6 +204,7 @@ vim.keymap.set('x', 'n', [[n<Cmd>nohlsearch<CR>]])
 vim.keymap.set('x', 'N', [[N<Cmd>nohlsearch<CR>]])
 vim.keymap.set({ 'o', 'x' }, [[a"]], [[2i"]])
 vim.keymap.set({ 'o', 'x' }, [[a']], [[2i']])
+vim.keymap.set('o', 'ic', textobj_comment, { expr = true })
 vim.keymap.set('c', '<C-l>', '<C-f>')
 vim.keymap.set('c', '<C-f>', '<Right>')
 vim.keymap.set('c', '<C-b>', '<Left>')
