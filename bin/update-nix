@@ -4,15 +4,23 @@ set -e
 
 config_dir=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
 
+function echo-bold {
+	printf "\e[1m$@\e[0m\n"
+}
+
+function is-super-user {
+	[[ $(id -u) == 0 ]]
+}
+
 function is-darwin() {
 	[[ $(uname) == Darwin ]]
 }
 
-function usage() {
+function usage {
 	if is-darwin; then
 		echo 'update-nix [flake|home|help|-h|--help]'
 	else
-		echo 'update-nix [flake|home|system [DE]|help|-h|--help]'
+		echo 'update-nix [flake|home|system [DE]|all|help|-h|--help]'
 		echo ''
 		echo 'Available DEs:'
 		echo ''
@@ -20,7 +28,11 @@ function usage() {
 	fi
 }
 
-function message-on-nix-failure() {
+function nix-run {
+	nix run --extra-experimental-features nix-command --extra-experimental-features flakes "$@"
+}
+
+function message-on-nix-failure {
 	if [[ $1 -ne 0 ]]; then
 		echo ''
 		echo 'Nix command failed.'
@@ -28,14 +40,30 @@ function message-on-nix-failure() {
 	fi
 }
 
-function detect-nixos-build-target() {
+function detect-wm {
+	local indicator
+	indicator="${XDG_CURRENT_DESKTOP,,}"  # Make lowercase
+	if [[ "$indicator" == *xfce* ]]; then
+		echo 'xfce'
+	elif [[ "$indicator" == *awesome* ]]; then
+		echo 'awesome'
+	elif [[ "$indicator" == *i3* ]]; then
+		echo 'i3'
+	fi
+}
+
+function detect-build-target {
+	if is-darwin; then
+		echo 'darwin'
+		return
+	fi
+
 	local de
 	local pc
 
-	de=awesome
-	if [[ -n $1 ]]; then
-		de="$1"
-	fi
+	de=$(detect-wm)
+	[[ -n $1 ]] && de="$1"
+	[[ -z $de ]] && de=xfce
 
 	pc=$(hostnamectl status | grep 'Hardware Model:' | sed 's/^[[:space:]]*Hardware[[:space:]]*Model:[[:space:]]*//')
 	if [[ "$pc" == "HP ENVY Laptop"* ]]; then
@@ -45,16 +73,18 @@ function detect-nixos-build-target() {
 	fi
 }
 
-function do-nix-update() {
-	set +e
+function do-nix-update {
+	local sudo
+	! is-super-user && sudo=sudo
+
 	cd "$config_dir"
 	case $1 in
 		"flake")
 			nix flake update
 			;;
 		"home")
-			nix run nixpkgs#home-manager -- switch -b backup --flake .#myHome
-			message-on-nix-failure $?
+			shift
+			nix-run nixpkgs#home-manager -- switch -b backup --flake .#$(detect-build-target "$@")
 			;;
 		"system")
 			if is-darwin; then
@@ -63,8 +93,7 @@ function do-nix-update() {
 			fi
 
 			shift
-			sudo nixos-rebuild switch --flake .#$(detect-nixos-build-target "$@")
-			message-on-nix-failure $?
+			$sudo nixos-rebuild switch --flake .#$(detect-build-target "$@")
 			;;
 		*)
 			echo 'unreachable'
@@ -73,9 +102,30 @@ function do-nix-update() {
 	esac
 }
 
+function do-nix-update-with-message {
+	echo-bold "Updating $1"
+	do-nix-update "$1"
+	echo-bold "Updating $1 done"
+}
+
+function do-nix-update-all {
+	if ! is-super-user; then
+		exec sudo "$(realpath ${BASH_SOURCE[0]})" all
+	else
+		do-nix-update-with-message flake
+		do-nix-update-with-message system
+		sleep 1  # Network service maybe in reboot.  Give a bit time for it.
+		do-nix-update-with-message home
+	fi
+}
+
+trap 'message-on-nix-failure $?' EXIT
+
 case $1 in
 	"flake" | "home" | "system")
 		do-nix-update "$@";;
+	"all")
+		do-nix-update-all;;
 	"help" | "--help" | "-h")
 		usage;;
 	*)

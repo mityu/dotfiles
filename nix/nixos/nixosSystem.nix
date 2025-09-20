@@ -1,12 +1,6 @@
 { inputs, username }:
   let
-    genPlatformInfo = platform:
-      let
-        NiriWM = platform == "niri";
-        Wayland = NiriWM || platform == "wayland";
-        X11 = platform == "x11";
-      in
-      { inherit X11 Wayland NiriWM; };
+    getPlatformInfo = import ../lib/getPlatformInfo.nix;
 
     moduleBuildParam = { lib, config, ... }:
       let
@@ -21,7 +15,7 @@
             type = types.enum [ "x11" "wayland" "niri" ];
           };
           modules = lib.mkOption {
-            type = types.listOf types.path;
+            type = types.listOf (types.oneOf [ types.path types.attrs ]);
           };
           system = lib.mkOption {
             type = types.str;
@@ -37,7 +31,7 @@
         config.mynixos = {
           specialArgs = inputs // {
             inherit username;
-            platform = genPlatformInfo cfg.platform;
+            platform = getPlatformInfo cfg.platform;
           };
         };
       };

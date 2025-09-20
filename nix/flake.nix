@@ -35,10 +35,10 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
     let
       username = "mityu";
-      pcs = [ "laptop-hp-envy"  "desktop-endeavor" ];
+      pc = [ "laptop-hp-envy"  "desktop-endeavor" ];
       des = {
         xfce = {
           modules = [ ./nixos/de/xfce.nix ];
@@ -49,6 +49,10 @@
           platform = "x11";
         };
       };
+      profiles = (import ./lib/mkCombination.nix { lib = nixpkgs.lib; }) {
+          inherit pc;
+          de = builtins.attrNames des;
+        };
     in
     {
       nixosConfigurations =
@@ -57,40 +61,44 @@
 
           getModuleOfPC = pc: ./nixos/pc/${pc}/configuration.nix;
 
-          # Make a derivation for the set of "pc" and "de(Desktop Environment)".
-          buildConfig = pc: de:
+          buildConfig = { pc, de }:
             let
               inherit (nixpkgs.lib) mkIf;
               nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
-              modules = [ (getModuleOfPC pc) ] ++ de.modules;
-            in
-            nixosSystem {
-              inherit modules;
-              platform = de.platform;
-            } // mkIf (de ? system) { system = de.system; };
+              deConfig = des.${de};
 
-          buildConfigsForPC = des: pc:
-            let f = deName: de:
-              let name = "${pc}-${deName}"; in
-              lib.nameValuePair name (buildConfig pc de);
+              modules = [ (getModuleOfPC pc) ] ++ deConfig.modules;
+              config = nixosSystem {
+                inherit modules;
+                system = mkIf (deConfig ? system) deConfig.system;
+                platform = deConfig.platform;
+              };
             in
-            lib.mapAttrs' f des;
+            { "${pc}-${de}" = config; };
         in
-        lib.mergeAttrsList (map (buildConfigsForPC des) pcs);
+        lib.mergeAttrsList (map buildConfig profiles);
 
-      homeConfigurations = {
-        myHome = inputs.home-manager.lib.homeManagerConfiguration {
-          pkgs = import inputs.nixpkgs {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
-          extraSpecialArgs = {
-            inherit inputs;
-            inherit username;
-          };
-          modules = [ ./home/linux.nix ];
-        };
-      };
+      homeConfigurations =
+        let
+          getPlatformInfo = import ./lib/getPlatformInfo.nix;
+          buildConfig = { pc, de }:
+            let config = home-manager.lib.homeManagerConfiguration {
+                pkgs = import inputs.nixpkgs {
+                  system = "x86_64-linux";
+                  config.allowUnfree = true;
+                };
+                extraSpecialArgs = {
+                  inherit inputs;
+                  inherit username;
+                  platform = getPlatformInfo de;
+                };
+                modules = [ ./home/linux.nix ];
+              };
+            in
+            { "${pc}-${de}" = config; };
+        in
+        (nixpkgs.lib.mergeAttrsList (map buildConfig profiles))
+        // { myHome = self.outputs.homeConfigurations.laptop-hp-envy-xfce; };
       list-des = builtins.attrNames des;
     };
 }
