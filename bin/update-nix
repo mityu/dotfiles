@@ -20,7 +20,7 @@ function usage {
 	if is-darwin; then
 		echo 'update-nix [flake|home|help|-h|--help]'
 	else
-		echo 'update-nix [flake|home|system [DE]|all|help|-h|--help]'
+		echo 'update-nix [flake|home|system [DE]|all|both|help|-h|--help]'
 		echo ''
 		echo 'Available DEs:'
 		echo ''
@@ -108,11 +108,11 @@ function do-nix-update-with-message {
 	echo-bold "Updating $1 done"
 }
 
-function do-nix-update-all {
+function do-nix-update-multi {
 	if ! is-super-user; then
-		exec sudo "$(realpath ${BASH_SOURCE[0]})" all
+		exec sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
 	else
-		do-nix-update-with-message flake
+		[[ "$1" == "all" ]] && do-nix-update-with-message flake
 		do-nix-update-with-message system
 		sleep 1  # Network service maybe in reboot.  Give a bit time for it.
 		do-nix-update-with-message home
@@ -124,8 +124,8 @@ trap 'message-on-nix-failure $?' EXIT
 case $1 in
 	"flake" | "home" | "system")
 		do-nix-update "$@";;
-	"all")
-		do-nix-update-all;;
+	"all" | "both")
+		do-nix-update-multi "$1";;
 	"help" | "--help" | "-h")
 		usage;;
 	*)
