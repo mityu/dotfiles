@@ -33,6 +33,7 @@
       llvmPackages.mlir
       lua
       ninja
+      nixfmt-rfc-style
       ocaml
       opam
       ripgrep
