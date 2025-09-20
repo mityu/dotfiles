@@ -31,7 +31,6 @@
       (lib.hiPrio llvmPackages.libcxxClang)
       llvmPackages.mlir
       lua
-      neovim
       ninja
       ocaml
       opam
@@ -49,4 +48,13 @@
       yazi
       yq-go
     ] ++ [ (lib.hiPrio uutils-coreutils) ];
+
+    programs.neovim = {
+      enable = true;
+      extraPackages = with pkgs; [
+        lua-language-server
+        gopls
+        nixd
+      ];
+    };
   }
