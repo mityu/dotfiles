@@ -12,7 +12,7 @@
         # evaluate modules listed in given "modules" attribute.
         options.mynixos = {
           platform = lib.mkOption {
-            type = types.enum [ "x11" "wayland" "niri" ];
+            type = types.enum [ "x11" "wayland" "niri" "xfce" ];
           };
           modules = lib.mkOption {
             type = types.listOf (types.oneOf [ types.path types.attrs ]);

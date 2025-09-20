@@ -1,4 +1,4 @@
-{ inputs, pkgs, lib, username, ... }:
+{ inputs, pkgs, lib, username, platform, hardware, ... }:
   let
     runBeforeXfconfSettings = commands:
       # This is a modification of:
@@ -161,7 +161,7 @@
       # };
       iconTheme = {
         package = pkgs.kdePackages.breeze-icons;
-        name = "breeze-dark";
+        name = if platform.Xfce then "breeze" else "breeze-dark";
       };
       # gtk3.bookmarks = [
       # ];
@@ -186,15 +186,14 @@
       Color_In=rgb(255,79,0)
       Color_Out=rgb(53,132,228)
       Text=net
-      Network_Device=eno1
+      Network_Device=${if hardware == "desktop-endeavor" then "eno1" else "wlo1"}
       Max_In=4096
       Max_Out=4096
-      Auto_Max=false
-      Update_Interval=950
+      Auto_Max=true
+      Update_Interval=1000
       Values_As_Bits=false
       Digits=2
     '';
-
 
     xfconf-xfce4-panel = {
       dark-mode = false;

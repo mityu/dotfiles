@@ -42,7 +42,7 @@
       des = {
         xfce = {
           modules = [ ./nixos/de/xfce.nix ];
-          platform = "x11";
+          platform = "xfce";
         };
         awesome = {
           modules = [ ./nixos/de/awesome.nix ];
@@ -90,6 +90,7 @@
                 extraSpecialArgs = {
                   inherit inputs;
                   inherit username;
+                  hardware = pc;
                   platform = getPlatformInfo de;
                 };
                 modules = [ ./home/linux.nix ];
