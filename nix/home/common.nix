@@ -13,6 +13,7 @@
       bat
       btop
       cmake
+      comma
       curl
       deno
       efm-langserver

@@ -2,6 +2,11 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -35,7 +40,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, home-manager, ... }:
+  outputs = inputs@{ self, nixpkgs, home-manager, nix-index-database, ... }:
     let
       username = "mityu";
       pc = [ "laptop-hp-envy"  "desktop-endeavor" ];
@@ -83,7 +88,7 @@
           getPlatformInfo = import ./lib/getPlatformInfo.nix;
           buildConfig = { pc, de }:
             let config = home-manager.lib.homeManagerConfiguration {
-                pkgs = import inputs.nixpkgs {
+                pkgs = import nixpkgs {
                   system = "x86_64-linux";
                   config.allowUnfree = true;
                 };
@@ -93,7 +98,10 @@
                   hardware = pc;
                   platform = getPlatformInfo de;
                 };
-                modules = [ ./home/linux.nix ];
+                modules = [
+                 ./home/linux.nix
+                  nix-index-database.homeModules.nix-index
+                ];
               };
             in
             { "${pc}-${de}" = config; };
