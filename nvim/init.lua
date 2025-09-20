@@ -508,6 +508,3 @@ if not vim.g.lazy_did_setup then
     },
   })
 end
-
--- LSP configurations must be loaded after lazy.nvim loads plugins.
-require('vimrc.lsp')
