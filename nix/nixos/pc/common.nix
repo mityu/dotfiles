@@ -95,6 +95,25 @@
   };
 
   services.gnome.gnome-keyring.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    pinentryPackage = pkgs.pinentry-gtk2;
+    settings = {
+      # c.f.: https://wiki.archlinux.jp/index.php/GnuPG#gpg-agent
+      default-cache-ttl = 60480000;
+      max-cache-ttl = 60480000;
+    };
+  };
+  security.pam.services.login = {
+    enableGnomeKeyring = true;
+
+    # FIXME: Pam for GnuPG doesn't work well.
+    # gnupg = {
+    #   enable = true;
+    #   noAutostart = true;
+    #   storeOnly = true;
+    # };
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   programs.fish.enable = true;
