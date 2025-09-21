@@ -6,10 +6,16 @@
 }:
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
+  vimExtraPackages = with pkgs; [
+    lua-language-server
+    gopls
+    nixd
+  ];
 in
 {
   imports = [
-    ./pkgs/vim.nix
+    ./pkgs/vim-overlay.nix
+    ./pkgs/vim-wrapper.nix
   ];
 
   nixpkgs.overlays = [
@@ -68,12 +74,12 @@ in
     ]
     ++ [ (lib.hiPrio uutils-coreutils) ];
 
+  programs.myvim = {
+    enable = true;
+    extraPackages = vimExtraPackages;
+  };
   programs.neovim = {
     enable = true;
-    extraPackages = with pkgs; [
-      lua-language-server
-      gopls
-      nixd
-    ];
+    extraPackages = vimExtraPackages;
   };
 }

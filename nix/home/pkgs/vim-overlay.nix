@@ -13,16 +13,14 @@ let
         compiledby = "${username}-nix";
         python3 = true;
       } final prev;
-    in
-    {
-      # Enable GUI and clipboards
-      vim = overlayed.vim.overrideAttrs (oldAttrs: {
+      vim-nightly = overlayed.vim.overrideAttrs (oldAttrs: {
         nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
           pkgs.wayland-scanner
         ];
         buildInputs =
           (oldAttrs.buildInputs or [ ])
           ++ builtins.filter (_: platform.X11) [
+            # Enable GUI and clipboards
             pkgs.gtk3
             pkgs.xorg.libXmu
             pkgs.xorg.libXpm
@@ -31,12 +29,11 @@ let
           "--enable-gui"
         ];
       });
+    in
+    {
+      vim = vim-nightly;
     };
 in
 {
-  nixpkgs = {
-    overlays = [
-      vim-overlay
-    ];
-  };
+  nixpkgs.overlays = [ vim-overlay ];
 }
