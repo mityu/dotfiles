@@ -1,7 +1,6 @@
 {
   pkgs,
   username,
-  platform,
   ...
 }:
 {
@@ -19,32 +18,6 @@
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.inputMethod = {
-    enable = true;
-    type = "fcitx5";
-    # enableGtk3 = true;
-    fcitx5 = {
-      waylandFrontend = with platform; !X11 && Wayland;
-      addons = [ pkgs.fcitx5-mozc ];
-      settings.globalOptions = {
-        "Hotkey/TriggerKeys" = { };
-        "Hotkey/ActivateKeys" = {
-          "0" = "Henkan";
-        };
-        "Hotkey/DeactivateKeys" = {
-          "0" = "Muhenkan";
-        };
-        "Hotkey/PrevCandidate" = {
-          "0" = "Control+P";
-          "1" = "Shift+Tab";
-        };
-        "Hotkey/NextCandidate" = {
-          "0" = "Control+N";
-          "1" = "Tab";
-        };
-      };
-    };
-  };
 
   fonts = {
     packages =
