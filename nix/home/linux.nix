@@ -33,6 +33,7 @@ in
   imports = [
     inputs.nur.modules.homeManager.default
     ./linux/xfconf-xfce4-panel.nix
+    ./linux/xfconf-xfce4-desktop-wallpaper.nix
     ./common.nix
   ];
 
@@ -289,6 +290,14 @@ in
         }
       ];
   };
+
+  xfconf-xfce4-desktop-wallpaper =
+    let
+      wallpapers = import ./pkgs/wallpapers.nix { inherit pkgs; };
+    in
+    {
+      workspace0 = "${wallpapers}/mahoyo-misakicho.jpeg";
+    };
 
   xfconf.settings = {
     xfce4-keyboard-shortcuts = {
