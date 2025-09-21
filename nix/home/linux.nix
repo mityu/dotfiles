@@ -302,8 +302,13 @@ in
   xfconf.settings = {
     xfce4-keyboard-shortcuts = {
       # <Primary> is the CTRL key.
+      "commands/custom/<Super>p" = null;
+      "commands/custom/override" = true;
       "commands/custom/<Primary>space" = "xfce4-appfinder";
       "commands/custom/<Super>space" = "xfce4-appfinder";
+      "xfwm4/custom/<Primary><Alt>Left" = null;
+      "xfwm4/custom/<Primary><Alt>Right" = null;
+      "xfwm4/custom/override" = true;
       "xfwm4/custom/<Super>Tab" = "cycle_windows_key";
       "xfwm4/custom/<Super><Shift>Tab" = "cycle_reverse_windows_key";
       "xfwm4/custom/<Alt>Tab" = "switch_window_key";
