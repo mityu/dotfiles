@@ -1,4 +1,9 @@
-{ pkgs, inputs, username, ... }:
+{
+  pkgs,
+  inputs,
+  username,
+  ...
+}:
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
 in
@@ -33,6 +38,7 @@ in
       gauche
       gh
       ghc
+      ghq
       go
       gcc
       hyperfine
