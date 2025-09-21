@@ -61,6 +61,9 @@ in
     vim-startuptime
     vscode
     wezterm
+    (lib.mkIf (hardware == "desktop-endeavor") texliveFull)
+    (lib.mkIf (hardware == "desktop-endeavor") papers)
+    (lib.mkIf (hardware == "desktop-endeavor") (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; }))
   ];
 
   programs.wezterm = {
