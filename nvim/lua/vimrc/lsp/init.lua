@@ -98,6 +98,24 @@ vim.lsp.enable('gopls')
 vim.lsp.enable('denols')
 vim.lsp.enable('nixd')
 
+if helper.is_plugin_installed('nvim-notify') then
+  local notify = require('notify')
+  helper.create_autocmd('LspAttach', {
+    group = 'vimrc',
+    callback = function(ev)
+      local client = vim.lsp.get_client_by_id(ev.data.client_id).name
+      notify.notify(("%s\nServer attached: %s"):format(vim.fn.pathshorten(ev.match), client))
+    end,
+  })
+  helper.create_autocmd('LspDetach', {
+    group = 'vimrc',
+    callback = function(ev)
+      local client = vim.lsp.get_client_by_id(ev.data.client_id).name
+      notify.notify(('Server detached: %s'):format(client))
+    end,
+  })
+end
+
 vim.diagnostic.config({
   -- virtual_lines = true,
   virtual_text = {
