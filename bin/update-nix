@@ -114,13 +114,14 @@ function do-nix-update-with-message {
 function do-nix-update-multi {
 	if ! is-super-user; then
 		exec sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
+
+		# home-manager must not be run as super user.
+		do-nix-update-with-message home
 	else
 		[[ "$1" == "all" ]] && do-nix-update-with-message flake
 		if ! is-darwin; then
 			do-nix-update-with-message system
-			sleep 1  # Network service maybe in reboot.  Give a bit time for it.
 		fi
-		do-nix-update-with-message home
 	fi
 }
 
