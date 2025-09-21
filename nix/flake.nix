@@ -57,6 +57,7 @@
       pc = [
         "laptop-hp-envy"
         "desktop-endeavor"
+        "desktop-b760m-pro"
       ];
       des = {
         xfce = {

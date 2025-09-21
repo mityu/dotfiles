@@ -61,9 +61,18 @@ in
     vim-startuptime
     vscode
     wezterm
-    (lib.mkIf (hardware == "desktop-endeavor") texliveFull)
-    (lib.mkIf (hardware == "desktop-endeavor") papers)
-    (lib.mkIf (hardware == "desktop-endeavor") (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; }))
+    (lib.mkIf (builtins.elem hardware [
+      "desktop-endeavor"
+      "desktop-b760m-pro"
+    ]) texliveFull)
+    (lib.mkIf (builtins.elem hardware [
+      "desktop-endeavor"
+      "desktop-b760m-pro"
+    ]) papers)
+    (lib.mkIf (builtins.elem hardware [
+      "desktop-endeavor"
+      "desktop-b760m-pro"
+    ]) (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; }))
   ];
 
   i18n.inputMethod = {
@@ -278,22 +287,29 @@ in
   #   xfce4-panel -r
   # '';
 
-  xfconf-xfce4-panel.plugins.netload.configFile = ''
-    Use_Label=true
-    Show_Values=true
-    Show_Bars=true
-    Colorize_Values=false
-    Color_In=rgb(255,79,0)
-    Color_Out=rgb(53,132,228)
-    Text=net
-    Network_Device=${if hardware == "desktop-endeavor" then "eno1" else "wlo1"}
-    Max_In=4096
-    Max_Out=4096
-    Auto_Max=true
-    Update_Interval=1000
-    Values_As_Bits=false
-    Digits=2
-  '';
+  xfconf-xfce4-panel.plugins.netload.configFile =
+    let
+      networkDevices = {
+        desktop-endeavor = "eno1";
+        desktop-b760m-pro = "enp4s0";
+      };
+    in
+    ''
+      Use_Label=true
+      Show_Values=true
+      Show_Bars=true
+      Colorize_Values=false
+      Color_In=rgb(255,79,0)
+      Color_Out=rgb(53,132,228)
+      Text=net
+      Network_Device=${if networkDevices ? ${hardware} then networkDevices.${hardware} else "wlo1"}
+      Max_In=4096
+      Max_Out=4096
+      Auto_Max=true
+      Update_Interval=1000
+      Values_As_Bits=false
+      Digits=2
+    '';
 
   xfconf-xfce4-panel = {
     dark-mode = false;

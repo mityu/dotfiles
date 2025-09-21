@@ -70,6 +70,8 @@ function detect-build-target {
 		echo "laptop-hp-envy-$de"
 	elif [[ "$pc" == "Endeavor ST190E" ]]; then
 		echo "desktop-endeavor-$de"
+	elif [[ "$pc" == "B760M Pro"* ]]; then
+		echo "desktop-b760m-pro-$de"
 	fi
 }
 
