@@ -42,7 +42,6 @@
 
   outputs =
     inputs@{
-      self,
       nixpkgs,
       home-manager,
       nix-index-database,

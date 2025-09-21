@@ -17,7 +17,7 @@ let
     in
     # The name 'xfconfSettings' is from:
     # https://github.com/nix-community/home-manager/blob/6e28513cf2ee9a985c339fcef24d44f43d23456b/modules/misc/xfconf.nix#L135/bin/xfconf-query
-    lib.hm.dag.entryBefore [ "xfconfSettings" ] (''
+    lib.hm.dag.entryBefore [ "xfconfSettings" ] ''
       if [[ -v DBUS_SESSION_BUS_ADDRESS ]]; then
         export DBUS_RUN_SESSION_CMD=""
       else
@@ -27,7 +27,7 @@ let
       run $DBUS_RUN_SESSION_CMD ${load}
 
       unset DBUS_RUN_SESSION_CMD
-    '');
+    '';
 in
 {
   imports = [
@@ -89,7 +89,7 @@ in
         "browser.search.region" = "JP";
         "layout.css.devPixelsPerPx" = 1.25;
         # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
-        "browser.uiCustomization.state" = builtins.toJSON ({
+        "browser.uiCustomization.state" = builtins.toJSON {
           placements = {
             nav-bar = [
               "back-button"
@@ -106,7 +106,7 @@ in
               "sidebar-button"
             ];
           };
-        });
+        };
       };
       extensions = {
         force = true;

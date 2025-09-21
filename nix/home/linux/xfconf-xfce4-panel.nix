@@ -2,7 +2,6 @@
 let
   inherit (lib)
     mkOption
-    mkEnableOption
     mkIf
     types
     ;
