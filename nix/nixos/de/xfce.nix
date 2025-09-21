@@ -1,4 +1,4 @@
-{ pkgs, platform, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ../app/xremap.nix
@@ -13,9 +13,10 @@
         # enableWaylandSession = platform.Wayland;
       };
     };
-    displayManager.lightdm.enable = true;
+    # displayManager.lightdm.enable = true;
   };
   services.displayManager.defaultSession = "xfce";
+  services.displayManager.ly.enable = true;
 
   environment.xfce.excludePackages = with pkgs; [
     xfce.xfce4-terminal
