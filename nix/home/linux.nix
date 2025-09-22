@@ -287,6 +287,7 @@ in
   #   xfce4-panel -r
   # '';
 
+  # Tips: Run `xfce4-panel -r` to reload configuration (it does restarting xfce4-panel).
   xfconf-xfce4-panel.plugins.netload.configFile =
     let
       networkDevices = {
@@ -421,6 +422,7 @@ in
     };
 
   xfconf.settings = {
+    # Note that `xfwm4 -r` command may helpful to check the effects of configuration changes.
     xfce4-keyboard-shortcuts = {
       # <Primary> is the CTRL key.
       "commands/custom/<Super>p" = null;
