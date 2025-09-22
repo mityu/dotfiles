@@ -2,6 +2,7 @@ local wezterm = require('wezterm');
 
 local isWindows = string.find(wezterm.target_triple, 'windows', 0, 1)
 local isMac = string.find(wezterm.target_triple, 'apple-darwin', 0, 1)
+local isLinux = not (isWindows or isMac)
 
 local colors = {
   background = '#1f1f1f',
@@ -124,6 +125,9 @@ elseif isMac then
   config.default_prog = { "/usr/bin/env", "PATH=/opt/homebrew/bin", "fish", "-l" }
   config.initial_cols = 110
   config.initial_rows = 35
+elseif isLinux then
+  config.initial_cols = 130
+  config.initial_rows = 70
 end
 
 return config
