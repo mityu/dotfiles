@@ -429,6 +429,13 @@ in
       "commands/custom/override" = true;
       "commands/custom/<Primary>space" = "xfce4-appfinder";
       "commands/custom/<Super>space" = "xfce4-appfinder";
+      "commands/custom/<Super><Primary>2" = "xfce4-screenshooter";
+      "commands/custom/<Super><Primary>3" = "xfce4-screenshooter --fullscreen";
+      "commands/custom/<Super><Primary>4" = "xfce4-screenshooter --region";
+      "commands/custom/<Super><Primary>5" = "xfce4-screenshooter --window";
+      "commands/custom/<Super><Primary><Shift>3" = "xfce4-screenshooter --clipboard --fullscreen";
+      "commands/custom/<Super><Primary><Shift>4" = "xfce4-screenshooter --clipboard --region";
+      "commands/custom/<Super><Primary><Shift>5" = "xfce4-screenshooter --clipboard --window";
       "xfwm4/custom/<Primary><Alt>Left" = null;
       "xfwm4/custom/<Primary><Alt>Right" = null;
       "xfwm4/custom/override" = true;
@@ -437,8 +444,6 @@ in
       "xfwm4/custom/<Alt>Tab" = "switch_window_key";
       "xfwm4/custom/<Super>Left" = "left_workspace_key";
       "xfwm4/custom/<Super>Right" = "right_workspace_key";
-      # "xfwm4/custom/<Super>KP_Left" = "left_workspace_key";
-      # "xfwm4/custom/<Super>KP_Right" = "right_workspace_key";
     };
     xfce4-power-manager = {
       "xfce4-power-manager/dpms-on-ac-off" = 35;
@@ -450,6 +455,7 @@ in
     xfwm4 = {
       "general/button_layout" = "CMHS|O";
       "general/show_dock_shadow" = false;
+      "general/raise_with_any_button" = false;
     };
     xsettings = {
       "Xft/DPI" = 96 * 1.25;
