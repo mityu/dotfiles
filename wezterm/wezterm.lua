@@ -127,7 +127,7 @@ elseif isMac then
   config.initial_rows = 35
 elseif isLinux then
   config.initial_cols = 130
-  config.initial_rows = 70
+  config.initial_rows = 40
 end
 
 return config
