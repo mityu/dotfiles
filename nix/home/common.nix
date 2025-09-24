@@ -7,9 +7,18 @@
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
   vimExtraPackages = with pkgs; [
-    lua-language-server
+    bash-language-server
+    coqPackages.coq-lsp
+    efm-langserver
+    fish-lsp
     gopls
+    haskell-language-server
+    lua-language-server
     nixd
+    ocamlPackages.ocaml-lsp
+    rust-analyzer
+    texlab
+    tinymist
   ];
 in
 {
@@ -37,7 +46,6 @@ in
       comma
       curl
       deno
-      efm-langserver
       eza
       fd
       fish
@@ -65,7 +73,6 @@ in
       stylua
       tdf
       tlrc
-      tinymist
       tokei
       typst
       vhs
