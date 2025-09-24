@@ -6,6 +6,7 @@ return {
     notify.setup({
       render = 'compact',
       stages = 'slide',
+      minimum_width = 15,
     })
   end,
 }
