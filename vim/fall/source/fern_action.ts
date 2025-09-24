@@ -18,7 +18,17 @@ export function fernAction(): Source<Detail> {
     const maps = await listFernMaps(denops);
     signal?.throwIfAborted();
 
-    const actions = maps.map((v) => v.match(/^<Plug>\(fern-action-(.*)\)/)![1]);
+    const allActions = maps.map((v) =>
+      v.match(/^<Plug>\(fern-action-(.*)\)/)![1]
+    );
+    const actions = new Set(allActions);
+
+    signal?.throwIfAborted();
+    allActions.filter((v) => v.endsWith("=")).forEach((v) => {
+      if (actions.has(v.substring(0, v.length - 1))) {
+        actions.delete(v);
+      }
+    });
 
     for (const [id, action] of enumerate(actions)) {
       signal?.throwIfAborted();
