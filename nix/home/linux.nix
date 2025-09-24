@@ -51,7 +51,6 @@ in
     gtrash
     hwloc
     libgcc
-    nautilus
     rofi
     seahorse
     slack
@@ -61,6 +60,7 @@ in
     vim-startuptime
     vscode
     wezterm
+    (lib.mkIf (!platform.Xfce) nautilus)
     (lib.mkIf (builtins.elem hardware [
       "desktop-endeavor"
       "desktop-b760m-pro"
@@ -263,7 +263,7 @@ in
     font = {
       package = pkgs.noto-fonts-cjk-sans;
       name = "Noto Sans CJK JP";
-      size = 9;
+      size = if platform.Xfce then 10 else 9;
     };
     # theme = {
     #   package = pkgs.whitesur-gtk-theme;
