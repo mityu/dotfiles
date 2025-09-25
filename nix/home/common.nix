@@ -107,7 +107,11 @@ in
       yazi
       yq-go
     ]
-    ++ [ (lib.hiPrio uutils-coreutils) ];
+    ++ [ (lib.hiPrio uutils-coreutils) ]
+    ++ (with pkgs.haskellPackages; [
+      cabal-install
+      stack
+    ]);
 
   programs.myvim = {
     enable = true;
