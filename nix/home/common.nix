@@ -68,6 +68,7 @@ in
     with pkgs;
     [
       bat
+      bottom
       btop
       cmake
       comma
