@@ -20,6 +20,33 @@ let
     texlab
     tinymist
   ];
+  # See: https://discourse.nixos.org/t/is-it-possible-to-override-cargosha256-in-buildrustpackage/4393/20
+  deno = pkgs.deno.override (
+    let
+      rp = pkgs.rustPlatform;
+    in
+    {
+      rustPlatform = rp // {
+        buildRustPackage =
+          args:
+          rp.buildRustPackage (
+            finalAttrs:
+            (args finalAttrs)
+            // rec {
+              version = "2.5.1";
+              src = pkgs.fetchFromGitHub {
+                owner = "denoland";
+                repo = "deno";
+                tag = "v${version}";
+                fetchSubmodules = true; # required for tests
+                hash = "sha256-W0wQ4SXIAxIBjjk2z3sNTJjAYdY73dDaiPWDeUVWo/w=";
+              };
+              cargoHash = "sha256-5votu/4MUusRvlZc4+vZQ/wbcI0XSZ8qkq5JaMGJHB8=";
+            }
+          );
+      };
+    }
+  );
 in
 {
   imports = [
