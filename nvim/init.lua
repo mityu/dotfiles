@@ -507,4 +507,5 @@ if not vim.g.lazy_did_setup then
       enabled = false,
     },
   })
+  require('vimrc.lsp')
 end
