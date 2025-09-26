@@ -113,7 +113,7 @@ function do-nix-update-with-message {
 
 function do-nix-update-multi {
 	if ! is-super-user; then
-		exec sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
+		sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
 
 		# home-manager must not be run as super user.
 		do-nix-update-with-message home
