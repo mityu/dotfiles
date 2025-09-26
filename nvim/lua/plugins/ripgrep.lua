@@ -32,7 +32,11 @@ return {
           local command = ('rg --json -i %s'):format(pat)
           vim.cmd.redraw()
           helper.echo(('Invoked command: %s'):format(command))
-          vim.fn['ripgrep#call'](command, cwd, vim.fs.joinpath(vim.fn.fnamemodify(cwd, ':.'), ''))
+          vim.fn['ripgrep#call'](
+            command,
+            cwd,
+            vim.fs.joinpath(vim.fn.fnamemodify(cwd, ':.'), '')
+          )
         end)
       end)
     end, { nargs = '*', complete = 'file' })

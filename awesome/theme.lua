@@ -9,7 +9,9 @@ local dpi = xresources.apply_dpi
 local gears = require("gears")
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
-local getfont = function(name, size) return name .. ' ' .. dpi(size) end
+local getfont = function(name, size)
+  return name .. " " .. dpi(size)
+end
 
 local theme = {}
 
@@ -83,14 +85,14 @@ theme.notification_margin = dpi(25)
 -- menu_[bg|fg]_[normal|focus]
 -- menu_[border_color|border_width]
 -- theme.menu_font = theme.font
-theme.menu_submenu = '>'
+theme.menu_submenu = ">"
 -- theme.menu_submenu = '❯'
 theme.menu_height = dpi(32)
 theme.menu_width = dpi(150)
-theme.menu_bg_normal = '#dbe3e6'
-theme.menu_bg_focus = '#2b63dd'
-theme.menu_fg_normal = '#1f1f1f'
-theme.menu_fg_focus = '#ffffff'
+theme.menu_bg_normal = "#dbe3e6"
+theme.menu_bg_focus = "#2b63dd"
+theme.menu_fg_normal = "#1f1f1f"
+theme.menu_fg_focus = "#ffffff"
 
 -- You can add as many variables as
 -- you wish and access them by using
@@ -166,7 +168,6 @@ theme.layout_cornerse = themes_path .. "default/layouts/cornersew.png"
 -- Generate Awesome icon:
 theme.awesome_icon =
   theme_assets.awesome_icon(theme.menu_height, theme.fg_focus, theme.bg_focus)
-
 
 -- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.

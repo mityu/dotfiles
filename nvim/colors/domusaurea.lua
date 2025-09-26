@@ -1,5 +1,8 @@
-local colorscheme =
-    vim.fs.joinpath(require('vimrc.helper').stdpath('dotvim-runtime'), 'colors', 'domusaurea.vim')
+local colorscheme = vim.fs.joinpath(
+  require('vimrc.helper').stdpath('dotvim-runtime'),
+  'colors',
+  'domusaurea.vim'
+)
 vim.cmd.source(colorscheme)
 vim.cmd.highlight([[IblIndent guifg=black ctermfg=black]])
 

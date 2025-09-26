@@ -8,9 +8,9 @@ return {
       callback = function()
         local rejectBuftypes = { 'quickfix', 'help', 'terminal', 'prompt', 'popup' }
         if
-            not vim.bo.modifiable
-            or vim.bo.filetype == 'help'
-            or vim.list_contains(rejectBuftypes, vim.bo.buftype)
+          not vim.bo.modifiable
+          or vim.bo.filetype == 'help'
+          or vim.list_contains(rejectBuftypes, vim.bo.buftype)
         then
           return
         end

@@ -14,14 +14,14 @@ if not vim_did_start then
   local lazy_plugin_path = lazy_root_path .. '/lazy.nvim'
   if not vim.uv.fs_stat(lazy_plugin_path) then
     vim
-        .system({
-          'git',
-          'clone',
-          '--filter=blob:none',
-          'https://github.com/folke/lazy.nvim.git',
-          lazy_plugin_path,
-        })
-        :wait()
+      .system({
+        'git',
+        'clone',
+        '--filter=blob:none',
+        'https://github.com/folke/lazy.nvim.git',
+        lazy_plugin_path,
+      })
+      :wait()
   end
   vim.opt.runtimepath:prepend(lazy_plugin_path)
 end
@@ -266,9 +266,19 @@ loopmap.loop_define({
   body = {
     { 'h', 'gT' },
     { 'l', 'gt' },
-    { 'T', function() map_tabmove(-1) end },
-    { 't', function() map_tabmove(1) end },
-  }
+    {
+      'T',
+      function()
+        map_tabmove(-1)
+      end,
+    },
+    {
+      't',
+      function()
+        map_tabmove(1)
+      end,
+    },
+  },
 })
 
 vim.cmd('iabbrev todo: TODO:')
@@ -290,7 +300,9 @@ vim.api.nvim_create_user_command(
   [[call setreg('+', getreg(<q-args>, 1))]],
   { nargs = '?' }
 )
-vim.api.nvim_create_user_command('Hlgroup', function() helper.show_highlight_group() end, { bar = true })
+vim.api.nvim_create_user_command('Hlgroup', function()
+  helper.show_highlight_group()
+end, { bar = true })
 vim.api.nvim_create_user_command('Draft', function(_)
   vim.bo.buftype = 'nofile'
   vim.bo.swapfile = false
@@ -315,7 +327,6 @@ vim.api.nvim_create_user_command('SetUndoFtplugin', function(config)
     vim.fn.setbufvar('%', 'undo_ftplugin', restorer)
   end
 end, { nargs = 1, complete = 'command' })
-
 
 helper.create_autocmd('CmdwinEnter', {
   group = 'vimrc-cmdwin',
@@ -397,14 +408,15 @@ if helper.is_invokable({ 'chmod' }) then
     group = 'vimrc',
     callback = function()
       local file = vim.fn.expand('%:p')
-      if vim.fn.stridx(vim.fn.getline(1), '#!') == 0
-          and not vim.fnok.executable(file) then
+      if
+        vim.fn.stridx(vim.fn.getline(1), '#!') == 0
+        and not vim.fnok.executable(file)
+      then
         vim.system({ 'chmod', 'a+x', file }):wait()
       end
     end,
   })
 end
-
 
 -- From: https://zenn.dev/vim_jp/articles/f02adb4f325e51   Thanks!
 helper.create_autocmd('BufWritePre', {

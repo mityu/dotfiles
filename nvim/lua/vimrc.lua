@@ -13,24 +13,32 @@ function M.search_project_root(path)
 
   local root_marker_dirs = {
     '.git',
-    'autoload', 'plugin', 'denops',
+    'autoload',
+    'plugin',
+    'denops',
   }
   local root_marker_files = {
     'go.mod',
-    'compile_flags.txt', 'compile_commands.json', '.clang-format',
+    'compile_flags.txt',
+    'compile_commands.json',
+    '.clang-format',
     'Cargo.toml',
     'dune-project',
-    'deno.json', 'deno.jsonc', 'import_map.json',
+    'deno.json',
+    'deno.jsonc',
+    'import_map.json',
   }
 
   local root = ''
 
-  local dirs = vim.fs.find(root_marker_dirs, { type = 'directory', path = path, upward = true })
+  local dirs =
+    vim.fs.find(root_marker_dirs, { type = 'directory', path = path, upward = true })
   if #dirs > 0 then
     root = vim.fs.dirname(dirs[1])
   end
 
-  local files = vim.fs.find(root_marker_files, { type = 'file', path = path, upward = true })
+  local files =
+    vim.fs.find(root_marker_files, { type = 'file', path = path, upward = true })
   if #files > 0 then
     local dir = vim.fs.dirname(files[1])
     if dir:len() > root:len() then
@@ -75,7 +83,10 @@ end
 ---@return string?
 function M.find_git_root(target)
   target = vim.fn.resolve(target or vim.fs.abspath(vim.fn.bufname('%')))
-  local gitdir = vim.fs.find({ '.git' }, { type = file, path = target, upward = true, limit = 1 })
+  local gitdir = vim.fs.find(
+    { '.git' },
+    { type = file, path = target, upward = true, limit = 1 }
+  )
   if #gitdir == 0 then
     return nil
   end
@@ -91,7 +102,8 @@ function M.cd_project_root(cdcmd)
 end
 
 function M.show_highlight_group()
-  local hlgroup = vim.fn.synIDattr(vim.fn.synID(vim.fn.line('.'), vim.fn.col('.'), 1), 'name')
+  local hlgroup =
+    vim.fn.synIDattr(vim.fn.synID(vim.fn.line('.'), vim.fn.col('.'), 1), 'name')
   local group_chain = {}
 
   while hlgroup ~= '' do

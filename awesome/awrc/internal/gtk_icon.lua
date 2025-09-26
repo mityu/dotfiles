@@ -1,7 +1,7 @@
 -- A internal module for loading GTK icons
 
-local gears = require('gears')
-local lgi = require('lgi')
+local gears = require("gears")
+local lgi = require("lgi")
 local cairo = lgi.cairo
 local rsvg = lgi.Rsvg
 local gtk = lgi.Gtk
@@ -39,9 +39,7 @@ local function load(name, options)
     return nil
   end
 
-  local icon =
-    options.width ~= nil
-    and get_resized_icon_surface(path, options.width)
+  local icon = options.width ~= nil and get_resized_icon_surface(path, options.width)
     or gears.surface.load(path)
 
   if options.color ~= nil then

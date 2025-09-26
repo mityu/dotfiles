@@ -54,12 +54,9 @@ local function gin_log_opened()
     [[<Cmd>call search('^commit\s\w\+', 'W')<CR>]],
     { buffer = true }
   )
-  vim.keymap.set(
-    'n',
-    '<Plug>(gin-action-diff:HEAD)',
-    function() gin_log_diff('HEAD') end,
-    { buffer = true }
-  )
+  vim.keymap.set('n', '<Plug>(gin-action-diff:HEAD)', function()
+    gin_log_diff('HEAD')
+  end, { buffer = true })
 end
 
 local function gin_edit_opened()
@@ -80,7 +77,7 @@ local function gin_edit_opened()
   local winid = vim.fn.bufwinid(bufnr)
   local remover = vim.iter({ 'do', 'dor', 'dol', 'dp' }):fold('', function(acc, v)
     local cmd = 'xunmap <buffer> ' .. v
-    return acc .. cmd .. "\n"
+    return acc .. cmd .. '\n'
   end)
   vim.fn.win_execute(winid, remover, 'silent!')
 
@@ -113,7 +110,11 @@ local function gin_diff_opened()
       table.remove(args, 1)
     end
 
-    if vim.iter(options):any(function(v) return v:match([[^\+\+opener]]) ~= nil end) then
+    if
+      vim.iter(options):any(function(v)
+        return v:match([[^\+\+opener]]) ~= nil
+      end)
+    then
       options:insert('++opener=tabedit')
     end
 
@@ -122,20 +123,21 @@ local function gin_diff_opened()
       local mods = ''
       if args.mods then
         -- Convert mods table into string representation
-        mods = vim.iter(ipairs(args.mods))
-            :map(function(arg)
-              local kind, value = arg:unpack()
-              if kind == 'filter' then
-                return nil
-              elseif kind == 'split' then
-                return value
-              elseif kind == 'emsg_silent' then
-                return value and 'silent' or nil
-              else
-                return kind
-              end
-            end)
-            :join(' ')
+        mods = vim
+          .iter(ipairs(args.mods))
+          :map(function(arg)
+            local kind, value = arg:unpack()
+            if kind == 'filter' then
+              return nil
+            elseif kind == 'split' then
+              return value
+            elseif kind == 'emsg_silent' then
+              return value and 'silent' or nil
+            else
+              return kind
+            end
+          end)
+          :join(' ')
       end
 
       -- Invoking :GinPatch here causes command execution recursion, so

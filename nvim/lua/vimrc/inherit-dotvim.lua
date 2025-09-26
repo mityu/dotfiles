@@ -4,7 +4,9 @@ local helper = require('vimrc.helper')
 local now = require('vimrc.helper.now')
 
 now(function()
-  local files = vim.fs.find(function(name, _) return vim.endswith(name, '.vim') end, {
+  local files = vim.fs.find(function(name, _)
+    return vim.endswith(name, '.vim')
+  end, {
     limit = math.huge,
     type = 'file',
     path = vim.fs.joinpath(helper.stdpath('dotvim-runtime'), 'ftdetect'),
@@ -25,7 +27,7 @@ helper.create_autocmd('Syntax', {
     for _, file in ipairs(files) do
       vim.cmd.source(vim.fn.fnameescape(file))
     end
-  end
+  end,
 })
 helper.create_autocmd('FileType', {
   group = 'vimrc-dotvim-ftplugin',
@@ -44,5 +46,5 @@ helper.create_autocmd('FileType', {
     for _, file in ipairs(files) do
       vim.cmd.source(vim.fn.fnameescape(file))
     end
-  end
+  end,
 })

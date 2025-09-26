@@ -105,8 +105,6 @@ mylauncher = awful.widget.launcher({
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
-
-
 -- {{{ Wibar
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -217,7 +215,8 @@ awful.screen.connect_for_each_screen(function(s)
   })
 
   -- Create the wibox
-  s.mywibox = awful.wibar({ height = beautiful.menu_height, position = "top", screen = s })
+  s.mywibox =
+    awful.wibar({ height = beautiful.menu_height, position = "top", screen = s })
   local spacer = wibox.container.margin(nil, dpi(8), 0, 0, 0)
 
   -- Add widgets to the wibox
@@ -415,27 +414,25 @@ globalkeys = gears.table.join(
   -- 	{ description = "toggle muting mike", group = "audio" }
   -- ),
 
-  awful.key({}, "XF86MonBrightnessUp", function(_) awful.spawn("brightnessctl set 5%+") end),
-  awful.key({}, "XF86MonBrightnessDown", function(_) awful.spawn("brightnessctl set 5%-") end)
+  awful.key({}, "XF86MonBrightnessUp", function(_)
+    awful.spawn("brightnessctl set 5%+")
+  end),
+  awful.key({}, "XF86MonBrightnessDown", function(_)
+    awful.spawn("brightnessctl set 5%-")
+  end)
 )
 
 for _, key in ipairs({ "j", "l" }) do
-  local tb = awful.key(
-    { modkey },
-    key,
-    function() awful.client.focus.byidx(1) end,
-    { description = "focus next by index", group = "client" }
-  )
+  local tb = awful.key({ modkey }, key, function()
+    awful.client.focus.byidx(1)
+  end, { description = "focus next by index", group = "client" })
   globalkeys = gears.table.join(globalkeys, tb)
 end
 
 for _, key in ipairs({ "k", "h" }) do
-  local tb = awful.key(
-    { modkey },
-    key,
-    function() awful.client.focus.byidx(-1) end,
-    { description = "focus previous by index", group = "client" }
-  )
+  local tb = awful.key({ modkey }, key, function()
+    awful.client.focus.byidx(-1)
+  end, { description = "focus previous by index", group = "client" })
   globalkeys = gears.table.join(globalkeys, tb)
 end
 
@@ -582,7 +579,7 @@ awful.rules.rules = {
         c.maximized = false
         c.maximized = true
       end
-    end
+    end,
   },
 
   -- Floating clients.

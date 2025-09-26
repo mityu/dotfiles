@@ -6,7 +6,9 @@ return {
     local function predicate(filename)
       if vim.regex([[\.git\%([\/]\%(config\|hooks\)\>\)\@!\>]]):match_str(filename) then
         return false
-      elseif vim.fn.resolve(vim.fn.expand('%:p')) == filename and vim.bo.buftype ~= '' then
+      elseif
+        vim.fn.resolve(vim.fn.expand('%:p')) == filename and vim.bo.buftype ~= ''
+      then
         return false
       end
       return true
@@ -22,7 +24,7 @@ return {
       group = 'vimrc',
       pattern = '*/plugin/mr.vim',
       once = true,
-      command = 'call vimrc#mruw#start_recording()'
+      command = 'call vimrc#mruw#start_recording()',
     })
   end,
 }

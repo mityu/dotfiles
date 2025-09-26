@@ -29,7 +29,9 @@ function M.loop_define(config)
     for _, body in ipairs(config.body) do
       local rhs = body[2]
       if helper.is_string(rhs) and rhs:lower():find('<sid>', 0, true) ~= nil then
-        helper.echomsg_error(('loop_define: %s: rhs cannot have <SID>: %s'):format(config.id, rhs))
+        helper.echomsg_error(
+          ('loop_define: %s: rhs cannot have <SID>: %s'):format(config.id, rhs)
+        )
         return
       end
     end
@@ -92,9 +94,12 @@ end
 ---@param simple_config vimrc.loopmap.config-simple
 function M.simple_loop_define(simple_config)
   local config = vim.tbl_extend('error', vim.deepcopy(simple_config), { body = {} })
-  config.body = vim.iter(vim.fn.split(simple_config.follow_key, [[.\zs]])):map(function(v)
-    return { v, simple_config.enter_with .. v }
-  end):totable()
+  config.body = vim
+    .iter(vim.fn.split(simple_config.follow_key, [[.\zs]]))
+    :map(function(v)
+      return { v, simple_config.enter_with .. v }
+    end)
+    :totable()
 
   M.loop_define(config)
 end

@@ -8,7 +8,12 @@ local function make_menu()
   local awesome_menu = {
     { "hotkeys", show_hotkey_help },
     { "restart", awesome.restart },
-    { "quit", function() awesome.quit() end, },
+    {
+      "quit",
+      function()
+        awesome.quit()
+      end,
+    },
   }
 
   -- TODO: Add reboot, logout, lock, shutdown
@@ -20,10 +25,10 @@ local function make_menu()
       { "wezterm", "wezterm" },
       { "firefox", "firefox" },
       { "system", system_menu },
-    }
+    },
   })
 end
 
 return {
-  make = make_menu
+  make = make_menu,
 }

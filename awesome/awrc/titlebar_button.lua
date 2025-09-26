@@ -96,7 +96,13 @@ local function create_close_button(size, current_client)
     cr:stroke()
   end
 
-  return create_circle_button(size.button, current_client, "#fc474a", callback, overlay_drawer)
+  return create_circle_button(
+    size.button,
+    current_client,
+    "#fc474a",
+    callback,
+    overlay_drawer
+  )
 end
 
 --[[
@@ -192,7 +198,13 @@ local function create_maximize_button(size, current_client)
     end
   end
 
-  return create_circle_button(size.button, current_client, "#19c43d", callback, overlay_drawer)
+  return create_circle_button(
+    size.button,
+    current_client,
+    "#19c43d",
+    callback,
+    overlay_drawer
+  )
 end
 
 local function create_spacer(size)

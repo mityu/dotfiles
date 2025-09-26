@@ -5,4 +5,4 @@ local function load_module(table, key)
   return module
 end
 
-return setmetatable({}, {__index = load_module})
+return setmetatable({}, { __index = load_module })

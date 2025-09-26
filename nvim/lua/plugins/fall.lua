@@ -35,11 +35,11 @@ return {
   'https://github.com/vim-fall/fall.vim',
   lazy = false,
   dependencies = {
-    { 'https://github.com/mityu/vim-fall-modal' }
+    { 'https://github.com/mityu/vim-fall-modal' },
   },
   init = function()
     vim.g.fall_custom_path =
-        vim.fs.joinpath(helper.stdpath('dotvim'), 'fall', 'custom.ts')
+      vim.fs.joinpath(helper.stdpath('dotvim'), 'fall', 'custom.ts')
 
     vim.keymap.set('n', '<Space>k', '<Cmd>Fall mru<CR>')
     vim.keymap.set('n', '<Space>j', '<Cmd>Fall file:project<CR>')

@@ -7,10 +7,8 @@ local function git_branch_by_gin()
   return '%{vimrc#helper#statusline_git_branch_by_gin()}'
 end
 
-local git_branch =
-    helper.is_plugin_loaded('vim-gin')
-    and git_branch_by_gin
-    or git_branch_default
+local git_branch = helper.is_plugin_loaded('vim-gin') and git_branch_by_gin
+  or git_branch_default
 
 helper.create_autocmd('User', {
   group = 'vimrc',

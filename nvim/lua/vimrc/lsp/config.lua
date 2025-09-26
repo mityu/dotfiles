@@ -6,7 +6,9 @@ if helper.is_plugin_installed('nvim-notify') then
     group = 'vimrc',
     callback = function(ev)
       local client = vim.lsp.get_client_by_id(ev.data.client_id).name
-      notify.notify(("%s\nServer attached: %s"):format(vim.fn.pathshorten(ev.match), client))
+      notify.notify(
+        ('%s\nServer attached: %s'):format(vim.fn.pathshorten(ev.match), client)
+      )
     end,
   })
   helper.create_autocmd('LspDetach', {
@@ -31,7 +33,7 @@ vim.diagnostic.config({
       [vim.diagnostic.severity.HINT] = 'H>',
       [vim.diagnostic.severity.INFO] = 'I>',
     },
-  }
+  },
 })
 -- highlight link LspDiagVirtualTextError Error
 -- highlight link LspDiagVirtualTextWarning WarningMsg
@@ -75,16 +77,30 @@ helper.create_autocmd('LspAttach', {
     local create_command = gen_create_buflocal_command(args.buf)
 
     -- TODO: Define `LspCodeAction` command
-    create_command('LspRename', function() vim.lsp.buf.rename() end, {})
+    create_command('LspRename', function()
+      vim.lsp.buf.rename()
+    end, {})
     create_command('LspFmt', function()
       vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
     end, { bar = true })
-    create_command('LspDefinition', function() vim.lsp.buf.definition() end, { bar = true })
-    create_command('LspDeclaration', function() vim.lsp.buf.declaration() end, { bar = true })
-    create_command('LspHover', function() vim.lsp.buf.hover() end, { bar = true })
-    create_command('LspImplementation', function() vim.lsp.buf.implementation() end, { bar = true })
-    create_command('LspCodeAction', function() vim.lsp.buf.code_action() end, { bar = true })
-    create_command('LspDiagnosticOpenFloat', function() vim.diagnostic.open_float() end, { bar = true })
+    create_command('LspDefinition', function()
+      vim.lsp.buf.definition()
+    end, { bar = true })
+    create_command('LspDeclaration', function()
+      vim.lsp.buf.declaration()
+    end, { bar = true })
+    create_command('LspHover', function()
+      vim.lsp.buf.hover()
+    end, { bar = true })
+    create_command('LspImplementation', function()
+      vim.lsp.buf.implementation()
+    end, { bar = true })
+    create_command('LspCodeAction', function()
+      vim.lsp.buf.code_action()
+    end, { bar = true })
+    create_command('LspDiagnosticOpenFloat', function()
+      vim.diagnostic.open_float()
+    end, { bar = true })
 
     if client:supports_method('textDocument/formatting') then
       if should_auto_formatting(args.buf, client) then
@@ -107,7 +123,7 @@ helper.create_autocmd('LspAttach', {
               ---@param action lsp.CodeAction|lsp.Command
               filter = function(action)
                 return action == 'source.organizeImports'
-              end
+              end,
             })
           end,
         })
