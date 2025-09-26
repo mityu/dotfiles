@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+set -e
+
+function echoerr {
+	echo "$@" 1>&2
+}
+
+function usage {
+	echoerr "$(basename ${BASH_SOURCE[0]}) [<options>] <project>|<user>/<project>|<host>/<user>/<project>"
+	echoerr ''
+	echoerr '<options>:'
+	echoerr '  --cargo|--rust    Create a cargo project'
+	echoerr '  --dune|--ocaml    Create a dune project'
+	echoerr '  --haskell|--stack Create a stack project'
+	echoerr '  --cabal           Create a cabal project (haskell)'
+	echoerr '  --go              Create a Go language project'
+	echoerr '  -h|--help         Show this help'
+}
+
+declare -A __enabled_commands
+
+function ensure-command {
+	if ! type $@ > /dev/null; then
+		echoerr "Command not found: $@"
+		exit 1
+	fi
+}
+
+function enable-command {
+	ensure-command $@
+	__enabled_commands[$@]=true
+}
+
+function is-command-enabled {
+	[[ -v __enabled_commands[$@] ]]
+}
+
+function init-repo {
+	cd "$@"
+	git init --initial-branch main
+  git commit --allow-empty -m "Initial commit"
+	if is-command-enabled cargo; then
+		cargo init .
+	elif is-command-enabled dune; then
+		local name=$(basename $(pwd) | sed 's/^ocaml-//')
+		dune init project "$name" .
+	elif is-command-enabled stack; then
+		stack init .
+	elif is-command-enabled cabal; then
+		cabal init .
+	elif is-command-enabled go; then
+		local name=$(basename $(pwd) | sed 's/^go-//')
+		go mod init "$name"
+		go mod tidy
+	fi
+}
+
+function main {
+	ensure-command git
+	ensure-command ghq
+
+	local repo=''
+	while (( $# > 0 )); do
+		case $1 in
+			-h|--help)
+				usage 2>&1
+				exit 255
+				;;
+			--cargo|--rust)
+				enable-command cargo
+				;;
+			--dune|--ocaml)
+				enable-command dune
+				;;
+			--haskell|--stack)
+				enable-command stack
+				;;
+			--cabal)
+				enable-command cabal
+				;;
+			--go)
+				enable-command go
+				;;
+			-*)
+				echoerr "Invalid option: $1"
+				usage
+				exit 1
+				;;
+			*)
+				repo=$1
+				break
+				;;
+		esac
+	done
+	if [[ $repo == '' ]]; then
+		usage
+		exit 1
+	fi
+
+	local root=$(ghq root)
+	if [[ $(dirname $repo) == '.' ]]; then
+		root="$root/github.com/mityu"
+	elif [[ $(dirname $(dirname $repo)) == '.' ]]; then
+		root="$root/github.com"
+	fi
+
+	local dir="$root/$repo"
+	mkdir -p "$dir"
+	init-repo "$dir"
+	echo "$dir"
+}
+
+main "$@"

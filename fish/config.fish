@@ -147,6 +147,21 @@ if status is-interactive
     end
   end
 
+  function repo-new --description 'Create a new repository under a "ghq" managed directory'
+    set -l out (repo-new-base "$argv" | string collect)
+    set -l retval $pipestatus[1]
+    if test $retval -eq 0
+      if string length -q -- "$out"
+        builtin cd "$out"
+      end
+    else if test $retval -eq 255
+      echo "$out" | string replace "repo-new-base" "repo-new"
+      return 0
+    else
+      return $retval
+    end
+  end
+
   function dotfiles --description "Manage dotfiles"
     switch $argv[1]
       case cd
