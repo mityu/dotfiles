@@ -56,8 +56,6 @@ in
     slack
     # swift
     udisks
-    vim
-    vim-startuptime
     vscode
     wezterm
     (lib.mkIf (!platform.Xfce) nautilus)

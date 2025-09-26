@@ -104,6 +104,7 @@ in
       tokei
       typst
       vhs
+      vim-startuptime
       yazi
       yq-go
     ]
