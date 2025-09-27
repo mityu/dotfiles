@@ -1,4 +1,4 @@
 { pkgs, ... }:
-pkgs.writeShellScriptBin "coreutils" ''
-  exec ${pkgs.uutils-coreutils-noprefix}/bin/coreutils "$@"
+pkgs.writeShellScriptBin "uutils-coreutils" ''
+  exec ${pkgs.uutils-coreutils}/bin/uutils-coreutils "$@"
 ''

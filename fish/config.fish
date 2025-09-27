@@ -248,16 +248,16 @@ if command -q rlwrap
   set -gx RLWRAP_HOME $XDG_STATE_HOME/rlwrap
 end
 
-if command -q coreutils
+if command -q uutils-coreutils
   set __fishrc_coreutils_overrides \
     arch base32 base64 basename date df dirname groups head id nproc readlink \
     realpath seq tail tr tty uname uniq uptime wc who whoami yes
 
   function coreutils-alias
     for cmd in $__fishrc_coreutils_overrides
-      eval "alias $cmd='coreutils $cmd'"
+      eval "alias $cmd='uutils-coreutils $cmd'"
     end
-    set -g __fish_ls_command coreutils ls
+    set -g __fish_ls_command uutils-coreutils ls
     set -g __fish_ls_color_opt --color
     set -g __fish_ls_indicators_opt -F
   end
