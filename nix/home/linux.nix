@@ -268,7 +268,23 @@ in
     #   name = "WhiteSur-Light";
     # };
     iconTheme = {
-      package = pkgs.kdePackages.breeze-icons;
+      package = pkgs.callPackage (
+        { }:
+        pkgs.runCommand "cached-breeze-icons"
+          {
+            nativeBuildInputs = [ pkgs.kdePackages.breeze-icons ];
+          }
+          ''
+            mkdir -p $out
+            # install -Dm555 -d ${pkgs.kdePackages.breeze-icons}/share $out/
+            pushd ${pkgs.kdePackages.breeze-icons}
+            ${pkgs.lib.getExe pkgs.fd} . --type f \
+                --exec install -Dm666 "{}" "$out/{}" \;
+            popd
+            ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t $out/share/icons/breeze/
+            ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t $out/share/icons/breeze-dark/
+          ''
+      ) { };
       name = if platform.Xfce then "breeze" else "breeze-dark";
     };
     # gtk3.bookmarks = [
