@@ -53,8 +53,9 @@ in
         name = "Firefox";
         application.only = [ "Navigator.firefox" ];
         remap = {
-          "C-Shift-q" = "C-Shift-q";
-          "Super-Shift-n" = "C-Shift-q";
+          "C-Shift-p" = "C-Shift-p";
+          "Super-Shift-n" = "C-Shift-p";
+          "Super-Shift-p" = "C-Shift-p";
         };
       }
       {
