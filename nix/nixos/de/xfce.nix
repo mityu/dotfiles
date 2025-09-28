@@ -21,4 +21,9 @@
   environment.xfce.excludePackages = with pkgs; [
     xfce.xfce4-terminal
   ];
+
+  environment.systemPackages = with pkgs; [
+    xfce.thunar-volman
+    xfce.thunar-archive-plugin
+  ];
 }
