@@ -7,15 +7,15 @@ function echoerr {
 }
 
 function usage {
-	echoerr "$(basename ${BASH_SOURCE[0]}) [<options>] <project>|<user>/<project>|<host>/<user>/<project>"
-	echoerr ''
-	echoerr '<options>:'
-	echoerr '  --cargo|--rust    Create a cargo project'
-	echoerr '  --dune|--ocaml    Create a dune project'
-	echoerr '  --haskell|--stack Create a stack project'
-	echoerr '  --cabal           Create a cabal project (haskell)'
-	echoerr '  --go              Create a Go language project'
-	echoerr '  -h|--help         Show this help'
+	echo "$(basename ${BASH_SOURCE[0]}) [<options>] <project>|<user>/<project>|<host>/<user>/<project>"
+	echo ''
+	echo '<options>:'
+	echo '  --cargo|--rust    Create a cargo project'
+	echo '  --dune|--ocaml    Create a dune project'
+	echo '  --haskell|--stack Create a stack project'
+	echo '  --cabal           Create a cabal project (haskell)'
+	echo '  --go              Create a Go language project'
+	echo '  -h|--help         Show this help'
 }
 
 declare -A __enabled_commands
@@ -56,16 +56,21 @@ function init-repo {
 	fi
 }
 
+function output-result {
+	jq -n "$@" '$ARGS.named' | jq '.output |= split("\n")'
+}
+
 function main {
 	ensure-command git
 	ensure-command ghq
+	ensure-command jq
 
 	local repo=''
 	while (( $# > 0 )); do
 		case $1 in
 			-h|--help)
-				usage 2>&1
-				exit 255
+				output-result --arg status 0 --arg output "$(usage)"
+				exit 0
 				;;
 			--cargo|--rust)
 				enable-command cargo
@@ -83,9 +88,10 @@ function main {
 				enable-command go
 				;;
 			-*)
-				echoerr "Invalid option: $1"
-				usage
-				exit 1
+			  output-result	\
+					--arg status 1 \
+					--arg output "$(echo "Invalid option: $1"; usage)"
+				exit 0
 				;;
 			*)
 				repo=$1
@@ -94,8 +100,8 @@ function main {
 		esac
 	done
 	if [[ $repo == '' ]]; then
-		usage
-		exit 1
+		output-result --arg status 0 --arg output "$(usage)"
+		exit 0
 	fi
 
 	local root=$(ghq root)
@@ -107,8 +113,11 @@ function main {
 
 	local dir="$root/$repo"
 	mkdir -p "$dir"
-	init-repo "$dir"
-	echo "$dir"
+	local output=$(init-repo "$dir")
+	output-result \
+		--arg status 0 \
+		--arg output "$output" \
+		--arg repository "$dir"
 }
 
 main "$@"

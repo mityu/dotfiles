@@ -150,15 +150,14 @@ if status is-interactive
   function repo-new --description 'Create a new repository under a "ghq" managed directory'
     set -l out (repo-new-base "$argv" | string collect)
     set -l retval $pipestatus[1]
-    if test $retval -eq 0
-      if string length -q -- "$out"
-        builtin cd "$out"
-      end
-    else if test $retval -eq 255
-      echo "$out" | string replace "repo-new-base" "repo-new"
-      return 0
-    else
+
+    if test $retval -ne 0
       return $retval
+    else
+      set -l repository (echo $out | jq -r '.repository // ""')
+      string length -q -- "$repository"; and builtin cd "$repository"
+      echo $out | jq -r '.output | .[]' | string replace "repo-new-base" "repo-new"
+      return (echo $out | jq -r '.status')
     end
   end
 
