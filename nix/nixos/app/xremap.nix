@@ -130,6 +130,13 @@ in
           "Super-q" = "C-q";
         };
       }
+      {
+        name = "M-CR -> C-CR";
+        application.only = [ "Slack" ];
+        remap = {
+          "Super-Enter" = "C-Enter";
+        };
+      }
       (lib.mkIf platform.Xfce {
         name = "Wezterm Super-Plus";
         application.only = [ "org.wezfurlong.wezterm.org.wezfurlong.wezterm" ];
