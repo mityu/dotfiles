@@ -81,8 +81,12 @@ function do-update {
 		fi
 	fi
 
-	should-update update-vim && update-vim
-	[[ $(uname -o) != "Msys" ]] && should-update update-neovim && update-neovim
+	if ! (has-cmd nix && [[ -f ~/.nix-profile/bin/vim ]]); then
+		should-update update-vim && update-vim
+	fi
+	if ! (has-cmd nix && [[ -f ~/.nix-profile/bin/nvim ]]); then
+		[[ $(uname -o) != "Msys" ]] && should-update update-neovim && update-neovim
+	fi
 	should-update update-macvim && update-macvim
 
 	if should-update brew; then
