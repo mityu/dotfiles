@@ -49,7 +49,6 @@ in
       deno
       eza
       fd
-      fish
       gauche
       gh
       ghc
