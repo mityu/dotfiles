@@ -19,6 +19,7 @@ import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
 import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
 import { which } from "jsr:@david/which@^0.4.1";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher/multi_regexp.ts";
+import { matcherExtendedSubstring as matcherExtendedSubstringBase } from "./matcher/extended_substring.ts";
 import {
   actionOpenProjectRoot,
   actionSearchProjectRoot,
@@ -195,6 +196,9 @@ const rendererShowPackpath = (
 };
 
 const matcherMultiRegexp = matcherMultiRegexpBase({ ignoreCase: true });
+const matcherExtendedSubstring = matcherExtendedSubstringBase({
+  ignoreCase: true,
+});
 
 const myPathActions = {
   ...builtin.action.defaultOpenActions,
@@ -317,7 +321,7 @@ const fileFilterOpts = {
 
 const filePickerParams = {
   matchers: [
-    matcherMultiRegexp,
+    matcherExtendedSubstring,
   ],
   renderers: [
     builtin.renderer.nerdfont,
@@ -349,7 +353,7 @@ export const main: Entrypoint = async (
     }),
     theme: builtin.theme.MODERN_THEME,
   });
-  refineActionPicker({ matchers: [matcherMultiRegexp] });
+  refineActionPicker({ matchers: [matcherExtendedSubstring] });
 
   const grepCurator = await isExecutable("rg")
     ? builtin.curator.rg
@@ -482,7 +486,7 @@ export const main: Entrypoint = async (
       ),
     ),
     {
-      matchers: [matcherMultiRegexp],
+      matchers: [matcherExtendedSubstring],
       renderers: [
         rendererShowSourceName("LineNr"),
       ],
@@ -546,7 +550,7 @@ export const main: Entrypoint = async (
   });
 
   definePickerFromSource("gin-action", ginAction, {
-    matchers: [matcherMultiRegexp],
+    matchers: [matcherExtendedSubstring],
     previewers: [],
     actions: {
       ...defaultGinActions,
@@ -560,7 +564,7 @@ export const main: Entrypoint = async (
   });
 
   definePickerFromSource("fern-action", fernAction, {
-    matchers: [matcherMultiRegexp],
+    matchers: [matcherExtendedSubstring],
     previewers: [],
     actions: {
       ...defaultFernActions,
