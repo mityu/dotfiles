@@ -162,6 +162,12 @@ local config = {
 
     { key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize },
     { key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize },
+
+    {
+      key = '/',
+      mods = 'CTRL',
+      action = wezterm.action.SendKey({ key = '/', mods = 'CTRL' }),
+    },
   },
   window_padding = {
     top = 0,
