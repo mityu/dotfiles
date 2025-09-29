@@ -62,11 +62,28 @@ local function should_auto_formatting(bufnr, client)
   local disable_ft = {}
   if vim.list_contains(disable_ft, ft) then
     return false
+  elseif ft == 'lua' then
+    if client.name == 'efm' then
+      return true
+    else
+      return false
+    end
   elseif ft == 'cpp' then
     -- TODO: Check .clang-format
     -- TODO: Check filename when in Vim repository
   end
   return true
+end
+
+---@param ft string
+---@param client vim.lsp.Client
+---@return boolean
+local function should_use_as_formatter(ft, client)
+  local formatter_preference = {
+    lua = 'stylua',
+  };
+  local prf = formatter_preference[ft]
+  return prf == nil or prf == client.name
 end
 
 helper.create_autocmd('LspAttach', {
@@ -77,12 +94,14 @@ helper.create_autocmd('LspAttach', {
     local create_command = gen_create_buflocal_command(args.buf)
 
     -- TODO: Define `LspCodeAction` command
+    if should_use_as_formatter(ft, client) then
+      create_command('LspFmt', function()
+        vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
+      end, { bar = true })
+    end
     create_command('LspRename', function()
       vim.lsp.buf.rename()
     end, {})
-    create_command('LspFmt', function()
-      vim.lsp.buf.format({ bufnr = args.buf, id = client.id, timeout_ms = 1000 })
-    end, { bar = true })
     create_command('LspDefinition', function()
       vim.lsp.buf.definition()
     end, { bar = true })

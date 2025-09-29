@@ -11,7 +11,7 @@ end
 ---@param config nil|table
 local function setup_server(filetypes, server, config)
   helper.create_autocmd('FileType', {
-    group = 'vimrc-lsp-setup',
+    group = 'vimrc-nvim-lsp-setup',
     pattern = filetypes,
     once = true,
     callback = function()
@@ -52,3 +52,6 @@ setup_server({ 'ocaml' }, 'ocamlls')
 setup_server({ 'coq', 'rocq' }, 'coq-lsp')
 setup_server({ 'tex', 'latex', 'plaintex' }, 'texlab')
 setup_server({ 'rust' }, 'rust-analyzer')
+
+local efm_filetypes = { 'lua', 'python' }
+setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
