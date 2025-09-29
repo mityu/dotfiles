@@ -70,7 +70,10 @@ in
     ++ map (v: lib.mkIf enableTexPackages v) [
       pkgs.texliveFull
       pkgs.papers
-      (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; })
+      (import ./pkgs/ott.nix {
+        inherit (inputs) opam-nix;
+        inherit (pkgs) system;
+      })
     ];
 
   i18n.inputMethod = {

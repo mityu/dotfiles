@@ -1,4 +1,9 @@
-{ pkgs, username, ... }:
+{
+  pkgs,
+  username,
+  inputs,
+  ...
+}:
 {
   imports = [
     ./common.nix
@@ -10,5 +15,9 @@
 
   home.packages = with pkgs; [
     gnupg
+    (import ./pkgs/ott.nix {
+      inherit (inputs) opam-nix;
+      inherit (pkgs) system;
+    })
   ];
 }

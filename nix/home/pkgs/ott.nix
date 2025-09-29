@@ -1,6 +1,6 @@
-{ opam-nix }:
+{ opam-nix, system }:
 let
-  inherit (opam-nix.lib.x86_64-linux) queryToScope;
+  inherit (opam-nix.lib.${system}) queryToScope;
   scope = queryToScope { } {
     ott = "*";
     ocaml-base-compiler = "*";
