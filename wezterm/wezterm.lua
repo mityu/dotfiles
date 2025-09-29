@@ -181,9 +181,14 @@ if isWindows then
     '-use-full-path',
   }
 elseif isMac then
+  local initial_paths = {
+    '/run/current-system/sw/bin',
+    wezterm.home_dir .. '/.nix-profile/bin',
+    '/opt/homebrew/bin',
+  }
   config.default_prog = {
     '/usr/bin/env',
-    ('PATH=%s/.nix-profile/bin:/opt/homebrew/bin'):format(wezterm.home_dir),
+    ('PATH=%s'):format(table.concat(initial_paths, ':')),
     'fish',
     '-l',
   }
