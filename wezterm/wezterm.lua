@@ -1,7 +1,7 @@
 local wezterm = require('wezterm')
 
-local isWindows = string.find(wezterm.target_triple, 'windows', 0, false)
-local isMac = string.find(wezterm.target_triple, 'apple-darwin', 0, false)
+local isWindows = string.find(wezterm.target_triple, 'windows', 0, true)
+local isMac = string.find(wezterm.target_triple, 'apple-darwin', 0, true)
 local isLinux = not (isWindows or isMac)
 
 local colors = {
