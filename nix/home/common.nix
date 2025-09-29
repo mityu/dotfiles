@@ -65,6 +65,7 @@ in
       ninja
       nixfmt-rfc-style
       ocaml
+      ocamlPackages.ocamlformat
       opam
       ripgrep
       rlwrap
