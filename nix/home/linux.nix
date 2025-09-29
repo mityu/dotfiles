@@ -432,7 +432,11 @@ in
       wallpapers = import ./pkgs/wallpapers.nix { inherit pkgs; };
     in
     {
-      workspace0 = "${wallpapers}/mahoyo-misakicho.jpeg";
+      workspace0 =
+        if hardware == "laptop-hp-envy" then
+          "${wallpapers}/fgo-lady-avalon-oz-2.jpg"
+        else
+          "${wallpapers}/mahoyo-misakicho.jpeg";
     };
 
   xfconf.settings = {
