@@ -1,3 +1,3 @@
-SetUndoFtplugin set writebackup<
+SetUndoFtplugin set backupcopy<
 
-setlocal nowritebackup
+setlocal backupcopy=yes
