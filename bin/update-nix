@@ -87,12 +87,11 @@ function do-nix-update {
 			;;
 		"system")
 			if is-darwin; then
-				echo 'Not available on Darwin.'
-				exit 1
+				$sudo NIX_CONFIG="$NIX_CONFIG" nix run nix-darwin -- switch --flake .#default
+			else
+				shift
+				$sudo nixos-rebuild switch --flake .#$(detect-build-target "$@")
 			fi
-
-			shift
-			$sudo nixos-rebuild switch --flake .#$(detect-build-target "$@")
 			;;
 		*)
 			echo 'unreachable'
@@ -108,19 +107,14 @@ function do-nix-update-with-message {
 }
 
 function do-nix-update-multi {
-	if is-darwin; then
-		do-nix-update-with-message flake
+	if ! is-super-user; then
+		sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
+
+		# home-manager must not be run as super user.
 		do-nix-update-with-message home
 	else
-		if ! is-super-user; then
-			sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
-
-			# home-manager must not be run as super user.
-			do-nix-update-with-message home
-		else
-			[[ "$1" == "all" ]] && do-nix-update-with-message flake
-			do-nix-update-with-message system
-		fi
+		[[ "$1" == "all" ]] && do-nix-update-with-message flake
+		do-nix-update-with-message system
 	fi
 }
 

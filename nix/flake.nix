@@ -14,6 +14,11 @@
 
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-index-database = {
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -49,6 +54,7 @@
     inputs@{
       nixpkgs,
       home-manager,
+      nix-darwin,
       nix-index-database,
       ...
     }:
@@ -147,6 +153,13 @@
             ];
           };
         };
+      darwinConfigurations.default = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
+        specialArgs = {
+          inherit username;
+        };
+        modules = [ ./nix-darwin/default.nix ];
+      };
       list-des = builtins.attrNames des;
     };
 }
