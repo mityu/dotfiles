@@ -15,7 +15,7 @@ if helper.is_plugin_installed('nvim-notify') then
     group = 'vimrc',
     callback = function(ev)
       local client = vim.lsp.get_client_by_id(ev.data.client_id).name
-      notify.notify(('Server detached: %s'):format(client))
+      vim.schedule(function() notify.notify(('Server detached: %s'):format(client)) end)
     end,
   })
 end
@@ -80,7 +80,7 @@ end
 ---@return boolean
 local function should_use_as_formatter(ft, client)
   local formatter_preference = {
-    lua = 'stylua',
+    lua = 'efm',
   };
   local prf = formatter_preference[ft]
   return prf == nil or prf == client.name
