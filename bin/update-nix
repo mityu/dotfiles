@@ -19,7 +19,7 @@ function is-darwin() {
 
 function usage {
 	if is-darwin; then
-		echo 'update-nix [flake|home|help|-h|--help]'
+		echo 'update-nix [flake|home|both|all|help|-h|--help]'
 	else
 		echo 'update-nix [flake|home|system [DE]|all|both|help|-h|--help]'
 		echo ''
@@ -108,14 +108,17 @@ function do-nix-update-with-message {
 }
 
 function do-nix-update-multi {
-	if ! is-super-user; then
-		sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
-
-		# home-manager must not be run as super user.
+	if is-darwin; then
+		do-nix-update-with-message flake
 		do-nix-update-with-message home
 	else
-		[[ "$1" == "all" ]] && do-nix-update-with-message flake
-		if ! is-darwin; then
+		if ! is-super-user; then
+			sudo "$(realpath ${BASH_SOURCE[0]})" "$1"
+
+			# home-manager must not be run as super user.
+			do-nix-update-with-message home
+		else
+			[[ "$1" == "all" ]] && do-nix-update-with-message flake
 			do-nix-update-with-message system
 		fi
 	fi

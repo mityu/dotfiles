@@ -3,7 +3,7 @@ set -l add_completion complete -c update-nix
 $add_completion -f  # Disable file completion
 
 if test (uname) = 'Darwin'
-  $add_completion --condition '__fish_use_subcommand' -a 'flake home system help'
+  $add_completion --condition '__fish_use_subcommand' -a 'flake home system both all help'
   $add_completion --condition '__fish_use_subcommand' -l help -s h
 else
   function __fishrc_update_nix_list_available_des
