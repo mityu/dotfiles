@@ -32,6 +32,7 @@ let
     "desktop-endeavor"
     "desktop-b760m-pro"
   ];
+  isDesktop = lib.strings.hasPrefix "desktop" hardware;
 in
 {
   imports = [
@@ -462,13 +463,26 @@ in
       "xfwm4/custom/<Super>Left" = "left_workspace_key";
       "xfwm4/custom/<Super>Right" = "right_workspace_key";
     };
-    xfce4-power-manager = {
-      "xfce4-power-manager/dpms-on-ac-off" = 35;
-      "xfce4-power-manager/dpms-on-ac-sleep" = 30;
-    };
-    xfce4-screensaver = {
-      "saver/idle-activation/delay" = 15; # Time in minutes to lock screen.
-    };
+    xfce4-power-manager =
+      if isDesktop then
+        {
+          "xfce4-power-manager/dpms-on-ac-off" = 80;
+          "xfce4-power-manager/dpms-on-ac-sleep" = 75;
+        }
+      else
+        {
+          "xfce4-power-manager/dpms-on-ac-off" = 35;
+          "xfce4-power-manager/dpms-on-ac-sleep" = 30;
+        };
+    xfce4-screensaver =
+      if isDesktop then
+        {
+          "saver/idle-activation/delay" = 60; # Time in minutes to lock screen.
+        }
+      else
+        {
+          "saver/idle-activation/delay" = 15; # Time in minutes to lock screen.
+        };
     xfwm4 = {
       "general/button_layout" = "CMHS|O";
       "general/show_dock_shadow" = false;
