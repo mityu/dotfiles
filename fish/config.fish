@@ -70,6 +70,8 @@ if status is-login
   fish_add_path --prepend /opt/homebrew/bin
   fish_add_path --prepend /opt/homebrew/opt/trash/bin
   fish_add_path --prepend $dotfiles_path/bin
+  fish_add_path --prepend /run/current-system/sw/bin
+  fish_add_path --prepend ~/.nix-profile/bin
   fish_add_path --prepend ~/.local/bin
 
   if command -q aqua
