@@ -2,6 +2,7 @@
 
 set -e
 
+NIX_CONFIG='extra-experimental-features = nix-command flakes'
 config_dir=$(dirname $(dirname $(realpath ${BASH_SOURCE[0]})))/nix
 
 function echo-bold {
@@ -26,10 +27,6 @@ function usage {
 		echo ''
 		echo "  $(cd "$config_dir"; nix eval .#list-des 2>/dev/null)"
 	fi
-}
-
-function nix-run {
-	nix run --extra-experimental-features nix-command --extra-experimental-features flakes "$@"
 }
 
 function message-on-nix-failure {
@@ -86,8 +83,7 @@ function do-nix-update {
 			;;
 		"home")
 			shift
-			nix-run nixpkgs#home-manager -- switch -b backup --flake .#$(detect-build-target "$@") \
-					--extra-experimental-features nix-command --extra-experimental-features flakes
+			nix run nixpkgs#home-manager -- switch -b backup --flake .#$(detect-build-target "$@")
 			;;
 		"system")
 			if is-darwin; then
