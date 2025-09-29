@@ -28,6 +28,10 @@ let
 
       unset DBUS_RUN_SESSION_CMD
     '';
+  enableTexPackages = builtins.elem hardware [
+    "desktop-endeavor"
+    "desktop-b760m-pro"
+  ];
 in
 {
   imports = [
@@ -41,37 +45,32 @@ in
     homeDirectory = "/home/${username}";
   };
 
-  home.packages = with pkgs; [
-    bashInteractive
-    brightnessctl
-    cargo
-    discord
-    gdb
-    gnumake
-    gtrash
-    hwloc
-    libgcc
-    rofi
-    seahorse
-    slack
-    # swift
-    udisks
-    vscode
-    wezterm
-    (lib.mkIf (!platform.Xfce) nautilus)
-    (lib.mkIf (builtins.elem hardware [
-      "desktop-endeavor"
-      "desktop-b760m-pro"
-    ]) texliveFull)
-    (lib.mkIf (builtins.elem hardware [
-      "desktop-endeavor"
-      "desktop-b760m-pro"
-    ]) papers)
-    (lib.mkIf (builtins.elem hardware [
-      "desktop-endeavor"
-      "desktop-b760m-pro"
-    ]) (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; }))
-  ];
+  home.packages =
+    with pkgs;
+    [
+      bashInteractive
+      brightnessctl
+      cargo
+      discord
+      gdb
+      gnumake
+      gtrash
+      hwloc
+      libgcc
+      rofi
+      seahorse
+      slack
+      # swift
+      udisks
+      vscode
+      wezterm
+      (lib.mkIf (!platform.Xfce) nautilus)
+    ]
+    ++ map (v: lib.mkIf enableTexPackages v) [
+      pkgs.texliveFull
+      pkgs.papers
+      (import ./pkgs/ott.nix { opam-nix = inputs.opam-nix; })
+    ];
 
   i18n.inputMethod = {
     enable = true;
