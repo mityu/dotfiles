@@ -281,6 +281,14 @@ loopmap.loop_define({
   },
 })
 
+---@param cdcmd string
+---@return function
+local function cd_project_root(cdcmd)
+  return function()
+    require('vimrc').cd_project_root(cdcmd)
+  end
+end
+
 vim.cmd('iabbrev todo: TODO:')
 vim.cmd('iabbrev fixme: FIXME:')
 vim.cmd('iabbrev xxx: XXX:')
@@ -289,6 +297,9 @@ vim.cmd('iabbrev note: NOTE:')
 vim.api.nvim_create_user_command('CdCurrent', 'cd %:p:h', { bar = true })
 vim.api.nvim_create_user_command('LcdCurrent', 'lcd %:p:h', { bar = true })
 vim.api.nvim_create_user_command('TcdCurrent', 'tcd %:p:h', { bar = true })
+vim.api.nvim_create_user_command('CdRoot', cd_project_root('cd'), { bar = true })
+vim.api.nvim_create_user_command('LcdRoot', cd_project_root('lcd'), { bar = true })
+vim.api.nvim_create_user_command('TcdRoot', cd_project_root('tcd'), { bar = true })
 vim.api.nvim_create_user_command('FileName', [[echo expand('%:p')]], { bar = true })
 vim.api.nvim_create_user_command(
   'Rename',

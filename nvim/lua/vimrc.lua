@@ -85,7 +85,7 @@ function M.find_git_root(target)
   target = vim.fn.resolve(target or vim.fs.abspath(vim.fn.bufname('%')))
   local gitdir = vim.fs.find(
     { '.git' },
-    { type = file, path = target, upward = true, limit = 1 }
+    { type = 'directory', path = target, upward = true, limit = 1 }
   )
   if #gitdir == 0 then
     return nil
