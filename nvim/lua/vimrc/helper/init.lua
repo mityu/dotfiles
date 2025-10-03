@@ -86,6 +86,7 @@ M.stdpath = now(function()
     dotfiles = dotfiles,
     dotvim = dotvim,
     ['dotvim-runtime'] = vim.fs.joinpath(dotvim, 'runtime'),
+    packpath = vim.fn.stdpath('cache') .. '/lazy',
   }
 
   ---@string what string

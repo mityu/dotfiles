@@ -171,7 +171,9 @@ const rendererShowPackpath = (
 ): Renderer<{ path: string }> => {
   const getPackagePlace = (path: string): string => {
     const elems = path.split(SEPARATOR_PATTERN);
-    const idx = elems.findIndex((e: string) => e === "start" || e === "opt");
+    const idx = elems.findIndex((e: string) =>
+      e === "start" || e === "opt" || e === "lazy"
+    );
     if (idx <= 0) {
       return "no-information";
     }
