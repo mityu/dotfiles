@@ -37,6 +37,7 @@ setup_server({ 'lua' }, 'lua_ls', {
     },
   },
 })
+setup_server({ 'lua' }, 'stylua')
 
 setup_server({ 'nix' }, 'nixd', {
   settings = {
@@ -53,5 +54,5 @@ setup_server({ 'coq', 'rocq' }, 'coq-lsp')
 setup_server({ 'tex', 'latex', 'plaintex' }, 'texlab')
 setup_server({ 'rust' }, 'rust-analyzer')
 
-local efm_filetypes = { 'lua', 'python' }
+local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })

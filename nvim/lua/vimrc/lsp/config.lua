@@ -63,7 +63,7 @@ local function should_auto_formatting(bufnr, client)
   if vim.list_contains(disable_ft, ft) then
     return false
   elseif ft == 'lua' then
-    if client.name == 'efm' then
+    if client.name == 'stylua' then
       return true
     else
       return false
@@ -80,7 +80,7 @@ end
 ---@return boolean
 local function should_use_as_formatter(ft, client)
   local formatter_preference = {
-    lua = 'efm',
+    lua = 'stylua',
   };
   local prf = formatter_preference[ft]
   return prf == nil or prf == client.name

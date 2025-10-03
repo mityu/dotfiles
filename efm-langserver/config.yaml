@@ -22,19 +22,9 @@ tools:
     root-markers:
       - .github/
 
-  lua-stylua: &lua-stylua
-    format-command: 'stylua --color Never ${--range-start:charStart} ${--range-end:charEnd} --stdin-filepath ${INPUT}'
-    format-stdin: true
-    root-markers:
-      - .stylua.toml
-      - stylua.toml
-
 languages:
   python:
     - <<: *python-mypy
 
   yaml:
     - <<: *yaml-actionlint
-
-  lua:
-    - <<: *lua-stylua
