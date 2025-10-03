@@ -69,7 +69,7 @@ in
     ]
     ++ map (v: lib.mkIf enableTexPackages v) [
       pkgs.texliveFull
-      pkgs.papers
+      pkgs.kdePackages.okular
       (import ./pkgs/ott.nix {
         inherit (inputs) opam-nix;
         inherit (pkgs) system;
