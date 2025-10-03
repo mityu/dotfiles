@@ -6,7 +6,7 @@ runtime! syntax/tex.vim
 
 syntax keyword otexOttExpressions placeholder
 syntax clear otexOttExpressions
-syntax region otexCodeBlock keepend containedin=@texSectionGroup,@texSubSectionGroup,@texSubSubSectionGroup,@texMathZones,@texStyleGroup,@texMatchGroup contains=@otexOttExpressions matchgroup=otexCodeBlockDelimiter start=/\[\[/ end=/]]/
+syntax region otexCodeBlock keepend containedin=@texSectionGroup,@texSubSectionGroup,@texSubSubSectionGroup,@texMathZones,@texStyleGroup,@texMatchGroup,texCmdBody contains=@otexOttExpressions matchgroup=otexCodeBlockDelimiter start=/\[\[/ end=/]]/
 syntax region otexComment keepend containedin=texComment start=/\[\[/ end=/]]/
 
 highlight default link otexCodeBlock Normal
@@ -31,9 +31,9 @@ else
   endfunction
 endif
 
-if expand('%') !=# '' && expand('%:p') =~# 'dev[/\\]tex'
+if expand('%') !=# ''
   let s:script = s:findfile('syntax.vim')
-  if s:script->fnamemodify(':h:h') =~# 'dev[/\\]tex$'
+  if isdirectory(s:script->fnamemodify(':h') .. '/.git')
     source `=s:script`
   endif
   unlet! s:script
