@@ -4,7 +4,7 @@ function vimrc#fall#stdpath(kind) abort
   elseif a:kind ==# 'localpack'
     return expand('~/dev/vim')  " TODO: improve
   elseif a:kind ==# 'packpath'
-    return luaeval('require("lazy.core.config").defaults.root')
+    return luaeval('require("lazy.core.config").options.root')
   endif
 
   throw $'Unknown kind: {a:kind}'
