@@ -49,10 +49,15 @@ setup_server({ 'go' }, 'gopls')
 setup_server({ 'typescript' }, 'denols')
 setup_server({ 'haskell' }, 'hls')
 setup_server({ 'typst' }, 'tinymist')
-setup_server({ 'ocaml' }, 'ocamlls')
-setup_server({ 'coq', 'rocq' }, 'coq-lsp')
+setup_server(
+  { 'ocaml', 'menhir', 'ocamlinterface', 'ocamllex', 'reason', 'dune' },
+  'ocamllsp'
+)
+setup_server({ 'coq', 'rocq' }, 'coq_lsp')
 setup_server({ 'tex', 'latex', 'plaintex' }, 'texlab')
-setup_server({ 'rust' }, 'rust-analyzer')
+setup_server({ 'rust' }, 'rust_analyzer')
+setup_server({ 'fish' }, 'fish_lsp')
+setup_server({ 'bash' }, 'bashls')
 
 local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
