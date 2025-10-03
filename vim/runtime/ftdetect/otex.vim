@@ -1,1 +1,1 @@
-autocmd BufRead,BufNewFile *otex set filetype=otex
+autocmd BufRead,BufNewFile *.otex set filetype=otex

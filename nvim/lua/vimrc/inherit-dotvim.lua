@@ -24,9 +24,12 @@ helper.create_autocmd('Syntax', {
       type = 'file',
       path = vim.fs.joinpath(helper.stdpath('dotvim-runtime'), 'syntax'),
     })
-    for _, file in ipairs(files) do
-      vim.cmd.source(vim.fn.fnameescape(file))
-    end
+    -- I don't know why, but sourcing files immediately here doesn't have any effect.
+    vim.schedule(function()
+      for _, file in ipairs(files) do
+        vim.cmd.source(vim.fn.fnameescape(file))
+      end
+    end)
   end,
 })
 helper.create_autocmd('FileType', {

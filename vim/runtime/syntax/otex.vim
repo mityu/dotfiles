@@ -13,8 +13,26 @@ highlight default link otexCodeBlock Normal
 highlight default link otexCodeBlockDelimiter Delimiter
 highlight default link otexComment Comment
 
+if has('nvim')
+  function s:findfile(filename) abort
+    let files = v:lua.vim.fs.find([a:filename], #{
+      \ type: 'file',
+      \ path: expand('%:p:h'),
+      \ upward: v:true,
+      \ })
+    if !empty(files)
+      return files[0]
+    endif
+    return ''
+  endfunction
+else
+  function s:findfile(filename) abort
+    return vimrc#Findfile(a:filename, '.;')
+  endfunction
+endif
+
 if expand('%') !=# '' && expand('%:p') =~# 'dev[/\\]tex'
-  let s:script = vimrc#Findfile('syntax.vim', '.;')
+  let s:script = s:findfile('syntax.vim')
   if s:script->fnamemodify(':h:h') =~# 'dev[/\\]tex$'
     source `=s:script`
   endif
