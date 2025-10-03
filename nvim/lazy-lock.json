@@ -17,6 +17,7 @@
   "nvim-notify": { "branch": "master", "commit": "8701bece920b38ea289b457f902e2ad184131a5d" },
   "oil.nvim": { "branch": "master", "commit": "919e155fdf38e9148cdb5304faaaf53c20d703ea" },
   "open-browser.vim": { "branch": "master", "commit": "7d4c1d8198e889d513a030b5a83faa07606bac27" },
+  "ott-vim": { "branch": "develop", "commit": "6a750d8c5337c2d33e4088f81ea2f8d43b30c426" },
   "skkeleton": { "branch": "main", "commit": "8fa36fc8065d600706d5edeeb1008a5233eb1d51" },
   "skkeleton-henkan-highlight": { "branch": "main", "commit": "b952385ff9ace7597c9d83b5c93d393c6d73a1e6" },
   "skkeleton-state-popup": { "branch": "main", "commit": "62b7997cc9e3202e8fd05775638d7af5f670982b" },
