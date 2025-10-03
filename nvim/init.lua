@@ -116,6 +116,8 @@ VimrcTabline = require('vimrc.tabline')
 vim.opt_global.statusline = '%{%v:lua.VimrcStatusline()%}'
 vim.opt_global.tabline = '%!v:lua.VimrcTabline()'
 
+vim.g.tex_conceal = '' -- Disable default TeX conceal
+
 -- This is done in defaults.lua.  See :h nvim-defauts for the details.
 -- if vim.fn.executable('rg') == 1 then
 --   opt.grepprg = 'rg --vimgrep'
