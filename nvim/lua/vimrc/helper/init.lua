@@ -66,6 +66,16 @@ function M.is_plugin_loaded(plugin)
   return p ~= nil and p._.loaded ~= nil
 end
 
+---@param plugin string
+---@return string?
+function M.get_plugin_dir(plugin)
+  local p = lazy.plugins[plugin]
+  if p ~= nil then
+    return p.dir
+  end
+  return nil
+end
+
 ---@return boolean
 function M.is_string(v)
   return type(v) == 'string'
@@ -86,7 +96,7 @@ M.stdpath = now(function()
     dotfiles = dotfiles,
     dotvim = dotvim,
     ['dotvim-runtime'] = vim.fs.joinpath(dotvim, 'runtime'),
-    packpath = vim.fn.stdpath('cache') .. '/lazy',
+    packpath = vim.fs.joinpath(vim.fn.stdpath('cache'), 'lazy'),
   }
 
   ---@string what string
