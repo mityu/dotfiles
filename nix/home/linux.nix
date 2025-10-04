@@ -28,6 +28,7 @@ let
 
       unset DBUS_RUN_SESSION_CMD
     '';
+  reconnect-monitors = import ./pkgs/x11-reconnect-monitors.nix { inherit pkgs; };
   enableTexPackages = builtins.elem hardware [
     "desktop-endeavor"
     "desktop-b760m-pro"
@@ -459,6 +460,7 @@ in
       "commands/custom/<Super><Primary><Shift>3" = "xfce4-screenshooter --clipboard --fullscreen";
       "commands/custom/<Super><Primary><Shift>4" = "xfce4-screenshooter --clipboard --region";
       "commands/custom/<Super><Primary><Shift>5" = "xfce4-screenshooter --clipboard --window";
+      "commands/custom/<Super>F12" = "${reconnect-monitors}";
       "xfwm4/custom/<Primary><Alt>Left" = null;
       "xfwm4/custom/<Primary><Alt>Right" = null;
       "xfwm4/custom/override" = true;
