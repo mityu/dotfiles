@@ -74,6 +74,7 @@ in
         inherit (inputs) opam-nix;
         inherit (pkgs) system;
       })
+      pkgs.zotero
     ];
 
   i18n.inputMethod = {
@@ -228,6 +229,7 @@ in
         packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           ublacklist
+          (lib.mkIf enableTexPackages zotero-connector)
         ];
         settings = {
           "@ublacklist".settings = {
