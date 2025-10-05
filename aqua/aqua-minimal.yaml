@@ -5,7 +5,7 @@ registries:
 
 packages:
   - name: BurntSushi/ripgrep@14.1.1
-  - name: denoland/deno@v2.5.1
+  - name: denoland/deno@v2.5.3
   - name: fish-shell/fish-shell@4.0.2
   - name: skim-rs/skim@v0.20.5
   - name: zellij-org/zellij@v0.43.1
