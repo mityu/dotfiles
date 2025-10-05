@@ -67,6 +67,7 @@ in
       vscode
       wezterm
       (lib.mkIf (!platform.Xfce) nautilus)
+      (lib.mkIf (platform.X11) xsel)
     ]
     ++ map (v: lib.mkIf enableTexPackages v) [
       pkgs.texliveFull

@@ -315,6 +315,9 @@ end
 if $is_msys
   alias pbpaste='command cat /dev/clipboard'
   alias pbcopy='command cat > /dev/clipboard'
+else if command -q xsel
+  alias pbpaste='xsel -b'
+  alias pbcopy='xsel -bi'
 end
 
 if command -q vim
