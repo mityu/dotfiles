@@ -61,6 +61,7 @@ in
       (lib.hiPrio clang-tools)
       (lib.hiPrio llvmPackages.libcxxClang)
       llvmPackages.mlir
+      lstr
       lua
       ninja
       nixfmt-rfc-style
