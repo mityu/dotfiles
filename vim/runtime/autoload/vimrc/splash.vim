@@ -68,11 +68,11 @@ var RestoreSettings: func(): void
 def ComputePadding(text: list<string>): list<number>
   final text_height = len(text)
   final text_width = GetTextBlockWidth(text)
-  final win_height = &lines
+  final win_height = &lines - &cmdheight
   final win_width = &columns
 
   var padding = [0, 0, 0, 0]
-  padding[0] = (win_height - text_height) / 2
+  padding[0] = (win_height + &cmdheight - text_height) / 2
   padding[1] = (win_width - text_width) / 2
   padding[2] = win_height - text_height - padding[0]
   padding[3] = win_width - text_width - padding[1]
@@ -103,8 +103,8 @@ enddef
 export def Show()
   final splash = SPLASH[: &lines - 3]
   final popupID = popup_create(splash, {
-    minwidth: &columns,
-    minheight: &lines,
+    line: 1,
+    column: 1,
     highlight: 'Normal',
     scroll: 0,
     scrollbar: 0,
