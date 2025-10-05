@@ -7,13 +7,13 @@
   "dict": { "branch": "master", "commit": "4eb91a3bbfef70bde940668ec60f3beae291e971" },
   "fall.vim": { "branch": "main", "commit": "abf9c78fcb0015ead28813a11f8a5921420ca0f0" },
   "git-messenger.vim": { "branch": "master", "commit": "fd124457378a295a5d1036af4954b35d6b807385" },
-  "helpful.vim": { "branch": "master", "commit": "9739d5d1e5c148f9d99ac19331183c2cc78cd73d" },
+  "helpful.vim": { "branch": "master", "commit": "5a5ff6f2c8881da5fd19059f3d0eeddd63023b0b" },
   "indent-blankline.nvim": { "branch": "master", "commit": "005b56001b2cb30bfa61b7986bc50657816ba4ba" },
   "lazy.nvim": { "branch": "main", "commit": "59334064f8604ca073791c25dcc5c9698865406e" },
   "nvim-cmp": { "branch": "main", "commit": "b5311ab3ed9c846b585c0c15b7559be131ec4be9" },
   "nvim-cmp-buffer-lines": { "branch": "master", "commit": "924ccc04dc5c919b6baa05d45818025baa82699a" },
   "nvim-cursorword": { "branch": "master", "commit": "c0f2958ec729b47be2dba0d79ef43d005dac9f4e" },
-  "nvim-lspconfig": { "branch": "master", "commit": "b8c3630ce37dfbe51910b68785a71620b072c41a" },
+  "nvim-lspconfig": { "branch": "master", "commit": "e688b486fe9291f151eae7e5c0b5a5c4ef980847" },
   "nvim-notify": { "branch": "master", "commit": "8701bece920b38ea289b457f902e2ad184131a5d" },
   "oil.nvim": { "branch": "master", "commit": "919e155fdf38e9148cdb5304faaaf53c20d703ea" },
   "open-browser.vim": { "branch": "master", "commit": "7d4c1d8198e889d513a030b5a83faa07606bac27" },
@@ -25,6 +25,7 @@
   "vim-ambicmd": { "branch": "master", "commit": "884e3206708f95dda7598d2a060ce7ae4c2aa189" },
   "vim-backpair": { "branch": "main", "commit": "f538e78dc2f56bdf22de5b9d67927a09d930aa26" },
   "vim-charjump": { "branch": "main", "commit": "d9b0bc2ea6e03e6ceb59d61ae4d558d1eeab654b" },
+  "vim-cmdhistory": { "branch": "main", "commit": "24367f6477bae05d6dc3efc1d740d10e4635db68" },
   "vim-fall-modal": { "branch": "main", "commit": "9695aeae63a02ae738bdfd148bc0620ff0a9ce90" },
   "vim-fern": { "branch": "main", "commit": "88f6d81c2d2348cbfb3120931ce72268195859c6" },
   "vim-fern-hijack": { "branch": "master", "commit": "f65524899231b15528066744e714fb344abf0892" },
@@ -52,5 +53,5 @@
   "vim-textobj-line": { "branch": "master", "commit": "1a6780d29adcf7e464e8ddbcd0be0a9df1a37339" },
   "vim-textobj-user": { "branch": "master", "commit": "41a675ddbeefd6a93664a4dc52f302fe3086a933" },
   "vim-themis": { "branch": "master", "commit": "355c34b1bff03a8fd3744e3ad2dd0627c0692716" },
-  "vimdoc-ja": { "branch": "master", "commit": "df1cf0b48042e3b67b8a72bcb9d0f6a6b25fde87" }
+  "vimdoc-ja": { "branch": "master", "commit": "cf5803851b8616e9d3bda8454daea46ddf892511" }
 }
