@@ -1,13 +1,9 @@
 { pkgs, ... }:
 let
   pixiv =
-    {
-      url,
-      hash,
-      name,
-    }:
-    {
-      inherit url hash name;
+    input:
+    input
+    // {
       curlOptsList = [
         "-H"
         "Referer:https://app-api.pixiv.net/"
@@ -64,18 +60,33 @@ let
       url = "https://i.pximg.net/img-original/img/2022/08/15/19/10/47/100507843_p0.png";
       hash = "sha256-Y1y4P+Q11X7G8A2C1b49lUA1ybjgI5O8U8HFuRPXojk=";
       name = "fgo-lady-avalon-yagi.png";
+      crop = "3016x2500+0+0";
+    })
+    (pixiv {
+      # https://www.pixiv.net/artworks/111741898
+      url = "https://i.pximg.net/img-original/img/2023/09/15/19/57/57/111741898_p0.jpg";
+      hash = "sha256-6MObeoL+1OGMZC1CotqtquDPXV6QBjv3Mmn0VJP1KcY=";
+      name = "fgo-lady-avalon-oz-0.jpg";
+      crop = "1005x600+0+0";
     })
     (pixiv {
       # https://www.pixiv.net/artworks/111741898
       url = "https://i.pximg.net/img-original/img/2023/09/15/19/57/57/111741898_p2.jpg";
       hash = "sha256-GJQM7reBGAusM5YE+DgJghPYcP7BCIKLt0YkIMSBJEE=";
-      name = "fgo-lady-avalon-oz-1.jpg";
+      name = "fgo-lady-avalon-oz-2.jpg";
     })
     (pixiv {
       # https://www.pixiv.net/artworks/111741898
       url = "https://i.pximg.net/img-original/img/2023/09/15/19/57/57/111741898_p3.jpg";
       hash = "sha256-/5tzTRZu60hbxv6k6iXFarRUQrLf114J2xG+6oqytJM=";
-      name = "fgo-lady-avalon-oz-2.jpg";
+      name = "fgo-lady-avalon-oz-3.jpg";
+    })
+    (pixiv {
+      # https://www.pixiv.net/artworks/112421957
+      url = "https://i.pximg.net/img-original/img/2023/10/10/00/42/55/112421957_p0.jpg";
+      hash = "sha256-bR4Ojkwu3GEPG95lSYzpG/SwVjCNLr6hzKpRK88A+zw=";
+      name = "fgo-lady-avalon-MNe.jpg";
+      crop = "3201x2833+0+0";
     })
     (pixiv {
       # https://www.pixiv.net/artworks/133296630
@@ -101,11 +112,18 @@ let
       hash = "sha256-rmO5JLKh403r2EDS0t/Pdz0ozdy6WF4tMPXoo07ldP4=";
       name = "fgo-morgan-reluvy.png";
     })
+    (pixiv {
+      url = "https://i.pximg.net/img-original/img/2019/11/15/20/54/22/77828922_p0.jpg";
+      hash = "sha256-madMzxWaPVzpdc0iWyLD20krFguVG48GGKwkaRan0D4=";
+      name = "fgo-scathach.jpg";
+      crop = "3507x2000+0+0";
+    })
     {
       # https://x.com/kousaki_r/status/1577255417662812160/photo/1
       url = "https://pbs.twimg.com/media/FeOJWRvakAASHHX?format=jpg&name=orig";
       hash = "sha256-eNhibI2s2TdoLVcCmiNHZ4yN0WjZO8wSSIQbd8/m0gI=";
       name = "fgo-lady-avalon-kosaki.jpg";
+      crop = "760x650+0+0";
     }
   ];
 in
@@ -117,10 +135,29 @@ pkgs.callPackage (
   }:
   let
     imagePkgs = map (v: {
-      src = fetchurl (lib.filterAttrs (n: _: n != "name") v);
+      src =
+        let
+          filterAttr = [
+            "name"
+            "crop"
+          ];
+        in
+        fetchurl (lib.filterAttrs (n: _: !(builtins.elem n filterAttr)) v);
       dst = v.name;
+      crop = v.crop or null;
     }) images;
-    builderScript = [ "mkdir -p $out/" ] ++ (map (v: "cp ${v.src} $out/${v.dst}")) imagePkgs;
+    builderScript = [
+      "mkdir -p $out/"
+    ]
+    ++
+      (map (
+        v:
+        if v.crop == null then
+          "cp ${v.src} $out/${v.dst}"
+        else
+          "${lib.getExe pkgs.imagemagick} ${v.src} -crop ${v.crop} $out/${v.dst}"
+      ))
+        imagePkgs;
   in
   stdenvNoCC.mkDerivation {
     pname = "wallpapers";
