@@ -70,14 +70,15 @@ if status is-login
   fish_add_path --prepend /opt/homebrew/bin
   fish_add_path --prepend /opt/homebrew/opt/trash/bin
   fish_add_path --prepend $dotfiles_path/bin
-  fish_add_path --prepend /run/current-system/sw/bin
-  fish_add_path --prepend ~/.nix-profile/bin
-  fish_add_path --prepend ~/.local/bin
-
   if command -q aqua
     fish_add_path --prepend --move "$(aqua root-dir)/bin"
     set -gx AQUA_GLOBAL_CONFIG $dotfiles_path/aqua/aqua.yaml
   end
+  if test (uname) = "Darwin"
+    fish_add_path --prepend --move /run/current-system/sw/bin
+    fish_add_path --prepend --move ~/.nix-profile/bin
+  end
+  fish_add_path --prepend ~/.local/bin
 end
 
 if status is-interactive
