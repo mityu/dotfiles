@@ -6,14 +6,14 @@ return {
   end,
   config = function()
     local helper = require('vimrc.helper')
-    local now = require('vimrc.now')
+    local now = require('vimrc.helper.now')
 
     helper.create_autocmd('InsertEnter', {
       group = 'vimrc-gyoza',
       once = true,
       callback = function()
         vim.fn['gyoza#enable']()
-        vim.fn['vimrc#gyoza#load_rules']()
+        vim.fn['vimrc#gyoza#load_rules']('_')
       end,
     })
 
