@@ -54,6 +54,7 @@ in
       brightnessctl
       cargo
       discord
+      file
       gdb
       gnumake
       gtrash
@@ -63,6 +64,7 @@ in
       seahorse
       slack
       # swift
+      tree
       udisks
       vscode
       wezterm
