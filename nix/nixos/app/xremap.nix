@@ -50,6 +50,16 @@ in
 
     config.keymap = [
       {
+        name = "Zotero";
+        application.only = [ "Navigator.Zotero" ];
+        remap = {
+          "Super-f" = "C-f";
+          "Super-Shift-f" = "C-Shift-f";
+          "Super-w" = "C-w";
+          "Super-q" = "C-q";
+        };
+      }
+      {
         name = "Firefox";
         application.only = [ "Navigator.firefox" ];
         remap = {
