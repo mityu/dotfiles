@@ -76,6 +76,7 @@ in
           "Google-chrome"
           "Chromium"
           "Vivaldi-stable"
+          "Thunar.Thunar"
         ];
         remap = {
           "Super-t" = "C-t";
