@@ -307,6 +307,24 @@ in
     # ];
   };
 
+  xdg.mimeApps = {
+    defaultApplications = {
+    };
+    associations.added =
+      lib.pipe
+        [ "jpeg" "png" "bmp" "apng" "heif" ]
+        [
+          (map (type: "image/${type}"))
+          (
+            mime-types:
+            lib.genAttrs mime-types (_: [
+              "org.xfce.ristretto.desktop"
+              "org.kde.okular.desktop"
+            ])
+          )
+        ];
+  };
+
   # Clean /plugins property before apply this settings because all of the
   # entry in /plugins property of xfce4-panel channel should be completely
   # **replaced**.
