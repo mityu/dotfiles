@@ -59,7 +59,9 @@ in
       gnumake
       gtrash
       hwloc
+      imagemagick
       libgcc
+      net-tools
       rofi
       seahorse
       slack
