@@ -187,6 +187,11 @@ in
     package = inputs.wezterm.packages.${pkgs.system}.default;
   };
 
+  services.kdeconnect = {
+    enable = true;
+    indicator = true;
+  };
+
   programs.firefox = {
     enable = true;
     languagePacks = [ "ja" ];

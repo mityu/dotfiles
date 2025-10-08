@@ -1,8 +1,12 @@
 {
   pkgs,
+  lib,
   username,
   ...
 }:
+let
+  kdeConnectPorts = lib.lists.range 1714 1764;
+in
 {
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -143,8 +147,8 @@
   # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = kdeConnectPorts;
+  networking.firewall.allowedUDPPorts = kdeConnectPorts;
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
