@@ -132,7 +132,6 @@ fi
 shopt -s nocaseglob
 set -o vi
 
-alias dotfiles=". $(which dotfiles)"
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
 alias themis-nvim='THEMIS_VIM=nvim themis'
@@ -153,17 +152,6 @@ if bashrc_has_cmd rlwrap; then
 	bashrc_has_cmd ocaml && alias ocaml='rlwrap ocaml'
 fi
 
-if bashrc_has_cmd eza; then
-	function ls() {
-		if [[ -t 1 ]]; then
-			# When output is terminal.
-			eza --group-directories-first --icons $*
-		else
-			command ls $*
-		fi
-	}
-fi
-
 if bashrc_has_cmd vim; then
 	alias vi="vim -u $__bashrc_dotfiles_path/vim/vimrc_stable"
 	alias vim-stable='vi'
@@ -176,14 +164,6 @@ if bashrc_has_cmd vim; then
 		export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
 	fi
 fi
-
-function gitinit() {
-	if git rev-parse 2> /dev/null; then
-		bashrc_ask_yesno 'In a git repository. continue?' || return 1
-	fi
-	git init --initial-branch main
-	git commit --allow-empty -m "Initial commit"
-}
 
 function CAPSLOCK() {
 	if bashrc_has_cmd xdotool; then
@@ -207,13 +187,6 @@ if bashrc_in_vim_terminal; then
 
 	function drop() {
 		printf "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
-	}
-
-	function synccwd() {
-		local cwd
-		printf "\e]51;[\"call\", \"Tapi_getcwd\", []]\x07"
-		read cwd
-		cd "$cwd"
 	}
 fi
 
