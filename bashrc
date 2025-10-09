@@ -26,7 +26,7 @@ if __bashrc_should_invoke_fish; then
 fi
 
 function dotfiles-path() {
-	echo $(cd $(dirname $(realpath ${BASH_SOURCE[0]})); pwd)
+	dirname "$(realpath "${BASH_SOURCE[0]}")"
 }
 
 function bashrc_is_msys() {
@@ -42,15 +42,15 @@ function bashrc_in_neovim_terminal() {
 }
 
 function bashrc_XDG_CONFIG_HOME() {
-	echo ${XDG_CONFIG_HOME:-$HOME/.config}
+	echo "${XDG_CONFIG_HOME:-$HOME/.config}"
 }
 
 function bashrc_XDG_CACHE_HOME() {
-	echo ${XDG_CACHE_HOME:-$HOME/.cache}
+	echo "${XDG_CACHE_HOME:-$HOME/.cache}"
 }
 
 function bashrc_has_cmd() {
-	type $1 &> /dev/null
+	type "$1" &> /dev/null
 }
 
 function bashrc_print_error() {
@@ -59,10 +59,10 @@ function bashrc_print_error() {
 
 function bashrc_ask_yesno() {
 	echo -n "$1 [y/N]: "
-	read -q
+	read -qr
 }
 
-__bashrc_dotfiles_path=`dotfiles-path`
+__bashrc_dotfiles_path=$(dotfiles-path)
 
 # Set environmental variables (Only when outside of Vim.)
 if ! (bashrc_in_vim_terminal || bashrc_in_neovim_terminal) && [[ -f ~/.envrc ]]; then
@@ -72,7 +72,7 @@ fi
 # Environmental variables
 if shopt -q login_shell; then
 	function bashrc_prepend_PATH() {
-		if [[ $1 != "" && ! $PATH =~ "$1" ]]; then
+		if [[ $1 != "" && ! $PATH =~ $1 ]]; then
 			export PATH=$1:$PATH
 		fi
 	}
@@ -97,15 +97,15 @@ if shopt -q login_shell; then
 			gobin=$(go env GOBIN)
 			gobin=${gobin:-$(go env GOPATH)/bin}
 			if bashrc_is_msys; then
-				gobin=$(cygpath -u $gobin)
+				gobin=$(cygpath -u "$gobin")
 			fi
-			echo $gobin
+			echo "$gobin"
 		}
-		bashrc_prepend_PATH $(__bashrc_get_gobin)
+		bashrc_prepend_PATH "$(__bashrc_get_gobin)"
 	fi
 
 	bashrc_has_cmd ros && bashrc_prepend_PATH "$HOME/.roswell/bin"
-	bashrc_has_cmd opam && eval $(opam env)
+	bashrc_has_cmd opam && eval "$(opam env)"
 
 	if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
 		__bashrc_brew_prefix=$(brew --prefix)
@@ -123,8 +123,8 @@ if shopt -q login_shell; then
 	fi
 
 	if bashrc_has_cmd aqua; then
-		bashrc_prepend_PATH $(aqua root-dir)
-		export AQUA_GLOBAL_CONFIG=$__bashrc_dotfiles_path/aqua/aqua.yaml
+		bashrc_prepend_PATH "$(aqua root-dir)"
+		export AQUA_GLOBAL_CONFIG="$__bashrc_dotfiles_path/aqua/aqua.yaml"
 	fi
 fi
 
@@ -195,7 +195,8 @@ if bashrc_has_cmd sk; then
 
 	bind -x '"\C-r": select-history'
 	function select-history() {
-		local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | sk --tac --no-multi)
+		local cmd
+		cmd=$(history | awk '{$1=""; print substr($0, 2)}' | sk --tac --no-multi)
 		if [[ $cmd != "" ]]; then
 			READLINE_LINE=$cmd
 			READLINE_POINT=${#cmd}
@@ -203,13 +204,13 @@ if bashrc_has_cmd sk; then
 	}
 
 	function cd() {
-		if [[ $@ != '' ]]; then
+		if [[ "$*" != '' ]]; then
 			command cd "$@"
 			return $?
 		fi
 		local path=$(interactive-cd-selector)
 		if [[ $path != "" ]]; then
-			command cd $path
+			command cd "$path"
 		fi
 	}
 elif bashrc_has_cmd fzf; then
@@ -217,7 +218,8 @@ elif bashrc_has_cmd fzf; then
 
 	bind -x '"\C-r": select-history'
 	function select-history() {
-		local cmd=$(history | awk '{$1=""; print substr($0, 2)}' | fzf --tac --no-multi)
+		local cmd
+		cmd=$(history | awk '{$1=""; print substr($0, 2)}' | fzf --tac --no-multi)
 		if [[ $cmd != "" ]]; then
 			READLINE_LINE=$cmd
 			READLINE_POINT=${#cmd}
@@ -256,7 +258,8 @@ function __bashrc_update_prompt() {
 		PS1+="${__bashrc_prompt_colors[red]}#\$?$reset"
 	fi
 	PS1+=" ${__bashrc_prompt_colors[yellow]}\w$reset "
-	local branch=$(git branch --show-current 2> /dev/null || echo '')
+	local branch
+	branch=$(git branch --show-current 2> /dev/null || echo '')
 	[[ -n $branch ]] && PS1+="${__bashrc_prompt_colors[gray]}($branch)$reset"
 	PS1+='\n'
 	[[ $(id -u) == 0 ]] && PS1+='# ' || PS1+='$ '
@@ -279,12 +282,12 @@ fi
 
 if bashrc_has_cmd brew; then
 	__bashrc_brew_prefix=$(brew --prefix)
-	if [[ -f $__bashrc_brew_prefix/etc/bash_completion ]]; then
-		. $__bashrc_brew_prefix/etc/bash_completion
+	if [[ -f "$__bashrc_brew_prefix/etc/bash_completion" ]]; then
+		. "$__bashrc_brew_prefix/etc/bash_completion"
 	fi
 	if [[ -d "$__bashrc_brew_prefix/etc/bash_completion.d" ]]; then
-		for f in $__bashrc_brew_prefix/etc/bash_completion.d/*; do
-			. $f
+		for f in "$__bashrc_brew_prefix"/etc/bash_completion.d/*; do
+			. "$f"
 		done
 	fi
 fi
