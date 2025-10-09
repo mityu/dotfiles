@@ -2,6 +2,29 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
+# Make fish shell substantial default shell.
+# https://blog.atusy.net/2025/03/13/drop-into-fish-from-bash/
+function __bashrc_should_invoke_fish {
+	# Don't invoke fish when the current bash isn't interactive use or fish command isn't available.
+	if ! { [[ $- == *i* && $- != *c* && $- != *s* ]] && command -v fish &>/dev/null; }; then
+		return 1
+	fi
+
+	# Don't invoke fish when the parent process if fish.
+	if [[ $(uname) == "Darwin" ]]; then
+		[[ $(/bin/ps -p $PPID -o comm | tail -n +2) != "fish" ]]
+	else
+		[[ $(ps --no-header --pid=$PPID --format=comm) != "fish" ]]
+	fi
+}
+if __bashrc_should_invoke_fish; then
+  if shopt -q login_shell; then
+    exec fish --login
+  else
+    exec fish
+  fi
+fi
+
 function dotfiles-path() {
 	echo $(cd $(dirname $(realpath ${BASH_SOURCE[0]})); pwd)
 }
