@@ -136,6 +136,7 @@ in
         application.only = [
           "Slack"
           "discord"
+          "okular.okular"
         ];
         remap = {
           "Super-q" = "C-q";
