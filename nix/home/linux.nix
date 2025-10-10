@@ -81,7 +81,8 @@ in
         inherit (pkgs) system;
       })
       pkgs.zotero
-    ];
+    ]
+    ++ map (v: lib.mkIf (!isDesktop) v) [ remmina ];
 
   i18n.inputMethod = {
     enable = true;

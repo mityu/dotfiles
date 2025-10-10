@@ -8,6 +8,8 @@ let
   kdeConnectPorts = lib.lists.range 1714 1764;
 in
 {
+  imports = [ ../app/softether.nix ];
+
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
