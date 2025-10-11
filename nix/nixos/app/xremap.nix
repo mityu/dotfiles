@@ -103,6 +103,7 @@ in
           "gnome-terminal-server.Gnome-terminal"
           "Alacritty"
           "Gvim"
+          "org.remmina.Remmina.org.remmina.Remmina"
         ];
         remap = {
           "C-b" = "Left";

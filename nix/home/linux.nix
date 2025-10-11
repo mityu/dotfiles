@@ -82,7 +82,10 @@ in
       })
       pkgs.zotero
     ]
-    ++ map (v: lib.mkIf (!isDesktop) v) [ remmina ];
+    ++ map (v: lib.mkIf (!isDesktop) v) [
+      remmina
+      zoom-us
+    ];
 
   i18n.inputMethod = {
     enable = true;
