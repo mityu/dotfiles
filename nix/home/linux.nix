@@ -193,6 +193,8 @@ in
     package = inputs.wezterm.packages.${pkgs.system}.default;
   };
 
+  services.blueman-applet.enable = isDesktop;
+
   services.kdeconnect = {
     enable = true;
     indicator = true;
