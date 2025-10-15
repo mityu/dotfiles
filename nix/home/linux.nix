@@ -241,6 +241,7 @@ in
             ];
           };
         };
+        "extensions.autoDisableScopes" = 0; # Automatically enable extensions.
       };
       extensions = {
         force = true;
