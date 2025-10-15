@@ -62,6 +62,7 @@ in
       imagemagick
       libgcc
       net-tools
+      ollama
       rofi
       seahorse
       slack
