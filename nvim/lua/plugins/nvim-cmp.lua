@@ -30,7 +30,7 @@ return {
         ---@param entry cmp.Entry
         ---@param vim_item vim.CompletedItem
         ---@return vim.CompletedItem
-        format = function (entry, vim_item)
+        format = function(entry, vim_item)
           if entry.source.name == 'nvim_lsp' then
             if vim_item.menu ~= nil then
               vim_item.menu = vim_item.menu .. ' LSP'
@@ -39,8 +39,8 @@ return {
             end
           end
           return vim_item
-        end
-      };
+        end,
+      },
       -- window = {
       --   documentation = cmp.config.window.bordered({
       --     winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None",
