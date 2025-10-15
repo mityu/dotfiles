@@ -38,6 +38,18 @@
   };
   services.blueman.enable = true;
 
+  services.open-webui = {
+    enable = true;
+    port = 11435;
+    environment = {
+      OLLAMA_API_BASE_URL = "http://llm:11434";
+      ANONYMIZED_TELEMETRY = "False";
+      DO_NOT_TRACK = "True";
+      SCARF_NO_ANALYTICS = "True";
+      WEBUI_AUTH = "False";
+    };
+  };
+
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
