@@ -15,7 +15,9 @@ if helper.is_plugin_installed('nvim-notify') then
     group = 'vimrc',
     callback = function(ev)
       local client = vim.lsp.get_client_by_id(ev.data.client_id).name
-      vim.schedule(function() notify.notify(('Server detached: %s'):format(client)) end)
+      vim.schedule(function()
+        notify.notify(('Server detached: %s'):format(client))
+      end)
     end,
   })
 end
@@ -35,6 +37,14 @@ vim.diagnostic.config({
     },
   },
 })
+
+do
+  local handler = vim.lsp.diagnostic.on_publish_diagnostics
+  vim.lsp.diagnostic.on_publish_diagnostics = function(...)
+    handler(...)
+    vim.diagnostic.setloclist({ open = false })
+  end
+end
 -- highlight link LspDiagVirtualTextError Error
 -- highlight link LspDiagVirtualTextWarning WarningMsg
 -- highlight link LspDiagVirtualTextHint Normal
@@ -81,7 +91,7 @@ end
 local function should_use_as_formatter(ft, client)
   local formatter_preference = {
     lua = 'stylua',
-  };
+  }
   local prf = formatter_preference[ft]
   return prf == nil or prf == client.name
 end
