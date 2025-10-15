@@ -1,2 +1,2 @@
-require('vimrc.lsp.setup')
-require('vimrc.lsp.config')
+require('vimrc.lsp.setup-server')
+require('vimrc.lsp.config-buffer')
