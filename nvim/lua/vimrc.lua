@@ -124,4 +124,66 @@ function M.show_highlight_group()
   end
 end
 
+---@param arg vim.api.keyset.create_user_command.command_args
+function M.clipbuffer(arg)
+  local catchup = function()
+    if not vim.bo.modified then
+      -- TODO: Catch error
+      local ok, r = pcall(function()
+        vim.cmd([[
+          %delete _
+          1 put +
+          1 delete _
+          setlocal nomodified
+        ]])
+      end)
+      if not ok then
+        helper.echomsg_error(tostring(r))
+      end
+    end
+  end
+
+  local opener = 'tabedit'
+  if arg.args ~= '' then
+    opener = arg.args
+  end
+
+  vim.cmd(('hide %s clipboard://buffer'):format(opener))
+
+  local bufnr = vim.fn.bufnr()
+  vim.fn.setbufvar(bufnr, 'clipbuffer_bufhidden', vim.bo.bufhidden)
+  vim.bo.buftype = 'acwrite'
+  vim.bo.modified = false
+  vim.bo.bufhidden = 'hide'
+  vim.bo.swapfile = false
+  catchup()
+
+  vim.api.nvim_clear_autocmds({
+    buffer = bufnr,
+  })
+  helper.create_autocmd('BufWriteCmd', {
+    buffer = bufnr,
+    group = 'vimrc-clipbuffer',
+    nested = true,
+    callback = function()
+      vim.cmd('%yank +')
+      vim.bo.modified = false
+    end,
+  })
+  helper.create_autocmd('BufEnter', {
+    buffer = bufnr,
+    group = 'vimrc-clipbuffer',
+    nested = true,
+    callback = catchup,
+  })
+  helper.create_autocmd('BufWipeout', {
+    buffer = bufnr,
+    group = 'vimrc-clipbuffer',
+    nested = true,
+    callback = function()
+      vim.fn.setbufvar(vim.fn.bufnr(), '&bufhidden', vim.b.clipbuffer_bufhidden)
+    end,
+  })
+end
+
 return M

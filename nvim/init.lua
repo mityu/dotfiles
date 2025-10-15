@@ -313,6 +313,11 @@ vim.api.nvim_create_user_command(
   [[call setreg('+', getreg(<q-args>, 1))]],
   { nargs = '?' }
 )
+vim.api.nvim_create_user_command(
+  'ClipBuffer',
+  require('vimrc').clipbuffer,
+  { bar = true, nargs = '?' }
+)
 vim.api.nvim_create_user_command('Hlgroup', function()
   helper.show_highlight_group()
 end, { bar = true })
