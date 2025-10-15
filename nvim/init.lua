@@ -519,6 +519,7 @@ end)
 if not vim.g.lazy_did_setup then
   require('lazy').setup('plugins', {
     root = lazy_root_path,
+    lockfile = vim.fs.joinpath(vim.fn.stdpath('cache'), 'lazy-lock.json'),
     defaults = { lazy = true },
     performance = {
       rtp = {
