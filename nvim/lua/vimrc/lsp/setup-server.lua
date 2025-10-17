@@ -1,4 +1,5 @@
 local helper = require('vimrc.helper')
+local now = require('vimrc.helper.now')
 
 if helper.is_plugin_loaded('cmp-nvim-lsp') then
   vim.lsp.config('*', {
@@ -6,22 +7,30 @@ if helper.is_plugin_loaded('cmp-nvim-lsp') then
   })
 end
 
----@param filetypes string[]
----@param server string
----@param config nil|table
-local function setup_server(filetypes, server, config)
-  helper.create_autocmd('FileType', {
-    group = 'vimrc-nvim-lsp-setup',
-    pattern = filetypes,
-    once = true,
-    callback = function()
-      if config ~= nil then
-        vim.lsp.config(server, config)
-      end
-      vim.lsp.enable(server)
-    end,
-  })
-end
+local setup_server = now(function()
+  local configurated_servers = {}
+
+  ---@param filetypes string[]
+  ---@param server string
+  ---@param config nil|table
+  return function(filetypes, server, config)
+    helper.create_autocmd('FileType', {
+      group = 'vimrc-nvim-lsp-setup',
+      pattern = filetypes,
+      once = true,
+      callback = function()
+        if configurated_servers[server] then
+          return
+        end
+        configurated_servers[server] = true
+        if config ~= nil then
+          vim.lsp.config(server, config)
+        end
+        vim.lsp.enable(server)
+      end,
+    })
+  end
+end)
 
 setup_server({ 'lua' }, 'lua_ls', {
   settings = {
