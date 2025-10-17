@@ -490,10 +490,10 @@ in
       "commands/custom/override" = true;
       "commands/custom/<Primary>space" = "xfce4-appfinder";
       "commands/custom/<Super>space" = "xfce4-appfinder";
-      "commands/custom/<Super><Primary>2" = "xfce4-screenshooter";
-      "commands/custom/<Super><Primary>3" = "xfce4-screenshooter --fullscreen";
-      "commands/custom/<Super><Primary>4" = "xfce4-screenshooter --region";
-      "commands/custom/<Super><Primary>5" = "xfce4-screenshooter --window";
+      "commands/custom/<Super><Shift>2" = "xfce4-screenshooter";
+      "commands/custom/<Super><Shift>3" = "xfce4-screenshooter --fullscreen";
+      "commands/custom/<Super><Shift>4" = "xfce4-screenshooter --region";
+      "commands/custom/<Super><Shift>5" = "xfce4-screenshooter --window";
       "commands/custom/<Super><Primary><Shift>3" = "xfce4-screenshooter --clipboard --fullscreen";
       "commands/custom/<Super><Primary><Shift>4" = "xfce4-screenshooter --clipboard --region";
       "commands/custom/<Super><Primary><Shift>5" = "xfce4-screenshooter --clipboard --window";
@@ -506,6 +506,8 @@ in
       "xfwm4/custom/<Alt>Tab" = "switch_window_key";
       "xfwm4/custom/<Super>Left" = "left_workspace_key";
       "xfwm4/custom/<Super>Right" = "right_workspace_key";
+      "xfwm4/custom/<Super><Primary>Left" = "tile_left_key";
+      "xfwm4/custom/<Super><Primary>Right" = "tile_right_key";
     };
     xfce4-power-manager =
       if isDesktop then
