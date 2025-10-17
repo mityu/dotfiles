@@ -1,10 +1,11 @@
 {
   pkgs,
   lib,
-  hardware,
+  config,
   ...
 }:
 let
+  inherit (config.feat) hardware isDesktop;
   runBeforeXfconfSettings =
     commands:
     # This is a modification of:
@@ -26,7 +27,6 @@ let
       unset DBUS_RUN_SESSION_CMD
     '';
   reconnect-monitors = import ../pkgs/x11-reconnect-monitors.nix { inherit pkgs; };
-  isDesktop = lib.strings.hasPrefix "desktop" hardware;
 in
 {
   imports = [

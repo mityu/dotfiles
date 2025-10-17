@@ -1,4 +1,7 @@
-{ pkgs, platform, ... }:
+{ pkgs, config, ... }:
+let
+  inherit (config.feat) platform;
+in
 {
   i18n.inputMethod = {
     enable = true;

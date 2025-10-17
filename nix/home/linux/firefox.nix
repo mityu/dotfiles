@@ -2,9 +2,12 @@
   pkgs,
   lib,
   username,
-  enableTexPackages,
+  config,
   ...
 }:
+let
+  inherit (config.feat) enableTexPackages;
+in
 {
   programs.firefox = {
     enable = true;

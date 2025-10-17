@@ -3,22 +3,17 @@
   pkgs,
   lib,
   username,
-  platform,
-  hardware,
+  config,
   ...
-}@allInputs:
+}:
 let
-  enableTexPackages = builtins.elem hardware [
-    "desktop-endeavor"
-    "desktop-b760m-pro"
-  ];
-  isDesktop = lib.strings.hasPrefix "desktop" hardware;
+  inherit (config.feat) platform isDesktop enableTexPackages;
 in
 {
   imports = [
     inputs.nur.modules.homeManager.default
     ./linux/fcitx5.nix
-    (import ./linux/firefox.nix (allInputs // { inherit enableTexPackages; }))
+    ./linux/firefox.nix
     ./linux/xfce4.nix
     ./common.nix
   ];
@@ -67,7 +62,6 @@ in
       remmina
       zoom-us
     ];
-
 
   programs.wezterm = {
     package = inputs.wezterm.packages.${pkgs.system}.default;

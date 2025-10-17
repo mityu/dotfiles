@@ -2,10 +2,11 @@
   inputs,
   pkgs,
   username,
-  platform,
+  config,
   ...
 }:
 let
+  inherit (config.feat) platform;
   vim-overlay =
     final: prev:
     let

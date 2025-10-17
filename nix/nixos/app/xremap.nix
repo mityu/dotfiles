@@ -2,11 +2,12 @@
   pkgs,
   lib,
   xremap,
-  platform,
   username,
+  config,
   ...
 }:
 let
+  inherit (config.feat) platform;
   buildCompleteFeatureFlags =
     flags:
     flags

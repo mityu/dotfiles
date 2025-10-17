@@ -90,29 +90,41 @@
           buildConfig =
             { pc, de }:
             let
-              inherit (nixpkgs.lib) mkIf;
-              nixosSystem = import ./nixos/nixosSystem.nix { inherit inputs username; };
+              inherit (inputs.nixpkgs.lib) nixosSystem;
+
+              featModule = import ./module/feat.nix {
+                hardware = pc;
+                desktopEnvironment = de;
+              };
               deConfig = des.${de};
 
-              modules = [ (getModuleOfPC pc) ] ++ deConfig.modules;
-              config = nixosSystem {
-                inherit modules;
-                system = mkIf (deConfig ? system) deConfig.system;
-                platform = deConfig.platform;
-              };
+              modules = [
+                featModule
+                (getModuleOfPC pc)
+              ]
+              ++ deConfig.modules;
             in
             {
-              "${pc}-${de}" = config;
+              "${pc}-${de}" = nixosSystem {
+                inherit modules;
+                system = deConfig.system or "x86_64-linux";
+                specialArgs = inputs // {
+                  inherit username;
+                };
+              };
             };
         in
         lib.mergeAttrsList (map buildConfig profiles);
 
       homeConfigurations =
         let
-          getPlatformInfo = import ./lib/getPlatformInfo.nix;
           buildConfig =
             { pc, de }:
             let
+              featModule = import ./module/feat.nix {
+                hardware = pc;
+                desktopEnvironment = de;
+              };
               config = home-manager.lib.homeManagerConfiguration {
                 pkgs = import nixpkgs {
                   system = "x86_64-linux";
@@ -121,10 +133,9 @@
                 extraSpecialArgs = {
                   inherit inputs;
                   inherit username;
-                  hardware = pc;
-                  platform = getPlatformInfo de;
                 };
                 modules = [
+                  featModule
                   ./home/linux.nix
                   nix-index-database.homeModules.nix-index
                 ];
@@ -144,10 +155,12 @@
             extraSpecialArgs = {
               inherit inputs;
               inherit username;
-              hardware = "mac";
-              platform = getPlatformInfo "darwin";
             };
             modules = [
+              (import ./module/feat.nix {
+                hardware = "mac";
+                desktopEnvironment = "darwin";
+              })
               ./home/darwin.nix
               nix-index-database.homeModules.nix-index
             ];
