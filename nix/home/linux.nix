@@ -58,7 +58,7 @@ in
       })
       pkgs.zotero
     ]
-    ++ map (v: lib.mkIf (!isDesktop) v) [
+    ++ [
       remmina
       zoom-us
     ];
