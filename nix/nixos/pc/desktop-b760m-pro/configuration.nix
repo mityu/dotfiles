@@ -2,8 +2,16 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ nixos-hardware, ... }:
-
+{
+  nixos-hardware,
+  lib,
+  username,
+  config,
+  ...
+}:
+let
+  sshPorts = [ 31725 ];
+in
 {
   imports = [
     # Include the results of the hardware scan.
@@ -42,6 +50,53 @@
     };
   };
   services.blueman.enable = true;
+
+  services.xrdp = {
+    enable = true;
+    defaultWindowManager = lib.mkIf (config.feat.platform.Xfce) "xfce4-session";
+    audio.enable = true;
+    openFirewall = true;
+    # extraConfDirCommands =
+    #   let
+    #     additional = pkgs.writeText "xrdp-vnc" ''
+    #       [xrdp1]
+    #       name=sesman-vnc
+    #       lib=libvnc.so
+    #       username=ask
+    #       password=ask
+    #       ip=127.0.0.1
+    #       port=5900
+    #       # port=-1
+    #     '';
+    #   in
+    #   ''
+    #     cat ${additional} >> $out/xrdp.ini
+    #   '';
+  };
+
+  services.openssh = {
+    enable = true;
+    ports = sshPorts;
+    openFirewall = true;
+    settings = {
+      PasswordAuthentication = true;
+      AllowUsers = [ username ];
+      UseDns = false;
+      PermitRootLogin = "no";
+    };
+  };
+  networking.firewall.allowedTCPPorts = sshPorts;
+
+  # KVM
+  # programs.virt-manager.enable = true;
+  # users.groups.libvirtd.members = [ username ];
+  # virtualisation = {
+  #   libvirtd = {
+  #     enable = true;
+  #     qemu.swtpm.enable = true;
+  #   };
+  #   spiceUSBRedirection.enable = true;
+  # };
 
   services.open-webui = {
     enable = true;
