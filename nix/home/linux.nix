@@ -32,9 +32,11 @@ in
       file
       gdb
       gnumake
+      gparted
       gtrash
       hwloc
       imagemagick
+      (lib.mkIf isDesktop ladybird)
       libgcc
       net-tools
       ollama
