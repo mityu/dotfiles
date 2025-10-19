@@ -24,6 +24,7 @@ in
   imports = [ xremap.nixosModules.default ];
 
   services.xremap = featureFlags // {
+    enable = true;
     userName = username;
     serviceMode = if platform.X11 then "system" else "user";
     watch = true;
