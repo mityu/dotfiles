@@ -152,6 +152,16 @@ in
           "Super-Enter" = "C-Enter";
         };
       }
+      {
+        name = "C-u on pinentry";
+        application.only = [ "pinentry.Pinentry" ];
+        remap = {
+          "C-u" = [
+            "C-a"
+            "Backspace"
+          ];
+        };
+      }
       (lib.mkIf platform.Xfce {
         name = "Wezterm Super-Plus";
         application.only = [ "org.wezfurlong.wezterm.org.wezfurlong.wezterm" ];
