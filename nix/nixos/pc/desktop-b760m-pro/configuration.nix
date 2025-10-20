@@ -83,6 +83,7 @@ in
       AllowUsers = [ username ];
       UseDns = false;
       PermitRootLogin = "no";
+      X11Forwarding = true;
     };
   };
   networking.firewall.allowedTCPPorts = sshPorts;
