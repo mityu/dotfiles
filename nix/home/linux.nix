@@ -16,6 +16,7 @@ in
     ./linux/firefox.nix
     ./linux/xfce4.nix
     ./common.nix
+    ./pkgs/adwaita-xfce4-icon-theme.nix
   ];
 
   home = {
@@ -103,24 +104,31 @@ in
     #   name = "WhiteSur-Light";
     # };
     iconTheme = {
-      package = pkgs.callPackage (
-        { }:
-        pkgs.runCommand "cached-breeze-icons"
-          {
-            nativeBuildInputs = [ pkgs.kdePackages.breeze-icons ];
-          }
-          ''
-            mkdir -p $out
-            # install -Dm555 -d ${pkgs.kdePackages.breeze-icons}/share $out/
-            pushd ${pkgs.kdePackages.breeze-icons}
-            ${pkgs.lib.getExe pkgs.fd} . --type f \
-                --exec install -Dm666 "{}" "$out/{}" \;
-            popd
-            ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t $out/share/icons/breeze/
-            ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t $out/share/icons/breeze-dark/
-          ''
-      ) { };
-      name = if platform.Xfce then "breeze" else "breeze-dark";
+      package =
+        let
+          buildCachedIconTheme =
+            theme:
+            pkgs.callPackage (
+              { }:
+              pkgs.runCommand "cached-${lib.getName theme}"
+                {
+                  nativeBuildInputs = [ theme ];
+                }
+                ''
+                  mkdir -p $out
+                  pushd ${theme}
+                  ${pkgs.lib.getExe pkgs.fd} . --type f \
+                      --exec install -Dm666 "{}" "$out/{}" \;
+                  popd
+                  pushd $out/share/icons
+                  ${pkgs.lib.getExe pkgs.fd} . --type d \
+                      --exec ${pkgs.gtk3}/bin/gtk-update-icon-cache -f -t "{}" \;
+                  popd
+                ''
+            ) { };
+        in
+        pkgs.adwaita-xfce4-icon-theme;
+      name = "Adwaita-Xfce";
     };
     # gtk3.bookmarks = [
     # ];
