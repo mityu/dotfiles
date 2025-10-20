@@ -8,7 +8,7 @@
     ./hardware-configuration.nix # Include the results of the hardware scan.
     nixos-hardware.nixosModules.common-pc-ssd
     ../common.nix
-    ../../app/virtualbox.nix
+    # ../../app/virtualbox.nix
   ];
 
   # Use the systemd-boot EFI boot loader.
