@@ -498,6 +498,23 @@ if vim.fn.exists('g:colors_name') == 0 then
   vim.cmd.colorscheme('domusaurea')
 end
 
+vim.cmd([[
+  function! Tapi_drop(bufnr, arglist) abort
+    let cwd = a:arglist[0]
+    let filepath = a:arglist[1]
+    if !isabsolutepath(filepath)
+      let filepath = fnamemodify(cwd, ':p') .. filepath
+    endif
+
+    let opencmd = 'drop'
+    if bufwinnr(bufnr(filepath)) == -1
+      let opencmd = 'split'
+    endif
+    execute opencmd fnameescape(filepath)
+    return ''
+  endfunction
+]])
+
 vim.treesitter.start = function(_bufnr, _lang) end -- Disable entire treesitter.
 
 -- lvimrc

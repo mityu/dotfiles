@@ -306,6 +306,10 @@ if $in_vim_terminal
     read cwd
     builtin cd "$cwd"
   end
+else if $in_neovim_terminal
+  function drop
+    nvim -u NONE --server $NVIM --headless --remote-expr "Tapi_drop(0, ['$(pwd)', '$argv[1]'])"
+  end
 else if $in_vscode_terminal
   function drop
     code --reuse-window "$(builtin realpath $argv[1])"
