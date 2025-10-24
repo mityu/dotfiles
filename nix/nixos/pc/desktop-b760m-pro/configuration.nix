@@ -4,6 +4,7 @@
 
 {
   nixos-hardware,
+  pkgs,
   lib,
   username,
   config,
@@ -32,6 +33,11 @@ in
     powerManagement.enable = true;
     nvidiaSettings = true;
   };
+
+  services.printing.enable = true;
+  services.printing.drivers = [
+    (pkgs.callPackage (import ../../app/fujixerox-driver.nix) { })
+  ];
 
   virtualisation.docker.rootless = {
     enable = true;
