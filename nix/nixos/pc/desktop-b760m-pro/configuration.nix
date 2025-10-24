@@ -34,6 +34,8 @@ in
     nvidiaSettings = true;
   };
 
+  networking.hostName = "rigel";
+
   services.printing.enable = true;
   services.printing.drivers = [
     (pkgs.callPackage (import ../../app/fujixerox-driver.nix) { })
