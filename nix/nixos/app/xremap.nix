@@ -172,6 +172,11 @@ in
       })
       {
         name = "Window manager's kill";
+        application.not = [
+          # Don't kill desktop components
+          "xfdesktop.Xfdesktop"
+          "xfce4-panel.Xfce4-panel"
+        ];
         remap = {
           "Super-q" = lib.mkIf platform.X11 {
             launch = [
