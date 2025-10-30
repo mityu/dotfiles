@@ -308,7 +308,7 @@ if $in_vim_terminal
   end
 else if $in_neovim_terminal
   function drop
-    nvim -u NONE --server $NVIM --headless --remote-expr "Tapi_drop(0, ['$(pwd)', '$argv[1]'])"
+    nvim -u NONE --server $NVIM --headless --remote-expr "v:lua.require('vimrc').tapi_drop(0, ['$(pwd)', '$argv[1]'])"
   end
 else if $in_vscode_terminal
   function drop

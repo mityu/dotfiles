@@ -186,4 +186,21 @@ function M.clipbuffer(arg)
   })
 end
 
+---@param arglist string[]
+---@return string
+function M.tapi_drop(_bufnr, arglist)
+  local cwd = arglist[1]
+  local filepath = arglist[2]
+  if vim.fnok.isabsolutepath(filepath) then
+    filepath = vim.fs.joinpath(cwd, filepath)
+  end
+
+  local opencmd = 'drop'
+  if vim.fn.bufwinnr(vim.fn.bufnr(filepath)) == -1 then
+    opencmd = 'split'
+  end
+  vim.cmd(opencmd .. ' ' .. vim.fn.fnameescape(filepath))
+  return ''
+end
+
 return M
