@@ -885,7 +885,7 @@ cnoremap <C-n> <Down>
 cnoremap <C-b> <Left>
 cnoremap <C-a> <C-b>
 cnoremap <C-[> <C-c>
-cnoremap <C-o> <Cmd>call cmdhistory#Select()<CR>
+cnoremap <C-o> <Cmd>call cmdhistory#select()<CR>
 
 onoremap a" 2i"
 onoremap a' 2i'
@@ -987,7 +987,7 @@ def CmdwinEnter()
 
   # Make executing a previous command easier.
   if Pacpack.Tap('vim-cmdhistory')
-    nnoremap <buffer> / <Cmd>call cmdhistory#Select()<CR>
+    nnoremap <buffer> / <Cmd>call cmdhistory#select()<CR>
   endif
 
   if Pacpack.Tap('vim-winc')
@@ -1395,9 +1395,9 @@ if Pacpack.Tap('vim-cmdhistory')
     autocmd User cmdhistory-initialize SetupCmdhistory()
   augroup END
   def SetupCmdhistory()
-    cmdhistory#SetDefaultMappings()
-    cmdhistory#MapAction('<ESC>', ['no-operation'])
-    cmdhistory#MapAction('<C-@>', ['no-operation'])
+    cmdhistory#set_default_mappings()
+    cmdhistory#map_action('<ESC>', ['no-operation'])
+    cmdhistory#map_action('<C-@>', ['no-operation'])
   enddef
 endif
 
