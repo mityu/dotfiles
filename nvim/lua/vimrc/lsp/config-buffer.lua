@@ -78,6 +78,12 @@ local function should_auto_formatting(bufnr, client)
     else
       return false
     end
+  elseif ft == 'fish' then
+    if vim.fn.bufname(bufnr):find('config.fish') then
+      return false
+    else
+      return true
+    end
   elseif ft == 'cpp' then
     -- TODO: Check .clang-format
     -- TODO: Check filename when in Vim repository
