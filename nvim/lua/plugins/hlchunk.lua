@@ -4,7 +4,7 @@ return {
   config = function()
     require('hlchunk').setup({
       chunk = {
-        enable = true,
+        enable = false,
         use_treesitter = false,
         duration = 0,
         delay = 10,
