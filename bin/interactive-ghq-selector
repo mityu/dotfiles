@@ -6,6 +6,13 @@ function main {
 		exit 1
 	fi
 
+	local initial_query=
+	if type getopts &>/dev/null; then
+		getopts q: OPT "$*" && initial_query="$OPTARG"
+	else
+		echo '"getopts" command not found.  Disable optional argument support.' 1>&2
+	fi
+
 	local preview=
 	if type bat &>/dev/null; then
 		preview="bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.*"
@@ -13,14 +20,18 @@ function main {
 		preview="cat $(ghq root)/{}/README.* | head -n 80"
 	fi
 
+	# FIXME: Broken when $initial_query has whitespaces.
+	local exopts=
+	[[ "$initial_query" != '' ]] && exopts="--select-1 --query $initial_query"
+
 	if type sk &>/dev/null; then
-		sk --reverse --no-sort --no-multi -c 'ghq list' --preview "$preview"
+		sk $exopts --reverse --no-sort --no-multi -c 'ghq list' --preview "$preview"
 	elif type fzf &>/dev/null; then
-		ghq list | fzf --reverse --no-sort --no-multi --preview "$preview"
+		ghq list | fzf $exopts --reverse --no-sort --no-multi --preview "$preview"
 	else
 		echo 'No fuzzy finder available: skim, fzf' 1>&2
 		exit 1
 	fi
 }
 
-main
+main "$@"

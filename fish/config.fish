@@ -129,7 +129,8 @@ if status is-interactive
 
   alias repos=repo
   function repo --description 'interactively select and cd repository from "ghq list"'
-    set -l path (interactive-ghq-selector)
+    set -l opt (if test (count $argv) = 0; echo ''; else echo "-q $argv"; end)
+    set -l path (interactive-ghq-selector $opt)
     if string length -q -- "$path"
       set path "$(ghq root)/$path"
       history append "cd $(fishrc_format_path $path)"
