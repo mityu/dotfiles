@@ -53,8 +53,7 @@ return {
     end,
   },
   {
-    'https://github.com/mityu/skkeleton-state-popup',
-    branch = 'fix-on-neovim-cmdwin',
+    'https://github.com/NI57721/skkeleton-state-popup',
     event = 'VeryLazy',
     config = function()
       local helper = require('vimrc.helper')
