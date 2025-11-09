@@ -41,6 +41,7 @@ local function on_open()
     '<Plug>(fern-action-include=)<C-e><C-u><CR>',
     { buffer = true }
   )
+  vim.keymap.set('n', 'p', '<Plug>(fern-action-preview)', { buffer = true })
 
   if helper.is_plugin_installed('fall.vim') then
     vim.keymap.set('n', 'a', '<Cmd>Fall fern-action<CR>', { buffer = true })
