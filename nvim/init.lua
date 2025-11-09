@@ -523,6 +523,7 @@ if not vim.g.lazy_did_setup then
     defaults = { lazy = true },
     performance = {
       rtp = {
+        reset = not vim.fnok.has('win32'),
         disabled_plugins = {
           'gzip',
           'netrwPlugin',
