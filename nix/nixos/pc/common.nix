@@ -31,7 +31,7 @@ in
       [
         noto-fonts-cjk-serif
         noto-fonts-cjk-sans
-        noto-fonts-emoji
+        noto-fonts-color-emoji
         nerd-fonts.noto
         hackgen-nf-font
         ipaexfont
