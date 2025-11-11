@@ -191,7 +191,7 @@ end
 function M.tapi_drop(_bufnr, arglist)
   local cwd = arglist[1]
   local filepath = arglist[2]
-  if vim.fnok.isabsolutepath(filepath) then
+  if not vim.fnok.isabsolutepath(filepath) then
     filepath = vim.fs.joinpath(cwd, filepath)
   end
 
