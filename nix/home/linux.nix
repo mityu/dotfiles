@@ -15,6 +15,7 @@ in
     ./linux/fcitx5.nix
     ./linux/firefox.nix
     ./linux/xfce4.nix
+    ./linux/libinput-gestures.nix
     ./common.nix
     ./pkgs/adwaita-xfce4-icon-theme.nix
   ];

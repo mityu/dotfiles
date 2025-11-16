@@ -66,8 +66,6 @@ if $IS_LINUX; then
 	ln -snfv ${SCRIPT_DIR}/xkeysnail $CONFIG_DIR/xkeysnail
 	ln -snfv ${SCRIPT_DIR}/xremap $CONFIG_DIR/xremap
 	ln -snfv $SCRIPT_DIR/dunst $CONFIG_DIR/dunst
-	ln -snfv $SCRIPT_DIR/libinput-gestures/libinput-gestures.conf \
-		$CONFIG_DIR/libinput-gestures.conf
 	ln -snfv $SCRIPT_DIR/rofi $CONFIG_DIR/rofi
 
 	if type pacman &> /dev/null; then

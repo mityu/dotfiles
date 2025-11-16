@@ -115,7 +115,10 @@ in
   users.users.${username} = {
     isNormalUser = true;
     initialPassword = "pass123";
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "input"
+    ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
   };
 
