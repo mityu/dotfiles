@@ -17,7 +17,7 @@
     gnupg
     (import ./pkgs/ott.nix {
       inherit (inputs) opam-nix;
-      inherit (pkgs) system;
+      inherit (pkgs.stdenv.hostPlatform) system;
     })
   ];
 }

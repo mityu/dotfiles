@@ -57,7 +57,7 @@ in
       pkgs.kdePackages.okular
       (import ./pkgs/ott.nix {
         inherit (inputs) opam-nix;
-        inherit (pkgs) system;
+        inherit (pkgs.stdenv.hostPlatform) system;
       })
       pkgs.zotero
     ]
@@ -67,7 +67,7 @@ in
     ];
 
   programs.wezterm = {
-    package = inputs.wezterm.packages.${pkgs.system}.default;
+    package = inputs.wezterm.packages.${pkgs.stdenv.hostPlatform.system}.default;
   };
 
   services.blueman-applet.enable = isDesktop;
