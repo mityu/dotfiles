@@ -30,6 +30,7 @@ in
       default = builtins.elem hardware [
         "desktop-endeavor"
         "desktop-b760m-pro"
+        "laptop-hp-envy"
       ];
     };
   };
