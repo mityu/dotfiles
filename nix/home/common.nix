@@ -79,6 +79,7 @@ in
       typst
       vhs
       vim-startuptime
+      with-shell
       yazi
       yq-go
     ]
