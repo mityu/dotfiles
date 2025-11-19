@@ -53,7 +53,10 @@ in
     config.keymap = [
       {
         name = "Zotero";
-        application.only = [ "Navigator.Zotero" ];
+        application.only = [
+          "Navigator.Zotero"
+          "okular.okular"
+        ];
         remap = {
           "Super-f" = "C-f";
           "Super-Shift-f" = "C-Shift-f";
@@ -94,6 +97,7 @@ in
           "Super-y" = "C-h";
           "Super-LeftBrace" = "C-LeftBrace";
           "Super-RightBrace" = "C-RightBrace";
+          "Super-p" = "C-p";
         };
       }
       {
@@ -139,7 +143,6 @@ in
         application.only = [
           "Slack"
           "discord"
-          "okular.okular"
         ];
         remap = {
           "Super-q" = "C-q";
