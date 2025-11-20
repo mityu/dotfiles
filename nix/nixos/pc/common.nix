@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   username,
   ...
 }:
@@ -116,9 +117,9 @@ in
     isNormalUser = true;
     initialPassword = "pass123";
     extraGroups = [
-      "wheel"
-      "input"
-    ]; # Enable ‘sudo’ for the user.
+      "wheel" # Enable ‘sudo’ for the user.
+    ]
+    ++ lib.optional config.feat.enableLibinputGestures "input";
     shell = pkgs.fish;
   };
 

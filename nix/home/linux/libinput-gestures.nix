@@ -1,13 +1,14 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }:
 {
   imports = [ ./module/libinput-gestures.nix ];
 
   services.libinput-gestures = {
-    enable = false;
+    enable = config.feat.enableLibinputGestures;
     gestures = {
       # xdotool getwindowclassname $(xdotool getwindowfocus)
       # NOTE: On Wayland, Firefox has native support for pinch in/out zooming.

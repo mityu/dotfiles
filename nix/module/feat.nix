@@ -4,7 +4,7 @@
   ...
 }:
 let
-  inherit (lib) mkOption types;
+  inherit (lib) mkOption mkEnableOption types;
 in
 {
   options.feat = {
@@ -33,5 +33,7 @@ in
         "laptop-hp-envy"
       ];
     };
+
+    enableLibinputGestures = mkEnableOption "libinput-gestures";
   };
 }
