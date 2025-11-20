@@ -172,7 +172,7 @@ in
 
   xfconf-xfce4-desktop-wallpaper =
     let
-      wallpapers = import ../pkgs/wallpapers.nix { inherit pkgs; };
+      wallpapers = import ../pkgs/wallpapers.nix { inherit pkgs lib; };
     in
     {
       workspace0 =
