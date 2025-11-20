@@ -177,7 +177,7 @@ in
     {
       workspace0 =
         if hardware == "laptop-hp-envy" then
-          "${wallpapers}/fgo-lady-avalon-MNe.jpg"
+          "${wallpapers}/mahoyo-hill-5.png"
         else
           "${wallpapers}/mahoyo-misakicho.jpeg";
     };
