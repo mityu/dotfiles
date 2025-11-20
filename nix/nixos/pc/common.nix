@@ -9,7 +9,10 @@ let
   kdeConnectPorts = lib.lists.range 1714 1764;
 in
 {
-  imports = [ ../app/softether.nix ];
+  imports = [
+    ../app/softether.nix
+    ../app/sound-theme.nix
+  ];
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
