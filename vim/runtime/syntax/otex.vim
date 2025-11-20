@@ -33,7 +33,7 @@ endif
 
 if expand('%') !=# ''
   let s:script = s:findfile('syntax.vim')
-  if isdirectory(s:script->fnamemodify(':h') .. '/.git')
+  if s:script !=# '' && isdirectory(s:script->fnamemodify(':h') .. '/.git')
     source `=s:script`
   endif
   unlet! s:script
