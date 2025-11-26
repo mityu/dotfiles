@@ -53,7 +53,7 @@ in
       (lib.mkIf (!platform.Xfce) nautilus)
       (lib.mkIf (platform.X11) xsel)
     ]
-    ++ map (v: lib.mkIf enableTexPackages v) [
+    ++ lib.optionals enableTexPackages [
       pkgs.texliveFull
       pkgs.kdePackages.okular
       (import ./pkgs/ott.nix {
