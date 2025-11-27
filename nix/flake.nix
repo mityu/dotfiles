@@ -55,6 +55,7 @@
   outputs =
     inputs@{
       nixpkgs,
+      nixpkgs-stable,
       home-manager,
       nix-darwin,
       nix-index-database,
@@ -70,14 +71,12 @@
       des = {
         xfce = {
           modules = [ ./nixos/de/xfce.nix ];
-          platform = "xfce";
         };
         awesome = {
           modules = [ ./nixos/de/awesome.nix ];
-          platform = "x11";
         };
       };
-      profiles = (import ./lib/mkCombination.nix { lib = nixpkgs.lib; }) {
+      profiles = nixpkgs.lib.cartesianProduct {
         inherit pc;
         de = builtins.attrNames des;
       };
@@ -105,15 +104,16 @@
                 (getModuleOfPC pc)
               ]
               ++ deConfig.modules;
+
+              system = deConfig.system or "x86_64-linux";
             in
             {
               "${pc}-${de}" = nixosSystem {
-                inherit modules;
-                system = deConfig.system or "x86_64-linux";
+                inherit modules system;
                 specialArgs = inputs // {
                   inherit username;
-                  pkgs-stable = import inputs.nixpkgs-stable {
-                    system = "x86_64-linux";
+                  pkgs-stable = import nixpkgs-stable {
+                    inherit system;
                     config.allowUnfree = true;
                   };
                 };
@@ -133,7 +133,7 @@
               };
               config = home-manager.lib.homeManagerConfiguration {
                 pkgs = import nixpkgs {
-                  system = "x86_64-linux";
+                  system = des.${de}.system or "x86_64-linux";
                   config.allowUnfree = true;
                 };
                 extraSpecialArgs = {
