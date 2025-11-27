@@ -2,6 +2,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -110,6 +112,10 @@
                 system = deConfig.system or "x86_64-linux";
                 specialArgs = inputs // {
                   inherit username;
+                  pkgs-stable = import inputs.nixpkgs-stable {
+                    system = "x86_64-linux";
+                    config.allowUnfree = true;
+                  };
                 };
               };
             };

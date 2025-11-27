@@ -5,6 +5,7 @@
 {
   nixos-hardware,
   pkgs,
+  pkgs-stable,
   lib,
   username,
   config,
@@ -109,6 +110,7 @@ in
 
   services.open-webui = {
     enable = true;
+    package = pkgs-stable.open-webui;
     port = 11435;
     environment = {
       OLLAMA_API_BASE_URL = "http://llm:11434";
