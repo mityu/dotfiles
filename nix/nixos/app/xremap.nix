@@ -52,7 +52,7 @@ in
 
     config.keymap = [
       {
-        name = "Zotero";
+        name = "PDF Viewer";
         application.only = [
           "Navigator.Zotero"
           "okular.okular"
@@ -143,6 +143,10 @@ in
         application.only = [
           "Slack"
           "discord"
+          "kdeconnect-app.kdeconnect-app"
+          "org.remmina.Remmina.org.remmina.Remmina"
+          "parole.Parole"
+          "ristretto.Ristretto"
         ];
         remap = {
           "Super-q" = "C-q";
