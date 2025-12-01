@@ -227,6 +227,10 @@ elseif isMac then
 elseif isLinux then
   config.initial_cols = 130
   config.initial_rows = 40
+  table.insert(
+    config.keys,
+    { key = '+', mods = MODKEY .. '|SHIFT', action = wezterm.action.IncreaseFontSize }
+  )
 end
 
 return config

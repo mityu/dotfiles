@@ -165,14 +165,6 @@ in
           ];
         };
       }
-      (lib.mkIf platform.Xfce {
-        name = "Wezterm Super-Plus";
-        application.only = [ "org.wezfurlong.wezterm.org.wezfurlong.wezterm" ];
-        remap = {
-          "Super-Shift-Equal" = "Super-KPPlus"; # US keyboard
-          "Super-Shift-Semicolon" = "Super-KPPlus"; # JIS keyboard
-        };
-      })
       {
         name = "Window manager's kill";
         application.not = [
