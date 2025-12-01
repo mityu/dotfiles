@@ -348,17 +348,17 @@ if command -q cargo
   end
 end
 
-# `preprompt` command fixes a prefix of prompt.  E.g.
-# $ preprompt 'ENV=XXX'
+# `with` command fixes a prefix of prompt.  E.g.
+# $ with 'ENV=XXX'
 # $ ENV=XXX  <-- Automatically inserted
 #
-# To remove prefix, just run `preprompt` with no arguments.
+# To remove prefix, just run `with` with no arguments.
 set -g ___fish_prompt_prefix
 
-function preprompt
+function with
   set ___fish_prompt_prefix $argv ""
 end
 
-function __preprompt --on-event fish_prompt
+function __with_hook --on-event fish_prompt
   commandline --replace "$___fish_prompt_prefix"
 end
