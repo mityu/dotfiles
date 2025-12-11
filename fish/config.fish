@@ -342,12 +342,6 @@ function gitinit
   git commit --allow-empty -m "Initial commit"
 end
 
-if command -q cargo
-  function cargoinit
-    gitinit && cargo init
-  end
-end
-
 # `with` command fixes a prefix of prompt.  E.g.
 # $ with 'ENV=XXX'
 # $ ENV=XXX  <-- Automatically inserted
