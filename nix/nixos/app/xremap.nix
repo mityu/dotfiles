@@ -19,182 +19,196 @@ let
     withX11 = platform.X11;
     withNiri = platform.NiriWM;
   };
+  package =
+    let
+      xremap-pkg = xremap.packages.${pkgs.stdenv.hostPlatform.system};
+
+      # An wrapper script that wait launching xremap until X11 server well
+      # starts up.
+      wrapper-x11 = pkgs.writeShellScriptBin "xremap" ''
+        ${lib.getExe pkgs.xhost} +SI:localuser:root
+        exec ${lib.getExe xremap-pkg.xremap-x11} "$@"
+      '';
+    in
+    if platform.X11 then { package = wrapper-x11; } else { };
 in
 {
   imports = [ xremap.nixosModules.default ];
 
-  services.xremap = featureFlags // {
-    enable = true;
-    userName = username;
-    serviceMode = if platform.X11 then "system" else "user";
-    watch = true;
+  services.xremap =
+    featureFlags
+    // package
+    // {
+      enable = true;
+      userName = username;
+      serviceMode = "user";
+      watch = true;
 
-    # To check application names, run `wmctrl -x -l`
-    # To see xremap debug logs, run `journalctl -u xremap`
-    config.modmap = [
-      {
-        name = "Global";
-        remap = {
-          "CapsLock" = "CTRL_L";
-          "Super_L" = {
-            held = "Super_L";
-            alone = "Muhenkan";
-            alone_timeout_millis = 750;
+      # To check application names, run `wmctrl -x -l`
+      # To see xremap debug logs, run `journalctl -u xremap`
+      config.modmap = [
+        {
+          name = "Global";
+          remap = {
+            "CapsLock" = "CTRL_L";
+            "Super_L" = {
+              held = "Super_L";
+              alone = "Muhenkan";
+              alone_timeout_millis = 750;
+            };
+            "Super_R" = {
+              held = "Super_R";
+              alone = "Henkan";
+              alone_timeout_millis = 750;
+            };
           };
-          "Super_R" = {
-            held = "Super_R";
-            alone = "Henkan";
-            alone_timeout_millis = 750;
-          };
-        };
-      }
-    ];
+        }
+      ];
 
-    config.keymap = [
-      {
-        name = "PDF Viewer";
-        application.only = [
-          "Navigator.Zotero"
-          "okular.okular"
-        ];
-        remap = {
-          "Super-f" = "C-f";
-          "Super-Shift-f" = "C-Shift-f";
-          "Super-w" = "C-w";
-          "Super-q" = "C-q";
-        };
-      }
-      {
-        name = "Firefox";
-        application.only = [ "Navigator.firefox" ];
-        remap = {
-          "C-Shift-p" = "C-Shift-p";
-          "Super-Shift-n" = "C-Shift-p";
-          "Super-Shift-p" = "C-Shift-p";
-        };
-      }
-      {
-        name = "Browser";
-        application.only = [
-          "firefox"
-          "Navigator.firefox"
-          "Google-chrome"
-          "Chromium"
-          "Vivaldi-stable"
-          "Thunar.Thunar"
-        ];
-        remap = {
-          "Super-t" = "C-t";
-          "Super-Shift-t" = "C-Shift-t";
-          "Super-n" = "C-n";
-          "Super-Shift-n" = "C-Shift-n";
-          "Super-w" = "C-w";
-          "Super-Shift-w" = "C-Shift-w";
-          "Super-r" = "C-r";
-          "Super-l" = lib.mkIf platform.Xfce "C-l";
-          "Super-f" = "C-f";
-          "Super-d" = "C-d";
-          "Super-y" = "C-h";
-          "Super-LeftBrace" = "C-LeftBrace";
-          "Super-RightBrace" = "C-RightBrace";
-          "Super-p" = "C-p";
-        };
-      }
-      {
-        name = "macOS like";
-        application.not = [
-          "URxvt"
-          "org.wezfurlong.wezterm"
-          "org.wezfurlong.wezterm.org.wezfurlong.wezterm"
-          "gnome-terminal-server.Gnome-terminal"
-          "Alacritty"
-          "Gvim"
-          "org.remmina.Remmina.org.remmina.Remmina"
-        ];
-        remap = {
-          "C-b" = "Left";
-          "C-f" = "Right";
-          "C-p" = "Up";
-          "C-n" = "Down";
-          "C-h" = "Backspace";
-          "C-d" = "Delete";
-          "C-a" = "Home";
-          "C-e" = "End";
-          "C-m" = "Enter";
-          "C-j" = "Enter";
-          "C-o" = [
-            "Enter"
-            "Left"
+      config.keymap = [
+        {
+          name = "PDF Viewer";
+          application.only = [
+            "Navigator.Zotero"
+            "okular.okular"
           ];
-          "Super-c" = "C-c";
-          "Super-v" = "C-v";
-          "Super-a" = "C-a";
-        };
-      }
-      {
-        name = "Xfce4-appfinder";
-        application.only = [ "xfce4-appfinder.Xfce4-appfinder" ];
-        remap = {
-          "Control-Space" = "Esc";
-        };
-      }
-      {
-        name = "Application specific kill";
-        application.only = [
-          "Slack"
-          "discord"
-          "kdeconnect-app.kdeconnect-app"
-          "org.remmina.Remmina.org.remmina.Remmina"
-          "parole.Parole"
-          "ristretto.Ristretto"
-        ];
-        remap = {
-          "Super-q" = "C-q";
-        };
-      }
-      {
-        name = "M-CR -> C-CR";
-        application.only = [ "Slack" ];
-        remap = {
-          "Super-Enter" = "C-Enter";
-        };
-      }
-      {
-        name = "C-u on pinentry";
-        application.only = [ "pinentry.Pinentry" ];
-        remap = {
-          "C-u" = [
-            "C-a"
-            "Backspace"
+          remap = {
+            "Super-f" = "C-f";
+            "Super-Shift-f" = "C-Shift-f";
+            "Super-w" = "C-w";
+            "Super-q" = "C-q";
+          };
+        }
+        {
+          name = "Firefox";
+          application.only = [ "Navigator.firefox" ];
+          remap = {
+            "C-Shift-p" = "C-Shift-p";
+            "Super-Shift-n" = "C-Shift-p";
+            "Super-Shift-p" = "C-Shift-p";
+          };
+        }
+        {
+          name = "Browser";
+          application.only = [
+            "firefox"
+            "Navigator.firefox"
+            "Google-chrome"
+            "Chromium"
+            "Vivaldi-stable"
+            "Thunar.Thunar"
           ];
-        };
-      }
-      {
-        name = "Window manager's kill";
-        application.not = [
-          # Don't kill desktop components
-          "xfdesktop.Xfdesktop"
-          "xfce4-panel.Xfce4-panel"
-        ];
-        remap = {
-          "Super-q" = lib.mkIf platform.X11 {
-            launch = [
-              "${lib.getExe pkgs.xdotool}"
-              "getactivewindow"
-              "windowclose"
+          remap = {
+            "Super-t" = "C-t";
+            "Super-Shift-t" = "C-Shift-t";
+            "Super-n" = "C-n";
+            "Super-Shift-n" = "C-Shift-n";
+            "Super-w" = "C-w";
+            "Super-Shift-w" = "C-Shift-w";
+            "Super-r" = "C-r";
+            "Super-l" = lib.mkIf platform.Xfce "C-l";
+            "Super-f" = "C-f";
+            "Super-d" = "C-d";
+            "Super-y" = "C-h";
+            "Super-LeftBrace" = "C-LeftBrace";
+            "Super-RightBrace" = "C-RightBrace";
+            "Super-p" = "C-p";
+          };
+        }
+        {
+          name = "macOS like";
+          application.not = [
+            "URxvt"
+            "org.wezfurlong.wezterm"
+            "org.wezfurlong.wezterm.org.wezfurlong.wezterm"
+            "gnome-terminal-server.Gnome-terminal"
+            "Alacritty"
+            "Gvim"
+            "org.remmina.Remmina.org.remmina.Remmina"
+          ];
+          remap = {
+            "C-b" = "Left";
+            "C-f" = "Right";
+            "C-p" = "Up";
+            "C-n" = "Down";
+            "C-h" = "Backspace";
+            "C-d" = "Delete";
+            "C-a" = "Home";
+            "C-e" = "End";
+            "C-m" = "Enter";
+            "C-j" = "Enter";
+            "C-o" = [
+              "Enter"
+              "Left"
+            ];
+            "Super-c" = "C-c";
+            "Super-v" = "C-v";
+            "Super-a" = "C-a";
+          };
+        }
+        {
+          name = "Xfce4-appfinder";
+          application.only = [ "xfce4-appfinder.Xfce4-appfinder" ];
+          remap = {
+            "Control-Space" = "Esc";
+          };
+        }
+        {
+          name = "Application specific kill";
+          application.only = [
+            "Slack"
+            "discord"
+            "kdeconnect-app.kdeconnect-app"
+            "org.remmina.Remmina.org.remmina.Remmina"
+            "parole.Parole"
+            "ristretto.Ristretto"
+          ];
+          remap = {
+            "Super-q" = "C-q";
+          };
+        }
+        {
+          name = "M-CR -> C-CR";
+          application.only = [ "Slack" ];
+          remap = {
+            "Super-Enter" = "C-Enter";
+          };
+        }
+        {
+          name = "C-u on pinentry";
+          application.only = [ "pinentry.Pinentry" ];
+          remap = {
+            "C-u" = [
+              "C-a"
+              "Backspace"
             ];
           };
-        };
-      }
-    ];
+        }
+        {
+          name = "Window manager's kill";
+          application.not = [
+            # Don't kill desktop components
+            "xfdesktop.Xfdesktop"
+            "xfce4-panel.Xfce4-panel"
+          ];
+          remap = {
+            "Super-q" = lib.mkIf platform.X11 {
+              launch = [
+                "${lib.getExe pkgs.xdotool}"
+                "getactivewindow"
+                "windowclose"
+              ];
+            };
+          };
+        }
+      ];
+    };
 
-  };
-
-  systemd.user.services.set-xhost = lib.mkIf platform.X11 {
-    description = "Run a one-shot command upon user login";
-    path = [ pkgs.xorg.xhost ];
-    wantedBy = [ "default.target" ];
-    script = "xhost +SI:localuser:root";
-    environment.DISPLAY = ":0.0";
-  };
+  # systemd.user.services.set-xhost = lib.mkIf platform.X11 {
+  #   description = "Run a one-shot command upon user login";
+  #   path = [ pkgs.xorg.xhost ];
+  #   wantedBy = [ "default.target" ];
+  #   script = "xhost +SI:localuser:root";
+  #   environment.DISPLAY = ":0.0";
+  # };
 }
