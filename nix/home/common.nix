@@ -70,6 +70,8 @@ in
       opam
       ripgrep
       rlwrap
+      satysfi
+      satyrographos
       serie
       skim
       stylua

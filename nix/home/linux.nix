@@ -30,6 +30,7 @@ in
       bashInteractive
       brightnessctl
       cargo
+      dig
       discord
       file
       gdb
