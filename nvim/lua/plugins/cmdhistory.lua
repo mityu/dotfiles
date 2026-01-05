@@ -18,6 +18,6 @@ return {
         vim.keymap.set('n', '/', '<Cmd>call cmdhistory#select()<CR>', { buffer = true })
       end,
     })
-    vim.keymap.set('c', '/', '<Cmd>call cmdhistory#select()<CR>')
+    vim.keymap.set('c', '<C-/>', '<Cmd>call cmdhistory#select()<CR>')
   end,
 }
