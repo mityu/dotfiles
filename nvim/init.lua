@@ -512,6 +512,17 @@ end)
 
 -- Load plugin configurations (only when startup).
 if not vim.g.lazy_did_setup then
+  -- Before updating plugins, reset the 'doc/tags-ja' file in the 'vimdoc-ja' repository to avoid conflicts.
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'LazyUpdatePre',
+    callback = function()
+      local repo = require('vimrc.helper').get_plugin_dir('vimdoc-ja')
+      if repo then
+        vim.fn.system({ 'git', '-C', repo, 'checkout', '--', 'doc/tags-ja' })
+      end
+    end,
+  })
+
   require('lazy').setup('plugins', {
     root = lazy_root_path,
     lockfile = vim.fs.joinpath(vim.fn.stdpath('cache'), 'lazy-lock.json'),
