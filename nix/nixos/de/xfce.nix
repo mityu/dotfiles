@@ -22,7 +22,7 @@
     xfce4-terminal
   ];
 
-  environment.systemPackages = with pkgs; [
+  programs.thunar.plugins = with pkgs; [
     thunar-volman
     thunar-archive-plugin
   ];
