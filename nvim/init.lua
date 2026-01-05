@@ -337,13 +337,8 @@ end, {
   nargs = '?',
   complete = 'filetype',
 })
-vim.api.nvim_create_user_command('SetUndoFtplugin', function(config)
-  local restorer = 'execute ' .. vim.fn.string(config.args)
-  if vim.b['undo_ftplugin'] then
-    vim.b['undo_ftplugin'] = restorer .. '|' .. vim.b['undo_ftplugin']
-  else
-    vim.fn.setbufvar('%', 'undo_ftplugin', restorer)
-  end
+vim.api.nvim_create_user_command('SetUndoFtplugin', function(arg)
+  require('vimrc').set_undo_ftplugin(arg.args)
 end, { nargs = 1, complete = 'command' })
 
 helper.create_autocmd('CmdwinEnter', {

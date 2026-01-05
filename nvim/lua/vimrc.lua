@@ -203,4 +203,14 @@ function M.tapi_drop(_bufnr, arglist)
   return ''
 end
 
+---@param cmd string
+function M.set_undo_ftplugin(cmd)
+  local restorer = 'execute ' .. vim.fn.string(cmd)
+  if vim.b['undo_ftplugin'] then
+    vim.b['undo_ftplugin'] = restorer .. '|' .. vim.b['undo_ftplugin']
+  else
+    vim.fn.setbufvar('%', 'undo_ftplugin', restorer)
+  end
+end
+
 return M
