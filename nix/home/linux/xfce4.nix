@@ -37,7 +37,7 @@ in
   # Clean /plugins property before apply this settings because all of the
   # entry in /plugins property of xfce4-panel channel should be completely
   # **replaced**.
-  home.activation.xfconfSettingsPre = runBeforeXfconfSettings "${lib.getExe' pkgs.xfce.xfconf "xfconf-query"} -c xfce4-panel -p /plugins -r -R";
+  home.activation.xfconfSettingsPre = runBeforeXfconfSettings "${lib.getExe' pkgs.xfconf "xfconf-query"} -c xfce4-panel -p /plugins -r -R";
 
   # Restart xfce4-panel on reloading configuration.
   # home.activation.xconfSettingsPost = lib.hm.dag.entryAfter [ "xfconfSettings" ] ''
@@ -115,14 +115,14 @@ in
         name = "power-manager-plugin";
       };
       systemload = {
-        package = pkgs.xfce.xfce4-systemload-plugin;
+        package = pkgs.xfce4-systemload-plugin;
         attrs = {
           uptime.enabled = false;
           network.enabled = false;
         };
       };
       netload = {
-        package = pkgs.xfce.xfce4-netload-plugin;
+        package = pkgs.xfce4-netload-plugin;
       };
     };
     panels =

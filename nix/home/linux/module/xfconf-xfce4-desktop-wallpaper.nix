@@ -26,7 +26,7 @@ in
     home.activation.xfconfSettingsPost =
       let
         # Tip: Use `xfconf-query -c xfce4-desktop -p /backdrop -r -R` to remove entire configuration about backgrounds.
-        xfconf-query = "${lib.getExe pkgs.xfce.xfconf}";
+        xfconf-query = "${lib.getExe pkgs.xfconf}";
         xrandr = "${lib.getExe pkgs.xorg.xrandr}";
         jc = "${lib.getExe pkgs.jc}";
         jq = "${lib.getExe pkgs.jq}";
