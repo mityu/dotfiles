@@ -5,6 +5,7 @@ let
     let
       softether = prev.softether.overrideAttrs (oldAttrs: {
         postInstall = "";
+        nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.gcc14 ];
       });
     in
     {

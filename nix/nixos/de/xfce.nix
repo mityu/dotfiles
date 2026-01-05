@@ -19,11 +19,11 @@
   services.displayManager.ly.enable = true;
 
   environment.xfce.excludePackages = with pkgs; [
-    xfce.xfce4-terminal
+    xfce4-terminal
   ];
 
   environment.systemPackages = with pkgs; [
-    xfce.thunar-volman
-    xfce.thunar-archive-plugin
+    thunar-volman
+    thunar-archive-plugin
   ];
 }
