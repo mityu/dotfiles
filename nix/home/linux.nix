@@ -137,11 +137,19 @@ in
   };
 
   xdg.mimeApps = {
-    defaultApplications = {
-    };
-    associations.added =
+    enable = true;
+    associations.added = # This goes to $XDG_CONFIG_HOME/mimeapps.list
       lib.pipe
-        [ "jpeg" "png" "bmp" "apng" "heif" ]
+        [
+          "apng"
+          "avif"
+          "bmp"
+          "gif"
+          "heif"
+          "jpeg"
+          "png"
+          "webp"
+        ]
         [
           (map (type: "image/${type}"))
           (
