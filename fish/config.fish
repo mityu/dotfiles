@@ -240,9 +240,11 @@ if command -q trash
   end
   alias gomi='trash'
   alias rm='echo "Use \"trash\" instead."; false'
+  alias '\rm'='command rm'
 else if command -q gtrash
   alias gomi='gtrash put'
   alias rm='echo "Use \"gtrash\" instead."; false'
+  alias '\rm'='command rm'
 end
 
 if command -q rlwrap
