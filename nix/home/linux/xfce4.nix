@@ -183,20 +183,28 @@ in
     };
 
   xfconf.settings = {
-    # Note that `xfwm4 -r` command may helpful to check the effects of configuration changes.
+    # Note that `xfwm4 -r` command may helpful to check the effects/result of configuration changes.
     xfce4-keyboard-shortcuts = {
       # <Primary> is the CTRL key.
       "commands/custom/<Super>p" = null;
       "commands/custom/override" = true;
       "commands/custom/<Primary>space" = "xfce4-appfinder";
       "commands/custom/<Super>space" = "xfce4-appfinder";
-      "commands/custom/<Super><Shift>2" = "xfce4-screenshooter";
-      "commands/custom/<Super><Shift>3" = "xfce4-screenshooter --fullscreen";
-      "commands/custom/<Super><Shift>4" = "xfce4-screenshooter --region";
-      "commands/custom/<Super><Shift>5" = "xfce4-screenshooter --window";
-      "commands/custom/<Super><Primary><Shift>3" = "xfce4-screenshooter --clipboard --fullscreen";
-      "commands/custom/<Super><Primary><Shift>4" = "xfce4-screenshooter --clipboard --region";
-      "commands/custom/<Super><Primary><Shift>5" = "xfce4-screenshooter --clipboard --window";
+      # "commands/custom/<Super><Shift>2" = "xfce4-screenshooter";
+      # "commands/custom/<Super><Shift>3" = "xfce4-screenshooter --fullscreen";
+      # "commands/custom/<Super><Shift>4" = "xfce4-screenshooter --region";
+      # "commands/custom/<Super><Shift>5" = "xfce4-screenshooter --window";
+      "commands/custom/<Super><Shift>at" = "xfce4-screenshooter";
+      "commands/custom/<Super><Shift>numbersign" = "xfce4-screenshooter --fullscreen";
+      "commands/custom/<Super><Shift>dollar" = "xfce4-screenshooter --region";
+      "commands/custom/<Super><Shift>percent" = "xfce4-screenshooter --window";
+      # "commands/custom/<Super><Primary><Shift>3" = "xfce4-screenshooter --clipboard --fullscreen";
+      # "commands/custom/<Super><Primary><Shift>4" = "xfce4-screenshooter --clipboard --region";
+      # "commands/custom/<Super><Primary><Shift>5" = "xfce4-screenshooter --clipboard --window";
+      "commands/custom/<Super><Primary><Shift>numbersign" =
+        "xfce4-screenshooter --clipboard --fullscreen";
+      "commands/custom/<Super><Primary><Shift>dollar" = "xfce4-screenshooter --clipboard --region";
+      "commands/custom/<Super><Primary><Shift>percent" = "xfce4-screenshooter --clipboard --window";
       "commands/custom/<Super>F12" = "${reconnect-monitors}";
       "xfwm4/custom/<Primary><Alt>Left" = null;
       "xfwm4/custom/<Primary><Alt>Right" = null;
