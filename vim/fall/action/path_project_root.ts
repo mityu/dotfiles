@@ -13,7 +13,10 @@ async function searchProjectRoot(
   denops: Denops,
   path: string,
 ): Promise<string> {
-  return ensure(await denops.call("vimrc#SearchProjectRoot", path), isString);
+  const fn = denops.meta.host === "vim"
+    ? "vimrc#SearchProjectRoot"
+    : "vimrc#fall#searchProjectRoot";
+  return ensure(await denops.call(fn, path), isString);
 }
 
 export function actionOpenProjectRoot(

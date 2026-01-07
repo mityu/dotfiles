@@ -13,3 +13,7 @@ endfunction
 function vimrc#fall#findProjectRoot(path) abort
   return luaeval($'require("vimrc").find_project_root("{a:path}")')
 endfunction
+
+function vimrc#fall#searchProjectRoot(path) abort
+  return luaeval($'require("vimrc").search_project_root(_A)', a:path)
+endfunction
