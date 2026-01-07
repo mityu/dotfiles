@@ -42,6 +42,12 @@ return {
         unpack(basics),
         augend.constant.new({ elements = { 'begin', 'end' } }),
       },
+      gitrebase = {
+        unpack(basics),
+        augend.constant.new({
+          elements = { 'pick', 'fixup', 'reword', 'edit', 'squash', 'drop', 'exec' },
+        }),
+      },
     })
   end,
 }
