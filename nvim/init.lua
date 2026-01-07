@@ -512,14 +512,29 @@ end)
 
 -- Load plugin configurations (only when startup).
 if not vim.g.lazy_did_setup then
-  -- Before updating plugins, reset the 'doc/tags-ja' file in the 'vimdoc-ja' repository to avoid conflicts.
-  vim.api.nvim_create_autocmd('User', {
+  -- Before updating plugins, reset the 'doc/tags-ja' file in the 'vimdoc-ja'
+  -- repository to avoid conflicts.
+  helper.create_autocmd('User', {
     pattern = 'LazyUpdatePre',
+    group = 'vimrc-lazy',
     callback = function()
       local repo = require('vimrc.helper').get_plugin_dir('vimdoc-ja')
       if repo then
         vim.fn.system({ 'git', '-C', repo, 'checkout', '--', 'doc/tags-ja' })
       end
+    end,
+  })
+
+  -- Clean Neovim's log files after updating plugins.
+  -- The log files are growing up unlimitedly, so we should clean them
+  -- regularly. I think it's good frequency to use plugin update event as the
+  -- event of cleaning log files.
+  helper.create_autocmd('User', {
+    pattern = 'LazyUpdate',
+    group = 'vimrc-lazy',
+    callback = function()
+      vim.fn.delete(vim.env.NVIM_LOG_FILE)
+      vim.fn.delete(vim.lsp.log.get_filename())
     end,
   })
 
