@@ -1,6 +1,7 @@
 return {
   'https://github.com/mityu/vim-backpair',
   event = { 'InsertEnter' },
+  enabled = false,
   config = function()
     vim.fn['backpair#enable']()
     vim.fn['backpair#add_pair']('(', ')')
