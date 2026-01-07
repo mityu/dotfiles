@@ -4,7 +4,6 @@ local colorscheme = vim.fs.joinpath(
   'domusaurea.vim'
 )
 vim.cmd.source(colorscheme)
-vim.cmd.highlight([[IblIndent guifg=black ctermfg=black]])
 
 vim.g['terminal_color_0'] = '#000000'
 vim.g['terminal_color_1'] = '#d54e53'

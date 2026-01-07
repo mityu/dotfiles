@@ -4,4 +4,3 @@ local colorscheme = vim.fs.joinpath(
   'reliquiae.vim'
 )
 vim.cmd(string.format('source %s', colorscheme))
-vim.cmd([[highlight IblIndent guifg=black ctermfg=black]])
