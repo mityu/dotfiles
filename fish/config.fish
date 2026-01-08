@@ -336,6 +336,11 @@ if command -q vim
   set -gx GIT_EDITOR vim
 end
 
+if command -q btm
+  alias top='btm'
+  alias '\\top'='command top'
+end
+
 function gitinit
   if git rev-parse 2> /dev/null
     fishrc_ask_yesno 'In a git repository. continue?' || return 1
