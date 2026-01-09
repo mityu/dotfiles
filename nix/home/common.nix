@@ -60,6 +60,7 @@ in
       # libgcc  # FIXME: I don't know why but this cause build failure on darwin.
       (lib.hiPrio clang-tools)
       (lib.hiPrio llvmPackages.libcxxClang)
+      license-generator
       llvmPackages.mlir
       lstr
       lua
