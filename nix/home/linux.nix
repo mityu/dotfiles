@@ -41,6 +41,8 @@ in
       imagemagick
       (lib.mkIf isDesktop ladybird)
       libgcc
+      libsecret
+      lssecret
       net-tools
       ollama
       rofi
@@ -160,5 +162,15 @@ in
             ])
           )
         ];
+  };
+
+  programs.gpg.enable = true;
+  services.gpg-agent = {
+    enable = true;
+    pinentry.package = pkgs.pinentry-gnome3;
+
+    # c.f.: https://wiki.archlinux.jp/index.php/GnuPG#gpg-agent
+    # defaultCacheTtl = 60480000;
+    # maxCacheTtl = 60480000;
   };
 }

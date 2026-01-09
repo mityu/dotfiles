@@ -94,24 +94,9 @@ in
   };
 
   services.gnome.gnome-keyring.enable = true;
-  programs.gnupg.agent = {
-    enable = true;
-    pinentryPackage = pkgs.pinentry-gtk2;
-    settings = {
-      # c.f.: https://wiki.archlinux.jp/index.php/GnuPG#gpg-agent
-      default-cache-ttl = 60480000;
-      max-cache-ttl = 60480000;
-    };
-  };
   security.pam.services.login = {
+    enable = true;
     enableGnomeKeyring = true;
-
-    # FIXME: Pam for GnuPG doesn't work well.
-    # gnupg = {
-    #   enable = true;
-    #   noAutostart = true;
-    #   storeOnly = true;
-    # };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -128,11 +113,27 @@ in
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    git
-    wget
-    libinput
-  ];
+  environment.systemPackages =
+    with pkgs;
+    [
+      git
+      wget
+      libinput
+    ]
+    ++ lib.optionals config.services.gnome.gnome-keyring.enable [
+      (writeShellScriptBin "keyring-lock" ''
+        ${lib.getExe' pkgs.libsecret "secret-tool"} lock
+      '')
+      (writeShellScriptBin "keyring-unlock" ''
+        function main() {
+            local pass=""
+            read -rsp "Password: " pass
+            head -c -1 <<<"$pass" | gnome-keyring-daemon --replace --unlock
+        }
+
+        main
+      '')
+    ];
 
   environment.shellAliases = {
     # Disable all of the bulitin shell aliases.

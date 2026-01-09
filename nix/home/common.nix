@@ -84,6 +84,7 @@ in
       with-shell
       yazi
       yq-go
+      (writeShellScriptBin "gpg-test" "gpg --clearsign <<<'test'")
     ]
     ++ [ (lib.hiPrio uutils-coreutils) ]
     ++ (with pkgs.haskellPackages; [
