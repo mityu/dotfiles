@@ -16,6 +16,7 @@ in
     ./linux/firefox.nix
     ./linux/xfce4.nix
     ./linux/libinput-gestures.nix
+    ./linux/module/gtrash.nix
     ./common.nix
     ./pkgs/adwaita-xfce4-icon-theme.nix
   ];
@@ -36,7 +37,6 @@ in
       gdb
       gnumake
       gparted
-      gtrash
       hwloc
       imagemagick
       (lib.mkIf isDesktop ladybird)
@@ -172,5 +172,16 @@ in
     # c.f.: https://wiki.archlinux.jp/index.php/GnuPG#gpg-agent
     # defaultCacheTtl = 60480000;
     # maxCacheTtl = 60480000;
+  };
+
+  programs.gtrash = {
+    enable = true;
+    auto-prune = {
+      enable = true;
+      persistent = true;
+      parameters = {
+        day = 30;
+      };
+    };
   };
 }
