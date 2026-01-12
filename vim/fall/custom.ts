@@ -19,7 +19,7 @@ import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
 import { which } from "jsr:@david/which@^0.4.1";
 import { mruw } from "./source/mruw.ts";
 import { matcherMultiRegexp as matcherMultiRegexpBase } from "./matcher/multi_regexp.ts";
-import { matcherExtendedSubstring as matcherExtendedSubstringBase } from "./matcher/extended_substring.ts";
+import { extendedSubstring as matcherExtendedSubstringBase } from "jsr:@mityu/fall-matcher-extended-substring@0.1.1";
 import {
   actionOpenProjectRoot,
   actionSearchProjectRoot,
