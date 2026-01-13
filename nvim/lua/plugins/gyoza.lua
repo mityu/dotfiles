@@ -21,6 +21,7 @@ return {
       group = 'vimrc-gyoza',
       callback = now(function()
         local loaded_filetypes = {}
+        local load_rules = vim.fn['vimrc#gyoza#load_rules']
         local extend_rules = vim.fn['vimrc#gyoza#extend_rules']
         local inherit_table = {
           vimspec = 'vim',
@@ -31,10 +32,11 @@ return {
         }
         return function(ev)
           local filetype = ev.match
-          if loaded_filetypes[filetype] then
+          if loaded_filetypes[filetype] ~= nil then
             return
           end
           loaded_filetypes[filetype] = true
+          load_rules(filetype)
 
           local inherit = inherit_table[filetype]
           if inherit ~= nil then
