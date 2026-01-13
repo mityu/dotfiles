@@ -65,7 +65,7 @@ in
       lstr
       lua
       ninja
-      nixfmt-rfc-style
+      nixfmt
       ocaml
       ocamlPackages.ocamlformat
       opam
