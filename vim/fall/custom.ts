@@ -13,7 +13,7 @@ import {
   Size,
 } from "jsr:@vim-fall/std@^0.11.0";
 import * as builtin from "jsr:@vim-fall/std@^0.11.0/builtin";
-import * as extra from "jsr:@vim-fall/extra@^0.2.0";
+import * as extra from "jsr:@vim-fall/extra@^0.3.0";
 import { SEPARATOR, SEPARATOR_PATTERN } from "jsr:@std/path@^1.0.8/constants";
 import { isAbsolute } from "jsr:@std/path@^1.0.0/is-absolute";
 import { which } from "jsr:@david/which@^0.4.1";
@@ -25,10 +25,6 @@ import {
   actionSearchProjectRoot,
 } from "./action/path_project_root.ts";
 import * as fileSource from "./source/file.ts";
-import { ginAction } from "./source/gin_action.ts";
-import { defaultGinActions } from "./action/gin_action.ts";
-import { fernAction } from "./source/fern_action.ts";
-import { defaultFernActions } from "./action/fern_action.ts";
 
 // NOTE:
 //
@@ -551,13 +547,13 @@ export const main: Entrypoint = async (
     defaultAction: "open",
   });
 
-  definePickerFromSource("gin-action", ginAction, {
+  definePickerFromSource("gin-action", extra.source.ginAction, {
     matchers: [matcherExtendedSubstring],
     previewers: [],
     actions: {
-      ...defaultGinActions,
+      ...extra.action.defaultGinActionExecuteActions,
     },
-    defaultAction: "execute",
+    defaultAction: "gin-action-execute",
     coordinator: coordinator({
       heightRatio: 0.4,
       widthRatio: 0.4,
@@ -565,13 +561,13 @@ export const main: Entrypoint = async (
     }),
   });
 
-  definePickerFromSource("fern-action", fernAction, {
+  definePickerFromSource("fern-action", extra.source.fernAction, {
     matchers: [matcherExtendedSubstring],
     previewers: [],
     actions: {
-      ...defaultFernActions,
+      ...extra.action.defaultFernActionExecuteActions,
     },
-    defaultAction: "execute",
+    defaultAction: "fern-action-execute",
     coordinator: coordinator({
       heightRatio: 0.4,
       widthRatio: 0.4,
