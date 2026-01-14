@@ -244,6 +244,9 @@ in
     };
     xsettings = {
       "Xft/DPI" = 96 * 1.25;
+
+      # The "Gtk/FontName" option seems to be set by `gtk.font` option.
+      "Gtk/MonospaceFontName" = "Noto Sans Mono CJK JP ${toString config.gtk.font.size}";
     };
   };
 }

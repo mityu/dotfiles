@@ -12,6 +12,7 @@ in
   imports = [
     ../app/softether.nix
     ../app/sound-theme.nix
+    ../app/fonts.nix
   ];
 
   # networking.hostName = "nixos"; # Define your hostname.
@@ -39,8 +40,19 @@ in
         nerd-fonts.noto
         hackgen-nf-font
         ipaexfont
+        biz-ud-gothic
+        ibm-plex
+        texlivePackages.haranoaji
+        texlivePackages.haranoaji-extra
+        source-han-mono
+        source-han-serif
+        source-han-sans
+        nerd-fonts.arimo
+
+        # The followings are by local package
+        cica-font
       ]
-      ++ [ (import ../../localpkgs/cica-font.nix pkgs) ];
+      ++ (builtins.attrValues apple-fonts);
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
@@ -53,11 +65,23 @@ in
           "Noto Color Emoji"
         ];
         monospace = [
+          "SF Mono"
           "Noto Sans Mono CJK JP"
           "Noto Color Emoji"
         ];
         emoji = [ "Noto Color Emoji" ];
       };
+      localConf = ''
+        <match target="pattern">
+          <test name="family">
+            <string>Helvetica</string>
+            <string>Arial</string>
+          </test>
+          <edit name="family" mode="assign">
+            <string>Arimo Nerd Font</string>
+          </edit>
+        </match>
+      '';
     };
   };
   # console = {
