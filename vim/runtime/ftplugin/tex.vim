@@ -3,7 +3,7 @@ SetUndoFtplugin set backupcopy<
 setlocal backupcopy=yes
 
 function s:range_str(min, full) abort
-  return range(strlen(a:min), strlen(a:full) - 1)->map({_, v -> strpart(a:full, 0, v)})
+  return range(strlen(a:min), strlen(a:full))->map({_, v -> strpart(a:full, 0, v)})
 endfunction
 
 function s:getline_before_cursor() abort
