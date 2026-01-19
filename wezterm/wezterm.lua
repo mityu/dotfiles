@@ -212,8 +212,8 @@ if isWindows then
   }
 elseif isMac then
   local initial_paths = {
-    -- '/run/current-system/sw/bin',
-    -- wezterm.home_dir .. '/.nix-profile/bin',
+    '/run/current-system/sw/bin',
+    wezterm.home_dir .. '/.nix-profile/bin',
     '/opt/homebrew/bin',
   }
   config.default_prog = {

@@ -1,5 +1,10 @@
-{ pkgs, username, ... }:
 {
+  pkgs,
+  username,
+  ...
+}:
+{
+  imports = [ ./module/compiler-infra.nix ];
 
   nix = {
     gc = {
@@ -21,8 +26,26 @@
     primaryUser = username;
   };
 
+  compiler-infra = {
+    enable = true;
+    accessibleGlobally = true;
+    apple-sdk = pkgs.apple-sdk_15;
+    libs = with pkgs; [
+      libiconv
+      ncurses
+    ];
+  };
+
   programs.fish = {
     enable = true;
     useBabelfish = true;
+
+    # Call path_helper during fish initialization to set PATH to some external
+    # applications such as mactex managed by Homebrew.
+    loginShellInit = ''
+      if path is -fx /usr/libexec/path_helper
+        eval (/usr/libexec/path_helper -c)
+      end
+    '';
   };
 }

@@ -107,7 +107,7 @@ if shopt -q login_shell; then
 	bashrc_has_cmd ros && bashrc_prepend_PATH "$HOME/.roswell/bin"
 	bashrc_has_cmd opam && eval "$(opam env)"
 
-	if bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
+	if ! bashrc_has_cmd darwin_rebuild && bashrc_has_cmd xcrun && bashrc_has_cmd brew; then
 		__bashrc_brew_prefix=$(brew --prefix)
 		export SDKROOT=$(xcrun --show-sdk-path)
 		export CPATH=$CPATH:$SDKROOT/usr/include

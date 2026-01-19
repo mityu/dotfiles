@@ -4,7 +4,7 @@ working_directory = "None"
 
 [terminal.shell]
 program = "/usr/bin/env"
-args = ["PATH=/opt/homebrew/bin", "fish", "-l"]
+args = ["PATH=/run/current-system/sw/bin:/opt/homebrew/bin", "fish", "--login"]
 
 [bell]
 animation = "EaseOutExpo"

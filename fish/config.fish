@@ -38,21 +38,33 @@ if status is-login
   # Make sure the $SHELL environmental variable is fish.
   string match -rq 'fish$' -- $SHELL || set -gx SHELL (status fish-path)
 
-  if command -q xcrun && command -q brew
-    set -l brew_prefix (brew --prefix)
-    set -gx SDKROOT (xcrun --show-sdk-path)
-    set -gx CPATH $CPATH:$SDKROOT/usr/include
-    set -gx LIBRARY_PATH $LIBRARY_PATH:$SDKROOT/usr/lib
-    set -gx DYLD_FRAMEWORK_PATH $DYLD_FRAMEWORK_PATH:$SDKROOT/System/Library/Frameworks
+  function setup-brew-cc
+    if command -q xcrun && command -q brew
+      # Set some environmental variables suitable for clang/gcc installed by Homebrew.
+      set -l brew_prefix (brew --prefix)
+      if string length -q -- $SDKROOT
+        set -gx SDKROOT (xcrun --show-sdk-path)
+      end
+      set -gx CPATH $CPATH:$SDKROOT/usr/include
+      set -gx LIBRARY_PATH $LIBRARY_PATH:$SDKROOT/usr/lib
+      set -gx DYLD_FRAMEWORK_PATH $DYLD_FRAMEWORK_PATH:$SDKROOT/System/Library/Frameworks
 
-    if test -d "$brew_prefix/opt/llvm"
-      fish_add_path --prepend $brew_prefix/opt/llvm/bin
-    end
+      if test -d "$brew_prefix/opt/llvm"
+        fish_add_path --prepend $brew_prefix/opt/llvm/bin
+      end
 
-    if test -d "$brew_prefix/opt/gcc"
-      fish_add_path --prepend $brew_prefix/opt/gcc/bin
-      fish_add_path --prepend $dotfiles_path/bin/macos
+      if test -d "$brew_prefix/opt/gcc"
+        fish_add_path --prepend $brew_prefix/opt/gcc/bin
+        fish_add_path --prepend $dotfiles_path/bin/macos
+      end
+    else
+      echo 'No xcrun or brew command'
+      return 1
     end
+  end
+
+  if not command -q darwin-rebuild
+    setup-brew-cc
   end
 
   if command -q go
