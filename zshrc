@@ -1,6 +1,6 @@
 function dotfiles-path() {
 	local thisfile=$(whence -v $0 | awk '{print $NF}')
-	echo $(cd $(dirname $(realpath $thisfile)); pwd)
+	dirname $(realpath $thisfile)
 }
 
 function gobin-path() {
@@ -8,7 +8,7 @@ function gobin-path() {
 }
 
 # Set environmental variables (Only when outside of vim.)
-if ! [ -n "$VIM_TERMINAL" ] && [ -f ~/.envrc ]; then
+if ! [[ -n "$VIM_TERMINAL" ]] && [[ -f ~/.envrc ]]; then
 	source ~/.envrc
 fi
 export LANG=en_US.UTF-8
@@ -80,16 +80,16 @@ alias update-softwares="update-zsh-plugins; $(dotfiles-path)/bin/update-software
 
 zshrc_has_cmd opam && eval $(opam env)
 
-if zshrc_has_cmd xcrun && zshrc_has_cmd brew; then
+if ! zshrc_has_cmd darwin_rebuild && zshrc_has_cmd xcrun && zshrc_has_cmd brew; then
 	__zshrc_brew_prefix=$(brew --prefix)
 	export SDKROOT=$(xcrun --show-sdk-path)
 	export CPATH=$CPATH:$SDKROOT/usr/include
 	export LIBRARY_PATH=$LIBRARY_PATH:$SDKROOT/usr/lib
 	# TODO: How can I set framework search path?
-	if [ -d "$__zshrc_brew_prefix/opt/llvm" ]; then
+	if [[ -d "$__zshrc_brew_prefix/opt/llvm" ]]; then
 		export PATH=$(brew --prefix)/opt/llvm/bin:$PATH
 	fi
-	if [ -d "$__zshrc_brew_prefix/opt/gcc" ]; then
+	if [[ -d "$__zshrc_brew_prefix/opt/gcc" ]]; then
 		zshrc_prepend_PATH "$__zshrc_brew_prefix/opt/gcc/bin"
 		zshrc_prepend_PATH "$(dotfiles-path)/opt/gcc/bin"
 	fi
@@ -295,7 +295,7 @@ function zshrc_prompt_git_dirty() {
 	# Prevent e.g. `git status` from refreshing the index as a side effect.
 	# Ref: https://github.com/sindresorhus/pure
 	export GIT_OPTIONAL_LOCKS=0
-	if [ -n "$(git status --porcelain --untracked-files=normal --no-renames)" ]; then
+	if [[ -n "$(git status --porcelain --untracked-files=normal --no-renames)" ]]; then
 		echo "${zshrc_prompt_colors[pink]}*${zshrc_prompt_colors[reset]}"
 	fi
 }
@@ -451,7 +451,7 @@ function zle-line-pre-redraw {
 	zshrc_has_cmd	_zsh_highlight__zle-line-pre-redraw && _zsh_highlight__zle-line-pre-redraw
 }
 
-if [ -n "$VIM_TERMINAL" ]; then
+if [[ -n "$VIM_TERMINAL" ]]; then
 	function drop() {
 		echo "\e]51;[\"call\", \"Tapi_drop\", [\"$(pwd)\", \"$1\"]]\x07"
 	}
@@ -480,12 +480,12 @@ function install_zsh_plugins() {
 		echo -e '\033[41mgit command not found\033[m'
 		return 1
 	fi
-	if [ ! -d "$DOTZSH/zsh-syntax-highlighting" ]; then
+	if [[ ! -d "$DOTZSH/zsh-syntax-highlighting" ]]; then
 		git clone https://github.com/zsh-users/zsh-syntax-highlighting \
 			$DOTZSH/zsh-syntax-highlighting
 	fi
 
-	if [ ! -d "$DOTZSH/zsh-async" ]; then
+	if [[ ! -d "$DOTZSH/zsh-async" ]]; then
 		git clone https://github.com/mafredri/zsh-async $DOTZSH/zsh-async
 	fi
 }
@@ -498,7 +498,7 @@ function update-zsh-plugins() {
 	done
 }
 
-if [ ! -d "$DOTZSH" ]; then
+if [[ ! -d "$DOTZSH" ]]; then
 	if zshrc_ask_yesno "Install plugins?"; then
 		mkdir -p $DOTZSH
 		install_zsh_plugins
@@ -524,10 +524,10 @@ function() {
 # 	prompt_newline=$' %{%(?.%F{green}.%F{red})%}$?%f\n%{\r%}'
 # fi
 
-[ -d "$DOTZSH/zsh-async" ] && source $DOTZSH/zsh-async/async.zsh && async
+[[ -d "$DOTZSH/zsh-async" ]] && source $DOTZSH/zsh-async/async.zsh && async
 zshrc_init_prompt  # Must build PROMPT string after "async" library is loaded.
 
-if [ -d "$DOTZSH/zsh-syntax-highlighting" ]; then
+if [[ -d "$DOTZSH/zsh-syntax-highlighting" ]]; then
 	source $DOTZSH/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 fi
 
