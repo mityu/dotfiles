@@ -520,9 +520,12 @@ if not vim.g.lazy_did_setup then
     pattern = 'LazyUpdatePre',
     group = 'vimrc-lazy',
     callback = function()
-      local repo = require('vimrc.helper').get_plugin_dir('vimdoc-ja')
-      if repo then
-        vim.fn.system({ 'git', '-C', repo, 'checkout', '--', 'doc/tags-ja' })
+      local plugins = { 'vimdoc-ja', 'vim-operator-swap' }
+      for _, plugin in ipairs(plugins) do
+        local repo = helper.get_plugin_dir(plugin)
+        if repo then
+          vim.system({ 'git', '-C', repo, 'checkout', '--', 'doc/tags-ja' }):wait()
+        end
       end
     end,
   })
