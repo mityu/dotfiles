@@ -1,6 +1,8 @@
 SetUndoFtplugin set backupcopy<
+SetUndoFtplugin set foldmethod<
 
 setlocal backupcopy=yes
+setlocal foldmethod=indent
 
 function s:range_str(min, full) abort
   return range(strlen(a:min), strlen(a:full))->map({_, v -> strpart(a:full, 0, v)})
