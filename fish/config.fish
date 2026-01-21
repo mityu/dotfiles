@@ -63,7 +63,7 @@ if status is-login
     end
   end
 
-  if not command -q darwin-rebuild
+  if test (uname) = "darwin"; and not command -q darwin-rebuild
     setup-brew-cc
   end
 
