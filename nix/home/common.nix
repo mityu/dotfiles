@@ -32,6 +32,13 @@ in
   ];
 
   programs.home-manager.enable = true;
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
+  };
+
   home = {
     username = "${username}";
     stateVersion = "22.11";
