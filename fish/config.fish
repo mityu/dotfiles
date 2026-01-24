@@ -1,3 +1,6 @@
+# Diagnostic error supression.  See this link for the details of error codes.
+# https://github.com/ndonfris/fish-lsp/wiki/Diagnostic-Error-Codes
+# @fish-lsp-disable 2002
 set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
