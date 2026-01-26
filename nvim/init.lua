@@ -8,10 +8,20 @@ end
 
 vim.scriptencoding = 'utf-8'
 
-local lazy_root_path = vim.fn.stdpath('cache') .. '/lazy'
+require('vimrc.helper.fnok')
+local now = require('vimrc.helper.now')
+
+local function lazy_base_path()
+  if vim.fnok.has('win32') and not vim.fnok.has('win32unix') then
+    return vim.fn.stdpath('data')
+  end
+  return vim.fn.stdpath('cache')
+end
+
+local lazy_root_path = vim.fs.joinpath(lazy_base_path(), 'lazy')
 if not vim_did_start then
   -- Load lazy.nvim
-  local lazy_plugin_path = lazy_root_path .. '/lazy.nvim'
+  local lazy_plugin_path = vim.fs.joinpath(lazy_root_path, 'lazy.nvim')
   if not vim.uv.fs_stat(lazy_plugin_path) then
     vim
       .system({
@@ -27,9 +37,7 @@ if not vim_did_start then
 end
 
 local helper = require('vimrc.helper')
-local now = require('vimrc.helper.now')
 helper.refresh_augroup_cache()
-require('vimrc.helper.fnok')
 require('vimrc.inherit-dotvim')
 
 local opt = vim.opt
@@ -545,7 +553,7 @@ if not vim.g.lazy_did_setup then
 
   require('lazy').setup('plugins', {
     root = lazy_root_path,
-    lockfile = vim.fs.joinpath(vim.fn.stdpath('cache'), 'lazy-lock.json'),
+    lockfile = vim.fs.joinpath(lazy_base_path(), 'lazy-lock.json'),
     defaults = { lazy = true },
     performance = {
       rtp = {
