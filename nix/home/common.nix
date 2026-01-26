@@ -7,6 +7,7 @@
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
   vimExtraPackages = with pkgs; [
+    actionlint
     bash-language-server
     coqPackages.coq-lsp
     efm-langserver

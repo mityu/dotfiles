@@ -2,6 +2,8 @@ version: 2
 root-markers:
   - .git/
 lint-debounce: 1s
+# log-file: /tmp/efm-langserver.log
+# log-level: 1
 
 tools:
   python-mypy: &python-mypy
@@ -20,7 +22,7 @@ tools:
     lint-formats:
       - "%f:%l:%c: %m"
     root-markers:
-      - .github/
+      - .github/workflows
 
 languages:
   python:

@@ -67,6 +67,7 @@ setup_server({ 'tex', 'latex', 'plaintex' }, 'texlab')
 setup_server({ 'rust' }, 'rust_analyzer')
 setup_server({ 'fish' }, 'fish_lsp')
 setup_server({ 'bash' }, 'bashls')
+setup_server({ 'yaml' }, 'efm')
 
 local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
