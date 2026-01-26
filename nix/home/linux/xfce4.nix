@@ -248,5 +248,10 @@ in
       # The "Gtk/FontName" option seems to be set by `gtk.font` option.
       "Gtk/MonospaceFontName" = "Noto Sans Mono CJK JP ${toString config.gtk.font.size}";
     };
+    thunar = {
+      "last-view" = "ThunarDetailsView";
+      "misc-date-style" = "THUNAR_DATE_STYLE_CUSTOM_SIMPLE";
+      "misc-date-custom-style" = "%Y/%m/%d %H:%M";
+    };
   };
 }

@@ -88,6 +88,7 @@ in
       settings = {
         "general.smoothScroll" = true;
         "layout.css.devPixelsPerPx" = 1.25;
+        "intl.date_time.pattern_override.date_short" = "yyyy/MM/dd";
       };
     };
   };
@@ -134,8 +135,10 @@ in
         pkgs.adwaita-xfce4-icon-theme;
       name = "Adwaita-Xfce";
     };
-    # gtk3.bookmarks = [
-    # ];
+    gtk3.bookmarks = [
+      "file:///home/${username}/Documents"
+      "file:///home/${username}/Downloads"
+    ];
   };
 
   xdg.mimeApps = {
