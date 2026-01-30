@@ -63,7 +63,9 @@ setup_server(
   'ocamllsp'
 )
 setup_server({ 'coq', 'rocq' }, 'coq_lsp')
-setup_server({ 'tex', 'latex', 'plaintex' }, 'texlab')
+setup_server({ 'tex', 'latex', 'plaintex', 'bib', 'otex' }, 'texlab', {
+  filetypes = { 'tex', 'latex', 'plaintex', 'bib', 'otex' },
+})
 setup_server({ 'rust' }, 'rust_analyzer')
 setup_server({ 'fish' }, 'fish_lsp')
 setup_server({ 'bash' }, 'bashls')
