@@ -184,6 +184,9 @@ in
 
   xfconf.settings = {
     # Note that `xfwm4 -r` command may helpful to check the effects/result of configuration changes.
+    xfce4-appfinder = {
+      "close-on-focus-lost" = true;
+    };
     xfce4-keyboard-shortcuts = {
       # <Primary> is the CTRL key.
       "commands/custom/<Super>p" = null;
