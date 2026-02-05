@@ -55,7 +55,6 @@ setup_server({ 'nix' }, 'nixd', {
 })
 setup_server({ 'c', 'cpp', 'objective-c' }, 'clangd')
 setup_server({ 'go' }, 'gopls')
-setup_server({ 'typescript' }, 'denols')
 setup_server({ 'haskell' }, 'hls')
 setup_server({ 'typst' }, 'tinymist')
 setup_server(
@@ -73,3 +72,34 @@ setup_server({ 'yaml' }, 'efm')
 
 local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
+
+-- setup_server({ 'typescript' }, 'denols')
+helper.create_autocmd('FileType', {
+  group = 'vimrc-nvim-lsp-setup',
+  callback = function(ctx)
+    if
+      not vim.tbl_contains(
+        {
+          'javascript',
+          'javascriptreact',
+          'javascript.jsx',
+          'typescript',
+          'typescriptreact',
+          'typescript.tsx',
+        },
+        ctx.match
+      )
+    then
+      return
+    end
+
+    -- node
+    if vim.fn.findfile('package.json', '.;') ~= '' then
+      vim.lsp.start(vim.lsp.config.ts_ls)
+      return
+    end
+
+    -- deno
+    vim.lsp.start(vim.lsp.config.denols)
+  end,
+})
