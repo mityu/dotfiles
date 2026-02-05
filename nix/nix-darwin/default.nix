@@ -27,7 +27,7 @@
   };
 
   compiler-infra = {
-    enable = true;
+    enable = false;
     accessibleGlobally = true;
     apple-sdk = pkgs.apple-sdk_15;
     libs = with pkgs; [
