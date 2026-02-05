@@ -5,6 +5,8 @@ local M = {}
 
 local function gen_create_autocmd()
   local augroups = {}
+  --- @param event vim.api.keyset.events|vim.api.keyset.events[]
+  --- @param opts vim.api.keyset.create_autocmd
   return function(event, opts)
     local augroup = opts and opts['group']
     if augroup ~= nil and augroups[augroup] == nil then

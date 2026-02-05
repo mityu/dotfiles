@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+# vim: set filetype=perl:
+# Basically from: https://qiita.com/sigma7641/items/fc2638f92d5915326b4a
+# See also: https://www2.yukawa.kyoto-u.ac.jp/~koudai.sugimoto/dokuwiki/doku.php
+
+$latex          = 'uplatex %O -halt-on-error -interaction=nonstopmode %P';
+
+# For bibtex, which uses biber internally
+$biber          = 'biber';
+$bibtex         = 'pbibtex';
+
+# For dvipdf
+$dvipdf         = 'dvipdfmx %O -o %Z%R.pdf %S';
+$max_repeat     = 5;
+$pdf_mode       = 3;
+
+$aux_dir         = 'build/';
+
+if ($ENV{TERM_PROGRAM} eq 'vscode') {
+    $pdf_previewer = 'code --reuse-window';
+} elsif ($^O eq 'darwin') {
+    $pdf_previewer = 'open --background -a skim';
+} elsif ($^O eq 'linux') {
+    $pdf_previewer = 'xdg-open %S 2>/dev/null';
+    if (system('type okular >/dev/null 2>&1') == 0) {
+        $editor_cmd = '';
+        if (length $ENV{VIM_SYNCTEX_PORT}) {
+            $editor_cmd = "--editor-cmd 'curl localhost:$ENV{VIM_SYNCTEX_PORT} -XPUT -d \"%l %f\"'"
+        }
+        $unique_flag = '';
+        if (system('ps | grep okular >/dev/null 2>&1') == 0) {
+            $unique_flag = '--unique';
+        }
+        $pdf_previewer = "okular $unique_flag --noraise $editor_cmd %S 2>/dev/null";
+    } elsif (system('type papers >/dev/null 2>&1') == 0) {
+        $pdf_previewer = 'papers %S 2>/dev/null';
+    }
+}

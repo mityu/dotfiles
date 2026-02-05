@@ -1,0 +1,29 @@
+:keeppatterns %s/\C\<PROJECTNAME\>/\=expand('%:p:h:t')->substitute('^deno-', '', 'g')/
+{
+  "name": "@mityu/PROJECTNAME",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "lock": false,
+  "publish": {
+    "include": [
+      "**/*.ts",
+      "LICENSE",
+      "README.md"
+    ],
+    "exclude": [
+      "*_test.ts"
+    ]
+  },
+  "tasks": {
+    "check-all": "deno task check && deno task check:doc && deno task lint && deno task test",
+    "check": "deno check --no-lock ./",
+    "check:doc": "deno test --doc --no-run",
+    "lint": "deno lint ./",
+    "lint-fix": "deno lint --fix ./",
+    "fmt": "deno fmt ./",
+    "test": "deno test -A --doc --parallel --shuffle **/*.ts",
+    "update": "deno run -A jsr:@molt/cli **/*.ts --write"
+  }
+}
