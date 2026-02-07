@@ -72,15 +72,24 @@ in
         emoji = [ "Noto Color Emoji" ];
       };
       localConf = ''
-        <match target="pattern">
-          <test name="family">
-            <string>Helvetica</string>
-            <string>Arial</string>
-          </test>
-          <edit name="family" mode="assign">
-            <string>Arimo Nerd Font</string>
-          </edit>
-        </match>
+        <fontconfig>
+          <match target="pattern">
+            <test name="family">
+              <string>Helvetica</string>
+            </test>
+            <edit name="family" mode="assign">
+              <string>Arimo Nerd Font</string>
+            </edit>
+          </match>
+          <match target="pattern">
+            <test name="family">
+              <string>Arial</string>
+            </test>
+            <edit name="family" mode="assign">
+              <string>Arimo Nerd Font</string>
+            </edit>
+          </match>
+        </fontconfig>
       '';
     };
   };
