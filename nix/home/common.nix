@@ -9,6 +9,7 @@ let
   vimExtraPackages = with pkgs; [
     actionlint
     bash-language-server
+    cmake-language-server
     coqPackages.coq-lsp
     efm-langserver
     fish-lsp
