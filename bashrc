@@ -131,6 +131,12 @@ fi
 
 shopt -s nocaseglob
 set -o vi
+bind -m vi-insert '\C-p':previous-history
+bind -m vi-insert '\C-n':next-history
+bind -m vi-insert '\C-e':end-of-line
+bind -m vi-insert '\C-a':beginning-of-line
+bind -m vi-insert '\C-b':backward-char
+bind -m vi-insert '\C-f':forward-char
 
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
