@@ -1,3 +1,6 @@
+setlocal shiftwidth=2
+SetUndoFtplugin setlocal shiftwidth<
+
 function s:abbrev_directive_function(trigger)
   const word = getline('.')->strpart(0, col('.') - 1)
   if word =~# '^\s*fu\%[nctio]$'
