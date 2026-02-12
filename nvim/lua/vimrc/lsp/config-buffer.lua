@@ -69,7 +69,7 @@ end
 local function should_auto_formatting(bufnr, client)
   local ft = vim.bo[bufnr].filetype
 
-  local disable_ft = { 'tex' }
+  local disable_ft = { 'tex', 'otex' }
   if vim.list_contains(disable_ft, ft) then
     return false
   elseif ft == 'lua' then
