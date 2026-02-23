@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   inherit (pkgs.lib) getExe;
-  xrandr = getExe pkgs.xorg.xrandr;
+  xrandr = getExe pkgs.xrandr;
   grep = getExe pkgs.gnugrep;
   awk = getExe pkgs.gawk;
   xargs = "${pkgs.findutils}/bin/xargs";

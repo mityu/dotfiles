@@ -1,6 +1,7 @@
 {
   inputs,
   pkgs,
+  lib,
   username,
   config,
   ...
@@ -20,11 +21,11 @@ let
         ];
         buildInputs =
           (oldAttrs.buildInputs or [ ])
-          ++ builtins.filter (_: platform.X11) [
+          ++ lib.optionals platform.X11 [
             # Enable GUI and clipboards
             pkgs.gtk3
-            pkgs.xorg.libXmu
-            pkgs.xorg.libXpm
+            pkgs.libXmu
+            pkgs.libXpm
           ];
         configureFlags = (oldAttrs.configureFlags or [ ]) ++ [
           "--enable-gui"

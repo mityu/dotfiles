@@ -27,7 +27,7 @@ in
       let
         # Tip: Use `xfconf-query -c xfce4-desktop -p /backdrop -r -R` to remove entire configuration about backgrounds.
         xfconf-query = "${lib.getExe pkgs.xfconf}";
-        xrandr = "${lib.getExe pkgs.xorg.xrandr}";
+        xrandr = "${lib.getExe pkgs.xrandr}";
         jc = "${lib.getExe pkgs.jc}";
         jq = "${lib.getExe pkgs.jq}";
         jqQuery = builtins.concatStringsSep "|" [
