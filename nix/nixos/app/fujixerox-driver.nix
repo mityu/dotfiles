@@ -18,7 +18,9 @@ stdenv.mkDerivation rec {
   version = "1.1.4-3";
 
   src = fetchurl {
-    url = "https://www.fujifilm.com/fb/sync/pub/exe/docuprint/p450d/fflinuxprint_${version}_${debPlatform}.deb";
+    # url = "https://www.fujifilm.com/fb/sync/pub/exe/docuprint/p450d/fflinuxprint_${version}_${debPlatform}.deb";
+    # hash = "sha256-oi6p4e9Uigz0TbEcmloDhv3qU98Ou1qqdorGY3942uM=";
+    url = "https://opencds-fb.fujifilm.com/gen/dufw/package/DLOnly/Common/LINUX_DEB/${version}/fflinuxprint_${version}_${debPlatform}.deb";
     hash = "sha256-oi6p4e9Uigz0TbEcmloDhv3qU98Ou1qqdorGY3942uM=";
   };
 
