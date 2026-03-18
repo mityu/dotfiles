@@ -11,7 +11,7 @@ let
   vim-overlay =
     final: prev:
     let
-      overlayed = inputs.vim-overlay.overlays.features {
+      overlayed = inputs.vim-overlay.lib.features {
         compiledby = "${username}-nix";
         python3 = true;
       } final prev;
