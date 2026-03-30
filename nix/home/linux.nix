@@ -139,6 +139,7 @@ in
       "file:///home/${username}/Documents"
       "file:///home/${username}/Downloads"
     ];
+    gtk4.theme = null;
   };
 
   xdg.mimeApps = {
