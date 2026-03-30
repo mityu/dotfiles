@@ -33,7 +33,7 @@ if $in_vim_terminal || $in_neovim_terminal
   set -e VIMRUNTIME
 end
 
-if status is-login
+if status is-login; and not string length -q -- $IN_NIX_SHELL
   set -gx LANG en_US.UTF-8
   set -gx CLICOLOR auto
   set -gx LSCOLORS gxexfxdxcxahadacagacad
