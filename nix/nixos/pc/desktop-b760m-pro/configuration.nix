@@ -29,7 +29,7 @@ in
   hardware.graphics.enable = true;
   services.xserver.videoDrivers = [ "nvidia" ];
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_535;
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
     # package = config.boot.kernelPackages.nvidiaPackages.production;
     open = false;
     modesetting.enable = true;
