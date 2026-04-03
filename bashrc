@@ -27,11 +27,16 @@ function __bashrc_should_invoke_fish {
 	fi
 }
 if __bashrc_should_invoke_fish; then
+	# Setup operations by 'nix develop' or something similar will be done after
+	# loading bashrc.  Thus we shouldn't switch to the fish shell immediately
+	# here.  Therefore we will stay until bash is fully started by hooking the
+	# first draw of prompt, and then change the shell to fish.
   if shopt -q login_shell; then
-    exec fish --login
+    PROMPT_COMMAND='exec fish --login'
   else
-    exec fish
+    PROMPT_COMMAND='exec fish'
   fi
+	return
 fi
 
 function dotfiles-path() {
