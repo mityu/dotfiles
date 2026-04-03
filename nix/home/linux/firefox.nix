@@ -72,6 +72,154 @@ in
           };
         };
       };
+      search = {
+        force = true;
+        default = "google";
+        engines =
+          let
+            engine =
+              {
+                name ? null,
+                icon,
+                aliases,
+                url,
+                params,
+                ...
+              }:
+              {
+                inherit icon;
+                definedAliases = map (v: "!${v}") (if builtins.isString aliases then [ aliases ] else aliases);
+                urls = [
+                  {
+                    template = url;
+                    inherit params;
+                  }
+                ];
+              }
+              // lib.optionalAttrs (builtins.isString name) { inherit name; };
+            searchParam = key: [
+              {
+                name = key;
+                value = "{searchTerms}";
+              }
+            ];
+            commonSearchParam = searchParam "q";
+          in
+          {
+            github = engine rec {
+              base = "https://github.com";
+              icon = "${base}/favicon.ico";
+              url = "${base}/search";
+              aliases = [
+                "gh"
+                "github"
+              ];
+              params = commonSearchParam;
+            };
+
+            google = engine rec {
+              base = "htttps://google.com";
+              icon = "${base}/favicon.ico";
+              url = "${base}/search";
+              aliases = "google";
+              params = commonSearchParam;
+            };
+
+            nixpkgs-pkgs = engine {
+              url = "https://search.nixos.org/packages";
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              aliases = [
+                "nix"
+                "nixpkg"
+                "nixpkgs"
+              ];
+              params = lib.attrsToList {
+                channel = "unstable";
+                query = "{searchTerms}";
+              };
+            };
+
+            nixpkgs-opts = engine {
+              url = "https://search.nixos.org/options";
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              aliases = "nixopts";
+              params = lib.attrsToList {
+                channel = "unstable";
+                query = "{searchTerms}";
+              };
+            };
+
+            mynixos = engine rec {
+              base = "https://mynixos.com";
+              icon = "${base}/favicon.ico";
+              url = "${base}/search";
+              aliases = "mynixos";
+              params = commonSearchParam;
+            };
+
+            home-manager-options = engine rec {
+              base = "https://home-manager-options.extranix.com";
+              icon = "${base}/images/favicon.ico";
+              url = base;
+              aliases = [
+                "hm"
+                "home-manager-options"
+                "home"
+              ];
+              params = lib.attrsToList {
+                release = "master";
+                query = "{searchTerms}";
+              };
+            };
+
+            noogle = engine rec {
+              base = "https://noogle.dev";
+              icon = "${base}/favicon.png";
+              url = "${base}/q";
+              aliases = "noogle";
+              params = searchParam "term";
+            };
+
+            npm = engine {
+              icon = "https://static-production.npmjs.com/b0f1a8318363185cc2ea6a40ac23eeb2.png";
+              url = "https://www.npmjs.com/search";
+              aliases = "npm";
+              params = commonSearchParam;
+            };
+
+            jsr = engine rec {
+              base = "https://jsr.io";
+              icon = "${base}/favicon.ico";
+              url = "${base}/packages";
+              aliases = "jsr";
+              params = searchParam "search";
+            };
+
+            rust-crates-io = engine rec {
+              name = "crates.io";
+              base = "https://crates.io";
+              icon = "${base}/favicon.ico";
+              url = "${base}/search";
+              aliases = [
+                "crate"
+                "crates"
+              ];
+              params = commonSearchParam;
+            };
+
+            rust-docs-rs = engine rec {
+              name = "docs.rs";
+              base = "https://docs.rs";
+              icon = "${base}/favicon.ico";
+              url = "${base}/releases/search";
+              aliases = [
+                "docs.rs"
+                "docs-rs"
+              ];
+              params = searchParam "query";
+            };
+          };
+      };
     };
   };
 
