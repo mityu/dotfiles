@@ -380,3 +380,13 @@ end
 function __with_hook --on-event fish_prompt
   commandline --replace "$___fish_prompt_prefix"
 end
+
+function gpg-dialog-here
+  if command -q gpg-connect-agent
+    set -gx GPG_TTY (tty)
+    gpg-connect-agent updatestartuptty /bye > /dev/null
+  else
+    echo 'gpg-connect-agent not found'
+    return 1
+  end
+end
