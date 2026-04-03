@@ -142,6 +142,8 @@ if status is-interactive
     end
   end
 
+  alias bash='BASHRC_DONT_INVOKE_FISH=1 command bash'
+
   alias repos=repo
   function repo --description 'interactively select and cd repository from "ghq list"'
     set -l opt (if test (count $argv) = 0; echo ''; else echo "-q $argv"; end)

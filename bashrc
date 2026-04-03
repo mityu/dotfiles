@@ -2,19 +2,28 @@
 # If not running interactively, don't do anything
 # [[ "$-" != *i* ]] && return
 
-# Make fish shell substantial default shell.
+# Make fish shell substantial default shell.  Basic idea is from:
 # https://blog.atusy.net/2025/03/13/drop-into-fish-from-bash/
 function __bashrc_should_invoke_fish {
+	if (( BASHRC_DONT_INVOKE_FISH > 0 )) || [[ "$BASHRC_DONT_INVOKE_FISH" == "true" ]]; then
+		return 1
+	fi
+
 	# Don't invoke fish when the current bash isn't interactive use or fish command isn't available.
 	if ! { [[ $- == *i* && $- != *c* && $- != *s* ]] && command -v fish &>/dev/null; }; then
 		return 1
 	fi
 
+	# Don't invoke fish when shell is not nested.
+	if (( SHLVL < 1 )); then
+		return 1
+	fi
+
 	# Don't invoke fish when the parent process if fish.
 	if [[ $(uname) == "Darwin" ]]; then
-		[[ $(/bin/ps -p $PPID -o comm | tail -n +2) != "fish" ]]
+		[[ $(/bin/ps -p $PPID -o comm | tail -n +2) == "fish" ]]
 	else
-		[[ $(ps --no-header --pid=$PPID --format=comm) != "fish" ]]
+		[[ $(ps --no-header --pid=$PPID --format=comm) == "fish" ]]
 	fi
 }
 if __bashrc_should_invoke_fish; then
