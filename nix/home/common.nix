@@ -43,7 +43,7 @@ in
 
   home = {
     username = "${username}";
-    stateVersion = "22.11";
+    stateVersion = "25.11";
   };
 
   home.packages =
