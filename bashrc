@@ -31,10 +31,11 @@ if __bashrc_should_invoke_fish; then
 	# loading bashrc.  Thus we shouldn't switch to the fish shell immediately
 	# here.  Therefore we will stay until bash is fully started by hooking the
 	# first draw of prompt, and then change the shell to fish.
+	__bashrc_fish_launcher="SHELL=$(which fish) exec fish"
   if shopt -q login_shell; then
-    PROMPT_COMMAND='exec fish --login'
+    PROMPT_COMMAND="$__bashrc_fish_launcher --login"
   else
-    PROMPT_COMMAND='exec fish'
+    PROMPT_COMMAND="$__bashrc_fish_launcher"
   fi
 	return
 fi
