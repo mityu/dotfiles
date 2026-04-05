@@ -93,6 +93,7 @@ local config = {
   colors = colors,
   macos_forward_to_ime_modifier_mask = 'SHIFT|CTRL',
 
+  enable_kitty_keyboard = true,
   disable_default_key_bindings = true,
   leader = { key = 'p', mods = MODKEY },
   keys = {
@@ -186,12 +187,6 @@ local config = {
 
     { key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize },
     { key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize },
-
-    {
-      key = '/',
-      mods = 'CTRL',
-      action = wezterm.action.SendKey({ key = '/', mods = 'CTRL' }),
-    },
   },
   window_padding = {
     top = 0,
@@ -224,6 +219,12 @@ elseif isMac then
   }
   config.initial_cols = 110
   config.initial_rows = 35
+  config.enable_kitty_keyboard = false
+  table.insert(config.keys, {
+    key = '/',
+    mods = 'CTRL',
+    action = wezterm.action.SendKey({ key = '/', mods = 'CTRL' }),
+  })
 elseif isLinux then
   config.initial_cols = 130
   config.initial_rows = 40
