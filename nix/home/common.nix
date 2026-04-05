@@ -94,6 +94,7 @@ in
       with-shell
       yazi
       yq-go
+      zellij
       (writeShellScriptBin "gpg-test" "gpg --clearsign <<<'test'")
     ]
     ++ [ (lib.hiPrio uutils-coreutils) ]
