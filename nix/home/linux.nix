@@ -35,6 +35,7 @@ in
       discord
       file
       gdb
+      ghostty
       gnumake
       gparted
       hwloc

@@ -54,6 +54,7 @@ ln -snfv $SCRIPT_DIR/efm-langserver $CONFIG_DIR/efm-langserver
 ln -snfv $SCRIPT_DIR/fish $CONFIG_DIR/fish
 ln -snfv $SCRIPT_DIR/nix $CONFIG_DIR/nix
 ln -snfv $SCRIPT_DIR/zellij $CONFIG_DIR/zellij
+ln -snfv $SCRIPT_DIR/ghostty $CONFIG_DIR/ghostty
 
 if $IS_MAC; then
 	ln -snfv $SCRIPT_DIR/karabiner $CONFIG_DIR/karabiner

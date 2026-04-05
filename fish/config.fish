@@ -5,6 +5,7 @@ set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
 set -l in_vscode_terminal test "$TERM_PROGRAM" = "vscode"
+set -l in_ghostty test "$TERM_PROGRAM" = "ghostty"
 
 set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_CACHE_HOME $HOME/.cache
@@ -356,6 +357,13 @@ end
 if command -q btm
   alias top='btm'
   alias '\\top'='command top'
+end
+
+if $in_ghostty
+  # Ghostty uses 'xterm-ghostty' as $TERM value, and it can causes error with
+  # some commands over SSH.  Set terminfo name to 'xterm-256color' on SSH
+  # server environment.
+  alias ssh='TERM=xterm-256color command ssh'
 end
 
 function gitinit

@@ -28,3 +28,4 @@ rm-link $CONFIG_DIR/pacman
 rm-link $CONFIG_DIR/fish
 rm-link $CONFIG_DIR/nix
 rm-link $CONFIG_DIR/zellij
+rm-link $CONFIG_DIR/ghostty

@@ -1,0 +1,9 @@
+font-family = Cica
+font-family = HackGen Console NF
+font-family = JetBrains Mono  # Ghostty's built-in default font.  The last fallback.
+font-feature = -dlig
+font-size = 15
+
+theme = relu
+
+maximize = true
