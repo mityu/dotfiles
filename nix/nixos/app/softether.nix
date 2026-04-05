@@ -1,21 +1,9 @@
 { pkgs, ... }:
 let
-  softether-overlay =
-    final: prev:
-    let
-      softether = prev.softether.overrideAttrs (oldAttrs: {
-        postInstall = "";
-        nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ pkgs.gcc14 ];
-      });
-    in
-    {
-      inherit softether;
-    };
   dataDir = "/var/lib/softether";
   package = pkgs.softether;
 in
 {
-  nixpkgs.overlays = [ softether-overlay ];
   environment.systemPackages = [ pkgs.softether ];
 
   # services.softether = {
@@ -48,7 +36,7 @@ in
     description = "SoftEther VPN Client";
     after = [ "softether-init.service" ];
     requires = [ "softether-init.service" ];
-    wantedBy = [ "network.target" ];
+    # wantedBy = [ "network.target" ];
     serviceConfig = {
       Type = "forking";
       ExecStart = "${package}/bin/vpnclient start";
