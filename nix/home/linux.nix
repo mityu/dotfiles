@@ -152,6 +152,12 @@ in
   xdg.mimeApps = {
     enable = true;
     associations.added = # This goes to $XDG_CONFIG_HOME/mimeapps.list
+      let
+        apps = {
+          okular = "org.kde.okular.desktop";
+          ristretto = "org.xfce.ristretto.desktop";
+        };
+      in
       lib.pipe
         [
           "apng"
@@ -167,12 +173,17 @@ in
           (map (type: "image/${type}"))
           (
             mime-types:
-            lib.genAttrs mime-types (_: [
-              "org.xfce.ristretto.desktop"
-              "org.kde.okular.desktop"
-            ])
+            lib.genAttrs mime-types (
+              _: with apps; [
+                ristretto
+                okular
+              ]
+            )
           )
-        ];
+        ]
+      // {
+        "application/pdf" = [ apps.okular ];
+      };
   };
 
   programs.gpg.enable = true;
