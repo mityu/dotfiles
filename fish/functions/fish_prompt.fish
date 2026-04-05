@@ -20,6 +20,7 @@ function fish_prompt --description 'Write out the prompt'
   set -g __fish_git_prompt_color_dirtystate magenta
   set -g __fish_git_prompt_color_untrackedfiles red
   set -g __fish_git_prompt_color_stashstate cyan
+  set -g __fish_shlvl_prompt_char "›"
 
   # Since we display the prompt on a new line allow the directory names to be longer.
   set -q fish_prompt_pwd_dir_length
@@ -45,7 +46,7 @@ function fish_prompt --description 'Write out the prompt'
     set prompt_loginuser "$(set_color $fish_color_host_remote)SSH$(set_color normal):$(prompt_login) "
   end
 
-  set -l shell_depth (string repeat --count (math $SHLVL - 1) '›')
+  set -l shell_depth (string repeat --count (math $SHLVL - 1) $__fish_shlvl_prompt_char)
 
   echo -s (set_color magenta) "fish " $normal $prompt_loginuser $prompt_status ' ' $cwd_color (prompt_pwd) $vcs_color (fish_vcs_prompt) $normal
   echo -n -s $shell_depth $suffix ' '
