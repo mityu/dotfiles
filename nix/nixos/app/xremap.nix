@@ -121,6 +121,7 @@ in
             "URxvt"
             "org.wezfurlong.wezterm"
             "org.wezfurlong.wezterm.org.wezfurlong.wezterm"
+            "ghostty.com.mitchellh.ghostty"
             "gnome-terminal-server.Gnome-terminal"
             "Alacritty"
             "Gvim"
@@ -165,6 +166,13 @@ in
           ];
           remap = {
             "Super-q" = "C-q";
+          };
+        }
+        {
+          name = "Ghostty kill";
+          application.only = [ "ghostty.com.mitchellh.ghostty" ];
+          remap = {
+            "Super-q" = "C-Shift-q";
           };
         }
         {
