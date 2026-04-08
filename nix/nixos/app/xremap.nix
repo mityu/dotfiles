@@ -51,21 +51,28 @@ in
           name = "Global";
           remap = {
             "CapsLock" = "CTRL_L";
-            "Super_L" = {
-              held = "Super_L";
-              alone = "Muhenkan";
-              alone_timeout_millis = 750;
-            };
-            "Super_R" = {
-              held = "Super_R";
-              alone = "Henkan";
-              alone_timeout_millis = 750;
-            };
+            # "Super_L" = {
+            #   held = "Super_L";
+            #   alone = "Muhenkan";
+            #   alone_timeout_millis = 750;
+            # };
+            # "Super_R" = {
+            #   held = "Super_R";
+            #   alone = "Henkan";
+            #   alone_timeout_millis = 750;
+            # };
           };
         }
       ];
 
       config.keymap = [
+        {
+          name = "Henkan/Muhenkan";
+          remap = {
+            "Super_L-Space" = "Muhenkan";
+            "Super_R-Space" = "Henkan";
+          };
+        }
         {
           name = "PDF Viewer";
           application.only = [
