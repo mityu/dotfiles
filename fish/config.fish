@@ -192,8 +192,6 @@ if status is-interactive
     switch $argv[1]
       case cd
         builtin cd (dotfiles-path)
-      case update pull
-        git -C (dotfiles-path) pull
       case '' 'help' '-h' '--help'
         echo 'Usage: dotfiles <cmds>'
         echo ''
@@ -202,8 +200,9 @@ if status is-interactive
         echo '  pull   Pull the upstream changes.'
         echo '  help   Show this help.'
       case '*'
-        echo "Invalid argument: $argv"
-        dotfiles --help
+        set -l execmd git -C (dotfiles-path) $argv
+        echo (set_color --bold)"==> $execmd"(set_color normal)
+        $execmd
     end
   end
 end
