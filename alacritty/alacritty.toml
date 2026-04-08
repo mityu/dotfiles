@@ -461,6 +461,16 @@ mods = "Shift"
 key = "¥"
 chars = "\\"
 
+[[keyboard.bindings]]
+action = "SelectNextTab"
+key = "Tab"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "SelectPreviousTab"
+key = "Tab"
+mods = "Control|Shift"
+
 [mouse]
 hide_when_typing = true
 
