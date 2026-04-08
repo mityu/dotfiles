@@ -39,9 +39,6 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   set -gx CLICOLOR auto
   set -gx LSCOLORS gxexfxdxcxahadacagacad
 
-  # Make sure the $SHELL environmental variable is fish.
-  string match -rq 'fish$' -- $SHELL || set -gx SHELL (status fish-path)
-
   function setup-brew-cc
     if command -q xcrun && command -q brew
       # Set some environmental variables suitable for clang/gcc installed by Homebrew.
@@ -98,6 +95,14 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
 end
 
 if status is-interactive
+  # Make sure the $SHELL environmental variable is fish.
+  if test $SHLVL -eq 1; and not string match -rq 'fish$' -- $SHELL
+    set -gx SHELL (which fish)
+    if test (realpath "$SHELL") != (status fish-path)
+      set -gx SHELL (status fish-path)
+    end
+  end
+
   abbr --add g git
   abbr --add --command git s status
   abbr --add --command git sw switch
