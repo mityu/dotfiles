@@ -1,16 +1,22 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env bash
 
-if [ ! -d "$HOME/.cache" ]; then
+set -xeo pipefail
+
+FORCEBUILD=false
+if [[ ! -d "$HOME/.cache" ]]; then
 	mkdir ~/.cache
 fi
-if [ ! -d "$HOME/.cache/alacrittybuild" ]; then
+if [[ ! -d "$HOME/.cache/alacrittybuild" ]]; then
 	git clone https://github.com/alacritty/alacritty ~/.cache/alacrittybuild
-	HASH=null
+	FORCEBUILD=true
+fi
+if [[ "$1" == "--force" || "$1" == "-f" ]]; then
+	FORCEBUILD=true
 fi
 cd ~/.cache/alacrittybuild
-: "${HASH:=$(git rev-parse HEAD)}"
+HASH=$(git rev-parse HEAD)
 git pull
-if [ $HASH == $(git rev-parse HEAD) ]; then
+if [[ $HASH == $(git rev-parse HEAD) ]] && ! $FORCEBUILD; then
 	exit 0
 fi
 if [[ "$(uname)" == "Darwin" ]]; then
