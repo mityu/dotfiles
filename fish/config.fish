@@ -43,7 +43,7 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
     if command -q xcrun && command -q brew
       # Set some environmental variables suitable for clang/gcc installed by Homebrew.
       set -l brew_prefix (brew --prefix)
-      if string length -q -- $SDKROOT
+      if not string length -q -- $SDKROOT
         set -gx SDKROOT (xcrun --show-sdk-path)
       end
       set -gx CPATH $CPATH:$SDKROOT/usr/include
