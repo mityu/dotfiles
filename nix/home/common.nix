@@ -99,7 +99,7 @@ in
     ]
     ++ [ (lib.hiPrio uutils-coreutils) ]
     ++ (with pkgs.haskellPackages; [
-      cabal-install
+      (if pkgs.stdenv.isDarwin then lib.hiPrio cabal-install else cabal-install)
       stack
     ]);
 
