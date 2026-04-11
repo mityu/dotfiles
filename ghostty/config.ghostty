@@ -4,6 +4,6 @@ font-family = JetBrains Mono  # Ghostty's built-in default font.  The last fallb
 font-feature = -dlig
 font-size = 15
 
-theme = relu
+theme = oliva
 
 maximize = true

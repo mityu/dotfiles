@@ -1,6 +1,7 @@
 vim9script
 
 import './gen.vim' as Gen
+import './ansicolors.vim' as AnsiColors
 
 Gen.Init(expand('<sfile>'), 'dark')
 
@@ -142,24 +143,6 @@ Gen.Hi('otexOttMacro', '#88aacc', '', '')
 # Gen.HiLink('ocamlFullMod', 'typescriptCall')
 # Gen.HiLink('ocamlModPath', 'ocamlFullMod')
 
-const ansiColors = [
- '#000000',
- '#d54e53',
- '#b9ca4a',
- '#e6c547',
- '#7aa6da',
- '#c397d8',
- '#70c0ba',
- '#eaeaea',
- '#666666',
- '#ff3334',
- '#9ec400',
- '#e7c547',
- '#7aa6da',
- '#b77ee0',
- '#54ced6',
- '#ffffff',
-]
-Gen.Script(['let g:terminal_ansi_colors = ' .. string(ansiColors)])
+Gen.Script(['let g:terminal_ansi_colors = ' .. string(AnsiColors.ansiColors)])
 
 Gen.Generate()

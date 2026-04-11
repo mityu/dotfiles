@@ -4,37 +4,7 @@ local isWindows = string.find(wezterm.target_triple, 'windows', 0, true)
 local isMac = string.find(wezterm.target_triple, 'apple-darwin', 0, true)
 local isLinux = not (isWindows or isMac)
 
-local colors = {
-  background = '#1f1f1f',
-  foreground = '#eaeaea',
-
-  selection_bg = '#666666',
-
-  cursor_fg = '#1f1f1f',
-  cursor_bg = '#fff8dc',
-  cursor_border = '#fff8dc',
-
-  ansi = {
-    '#000000',
-    '#d54e53',
-    '#b9ca4a',
-    '#e6c547',
-    '#7aa6da',
-    '#c397d8',
-    '#70c0ba',
-    '#eaeaea',
-  },
-  brights = {
-    '#666666',
-    '#ff3334',
-    '#9ec400',
-    '#e7c547',
-    '#7aa6da',
-    '#b77ee0',
-    '#54ced6',
-    '#ffffff',
-  },
-}
+local colors = require('colors')
 
 wezterm.on('gui-startup', function(cmd)
   local _, _, window = wezterm.mux.spawn_window(cmd or {})

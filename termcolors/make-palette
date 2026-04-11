@@ -1,0 +1,309 @@
+#!/usr/bin/env nix-shell
+/*
+#!nix-shell -i 'deno run --allow-write --allow-run' -p deno
+*/
+
+import { assert } from "jsr:@std/assert@^1.0.19";
+import { join } from "jsr:@std/path@^1.1.4/join";
+import { basename } from "jsr:@std/path@^1.1.4/basename";
+import { Result } from "jsr:@resulted/results@^1.0.0";
+import { Semaphore } from "jsr:@core/asyncutil@^1.2.0/semaphore";
+import { parseArgs } from "node:util";
+
+type RGB = {
+  r: number;
+  g: number;
+  b: number;
+};
+
+class Color {
+  readonly hex: string;
+  readonly rgb: RGB;
+  readonly r: RGB["r"];
+  readonly g: RGB["g"];
+  readonly b: RGB["b"];
+
+  constructor(hex: string) {
+    assert(hex.length === 7);
+    this.hex = hex;
+    this.r = parseInt(`0x${hex.substring(1, 3)}`);
+    this.g = parseInt(`0x${hex.substring(3, 5)}`);
+    this.b = parseInt(`0x${hex.substring(5, 7)}`);
+    this.rgb = {
+      r: this.r,
+      g: this.g,
+      b: this.b,
+    };
+  }
+}
+
+const targets = ["wezterm", "ghostty", "vim"] as const;
+
+const palette = {
+  ansi: [
+    new Color("#000000"), // black
+    new Color("#d54e53"), // blue
+    new Color("#b9ca4a"), // cyan
+    new Color("#e6c547"), // green
+    new Color("#7aa6da"), // magenta
+    new Color("#c397d8"), // red
+    new Color("#70c0ba"), // white
+    new Color("#eaeaea"), // yellow
+    new Color("#666666"), // bright black
+    new Color("#ff3334"), // bright blue
+    new Color("#9ec400"), // bright cyan
+    new Color("#e7c547"), // bright green
+    new Color("#7aa6da"), // bright magenta
+    new Color("#b77ee0"), // bright red
+    new Color("#54ced6"), // bright white
+    new Color("#ffffff"), // bright yellow
+  ],
+  normal: {
+    fg: new Color("#eaeaea"),
+    bg: new Color("#1f1f1f"),
+  },
+  selection: {
+    bg: new Color("#666666"),
+  },
+  cursor: {
+    fg: new Color("#1f1f1f"),
+    bg: new Color("#fff8dc"),
+  },
+} as const;
+
+type Palette = typeof palette;
+
+type Promisify<T> = T | Promise<T>;
+
+type Generator = (palette: Palette) => string;
+type Config = {
+  output: (dotfilesPath: string) => string;
+  postInstall?: (outfilePath: string) => Promisify<Result<null, null>>;
+};
+
+type Target = typeof targets[number];
+
+type ForAllTargets<T> = {
+  readonly [K in Target]: T;
+};
+
+function isListOfTarget(list: readonly string[]): list is Target[] {
+  return list.every((v) => (targets as unknown as string[]).includes(v));
+}
+
+function runCmd(
+  cmd: string,
+  ...args: string[]
+): Promise<Result<null, null>> {
+  const command = new Deno.Command(cmd, {
+    args,
+    stdin: "null",
+    stdout: "inherit",
+  });
+  const child = command.spawn();
+
+  return child.status.then((r) =>
+    r.success ? Result.ok(null) : Result.err(null)
+  );
+}
+
+const config: ForAllTargets<Config> = {
+  wezterm: {
+    output(dotfilesPath) {
+      return join(dotfilesPath, "wezterm", "colors.lua");
+    },
+    postInstall(outfilePath: string) {
+      return runCmd("stylua", outfilePath);
+    },
+  },
+  ghostty: {
+    output(dotfilesPath) {
+      return join(dotfilesPath, "ghostty", "themes", "oliva");
+    },
+  },
+  vim: {
+    output(dotfilesPath) {
+      return join(
+        dotfilesPath,
+        "vim",
+        "runtime",
+        "colors",
+        "src",
+        "ansicolors.vim",
+      );
+    },
+  },
+};
+
+const generators = {
+  wezterm(palette: Palette): string {
+    const separationIdx = palette.ansi.length / 2;
+    const ansiColors = palette.ansi.slice(0, separationIdx).map((v) =>
+      `'${v.hex}'`
+    ).join(", ");
+    const brightColors = palette.ansi.slice(separationIdx).map((v) =>
+      `'${v.hex}'`
+    ).join(", ");
+    return `
+return {
+  background = '${palette.normal.bg.hex}',
+  foreground = '${palette.normal.fg.hex}',
+  selection_bg = '${palette.selection.bg.hex}',
+  cursor_fg = '${palette.cursor.fg.hex}',
+  cursor_bg = '${palette.cursor.bg.hex}',
+  cursor_border = '${palette.cursor.bg.hex}',
+  ansi = { ${ansiColors} },
+  brights = { ${brightColors} },
+}
+    `;
+  },
+  ghostty(palette: Palette): string {
+    const paletteConfig = palette.ansi.map((v, i) => `palette = ${i}=${v.hex}`)
+      .join("\n");
+    return `
+background = ${palette.normal.bg.hex}
+foreground = ${palette.normal.fg.hex}
+
+selection-background = ${palette.selection.bg.hex}
+
+cursor-color = ${palette.cursor.bg.hex}
+cursor-text = ${palette.cursor.fg.hex}
+
+${paletteConfig}
+    `;
+  },
+  vim(palette: Palette): string {
+    const ansiColors = palette.ansi.map((v) => `'${v.hex}'`).join(", ");
+    return `
+vim9script
+
+export const ansiColors = [${ansiColors}]
+    `;
+  },
+} as const satisfies ForAllTargets<Generator>;
+
+function getHelp(): string {
+  const help = `
+Usage: ${basename(import.meta.url)} [<flags>] [<target> ...]
+
+<flags>:
+  --help|-h
+  --list-targets
+  --show-config
+  --output <path>
+
+<target>:
+  ${targets.join(" ")}
+  `;
+  return help.trimStart();
+}
+
+async function generateTarget(
+  palette: Palette,
+  generator: Generator,
+  outfilePath: string,
+  config: Omit<Config, "output">,
+): Promise<Result<null, null>> {
+  const code = generator(palette).trimStart();
+  await Deno.writeTextFile(outfilePath, code);
+  if (config.postInstall) {
+    const r = await config.postInstall(outfilePath);
+    if (r.isErr()) {
+      return r;
+    }
+  }
+  return Result.ok(null);
+}
+
+async function main(
+  args: string[],
+): Promise<Result<null | string, null | string>> {
+  const { ok, err } = Result;
+  const parsed = parseArgs({
+    args,
+    options: {
+      help: { type: "boolean", short: "h" },
+      output: { type: "string", short: "o" },
+      "list-targets": { type: "boolean" },
+      "show-config": { type: "boolean" },
+    },
+    allowPositionals: true,
+  });
+  if (parsed.values.help) {
+    console.log(getHelp());
+    return ok(null);
+  } else if (parsed.values["list-targets"]) {
+    console.log(targets.join("\n"));
+    return ok(null);
+  } else if (parsed.values.output) {
+    if (parsed.positionals.length !== 1) {
+      return err(
+        "Exact 1 target should be passed as <target> when you use '--output'.",
+      );
+    }
+  }
+
+  const genTargets = parsed.positionals.length === 0
+    ? targets
+    : parsed.positionals;
+  if (!isListOfTarget(genTargets)) {
+    const invalids = genTargets.filter((v) =>
+      !(targets as unknown as string[]).includes(v)
+    );
+    return err(`Invalid target(s): ${invalids.join(" ")}`);
+  }
+
+  if (parsed.values["show-config"]) {
+    for (const target of genTargets) {
+      const outfilePath = config[target].output("dotfiles");
+      console.log(`${target}: ${outfilePath}`);
+    }
+    return ok(null);
+  }
+
+  if (parsed.values.output) {
+    const target = genTargets[0];
+    return generateTarget(
+      palette,
+      generators[target],
+      parsed.values.output,
+      config[target],
+    );
+  } else {
+    const sem = new Semaphore(5);
+    const dotfilesPath = new URL("../", import.meta.url).pathname;
+    const worker = (target: Target) =>
+      sem.lock(async () => {
+        const outfilePath = config[target].output(dotfilesPath);
+        const result = await generateTarget(
+          palette,
+          generators[target],
+          outfilePath,
+          config[target],
+        ) satisfies Result<null, null>;
+        return { outfilePath, target, result };
+      });
+    const results = await Promise.all(genTargets.map(worker));
+    const hasError = !results.every((v) => v.result.isOk());
+    const msg = results.map((v) => {
+      if (v.result.isOk()) {
+        return `${v.target} palette written => ${v.outfilePath}`;
+      }
+      return undefined;
+    }).filter((v) => !!v).join("\n");
+    return (hasError ? err : ok)(msg);
+  }
+}
+
+if (import.meta.main) {
+  await main(Deno.args).then((r) => {
+    if (r.isOk()) {
+      console.log(r.value);
+    } else {
+      console.log(r.error);
+      Deno.exit(1);
+    }
+  });
+}
+
+// vim: filetype=typescript
