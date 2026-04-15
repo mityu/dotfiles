@@ -61,7 +61,6 @@ local config = {
   }),
   font_size = 14,
   colors = colors,
-  macos_forward_to_ime_modifier_mask = 'SHIFT|CTRL',
 
   enable_kitty_keyboard = true,
   disable_default_key_bindings = true,
@@ -153,7 +152,6 @@ local config = {
 
     { key = 'x', mods = MODKEY, action = 'ActivateCopyMode' },
     { key = 'z', mods = MODKEY, action = 'TogglePaneZoomState' },
-    { key = 'q', mods = 'CTRL', action = wezterm.action({ SendString = '\x11' }) },
 
     { key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize },
     { key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize },
@@ -189,12 +187,35 @@ elseif isMac then
   }
   config.initial_cols = 110
   config.initial_rows = 35
-  config.enable_kitty_keyboard = false
-  table.insert(config.keys, {
-    key = '/',
-    mods = 'CTRL',
-    action = wezterm.action.SendKey({ key = '/', mods = 'CTRL' }),
-  })
+  config.macos_forward_to_ime_modifier_mask = 'SHIFT|CTRL'
+  -- config.enable_kitty_keyboard = false
+  if config.enable_kitty_keyboard then
+    table.insert(config.keys, {
+      key = '/',
+      mods = 'CTRL',
+      action = wezterm.action.SendString('\x1b[47;5u'),
+    })
+    table.insert(config.keys, {
+      key = '\\',
+      mods = 'CTRL',
+      action = wezterm.action.SendString('\x1b[92;5u'),
+    })
+    table.insert(config.keys, {
+      key = '¥',
+      mods = 'CTRL',
+      action = wezterm.action.SendString('\x1b[92;5u'),
+    })
+  else
+    table.insert(config.keys, {
+      key = '/',
+      mods = 'CTRL',
+      action = wezterm.action.SendKey({ key = '/', mods = 'CTRL' }),
+    })
+  end
+  table.insert(
+    config.keys,
+    { key = 'q', mods = 'CTRL', action = wezterm.action({ SendString = '\x11' }) }
+  )
 elseif isLinux then
   config.initial_cols = 130
   config.initial_rows = 40
