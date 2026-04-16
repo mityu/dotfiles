@@ -7,3 +7,15 @@ font-size = 15
 theme = oliva
 
 maximize = true
+
+keybind = all:super+plus=increase_font_size:1.5
+keybind = all:super+shift+equal=increase_font_size:1.5
+keybind = all:super+minus=decrease_font_size:1.5
+keybind = super+t=new_tab
+keybind = super+q=quit
+keybind = super+p>v=new_split:right
+keybind = super+p>s=new_split:down
+keybind = super+p>h=goto_split:left
+keybind = super+p>j=goto_split:down
+keybind = super+p>k=goto_split:up
+keybind = super+p>l=goto_split:right
