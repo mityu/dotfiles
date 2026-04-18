@@ -104,7 +104,7 @@ end
 
 if status is-interactive
   # Make sure the $SHELL environmental variable is fish.
-  if test $SHLVL -eq 1; and not string match -rq 'fish$' -- $SHELL
+  if set -q SHLVL; test $SHLVL -eq 1; and not string match -rq 'fish$' -- $SHELL
     set -gx SHELL (which fish)
     if test (realpath "$SHELL") != (status fish-path)
       set -gx SHELL (status fish-path)
