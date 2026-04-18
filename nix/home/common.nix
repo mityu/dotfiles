@@ -110,5 +110,6 @@ in
   programs.neovim = {
     enable = true;
     extraPackages = vimExtraPackages;
+    sideloadInitLua = true;
   };
 }
