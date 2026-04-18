@@ -75,7 +75,6 @@ if zshrc_has_cmd eza; then
 	}
 fi
 
-alias dotfiles=". $(dotfiles-path)/bin/dotfiles"
 alias update-softwares="update-zsh-plugins; $(dotfiles-path)/bin/update-softwares"
 
 zshrc_has_cmd opam && eval $(opam env)
@@ -572,4 +571,26 @@ function stdin() {
 	while read -r stdin; do
 		"$cmd" "$@" "$stdin"
 	done
+}
+
+function dotfiles() {
+	case $1 in
+		cd)
+			command cd $(dotfiles-path)
+			;;
+		help|-h|--help)
+			echo 'Usage: dotfiles <cmds>'
+			echo ''
+			echo '<cmds>:'
+			echo '  cd     Change the cwd to the dotfiles directory.'
+			echo '  pull   Pull the upstream changes.'
+			echo '  help   Show this help.'
+			;;
+		*)
+			local execmd
+			execmd="git -C $(dotfiles-path) $@"
+			echo "\e[1m==> $execmd\e[0m"
+			eval $execmd
+			;;
+	esac
 }

@@ -181,7 +181,7 @@ if bashrc_has_cmd vim; then
 	export EDITOR=vim
 	export GIT_EDITOR=vim
 
-	if bashrc_is_msys && [[ $(which vim) == "$(cygpath $USERPROFILE)"* ]]; then
+	if bashrc_is_msys && [[ $(which vim) == "$(cygpath "$USERPROFILE")"* ]]; then
 		export PATH=$(echo $PATH | sed -E "s;$(dirname $(which vim))/?:;;"):$(dirname $(which vim))
 	fi
 fi
@@ -201,6 +201,28 @@ function stdin() {
 	while read -r stdin; do
 		"$cmd" "$@" "$stdin"
 	done
+}
+
+function dotfiles() {
+	case $1 in
+		cd)
+			command cd "$(dotfiles-path)"
+			;;
+		help|-h|--help)
+			echo 'Usage: dotfiles <cmds>'
+			echo ''
+			echo '<cmds>:'
+			echo '  cd     Change the cwd to the dotfiles directory.'
+			echo '  pull   Pull the upstream changes.'
+			echo '  help   Show this help.'
+			;;
+		*)
+			local execmd
+			execmd="git -C $(dotfiles-path) $*"
+			echo -e "\e[1m==> $execmd\e[0m"
+			eval "$execmd"
+			;;
+	esac
 }
 
 if bashrc_in_vim_terminal; then
