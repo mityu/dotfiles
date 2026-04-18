@@ -118,6 +118,13 @@ let
         name = "fgo-lady-avalon-kosaki.jpg";
         crop = "760x650+0+0";
       })
+      (fromNet {
+        # https://x.com/taiki99/status/1310178931987722240
+        url = "https://pbs.twimg.com/media/Ei6wulvVkAIFjeQ?format=jpg&name=large";
+        hash = "sha256-GEIf8tBMfWuCfYGLaZDagiIOhATfUl/4X61TPJbONK4=";
+        name = "fgo-lady-avalon-taiki.jpg";
+        crop = "1870x1140+25+25";
+      })
     ]
     ++ (lib.pipe ./wallpapers [
       builtins.readDir
