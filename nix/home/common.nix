@@ -49,6 +49,10 @@ in
   home.packages =
     with pkgs;
     [
+      # act
+      # actionlint
+      # shellcheck
+      # ffmpeg
       bat
       bottom
       btop
@@ -63,12 +67,9 @@ in
       ghc
       ghq
       go
-      gcc
       hyperfine
       jq
       # libgcc  # FIXME: I don't know why but this cause build failure on darwin.
-      (lib.hiPrio clang-tools)
-      (lib.hiPrio llvmPackages.libcxxClang)
       license-generator
       llvmPackages.mlir
       lstr
@@ -78,6 +79,8 @@ in
       ocaml
       ocamlPackages.ocamlformat
       opam
+      # p7zip
+      # pstree
       ripgrep
       rlwrap
       satysfi

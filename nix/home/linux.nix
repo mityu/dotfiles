@@ -41,7 +41,10 @@ in
       hwloc
       imagemagick
       (lib.mkIf isDesktop ladybird)
+      gcc
       libgcc
+      (lib.hiPrio clang-tools)
+      (lib.hiPrio llvmPackages.libcxxClang)
       libsecret
       lssecret
       net-tools
