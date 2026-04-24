@@ -368,6 +368,10 @@ end
 
 if command -q btm
   alias top='btm'
+else if command -q htop
+  alias top='htop'
+end
+if functions -q top
   alias '\\top'='command top'
 end
 
