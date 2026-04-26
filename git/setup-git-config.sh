@@ -33,6 +33,7 @@ set-config rebase.autoStash true
 set-config fetch.prune true
 set-config diff.algorithm histogram
 set-config github.user mityu
+set-config url.git@github.com:.pushInsteadOf https://github.com/
 set-config ghq.root ~/dev
 set-config -f alias.vim '!vim --cmd "autocmd User DenopsPluginPost:gin ++once call feedkeys(\"\<Cmd>GinStatus\<CR>\", \"n\")"'
 
