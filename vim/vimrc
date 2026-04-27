@@ -205,10 +205,6 @@ if !v:vim_did_enter
     }
   endif
 
-  # Disable modifyOtherKeys and kitty keyboard protocol
-  &t_TI = ''
-  &t_TE = ''
-
   # disable default plugins
   g:loaded_2html_plugin = 1
   g:loaded_getscriptPlugin = 1
@@ -629,7 +625,7 @@ Set noimdisable
 Set lazyredraw
 Set termwinkey=<C-w>
 Set nowrapscan
-Set noesckeys timeoutlen=3000 ttimeoutlen=100
+Set timeoutlen=3000 ttimeoutlen=100
 Set isfname-==
 Set spelllang& spelllang+=cjk
 setglobal fileformat=unix
