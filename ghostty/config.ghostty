@@ -20,3 +20,5 @@ keybind = super+p>h=goto_split:left
 keybind = super+p>j=goto_split:down
 keybind = super+p>k=goto_split:up
 keybind = super+p>l=goto_split:right
+keybind = super+c=copy_to_clipboard
+keybind = super+v=paste_from_clipboard
