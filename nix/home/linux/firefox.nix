@@ -11,6 +11,7 @@ in
 {
   programs.firefox = {
     enable = true;
+    configPath = "${config.xdg.configHome}/mozilla/firefox";
     languagePacks = [ "ja" ];
     profiles.${username} = {
       id = 0;
