@@ -1,6 +1,7 @@
 [general]
 live_config_reload = true
 working_directory = "None"
+import = ["./colors.toml"]
 
 [terminal.shell]
 program = "/usr/bin/env"
@@ -14,37 +15,6 @@ duration = 0
 [colors]
 draw_bold_text_with_bright_colors = true
 indexed_colors = []
-
-[colors.bright]
-black = "#666666"
-blue = "#7aa6da"
-cyan = "#54ced6"
-green = "#9ec400"
-magenta = "#b77ee0"
-red = "#ff3334"
-white = "#ffffff"
-yellow = "#e7c547"
-
-[colors.cursor]
-cursor = "#fff8dc"
-text = "#1f1f1f"
-
-[colors.normal]
-black = "#000000"
-blue = "#7aa6da"
-cyan = "#70c0ba"
-green = "#b9ca4a"
-magenta = "#c397d8"
-red = "#d54e53"
-white = "#eaeaea"
-yellow = "#e6c547"
-
-[colors.primary]
-background = "#1f1f1f"
-foreground = "#eaeaea"
-
-[colors.selection]
-background = "#666666"
 
 [cursor]
 unfocused_hollow = true

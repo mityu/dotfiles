@@ -37,26 +37,26 @@ class Color {
   }
 }
 
-const targets = ["wezterm", "ghostty", "vim"] as const;
+const targets = ["alacritty", "wezterm", "ghostty", "vim"] as const;
 
 const palette = {
   ansi: [
     new Color("#000000"), // black
-    new Color("#d54e53"), // blue
-    new Color("#b9ca4a"), // cyan
-    new Color("#e6c547"), // green
-    new Color("#7aa6da"), // magenta
-    new Color("#c397d8"), // red
-    new Color("#70c0ba"), // white
-    new Color("#eaeaea"), // yellow
+    new Color("#d54e53"), // red
+    new Color("#b9ca4a"), // green
+    new Color("#e6c547"), // yellow
+    new Color("#7aa6da"), // blue
+    new Color("#c397d8"), // magenta
+    new Color("#70c0ba"), // cyan
+    new Color("#eaeaea"), // white
     new Color("#666666"), // bright black
-    new Color("#ff3334"), // bright blue
-    new Color("#9ec400"), // bright cyan
-    new Color("#e7c547"), // bright green
-    new Color("#7aa6da"), // bright magenta
-    new Color("#b77ee0"), // bright red
-    new Color("#54ced6"), // bright white
-    new Color("#ffffff"), // bright yellow
+    new Color("#ff3334"), // bright red
+    new Color("#9ec400"), // bright green
+    new Color("#e7c547"), // bright yellow
+    new Color("#7aa6da"), // bright blue
+    new Color("#b77ee0"), // bright magenta
+    new Color("#54ced6"), // bright cyan
+    new Color("#ffffff"), // bright white
   ],
   normal: {
     fg: new Color("#eaeaea"),
@@ -108,6 +108,11 @@ function runCmd(
 }
 
 const config: ForAllTargets<Config> = {
+  alacritty: {
+    output(dotfilesPath) {
+      return join(dotfilesPath, "alacritty", "colors.toml");
+    },
+  },
   wezterm: {
     output(dotfilesPath) {
       return join(dotfilesPath, "wezterm", "colors.lua");
@@ -136,6 +141,40 @@ const config: ForAllTargets<Config> = {
 };
 
 const generators = {
+  alacritty(palette: Palette): string {
+    return `
+[colors.cursor]
+cursor = "${palette.cursor.bg.hex}"
+text = "${palette.cursor.fg.hex}"
+
+[colors.primary]
+background = "${palette.normal.bg.hex}"
+foreground = "${palette.normal.fg.hex}"
+
+[colors.selection]
+background = "${palette.selection.bg.hex}"
+
+[colors.normal]
+black = "${palette.ansi[0].hex}"
+red = "${palette.ansi[1].hex}"
+green = "${palette.ansi[2].hex}"
+yellow = "${palette.ansi[3].hex}"
+blue = "${palette.ansi[4].hex}"
+magenta = "${palette.ansi[5].hex}"
+cyan = "${palette.ansi[6].hex}"
+white = "${palette.ansi[7].hex}"
+
+[colors.bright]
+black = "${palette.ansi[8].hex}"
+red = "${palette.ansi[9].hex}"
+green = "${palette.ansi[10].hex}"
+yellow = "${palette.ansi[11].hex}"
+blue = "${palette.ansi[12].hex}"
+magenta = "${palette.ansi[13].hex}"
+cyan = "${palette.ansi[14].hex}"
+white = "${palette.ansi[15].hex}"
+    `;
+  },
   wezterm(palette: Palette): string {
     const separationIdx = palette.ansi.length / 2;
     const ansiColors = palette.ansi.slice(0, separationIdx).map((v) =>
