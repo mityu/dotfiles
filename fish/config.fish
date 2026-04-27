@@ -94,11 +94,18 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   fish_add_path --prepend ~/.local/bin
 
   if set -q SSH_TTY; and not set -q COLORTERM
-    if command -q check-truecolor
-      check-truecolor && set -gx COLORTERM truecolor
-    else if command -q nix
-      nix run github:mityu/cpp-check-truecolor && set -gx COLORTERM truecolor
+    function fishrc-detect-truecolor
+      set -l cmd
+      if command -q check-truecolor
+        set cmd check-truecolor
+      else if command -q nix
+        set cmd nix run github:mityu/cpp-check-truecolor --
+      end
+      if string length -q cmd
+        $cmd --teardown-timeout 100 && set -gx COLORTERM truecolor
+      end
     end
+    fishrc-detect-truecolor
   end
 end
 
