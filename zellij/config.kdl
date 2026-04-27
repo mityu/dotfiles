@@ -20,6 +20,7 @@ keybinds clear-defaults=true {
         bind "t" { NewTab; SwitchToMode "locked"; }
         bind "Ctrl t" { NewTab; SwitchToMode "locked"; }
         bind "g" { SwitchToMode "tab"; }
+        bind "." { SwitchToMode "locked"; Write 19 /* Ctrl+S */; }
     }
     pane {
         bind "left" { MoveFocus "left"; }
