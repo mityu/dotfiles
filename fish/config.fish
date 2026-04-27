@@ -421,3 +421,12 @@ function gpg-dialog-here
     return 1
   end
 end
+
+
+# Start zellij automatically
+if status is-interactive; and set -q SHLVL; and test $SHLVL -eq 1
+  and status is-interactive
+  and command -q zellij
+  and not set -q ZELLIJ
+  zellij
+end
