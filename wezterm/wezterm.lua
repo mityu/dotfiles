@@ -153,6 +153,9 @@ local config = {
     { key = 'x', mods = MODKEY, action = 'ActivateCopyMode' },
     { key = 'z', mods = MODKEY, action = 'TogglePaneZoomState' },
 
+    { key = '[', mods = MODKEY, action = wezterm.action.ScrollToPrompt(-1) },
+    { key = ']', mods = MODKEY, action = wezterm.action.ScrollToPrompt(1) },
+
     { key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize },
     { key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize },
   },
