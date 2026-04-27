@@ -22,3 +22,5 @@ keybind = super+p>k=goto_split:up
 keybind = super+p>l=goto_split:right
 keybind = super+c=copy_to_clipboard
 keybind = super+v=paste_from_clipboard
+keybind = super+[=jump_to_prompt:-1
+keybind = super+]=jump_to_prompt:1
