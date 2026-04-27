@@ -48,6 +48,7 @@ in
         source-han-serif
         source-han-sans
         nerd-fonts.arimo
+        udev-gothic-nf
 
         # The followings are by local package
         cica-font
