@@ -11,7 +11,7 @@ wezterm.on('gui-startup', function(cmd)
   window:gui_window():maximize()
 end)
 
-wezterm.on('update-right-status', function(window, pane)
+wezterm.on('update-right-status', function(window, _)
   local bat = ''
   local bat_color = colors.foreground
   for _, b in ipairs(wezterm.battery_info()) do
@@ -26,7 +26,7 @@ wezterm.on('update-right-status', function(window, pane)
     else
       bat = wezterm.nerdfonts.fa_battery_full
     end
-    bat = bat .. '  ' .. string.format('%0.f%%', b.state_of_charge * 100)
+    bat = ('%s %0.f%%'):format(bat, b.state_of_charge * 100)
 
     if b.state == 'Charging' then
       bat_color = '#44dd44'
@@ -193,7 +193,6 @@ elseif isMac then
   config.initial_cols = 110
   config.initial_rows = 35
   config.macos_forward_to_ime_modifier_mask = 'SHIFT|CTRL'
-  -- config.enable_kitty_keyboard = false
   if config.enable_kitty_keyboard then
     table.insert(config.keys, {
       key = '/',
