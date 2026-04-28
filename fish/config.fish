@@ -252,6 +252,7 @@ set fish_color_command blue
 
 alias zenn='deno run --unstable-fs -A npm:zenn-cli@latest'
 alias zenn-update='deno cache --reload npm:zenn-cli@latest'
+alias themis-vim='THEMIS_VIM=vim themis'
 alias themis-nvim='THEMIS_VIM=nvim themis'
 alias nix-run='nix run --extra-experimental-features nix-command --extra-experimental-features flakes'
 alias update-aqua='aqua update -c $AQUA_GLOBAL_CONFIG'
