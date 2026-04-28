@@ -429,5 +429,6 @@ if status is-interactive; and set -q SHLVL; and test $SHLVL -eq 1
   and status is-interactive
   and command -q zellij
   and not set -q ZELLIJ
+  and not begin $in_vim_terminal; or $in_neovim_terminal; end
   zellij
 end
