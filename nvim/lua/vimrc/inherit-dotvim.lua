@@ -36,7 +36,7 @@ helper.create_autocmd('FileType', {
   group = 'vimrc-dotvim-ftplugin',
   callback = function(arg)
     local filetype = arg.match
-    if vim.list_contains({ 'markdown', 'coq', 'vim', 'vimspec' }, filetype) then
+    if vim.list_contains({ 'markdown', 'coq', 'vim' }, filetype) then
       -- These ftplugin files are written in Vim9 script therefore disable them for now.
       return
     end
