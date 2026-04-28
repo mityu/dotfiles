@@ -630,6 +630,9 @@ Set isfname-==
 Set spelllang& spelllang+=cjk
 setglobal fileformat=unix
 Set fillchars=vert:\\u2502
+if $TERM_PROGRAM ==? 'WezTerm'
+  Set keyprotocol& keyprotocol^=xterm:kitty
+endif
 &listchars = 'tab:|-'
 g:vim_indent = get(g:, 'vim_indent', {})
 g:vim_indent.line_continuation = 'shiftwidth()'
