@@ -2743,8 +2743,8 @@ if Pacpack.Tap('vim-gin')
 
     const path = argsCopy->join()->trim()
 
-    # Invoke :GinPatch here causes command execution recursion, so instead of
-    # fire the command, call the internal gin API directly.
+    # Invoking :GinPatch here causes command execution recursion, so instead
+    # of fire the command, call the internal gin API directly.
     if path =~# '^%\?$'
       denops#request('gin', 'patch:command', [bang, mods, options + [gin#util#expand('%')]])
     else
@@ -2774,7 +2774,7 @@ if Pacpack.Tap('fall.vim')
   def FallDefColors()
     highlight link FallListMatch Special
     highlight link FallBorder Normal
-    sign define FallListSelected text=>> linehl=Number
+    sign define FallListSelectedSign text=>> linehl=Number
   enddef
 
   def g:FallGetStdpath(kind: string): string
