@@ -160,6 +160,7 @@ local config = {
 
     { key = '+', mods = MODKEY, action = wezterm.action.IncreaseFontSize },
     { key = '-', mods = MODKEY, action = wezterm.action.DecreaseFontSize },
+    { key = 'l', mods = 'CTRL|SHIFT', action = wezterm.action.ShowDebugOverlay },
   },
   window_padding = {
     top = 0,
@@ -193,6 +194,9 @@ elseif isMac then
   config.initial_cols = 110
   config.initial_rows = 35
   config.macos_forward_to_ime_modifier_mask = 'SHIFT|CTRL'
+
+  -- These are necessary to make CTRL-/ work on macOS when the CTRL key is
+  -- in the `macos_forward_to_ime_modifier_mask` option value.
   if config.enable_kitty_keyboard then
     table.insert(config.keys, {
       key = '/',
