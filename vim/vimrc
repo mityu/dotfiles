@@ -2820,6 +2820,7 @@ if Pacpack.Tap('fall.vim')
   nnoremap <Space>l <Cmd>Fall line<CR>
   command! PackFiles Fall file:pack
   command! Dotfiles Fall file:dotfiles
+  command! RuntimeFiles Fall file:runtime
   command! -nargs=? -complete=dir LiveGrep FallLiveGrep('grep', <q-args>)
 endif
 

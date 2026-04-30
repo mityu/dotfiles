@@ -47,6 +47,7 @@ return {
     vim.keymap.set('n', '<Space>l', '<Cmd>Fall line<CR>')
     vim.api.nvim_create_user_command('PackFiles', 'Fall file:pack', {})
     vim.api.nvim_create_user_command('Dotfiles', 'Fall file:dotfiles', {})
+    vim.api.nvim_create_user_command('RuntimeFiles', 'Fall file:runtime', {})
     -- TODO: LiveGrep command
   end,
   config = function()
