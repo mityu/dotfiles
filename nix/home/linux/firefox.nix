@@ -120,7 +120,7 @@ in
               }:
               {
                 inherit icon;
-                definedAliases = map (v: "!${v}") (if builtins.isString aliases then [ aliases ] else aliases);
+                definedAliases = map (v: "@${v}") (if builtins.isString aliases then [ aliases ] else aliases);
                 urls = [
                   {
                     template = url;
