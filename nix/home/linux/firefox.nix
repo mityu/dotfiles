@@ -32,7 +32,7 @@ in
         "intl.locale.requested" = "ja,en-US";
         "browser.search.region" = "JP";
         "layout.css.devPixelsPerPx" = 1.25;
-        # "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+        "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "browser.uiCustomization.state" = builtins.toJSON {
           placements = {
             nav-bar = [
