@@ -22,7 +22,8 @@ in
         "browser.toolbars.bookmarks.visibility" = "never";
         "browser.download.autohideButton" = false;
         "sidebar.verticalTabs" = true;
-        "sidebar.main.tools" = "history,bookmarks,syncedtabs,aichat";
+        "browser.smartwindow.sidebar.openByDefault" = false;
+        "sidebar.main.tools" = "history,bookmarks,syncedtabs,aichat,treestyletab@piro.sakura.ne.jp";
         "sidebar.revamp" = true;
         "sidebar.position_start" = false;
         "general.useragent.locale" = "ja";
@@ -48,17 +49,21 @@ in
               "history-panelmenu"
               "preferences-button"
               "sidebar-button"
+              "ublock0_raymondhill_net-browser-action"
+              "treestyletab_piro_sakura_ne_jp-browser-action"
             ];
           };
         };
         "extensions.autoDisableScopes" = 0; # Automatically enable extensions.
       };
+      userChrome = builtins.readFile ./firefox/userChrome.css;
       extensions = {
         force = true;
         packages = with pkgs.nur.repos.rycee.firefox-addons; [
           ublock-origin
           ublacklist
           control-panel-for-twitter
+          tree-style-tab
           (lib.mkIf enableTexPackages zotero-connector)
         ];
         settings = {
@@ -70,6 +75,32 @@ in
                 enabled = true;
               }
             ];
+          };
+          "treestyletab@piro.sakura.ne.jp" = {
+            permissions = [
+              # Basic permissions
+              "activeTab"
+              "contextualIdentities"
+              "cookies"
+              "menus"
+              "menus.overrideContext"
+              "notifications"
+              "search"
+              "sessions"
+              "storage"
+              "tabGroups"
+              "tabs"
+              "theme"
+
+              # Advanced permissions
+              "browsingData"
+              "bookmarks"
+            ];
+            settings = {
+              tabPreviewTooltip = true;
+              sidebarPosition = 1;
+              userStyleRules = builtins.readFile ./firefox/tree-style-tab-style.css;
+            };
           };
         };
       };

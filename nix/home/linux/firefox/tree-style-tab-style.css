@@ -1,0 +1,54 @@
+/* Show title of unread tabs with red and italic font */
+/*
+:root.sidebar tab-item.unread .label-content {
+  color: red !important;
+  font-style: italic !important;
+}
+*/
+
+/* Add private browsing indicator per tab */
+/*
+:root.sidebar tab-item.private-browsing tab-label:before {
+  content: "🕶";
+}
+*/
+
+/*
+ * Change background/foreground color when the window is active.
+ */
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  tab-item:not(.active):not(.bundled-active):not(.highlighted),
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  .tab:not(.active),
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  .after-tabs button,
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  .after-tabs [role="button"],
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  #subpanel-selector-anchor,
+:root.active[color-scheme="system-color"][data-user-agent*="Linux"]
+  #background
+{
+  --toolbar-non-lwt-bgcolor: rgba(0, 0, 0, 0.05);
+  --toolbar-non-lwt-textcolor: color-mix(in srgb, CaptionText, transparent 10%);
+}
+
+/*
+ * Change background/foreground color when the window is inactive.
+ */
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  tab-item:not(.active):not(.bundled-active):not(.highlighted),
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  .tab:not(.active),
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  .after-tabs button,
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  .after-tabs [role="button"],
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  #subpanel-selector-anchor,
+:root:not(.active)[color-scheme="system-color"][data-user-agent*="Linux"]
+  #background
+{
+  --toolbar-non-lwt-bgcolor: rgba(0, 0, 5, 0.00);
+  --toolbar-non-lwt-textcolor: color-mix(in srgb, CaptionText, transparent 15%);
+}

@@ -1,0 +1,13 @@
+/* Hide tab bar if TreeStyleTab is visible. */
+#main-window body:has(#sidebar-box[sidebarcommand=treestyletab_piro_sakura_ne_jp-sidebar-action][checked=true]:not([hidden=true])) #vertical-tabs { visibility: collapse !important; }
+/* This configuration is for hide the horizontal tab bar, but it also hides buttons to close window etc. */
+/* #main-window body:has(#sidebar-box[sidebarcommand=treestyletab_piro_sakura_ne_jp-sidebar-action][checked=true]:not([hidden=true])) #TabsToolbar { visibility: collapse !important; } */
+
+/*
+ * Hide header of TreeStyleTab.
+ * https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules#hide-the-tree-style-tab-header-at-the-top-of-the-sidebar
+ */
+/* XXX: This may also hide header of other sidebar extensions. */
+*|sidebar-panel-header {
+  display: none !important;
+}
