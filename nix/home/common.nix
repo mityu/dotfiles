@@ -66,6 +66,7 @@ in
       fd
       gauche
       gh
+      gh-dash
       ghc
       ghq
       go
