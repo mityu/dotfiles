@@ -2,10 +2,12 @@
   pkgs,
   inputs,
   username,
+  config,
   ...
 }:
 let
   uutils-coreutils = import ./pkgs/uutils-coreutils.nix { inherit pkgs; };
+  override-coreutils = config.feat.hardware == "laptop-hp-envy";
   vimExtraPackages = with pkgs; [
     actionlint
     bash-language-server
@@ -100,7 +102,18 @@ in
       zellij
       (writeShellScriptBin "gpg-test" "gpg --clearsign <<<'test'")
     ]
-    ++ [ (lib.hiPrio uutils-coreutils) ]
+    ++ lib.optional (!override-coreutils) (lib.hiPrio uutils-coreutils)
+    ++ lib.optionals override-coreutils (
+      let
+        uutils = with pkgs; [
+          uutils-coreutils-noprefix
+          uutils-diffutils
+          uutils-findutils
+          uutils-procps
+        ];
+      in
+      map (v: lib.hiPrio v) uutils
+    )
     ++ (with pkgs.haskellPackages; [
       (if pkgs.stdenv.isDarwin then lib.hiPrio cabal-install else cabal-install)
       stack
