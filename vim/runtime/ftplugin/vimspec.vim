@@ -2,6 +2,8 @@
 " SetUndoFtplugin unlet! b:textobj_function_select
 let b:textobj_function_select = function('vimrc#textobj_vimspec#Select')
 
+finish " The following configuration will be taken over by vimspec-command-abbrev.vim
+
 function s:command_abbrev(command) abort
   if getline('.')[: col('.') - 1]->trim() ==# a:command
     return toupper(a:command[0]) .. a:command[1 :]
