@@ -110,6 +110,32 @@ local function config()
     })
   )
 
+  local recipe_postfix_braket = {
+    action = function(ctx)
+      local lenb = ctx.before():match('<+$'):len()
+      local lena = ctx.after():match('^>+'):len()
+      local len = math.min(lena, lenb)
+      local keyseq = ('<Del>'):rep(len) .. ctx.char
+      ctx.send(keyseq)
+    end,
+    enabled = function(ctx)
+      return ctx.before():match('<$') ~= nil and ctx.after():match('^>') ~= nil
+    end,
+  }
+  insx.add('<Space>', recipe_postfix_braket)
+  insx.add('=', recipe_postfix_braket)
+
+  insx.add(';', {
+    action = function(ctx)
+      ctx.send('<C-g>U<Right>' .. ctx.char .. '<C-g>U<Left><C-g>U<Left>')
+    end,
+    enabled = function(ctx)
+      local around = ctx.before():match('.$') .. ctx.after()
+      local pair_list = { '()', '[]', '{}', '<>', [[""]], [['']] }
+      return ctx.after():match('^.$') ~= nil and vim.tbl_contains(pair_list, around)
+    end,
+  })
+
   insx.add(
     '<Space>',
     insx.with(
