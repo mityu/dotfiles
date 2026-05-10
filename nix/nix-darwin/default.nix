@@ -43,7 +43,7 @@
     # Call path_helper during fish initialization to set PATH to some external
     # applications such as mactex managed by Homebrew.
     loginShellInit = ''
-      if path is -fx /usr/libexec/path_helper
+      if not string length -q -- $IN_NIX_SHELL; and path is -fx /usr/libexec/path_helper
         eval (/usr/libexec/path_helper -c)
       end
     '';
