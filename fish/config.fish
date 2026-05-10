@@ -430,5 +430,9 @@ if status is-interactive; and set -q SHLVL; and test $SHLVL -eq 1
   and command -q zellij
   and not set -q ZELLIJ
   and not begin $in_vim_terminal; or $in_neovim_terminal; end
-  zellij
+  if set -q SSH_TTY
+    zellij attach --create "ssh-$(hostname)"
+  else
+    zellij
+  end
 end
