@@ -70,6 +70,7 @@ in
       ghc
       ghq
       go
+      htop
       hyperfine
       jq
       # libgcc  # FIXME: I don't know why but this cause build failure on darwin.
