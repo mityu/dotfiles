@@ -256,7 +256,7 @@ alias themis-vim='THEMIS_VIM=vim themis'
 alias themis-nvim='THEMIS_VIM=nvim themis'
 alias nix-run='nix run --extra-experimental-features nix-command --extra-experimental-features flakes'
 alias update-aqua='aqua update -c $AQUA_GLOBAL_CONFIG'
-alias gemini-cli='deno run -A npm:@google/gemini-cli@latest'
+alias gemini-cli='nix-shell -p nodejs-slim --run "npx @google/gemini-cli"'
 
 if command -q trash
   function trash
