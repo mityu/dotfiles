@@ -85,7 +85,7 @@ if ! (bashrc_in_vim_terminal || bashrc_in_neovim_terminal) && [[ -f ~/.envrc ]];
 fi
 
 # Environmental variables
-if shopt -q login_shell; then
+if shopt -q login_shell && [[ -z "$IN_NIX_SHELL" ]]; then
 	function bashrc_prepend_PATH() {
 		if [[ $1 != "" && ! $PATH =~ $1 ]]; then
 			export PATH=$1:$PATH
