@@ -68,7 +68,10 @@ setup_server({ 'tex', 'latex', 'plaintex', 'bib', 'otex' }, 'texlab', {
 setup_server({ 'rust' }, 'rust_analyzer')
 setup_server({ 'fish' }, 'fish_lsp')
 setup_server({ 'bash' }, 'bashls')
-setup_server({ 'yaml' }, 'efm')
+setup_server({ 'yaml' }, 'efm', {
+  filetypes = { 'yaml' },
+})
+setup_server({ 'cmake' }, 'cmake')
 
 local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
@@ -78,17 +81,14 @@ helper.create_autocmd('FileType', {
   group = 'vimrc-nvim-lsp-setup',
   callback = function(ctx)
     if
-      not vim.tbl_contains(
-        {
-          'javascript',
-          'javascriptreact',
-          'javascript.jsx',
-          'typescript',
-          'typescriptreact',
-          'typescript.tsx',
-        },
-        ctx.match
-      )
+      not vim.tbl_contains({
+        'javascript',
+        'javascriptreact',
+        'javascript.jsx',
+        'typescript',
+        'typescriptreact',
+        'typescript.tsx',
+      }, ctx.match)
     then
       return
     end
