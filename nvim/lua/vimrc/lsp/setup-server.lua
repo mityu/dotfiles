@@ -68,9 +68,6 @@ setup_server({ 'tex', 'latex', 'plaintex', 'bib', 'otex' }, 'texlab', {
 setup_server({ 'rust' }, 'rust_analyzer')
 setup_server({ 'fish' }, 'fish_lsp')
 setup_server({ 'bash' }, 'bashls')
-setup_server({ 'yaml' }, 'efm', {
-  filetypes = { 'yaml' },
-})
 setup_server({ 'cmake' }, 'cmake')
 
 local efm_filetypes = { 'python' }
@@ -101,5 +98,15 @@ helper.create_autocmd('FileType', {
 
     -- deno
     vim.lsp.start(vim.lsp.config.denols)
+  end,
+})
+
+helper.create_autocmd('FileType', {
+  group = 'vimrc-nvim-lsp-setup',
+  pattern = 'yaml',
+  callback = function()
+    if vim.fn.expand('%:p'):match([=[.github[/\]workflows[/\]]=]) ~= nil then
+      vim.lsp.start(vim.lsp.config.efm)
+    end
   end,
 })
