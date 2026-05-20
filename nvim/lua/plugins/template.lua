@@ -13,6 +13,9 @@ return {
         if helper.is_plugin_installed('vim-findent') then
           vim.cmd('Findent!')
         end
+        if not (vim.fn.line('$') == 1 and vim.fn.getline(1) == '') then
+          vim.bo.modified = true
+        end
       end,
     })
   end,
