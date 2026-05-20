@@ -1166,7 +1166,7 @@ if Pacpack.Tap('vim-ripgrep')
     endif
     const command = $'rg --json -i {args}'
     Echo($'Invoked command: {command}')
-    ripgrep#call(command, cwd, fnamemodify(cwd, ':.') .. Fs.slash)
+    ripgrep#call(command, cwd, fnamemodify(cwd, ':p:.') .. Fs.slash)
   enddef
 
   command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)

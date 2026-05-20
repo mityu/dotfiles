@@ -35,7 +35,7 @@ return {
           vim.fn['ripgrep#call'](
             command,
             cwd,
-            vim.fs.joinpath(vim.fn.fnamemodify(cwd, ':.'), '')
+            vim.fs.joinpath(vim.fn.fnamemodify(cwd, ':p:.'), '')
           )
         end)
       end)
