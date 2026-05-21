@@ -494,7 +494,7 @@ helper.create_autocmd('BufRead', {
 helper.create_autocmd('TextYankPost', {
   group = 'vimrc',
   callback = function()
-    vim.highlight.on_yank({ timeout = 120 })
+    vim.hl.hl_op({ timeout = 120 })
   end,
 })
 
