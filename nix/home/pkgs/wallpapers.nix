@@ -13,10 +13,15 @@ let
         hash = "sha256-oF8f/Hw4x+aJlC9TnwPsBfazNIoLkLmZWXfgcQCiJRc=";
         name = "mahoyo-misakicho.jpeg";
       })
+      # (fromNet {
+      #   url = "https://mahoyo-movie.com/assets/img/kv/poster_pc.jpg";
+      #   hash = "sha256-9IBC76e19zuteN6J/rOP7nWJfdpBOeyCGTC+vkeYMtQ=";
+      #   name = "mahoyo-movie-poster.jpg";
+      # })
       (fromNet {
-        url = "https://mahoyo-movie.com/assets/img/kv/poster_pc.jpg";
-        hash = "sha256-9IBC76e19zuteN6J/rOP7nWJfdpBOeyCGTC+vkeYMtQ=";
-        name = "mahoyo-movie-poster.jpg";
+        url = "https://mahoyo-movie.com/assets/img/kv/ph_2_wide.webp";
+        hash = "sha256-gfds59Mi4XVZAb+w1IEjSp4k9qiCGJMJuBbc+Q3entQ=";
+        name = "mahoyo-movie-poster.webp";
       })
       (fromNet {
         # https://www.pixiv.net/artworks/69000196
