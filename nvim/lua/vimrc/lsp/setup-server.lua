@@ -7,6 +7,31 @@ if helper.is_plugin_loaded('cmp-nvim-lsp') then
   })
 end
 
+--- `vim.lsp.start()` does not accept a function as `config.root_dir`, unlike
+--- `vim.lsp.config()`. Therefore, if `config.root_dir` is a function, it
+--- should be evaluated beforehand before passing the config to
+--- `vim.lsp.start()`.
+---
+---@param bufnr integer
+---  The buffer number to attach LSP.
+---
+---@param config vim.lsp.Config
+---  The LSP configuration.  Typically got by `vim.lsp.config[<LSP-name>]`.
+local function start_server(bufnr, config)
+  if type(config.root_dir) == 'function' then
+    config = vim.deepcopy(config)
+    ---@param root_dir? string
+    config.root_dir(bufnr, function(root_dir)
+      config.root_dir = root_dir
+    end)
+    vim.schedule(function()
+      vim.lsp.start(config)
+    end)
+  else
+    vim.lsp.start(config)
+  end
+end
+
 local setup_server = now(function()
   local configurated_servers = {}
 
@@ -73,7 +98,6 @@ setup_server({ 'cmake' }, 'cmake')
 local efm_filetypes = { 'python' }
 setup_server(efm_filetypes, 'efm', { filetypes = efm_filetypes })
 
--- setup_server({ 'typescript' }, 'denols')
 helper.create_autocmd('FileType', {
   group = 'vimrc-nvim-lsp-setup',
   callback = function(ctx)
@@ -92,12 +116,12 @@ helper.create_autocmd('FileType', {
 
     -- node
     if vim.fn.findfile('package.json', '.;') ~= '' then
-      vim.lsp.start(vim.lsp.config.ts_ls)
+      start_server(ctx.buf, vim.lsp.config.ts_ls)
       return
     end
 
     -- deno
-    vim.lsp.start(vim.lsp.config.denols)
+    start_server(ctx.buf, vim.lsp.config.denols)
   end,
 })
 
