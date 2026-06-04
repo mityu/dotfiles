@@ -1,7 +1,7 @@
 import {
   BaseConfig,
   type ConfigArguments,
-} from "jsr:@shougo/ddc-vim@~9.4.0/config";
+} from "jsr:@shougo/ddc-vim@^10.3.0/config";
 
 export class Config extends BaseConfig {
   override config(args: ConfigArguments): Promise<void> {

@@ -6,6 +6,7 @@ return {
     'amarakon/nvim-cmp-buffer-lines',
   },
   event = 'InsertEnter',
+  enabled = false,
   config = function()
     local cmp = require('cmp')
     cmp.setup({
@@ -26,6 +27,10 @@ return {
         ['<C-y>'] = cmp.mapping(cmp.mapping.confirm()),
         ['<C-e>'] = cmp.mapping(cmp.mapping.close()),
       },
+      -- window = {
+      --   completion = cmp.config.window.bordered({ border = 'rounded' }),
+      --   documentation = cmp.config.window.bordered({ border = 'rounded' }),
+      -- },
       formatting = {
         ---@param entry cmp.Entry
         ---@param vim_item vim.CompletedItem
