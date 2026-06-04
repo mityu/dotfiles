@@ -26,6 +26,7 @@ export class Config extends BaseConfig {
           mark: "around",
           minAutoCompleteLength: 3,
           maxItems: 20,
+          keywordPattern: "(?:\\k|-)*",
         },
         vim: {
           mark: "vim",
