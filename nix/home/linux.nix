@@ -23,6 +23,7 @@ in
 
   home = {
     homeDirectory = "/home/${username}";
+    stateVersion = "26.05";
   };
 
   home.packages =

@@ -43,10 +43,7 @@ in
     options = "--delete-older-than 7d";
   };
 
-  home = {
-    username = "${username}";
-    stateVersion = "25.11";
-  };
+  home.username = "${username}";
 
   home.packages =
     with pkgs;

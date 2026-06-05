@@ -11,6 +11,7 @@
 
   home = {
     homeDirectory = "/Users/${username}";
+    stateVersion = "25.11";
   };
 
   home.packages = with pkgs; [
