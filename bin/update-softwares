@@ -3,7 +3,7 @@
 shopt -s extglob
 
 function has-cmd {
-	type $1 &> /dev/null
+	type "$1" &> /dev/null
 }
 
 function list-sudoists {
@@ -12,14 +12,14 @@ function list-sudoists {
 
 function need-password {
 	for c in $(list-sudoists); do
-		has-cmd $c && return $?
+		has-cmd "$c" && return $?
 	done
 	false
 }
 
 function should-update {
-	if has-cmd $1; then
-		if list-sudoists | grep $1 &> /dev/null; then
+	if has-cmd "$1"; then
+		if list-sudoists | grep "$1" &> /dev/null; then
 			allow-sudo
 		else
 			true
@@ -30,7 +30,7 @@ function should-update {
 }
 
 function ask {
-	read -p "$1 (yes/no): " answer
+	read -rp "$1 (yes/no): " answer
 	case "$answer" in
 		[yY]?([eE][sS]))  # Matches "y" or "yes" with ignoring cases.
 			true;;
@@ -38,7 +38,7 @@ function ask {
 			false;;
 		*)
 			echo "Invalid input: $answer"
-			ask $1;;
+			ask "$1";;
 	esac
 }
 
@@ -59,9 +59,10 @@ function confirm-allowing-sudo {
 }
 
 function gobin-path {
-	local gobin=$(go env GOBIN)
+	local gobin
+	gobin=$(go env GOBIN)
 	gobin=${gobin:-$(go env GOPATH)/bin}
-	echo $gobin
+	echo "$gobin"
 }
 
 function do-update {
@@ -70,11 +71,11 @@ function do-update {
 	if need-password; then
 		if confirm-allowing-sudo; then
 			sudo --reset-timestamp
-			echo -n 'Password:'; read --silent password;
-			while ! sudo --stdin --validate --prompt='' &> /dev/null <<< $password; do
+			read -rs 'Password: ' password
+			while ! sudo --stdin --validate --prompt='' &> /dev/null <<< "$password"; do
 				echo
 				echo 'Sorry, try again.'
-				echo -n 'Password:'; read --silent password;
+				read -rs 'Password: ' password
 			done
 		else
 			echo "Skip invoking update commands for package managers that require sudo: $(list-sudoists)"
@@ -98,23 +99,24 @@ function do-update {
 	fi
 
 	if should-update apt; then
-		sudo --stdin apt update <<< $password
-		sudo --stdin apt upgrade <<< $password
+		sudo --stdin apt update <<< "$password"
+		sudo --stdin apt upgrade <<< "$password"
 	fi
 
 	if should-update pacman; then
 		if has-cmd yay; then
 			# Prefer using yay to pacman
-			yay -Syyu --noconfirm --sudoflags --stdin <<< $password
+			yay -Syyu --noconfirm --sudoflags --stdin <<< "$password"
 		else
-			sudo --stdin pacman -Syyu --noconfirm <<< $password
+			sudo --stdin pacman -Syyu --noconfirm <<< "$password"
 		fi
 	fi
 
 	if should-update go; then
+		local pkg
 		pushd ~
-		find $(gobin-path) -type f | while read file; do
-			local pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
+		find "$(gobin-path)" -type f | while read -r file; do
+			pkg="$(go version -m "${file}" | head -n2 | tail -n1 | awk '{print $2}')"
 			go install "${pkg}@latest"
 		done
 		popd
@@ -123,11 +125,11 @@ function do-update {
 	should-update rustup && rustup update
 
 	if cargo install-update --version &> /dev/null; then
-		local arg=
+		local arg
 		if cargo +nightly --version &> /dev/null; then
 			arg='+nightly'
 		fi
-		cargo $arg install-update --git --all
+		cargo "$arg" install-update --git --all
 	fi
 
 	if should-update opam; then
