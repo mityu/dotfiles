@@ -26,11 +26,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    opam-nix = {
-      url = "github:tweag/opam-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     xremap = {
       url = "github:xremap/nix-flake";
       # inputs.nixpkgs.follows = "nixpkgs";

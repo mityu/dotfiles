@@ -61,15 +61,16 @@ in
       (lib.mkIf (!platform.Xfce) nautilus)
       (lib.mkIf (platform.X11) xsel)
     ]
-    ++ lib.optionals enableTexPackages [
-      pkgs.texliveFull
-      pkgs.kdePackages.okular
-      (import ./pkgs/ott.nix {
-        inherit (inputs) opam-nix;
-        inherit (pkgs.stdenv.hostPlatform) system;
-      })
-      pkgs.zotero
-    ]
+    ++ lib.optionals enableTexPackages (
+      with pkgs;
+      [
+        texliveFull
+        kdePackages.okular
+        ott
+        zotero
+        libreoffice
+      ]
+    )
     ++ [
       remmina
       zoom-us

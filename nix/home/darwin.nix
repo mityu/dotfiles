@@ -20,10 +20,7 @@
     gnupg
     git
     translate-shell
-    (import ./pkgs/ott.nix {
-      inherit (inputs) opam-nix;
-      inherit (pkgs.stdenv.hostPlatform) system;
-    })
+    ott
   ];
 
   programs.gpg.enable = true;
