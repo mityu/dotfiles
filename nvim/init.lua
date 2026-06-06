@@ -452,10 +452,12 @@ helper.create_autocmd('BufWritePre', {
     local filename = vim.fn.expand('<afile>:t')
     local invalid_chars = [[!&()[]{}<>^*=+:;'",`~?|]]
     for i = 1, #invalid_chars do
-      local c = invalid_chars:byte(i)
+      local c = invalid_chars:sub(i, i)
       if string.find(filename, c, 0, true) ~= nil then
         -- FIXME: This cannot block writing to file.
-        helper.throw(('Filename has invalid char: %s'):format(filename))
+        helper.throw(
+          ('Filename has invalid char: (char = %s, filename = %s)'):format(c, filename)
+        )
       end
     end
 
