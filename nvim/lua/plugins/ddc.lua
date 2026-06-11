@@ -1,3 +1,15 @@
+---@param findstart number
+local function complete_func(findstart, _)
+  if findstart ~= 0 then
+    vim.defer_fn(function()
+      vim.fn['ddc#map#manual_complete']()
+    end, 0)
+    return -3
+  else
+    return {}
+  end
+end
+
 return {
   'https://github.com/Shougo/ddc.vim',
   dependencies = {
@@ -25,5 +37,8 @@ return {
         vim.fn['ddc#custom#patch_buffer']('specialBufferCompletion', false)
       end,
     })
+
+    _G.vimrc_ddc_completefunc = complete_func
+    vim.opt.completefunc = 'v:lua.vimrc_ddc_completefunc'
   end,
 }
