@@ -115,7 +115,7 @@ in
     package = pkgs-stable.open-webui;
     port = 11435;
     environment = {
-      OLLAMA_API_BASE_URL = "http://llm:11434";
+      OLLAMA_API_BASE_URL = "http://argo:61022";
       ANONYMIZED_TELEMETRY = "False";
       DO_NOT_TRACK = "True";
       SCARF_NO_ANALYTICS = "True";
@@ -123,7 +123,7 @@ in
     };
   };
   environment.variables = {
-    OLLAMA_HOST = "llm:11434";
+    OLLAMA_HOST = "argo:61022";
   };
 
   # This value determines the NixOS release from which the default
