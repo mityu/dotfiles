@@ -211,6 +211,10 @@ in
         "nix-command"
         "flakes"
       ];
+      trusted-users = [
+        "root"
+        username
+      ];
     };
     gc = {
       automatic = true;
