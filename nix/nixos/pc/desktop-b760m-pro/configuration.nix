@@ -40,9 +40,10 @@ in
   networking.hostName = "rigel";
 
   services.printing.enable = true;
-  services.printing.drivers = [
-    (pkgs.callPackage (import ../../app/fujixerox-driver.nix) { })
-  ];
+  # services.printing.drivers = [
+  #   (pkgs.callPackage (import ../../app/fujixerox-driver.nix) { })
+  # ];
+  services.avahi.enable = true;
 
   virtualisation.docker.rootless = {
     enable = true;
