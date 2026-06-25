@@ -213,7 +213,7 @@ in
       ];
       trusted-users = [
         "root"
-        username
+        "@wheel"
       ];
     };
     gc = {
