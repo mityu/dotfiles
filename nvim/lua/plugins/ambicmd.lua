@@ -54,6 +54,13 @@ return {
       callback = setup_for_cmdwin,
     })
 
+    -- XXX: When this plugin is loaded on CmdwinEnter event, it seems that
+    -- setup for the present cmdwin doesn't run.  Forcely run setups if the
+    -- current window is the command-line window on load.
+    if vim.fn.getcmdwintype() ~= '' then
+      setup_for_cmdwin()
+    end
+
     vim.g['ambicmd#show_completion_menu'] = true
     vim.g['ambicmd#build_rule'] = build_rule
   end,
