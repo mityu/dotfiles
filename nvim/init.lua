@@ -154,6 +154,9 @@ local function textobj_comment()
   return require('vim._comment').textobject()
 end
 
+-- Cut off idiot default mappings.
+vim.keymap.del({ 'i', 's' }, { '<Tab>', '<S-Tab>' })
+
 vim.keymap.set({ 'n', 'v' }, ':', 'q:A')
 vim.keymap.set({ 'n', 'v' }, '<Space>:', 'q:k')
 vim.keymap.set({ 'n', 'v' }, '/', 'q/A')
@@ -393,6 +396,10 @@ helper.create_autocmd('CmdwinEnter', {
         gen_cmdwin_completion(false),
         { expr = true, buffer = true }
       )
+
+      vim.keymap.set('i', '<Tab>', '<C-x><C-v>', { buffer = true })
+      vim.keymap.set('i', '<S-Tab>', '<C-p>', { buffer = true })
+
       vim.opt_local.completeopt = { 'menu', 'preview' }
 
       if vim.fn.line('$') >= vim.opt.cmdwinheight:get() then
