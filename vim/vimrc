@@ -269,21 +269,18 @@ if !v:vim_did_enter
   }
 endif
 
-{ # Initialize augroups
-  const filename = expand('<sfile>')
+if v:vim_did_enter # Initialize augroups on reload
+  const filename = expand('<script>')
   const pattern = '^\s*aug\%[roup]\s\+\zs\S\+'
-  const augroups = readfile(filename)
+  eval readfile(filename)
         ->filter((_: number, line: string): bool => stridx(line, 'aug') != -1)
         ->map((_: number, line: string): string => matchstr(line, pattern))
-        ->filter((_: number, augroup: string): bool => augroup !=# '' && augroup !=? 'END')
+        ->filter((_: number, augroup: string): bool => augroup !=# '' && augroup !=? 'END' && exists($'#{augroup}'))
         ->sort()
         ->uniq()
-  for group in augroups
-    execute 'augroup' group
-    autocmd!
-  endfor
-  augroup END
-}
+        ->mapnew((_: number, augroup: string): dict<string> => ({ event: '*', group: augroup }))
+        ->autocmd_delete()
+endif
 
 # minpac
 export const PacPath = Fs.JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
