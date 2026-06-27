@@ -20,6 +20,12 @@ in
       readOnly = true;
     };
 
+    platformName = mkOption {
+      type = types.str;
+      default = desktopEnvironment;
+      readOnly = true;
+    };
+
     isDesktop = mkOption {
       type = types.bool;
       default = lib.strings.hasPrefix "desktop" hardware;

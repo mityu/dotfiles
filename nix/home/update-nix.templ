@@ -1,0 +1,211 @@
+# vim:filetype=bash
+
+set -euo pipefail
+
+THISFILE="$(realpath "${BASH_SOURCE[0]}")"
+THISCMD="$(basename "${BASH_SOURCE[0]}")"
+
+function get-nix-config-dir {
+	local xdgConfigHome
+	local configDir
+	local dotfilesDir
+
+	xdgConfigHome=${XDG_CONFIG_HOME:-$HOME/.config}
+	configDir="$xdgConfigHome/nix"
+	if [[ ! -d "$configDir" ]]; then
+		if type dotfiles-path >/dev/null; then
+			dotfilesDir=$(dotfiles-path)
+		else
+			dotfilesDir="$HOME/dotfiles"
+		fi
+		configDir="$dotfilesDir/nix"
+	fi
+
+	echo "$configDir"
+}
+
+function gen-nix-config-var {
+	local flags
+	flags=(
+		'extra-experimental-features = nix-command flakes'
+	)
+	if type gh >/dev/null && gh auth status >/dev/null; then
+		flags+=("access-tokens = github.com=$(gh auth token)")
+	fi
+	echo "$(IFS=$'\n'; echo "${flags[*]}")"
+}
+
+function set-nix-config-var {
+	if [[ -z "${NIX_CONFIG:-}" ]]; then
+		NIX_CONFIG=$(gen-nix-config-var)
+		export NIX_CONFIG
+	fi
+}
+
+function echo-bold {
+	printf "\e[1m%s\e[0m\n" "$@"
+}
+
+function is-super-user {
+	[[ $(id -u) == 0 ]]
+}
+
+function is-darwin {
+	[[ $(uname) == Darwin ]]
+}
+
+function is-linux {
+	[[ $(uname) == Linux ]]
+}
+
+function wait-network-connection {
+	if is-linux && type nm-online >/dev/null; then
+		nm-online --timeout=120
+	fi
+}
+
+function usage {
+	echo 'update-nix <subcmd> [<nix-command-arguments>]'
+	echo ''
+	echo '<subcmd>: flake|home|system|all|both|help|-h|--help'
+	if ! is-darwin; then
+		echo ''
+		echo 'The build target: @build-target@'
+	fi
+}
+
+function message-on-nix-failure {
+	if [[ $1 -ne 0 ]]; then
+		echo ''
+		echo 'Nix command failed.'
+		echo "Don't you forget 'git add'?"
+	fi
+}
+
+function should-run-as-super-user {
+	case "$1" in
+		'system' | 'both' | 'all')
+			true;;
+		*)
+			false;;
+	esac
+}
+
+function preserve-env-vars {
+	local varlist
+	varlist=(
+		UPDNIX_SUBCOMMANDS
+		UPDNIX_CONFIG_DIR
+		UPDNIX_DID_INIT
+		NIX_CONFIG
+	)
+	echo "$(IFS=','; echo "${varlist[*]}")"
+}
+
+function do-nix-update {
+	local subcmd
+
+	subcmd="$1"
+	shift
+	echo-bold "Updating $subcmd"
+	case $subcmd in
+		"flake")
+			nix flake update "$@"
+			;;
+		"home")
+			home-manager switch -b backup --flake '.#@build-target@' "$@"
+			;;
+		"system")
+			if ! is-super-user; then
+				echo 'unreachable'
+				exit 1
+			fi
+
+			if is-darwin; then
+				echo 'Not implemented yet'
+				exit 1
+			else
+				nixos-rebuild switch --flake '.#@build-target@' "$@"
+			fi
+			;;
+		*)
+			echo 'unreachable'
+			exit 1
+			;;
+	esac
+	echo-bold "Updating $subcmd done"
+}
+
+if [[ -z "${UPDNIX_DID_INIT:-}" ]]; then
+	if (( $# == 0 )); then
+		usage
+		exit 0
+	fi
+	case "$1" in
+		'help' | '--help' | '-h')
+			usage
+			exit 0;;
+	esac
+
+	trap 'message-on-nix-failure $?' EXIT
+	if is-super-user; then
+		echo "Internal error(?): '$THISCMD' is not initialized."
+		echo "NOTE: '$THISCMD' must not run with sudo."
+		exit 1
+	else
+		subcmds_local_user=
+		subcmds_super_user=
+		case "$1" in
+			'flake' | 'home')
+				subcmds_local_user="$1";;
+			'system')
+				subcmds_super_user="$1";;
+			'all')
+				subcmds_super_user='flake system'
+				subcmds_local_user='home'
+				;;
+			'both')
+				subcmds_super_user='system'
+				subcmds_local_user='home'
+				;;
+			*)
+				echo "Invalid argument: $*"
+				usage
+				exit 1
+				;;
+		esac
+		UPDNIX_DID_INIT=1
+		UPDNIX_CONFIG_DIR="$(get-nix-config-dir)"
+		shift
+
+		set-nix-config-var
+
+		if [[ -n "$subcmds_super_user" ]]; then
+			UPDNIX_SUBCOMMANDS="$subcmds_super_user"
+
+			export UPDNIX_SUBCOMMANDS
+			export UPDNIX_CONFIG_DIR
+			export UPDNIX_DID_INIT
+			sudo --preserve-env="$(preserve-env-vars)" "$THISFILE" "$@"
+
+			if [[ -n "$subcmds_local_user" ]]; then
+				wait-network-connection
+			fi
+		fi
+
+		UPDNIX_SUBCOMMANDS="$subcmds_local_user"
+	fi
+fi
+
+cd "$UPDNIX_CONFIG_DIR"
+for subcmd in $UPDNIX_SUBCOMMANDS; do
+	case "$subcmd" in
+		'flake' | 'home' | 'system')
+			set-nix-config-var
+			do-nix-update "$subcmd" "$@";;
+		*)
+			echo "Internal error: unknown subcommand: $subcmd"
+			usage
+			;;
+	esac
+done

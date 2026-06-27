@@ -1,5 +1,6 @@
 {
   pkgs,
+  lib,
   inputs,
   username,
   config,
@@ -24,6 +25,12 @@ let
     texlab
     tinymist
   ];
+  update-nix-bash =
+    let
+      build-target = "${config.feat.hardware}-${config.feat.platformName}";
+      scriptFile = pkgs.replaceVars ./update-nix.templ { inherit build-target; };
+    in
+    pkgs.writeShellScriptBin "update-nix" (builtins.readFile scriptFile);
 in
 {
   imports = [
@@ -100,6 +107,7 @@ in
       yq-go
       zellij
       (writeShellScriptBin "gpg-test" "gpg --clearsign <<<'test'")
+      update-nix-bash
     ]
     ++ lib.optional (!override-coreutils) (lib.hiPrio uutils-coreutils)
     ++ lib.optionals override-coreutils (
