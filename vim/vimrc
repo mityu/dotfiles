@@ -37,11 +37,6 @@ export class Stdpath
   static const localpack = Fs.JoinPath(expand('~'), 'dev', 'vim')
 endclass
 
-export def SIDPrefix(): string
-  # Returns "<SNR>{script-ID}_"
-  return expand('<SID>')
-enddef
-
 def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
@@ -595,6 +590,8 @@ Set isfname-==
 Set spelllang& spelllang+=cjk
 setglobal fileformat=unix
 Set fillchars=vert:\\u2502
+Set fileencodings=utf-8,euc-jp,cp932,sjis
+Set ambiwidth=single
 if $TERM_PROGRAM ==? 'WezTerm'
   Set keyprotocol& keyprotocol^=xterm:kitty
 endif
@@ -658,22 +655,8 @@ if (IsLinux && !IsWSL) && executable('fcitx5-remote') == 1
   augroup END
 endif
 
-
-if has('kaoriya')
-  set fileencodings=guess,utf-8
-  set ambiwidth=auto
-else
-  set fileencodings=utf-8,euc-jp,cp932,sjis
-  set ambiwidth=single
-endif
-if IsUnix
-  set path& path+=/usr/local/include,/opt/homebrew/include
-endif
 if executable('rg')
   &grepprg = 'rg --vimgrep'
-  &grepformat = '%f:%l:%c:%m'
-elseif executable('ag')
-  &grepprg = 'ag --vimgrep'
   &grepformat = '%f:%l:%c:%m'
 endif
 
@@ -888,7 +871,7 @@ augroup vimrc
 augroup END
 
 def DefineLoopMappings()
-  const sid = SIDPrefix()
+  const sid = expand('<SID>')
   vimrc#loopmap#SimpleLoopDefine({
     id: 'Window',
     enter_with: '<C-w>',
@@ -2615,7 +2598,7 @@ if Pacpack.Tap('vim-gin')
       group: 'vimrc-gin-patch-remove-mappings',
       event: 'TabClosed',
       bufnr: bufnr,
-      cmd: $'call {SIDPrefix()}GinRemoveBufferLocalMappings()',
+      cmd: $'call {expand('<SID>')}GinRemoveBufferLocalMappings()',
       once: true,
       replace: true,
     }])
@@ -2848,7 +2831,7 @@ def StatuslineGenerator(): string
     '[%{&fileformat}]' ..
     '[%{&fileencoding == "" ? &encoding : &fileencoding}]' ..
     '[%{pathshorten(getcwd(winnr()))}]'
-  return substitute(statusline, '\c<SID>', SIDPrefix(), 'g')
+  return substitute(statusline, '\c<SID>', expand('<SID>'), 'g')
 enddef
 def FilenameLabel(bufnr: number): string
   const buftype = getbufvar(bufnr, '&buftype')
@@ -2871,7 +2854,7 @@ enddef
 &statusline = StatuslineGenerator()
 
 # tabline
-&tabline = printf('%%!%sTabline()', SIDPrefix())
+&tabline = printf('%%!%sTabline()', expand('<SID>'))
 def GenerateTabinfo(tabnr: number): string
   const dirty =
     !tabpagebuflist(tabnr)->filter('getbufvar(v:val, "&modified")')->empty()
@@ -2893,7 +2876,7 @@ def Tabline(): string
   endfor
   tabline ..= '%>%=[%{pathshorten(getcwd())}]'
 
-  return substitute(tabline, '\c<SID>', SIDPrefix(), 'g')
+  return substitute(tabline, '\c<SID>', expand('<SID>'), 'g')
 enddef
 
 # :terminal
@@ -3093,6 +3076,6 @@ if exists('#User#vimrc_initialize')
       timer_start(5, (timer) => execute('doautocmd User vimrc_initialize', ''))
       return ''
     enddef
-    &statusline = $'%!{SIDPrefix()}VimrcInitialize({&statusline->string()})'
+    &statusline = $'%!{expand('<SID>')}VimrcInitialize({&statusline->string()})'
   endif
 endif
