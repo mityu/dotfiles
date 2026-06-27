@@ -42,10 +42,6 @@ export def SIDPrefix(): string
   return expand('<SID>')
 enddef
 
-def SNR(): string
-  return matchstr(SIDPrefix(), '<SNR>\zs\d\+\ze_$')
-enddef
-
 def GetMsgString(msg: string): string
   return '[vimrc] ' .. msg
 enddef
@@ -508,7 +504,6 @@ Pacpack.AddLazy('https://github.com/lambdalisue/vim-suda')
 Pacpack.AddLazy('https://github.com/prabirshrestha/vim-lsp')
 Pacpack.AddLazy('https://github.com/mattn/vim-lsp-settings')
 # Pacpack.Add('https://github.com/kuuote/lspoints')
-Pacpack.AddLazy('https://github.com/sedm0784/vim-rainbow-trails')
 Pacpack.AddLazy('https://github.com/tweekmonster/helpful.vim')
 Pacpack.AddLazy('https://github.com/y0za/vim-reading-vimrc')
 
@@ -683,7 +678,6 @@ elseif executable('ag')
 endif
 
 augroup vimrc
-  autocmd BufRead .envrc set filetype=sh
   autocmd CursorHold * if getcmdwintype() ==# '' | checktime | endif
   autocmd VimResized * wincmd =
   if !v:vim_did_enter
@@ -1033,14 +1027,11 @@ command! -bar Draft setlocal buftype=nofile noswapfile noundofile
 command! -bar -nargs=+ -complete=command Vimrc <args> $MYVIMRC
 command! -bar -nargs=* -complete=file ListTasks call vimrc#ListTasks(<q-args>)
 command! DeleteUndoFiles call vimrc#DeleteUndofiles()
-command! -nargs=? -complete=dir Gof call Gof(<q-args>)
-command! -bar -nargs=? -complete=dir GitInitRepo call vimrc#GitInitRepo(<q-args>)
 command! -bar LocalPackUpdate call vimrc#UpdateLocalPackages()
 command! -nargs=+ -complete=shellcmd Man delcommand Man|runtime ftplugin/man.vim|Man <args>
 command! -nargs=? -complete=filetype TMP enew|Draft|execute (<q-args> ==# '' ? '' : 'setfiletype <args>')
 command! -bar -nargs=+ -complete=dir SysOpen vimrc#DefineOpenCommand()|SysOpen <args>
 command! -bar Hlgroup vimrc#ShowHighlightGroup()
-command! -bar HighlightGroup Hlgroup
 command! -bar RTP echo &runtimepath->split(',')->join("\n")
 command! -bar -nargs=? -complete=dir Filore call vimrc#filore#start(<q-args>)
 
@@ -1063,35 +1054,6 @@ def FindGitroot(targetGiven: string = null_string): string
     return ''
   endif
   return fnamemodify(gitDir, ':p:h:h')
-enddef
-
-def Gof(path: string)
-  if !executable('gof')
-    Echo('"gof" command not found.')
-    return
-  endif
-  var gofcmd = 'gof -f -tf "Tapi_gof"'
-  if !empty(path)
-    gofcmd ..= ' -d ' .. path
-  endif
-  const minwidth = min([&columns, 100])
-  const minheight = min([&lines, 40])
-  popup_create(term_start(gofcmd, {hidden: 1, term_finish: 'close'}),
-        \ {minwidth: minwidth, minheight: minheight})
-enddef
-
-def GofForMapping()
-  Gof(FindGitroot() ?? getcwd(winnr()))
-enddef
-
-def g:Tapi_gof(bufnum: number, file_info: dict<string>)  # Be global
-  const winid = win_getid(winnr('#'))
-  const buftype = getwinvar(winid, '&buftype')
-  var open_cmd = 'edit'
-  if !(buftype ==# 'nofile' || buftype ==# '')
-    open_cmd = 'split'
-  endif
-  win_execute(winid, open_cmd .. ' ' .. fnameescape(file_info.fullpath))
 enddef
 
 # Installed plugins
@@ -2185,32 +2147,6 @@ if Pacpack.Tap('vim-suda')
       \ Pacpack.Load('vim-suda')|SudaRead <args>
     command! -nargs=? -complete=file SudaWrite
       \ Pacpack.Load('vim-suda')|SudaWrite <args>
-  endif
-endif
-
-if Pacpack.Tap('vim-rainbow-trails')
-  augroup vimrc
-    autocmd SourcePost */plugin/rainbow_trails.vim ++once RainbowTrailsHighlight()
-    autocmd ColorScheme * RainbowTrailsHighlight()
-  augroup END
-
-  def RainbowTrailsHighlight()
-    highlight RainbowRed guibg=#808080 ctermbg=244
-    highlight RainbowOrange guibg=#6c6c6c ctermbg=242
-    highlight RainbowYellow guibg=#585858 ctermbg=240
-    highlight RainbowGreen guibg=#444444 ctermbg=238
-    highlight RainbowBlue guibg=#303030 ctermbg=236
-    highlight RainbowIndigo guibg=#1c1c1c ctermbg=234
-    highlight RainbowViolet guibg=#080808 ctermbg=232
-  enddef
-
-  def LoadRainbowTrails()
-    delcommand RainbowTrails
-    Pacpack.Load('vim-rainbow-trails')
-  enddef
-
-  if !Pacpack.IsLoaded('vim-rainbow-trails')
-    command -bar -bang RainbowTrails LoadRainbowTrails()|RainbowTrails<bang>
   endif
 endif
 
