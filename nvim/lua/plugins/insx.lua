@@ -56,14 +56,14 @@ local function add_auto_pair(opener, closer)
   )
 end
 
-local function config_pinsnip_like()
-  local insx = require('insx')
-  local add = function(recipe)
-    insx.add('<Plug>(vimrc-insx-pinsnip)', recipe)
-  end
-
-  -- add('')
-end
+-- local function config_pinsnip_like()
+--   local insx = require('insx')
+--   local add = function(recipe)
+--     insx.add('<Plug>(vimrc-insx-pinsnip)', recipe)
+--   end
+--
+--   -- add('')
+-- end
 
 local function config()
   local insx = require('insx')
@@ -73,8 +73,8 @@ local function config()
     pair_spacing = require('insx.recipe.pair_spacing'),
   }
   local esc = insx.esc
-  vim.keymap.set('i', '<C-j>', '<Plug>(vimrc-insx-pinsnip)', {})
-  config_pinsnip_like()
+  -- vim.keymap.set('i', '<C-j>', '<Plug>(pinsnip-expand)', {})
+  -- config_pinsnip_like()
 
   add_auto_pair('(', ')')
   add_auto_pair('[', ']')
