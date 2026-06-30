@@ -53,7 +53,7 @@ let
   srcs = [
     {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Pro.dmg";
-      hash = "sha256-W0sZkipBtrduInk0oocbFAXX1qy0Z+yk2xUyFfDWx4s=";
+      hash = "sha256-YxGk8IQ6TS5hagsFx3US0x0uqVBFnPUmzbW5CZageU8=";
     }
     {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Mono.dmg";
@@ -61,7 +61,7 @@ let
     }
     {
       url = "https://devimages-cdn.apple.com/design/resources/download/SF-Compact.dmg";
-      hash = "sha256-RWeq4GFt01r8NLrWvvVH5y/R5lhFMFozlzBkUY0dU0g=";
+      hash = "sha256-/lF6UYS+KQ5m/om4tLbqGFSPztGuFTlJmnEmXjMXJJ8=";
     }
     {
       url = "https://devimages-cdn.apple.com/design/resources/download/NY.dmg";
