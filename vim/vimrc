@@ -803,7 +803,7 @@ vnoremap m <Nop>
 nnoremap % <Cmd>call <SID>LoadMatchitPlugin()<CR><Plug>(MatchitNormalForward)
 xnoremap % <Cmd>call <SID>LoadMatchitPlugin()<CR><Plug>(MatchitVisualForward)
 
-inoremap <C-m> <C-g>u<C-m>
+inoremap <C-m> <C-]><C-g>u<C-m>
 inoremap <C-u> <C-g>u<C-u>
 inoremap <C-j> <C-g>u<C-j>
 inoremap <C-l> <C-x>
