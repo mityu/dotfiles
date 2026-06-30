@@ -40,14 +40,26 @@ local helper = require('vimrc.helper')
 helper.refresh_augroup_cache()
 require('vimrc.inherit-dotvim')
 
-local opt = vim.opt
-if vim_did_start then
-  opt = vim.opt_global
-end
-local set_default = function(vimopt)
-  vimopt._value = vimopt._info.default
-  return vimopt
-end
+local opt = vim_did_start and vim.opt or vim.opt_global
+local set_default = now(function()
+  local default_set_opts = vim_did_start and {} or { scope = 'global' }
+  ---@param optname string
+  ---@param set_opts vim.api.keyset.option
+  ---@return vim.Option
+  return function(optname, set_opts)
+    local opts = set_opts or default_set_opts
+    vim.api.nvim_set_option_value(
+      optname,
+      vim.api.nvim_get_option_info2(optname, {}).default,
+      opts
+    )
+    if opts.scope == 'global' then
+      return vim.opt_global[optname]
+    else
+      return opt[optname]
+    end
+  end
+end)
 
 vim.cmd([[
   try
@@ -83,14 +95,14 @@ opt.lazyredraw = true
 opt.laststatus = 2
 opt.scrolloff = 1
 opt.wildoptions = { 'pum', 'fuzzy' }
-set_default(opt.wildignore):append('*.DS_STORE')
+set_default('wildignore'):append('*.DS_STORE')
 opt.history = 500
 opt.keywordprg = ':help'
 opt.virtualedit = 'block'
 opt.timeoutlen = 3000
 opt.ttimeoutlen = 100
-set_default(opt.isfname):remove('=')
-set_default(opt.spelllang):append('cjk')
+set_default('isfname'):remove('=')
+set_default('spelllang'):append('cjk')
 opt.statusline = '%m%y[#%n] %<%t'
 opt.equalalways = false
 opt.colorcolumn = '78'
@@ -103,7 +115,7 @@ opt.autoread = true
 opt.hidden = true
 opt.showcmd = true
 opt.diffopt = { 'internal', 'algorithm:histogram' }
-set_default(opt.shortmess):append('Ic')
+set_default('shortmess'):append('Ic')
 opt.backspace = { 'eol', 'start', 'indent' }
 opt.cinoptions = { ':0', 'g0', 'N-s', 'E-s' }
 opt.cmdheight = 2
@@ -113,7 +125,7 @@ vim.opt_global.fileformat = 'unix'
 vim.opt_global.fileencodings = { 'utf-8', 'euc-jp', 'cp932', 'sjis' }
 
 -- The undodir/directory/backupdir are automatically created by defaults.lua.
-set_default(vim.opt_global.backupdir):remove('.')
+set_default('backupdir', { scope = 'global' }):remove('.')
 vim.opt_global.undofile = true
 vim.opt_global.swapfile = true
 vim.opt_global.backup = true
