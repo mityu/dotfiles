@@ -91,7 +91,12 @@ in
       # pstree
       ripgrep
       rlwrap
-      satysfi
+      (satysfi.overrideAttrs (o: {
+        postInstall = ''
+          ${o.postInstall or ""}
+          cp -r ${pkgs.ipaexfont}/share/fonts/truetype/* $out/share/satysfi/dist/fonts/
+        '';
+      }))
       satyrographos
       serie
       skim
