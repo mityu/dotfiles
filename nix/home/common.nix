@@ -27,7 +27,12 @@ let
   ];
   update-nix-bash =
     let
-      build-target = "${config.feat.hardware}-${config.feat.platformName}";
+      feat = config.feat;
+      build-target =
+        if feat.platformName == "darwin" then
+          feat.platformName
+        else
+          "${feat.hardware}-${feat.platformName}";
       scriptFile = pkgs.replaceVars ./update-nix.templ { inherit build-target; };
     in
     pkgs.writeShellScriptBin "update-nix" (builtins.readFile scriptFile);
