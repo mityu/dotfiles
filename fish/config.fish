@@ -39,6 +39,10 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   set -gx CLICOLOR auto
   set -gx LSCOLORS gxexfxdxcxahadacagacad
 
+  function fishrc_add_path
+    fish_add_path --path $argv
+  end
+
   function setup-brew-cc
     if command -q xcrun && command -q brew
       # Set some environmental variables suitable for clang/gcc installed by Homebrew.
@@ -51,12 +55,12 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
       set -gx DYLD_FRAMEWORK_PATH $DYLD_FRAMEWORK_PATH:$SDKROOT/System/Library/Frameworks
 
       if test -d "$brew_prefix/opt/llvm"
-        fish_add_path --prepend $brew_prefix/opt/llvm/bin
+        fishrc_add_path --prepend $brew_prefix/opt/llvm/bin
       end
 
       if test -d "$brew_prefix/opt/gcc"
-        fish_add_path --prepend $brew_prefix/opt/gcc/bin
-        fish_add_path --prepend $dotfiles_path/bin/macos
+        fishrc_add_path --prepend $brew_prefix/opt/gcc/bin
+        fishrc_add_path --prepend $dotfiles_path/bin/macos
       end
     else
       echo 'No xcrun or brew command'
@@ -71,27 +75,27 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   if command -q go
     set -l gobin "$(go env GOBIN)"
     string length -q -- $gobin || set -l gobin "$(go env GOPATH)"/bin
-    fish_add_path --prepend $gobin
+    fishrc_add_path --prepend $gobin
   end
 
   command -q opam && eval (opam env)
   test -f ~/.cargo/env.fish && source ~/.cargo/env.fish
 
-  fish_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
-  fish_add_path --prepend ~/.nodebrew/current/bin
-  fish_add_path --prepend ~/.roswell/bin
-  fish_add_path --prepend /opt/homebrew/bin
-  fish_add_path --prepend /opt/homebrew/opt/trash/bin
-  fish_add_path --prepend $dotfiles_path/bin
+  fishrc_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
+  fishrc_add_path --prepend ~/.nodebrew/current/bin
+  fishrc_add_path --prepend ~/.roswell/bin
+  fishrc_add_path --prepend /opt/homebrew/bin
+  fishrc_add_path --prepend /opt/homebrew/opt/trash/bin
+  fishrc_add_path --prepend $dotfiles_path/bin
   if command -q aqua
-    fish_add_path --prepend --move "$(aqua root-dir)/bin"
+    fishrc_add_path --prepend --move "$(aqua root-dir)/bin"
     set -gx AQUA_GLOBAL_CONFIG $dotfiles_path/aqua/aqua.yaml
   end
   if test (uname) = "Darwin"
-    fish_add_path --prepend --move /run/current-system/sw/bin
-    fish_add_path --prepend --move ~/.nix-profile/bin
+    fishrc_add_path --prepend --move /run/current-system/sw/bin
+    fishrc_add_path --prepend --move ~/.nix-profile/bin
   end
-  fish_add_path --prepend ~/.local/bin
+  fishrc_add_path --prepend ~/.local/bin
 
   if set -q SSH_TTY; and not set -q COLORTERM
     function fishrc-detect-truecolor
