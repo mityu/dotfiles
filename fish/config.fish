@@ -329,7 +329,7 @@ if command -q uutils-coreutils
 else if command -q eza
   function ls
     if test -t 1
-      eza --group-directories-first --icons $argv
+      eza --group-directories-first --icons auto $argv
     else
       command ls $argv
     end
