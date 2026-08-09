@@ -30,6 +30,7 @@ function should-update {
 }
 
 function ask {
+	local answer
 	read -rp "$1 (yes/no): " answer
 	case "$answer" in
 		[yY]?([eE][sS]))  # Matches "y" or "yes" with ignoring cases.
@@ -66,16 +67,16 @@ function gobin-path {
 }
 
 function do-update {
-	local password=''
+	local password
 
 	if need-password; then
 		if confirm-allowing-sudo; then
 			sudo --reset-timestamp
-			read -rs 'Password: ' password
+			read -rsp 'Password: ' password
 			while ! sudo --stdin --validate --prompt='' &> /dev/null <<< "$password"; do
 				echo
 				echo 'Sorry, try again.'
-				read -rs 'Password: ' password
+				read -rsp 'Password: ' password
 			done
 		else
 			echo "Skip invoking update commands for package managers that require sudo: $(list-sudoists)"
