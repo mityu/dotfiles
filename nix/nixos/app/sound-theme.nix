@@ -1,5 +1,30 @@
 { pkgs, lib, ... }:
 let
+  yaru-sound-theme-derivation =
+    { stdenv, fetchFromGitHub }:
+    stdenv.mkDerivation (finalAttrs: {
+      pname = "yaru";
+      version = "25.10.3";
+
+      src = fetchFromGitHub {
+        owner = "ubuntu";
+        repo = "yaru";
+        rev = finalAttrs.version;
+        hash = "sha256-3cSVPObfmr62S6yTD2c8AO3s7lxb9KFVuYSydTIJ1jE=";
+      };
+
+      dontConfigure = true;
+      dontBuild = true;
+      dontDropIconThemeCache = true;
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p "$out/share/sounds/Yaru/"
+        cp -r "$src/sounds/src/stereo" "$out/share/sounds/Yaru/"
+        runHook postInstall
+      '';
+    });
+  yaru-sound-theme = pkgs.callPackage yaru-sound-theme-derivation { };
   sound-theme-pkg =
     { stdenv }:
     stdenv.mkDerivation {
@@ -8,8 +33,8 @@ let
 
       nativeBuildInputs = [
         pkgs.ocaml
-        pkgs.yaru-theme
         pkgs.sound-theme-freedesktop
+        yaru-sound-theme
       ];
 
       builder =
@@ -59,7 +84,7 @@ let
         pkgs.writeShellScript "merge-sound-theme" ''
           install_stereo_dir="$out/share/sounds/freedesktop-and-yaru/stereo"
           base_stereo_dir='${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo'
-          override_stereo_dir='${pkgs.yaru-theme}/share/sounds/Yaru/stereo'
+          override_stereo_dir='${yaru-sound-theme}/share/sounds/Yaru/stereo'
 
           mkdir -p $install_stereo_dir
           cp ${index-theme} $install_stereo_dir/../index.theme
