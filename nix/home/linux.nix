@@ -14,6 +14,7 @@ in
     inputs.nur.modules.homeManager.default
     ./linux/fcitx5.nix
     ./linux/firefox.nix
+    ./linux/thunderbird.nix
     ./linux/xfce4.nix
     ./linux/libinput-gestures.nix
     ./linux/slack.nix
@@ -83,21 +84,6 @@ in
   services.kdeconnect = {
     enable = true;
     indicator = true;
-  };
-
-  programs.thunderbird = {
-    enable = true;
-    languagePacks = [ "ja" ];
-    profiles.${username} = {
-      isDefault = true;
-      settings = {
-        "general.smoothScroll" = true;
-        "layout.css.devPixelsPerPx" = 1.25;
-        "intl.date_time.pattern_override.date_short" = "yyyy/MM/dd";
-        "font.cjk_pref_fallback_order" = "ja,zh-cn,zh-hk,zh-tw,ko";
-        "intl.locale.requested" = "ja,en-US";
-      };
-    };
   };
 
   programs.direnv = {
