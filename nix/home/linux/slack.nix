@@ -5,15 +5,14 @@ in
 {
   home.packages = [ slack ];
 
-  systemd.user.services.slack-systray = {
-    Unit = {
-      Description = "Launch Slack in background on login";
-    };
-    Service = {
-      ExecStart = "${lib.getExe slack} --silent --startup";
-    };
-    Install = {
-      WantedBy = [ "graphical-session.taret" ];
+  xdg.configFile."autostart/slack-systray.desktop".text = lib.generators.toINI { } {
+    "Desktop Entry" = {
+      Name = "Slack";
+      Comment = "Launch Slack in background";
+      Exec = "${lib.getExe slack} --silent --startup";
+      Terminal = false;
+      Type = "Application";
+      Hidden = false;
     };
   };
 }

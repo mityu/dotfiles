@@ -42,18 +42,14 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ cfg.package ];
 
-    systemd.user.services = {
-      birdtray = {
-        Unit = {
-          Description = "Launch Birdtray on login into graphical session";
-        };
-        Service = {
-          # ExecStart = lib.getExe cfg.package;
-          ExecStart = lib.getExe launcher;
-        };
-        Install = {
-          WantedBy = [ "graphical-session.target" ];
-        };
+    xdg.configFile."autostart/Birdtray.desktop".text = lib.generators.toINI { } {
+      "Desktop Entry" = {
+        Name = "Birdtray";
+        Comment = "Launch Birdtray";
+        Exec = "${lib.getExe launcher}";
+        Terminal = false;
+        Type = "Application";
+        Hidden = false;
       };
     };
   };
