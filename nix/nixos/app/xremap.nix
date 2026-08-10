@@ -183,10 +183,11 @@ in
           };
         }
         {
-          name = "M-CR -> C-CR";
+          name = "Slack specific keybindings";
           application.only = [ "Slack" ];
           remap = {
             "Super-Enter" = "C-Enter";
+            "Super-w" = "C-w";
           };
         }
         {
