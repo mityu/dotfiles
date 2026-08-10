@@ -24,19 +24,6 @@ let
       gen-birdtray-config --base-config "${baseconf}"
       exec birdtray
     '';
-    # text = ''
-    #   if [[ ! -d "$HOME/.thunderbird" ]]; then
-    #     cat "${baseconf}" > "$CONFIG_FILE"
-    #     exit 0
-    #   fi
-    #
-    #   if [[ ! -d "$XDG_CONFIG_HOME" ]]; then
-    #     mkdir -p "$XDG_CONFIG_HOME"
-    #   fi
-    #   printf '%s\n' ~/.thunderbird/*/*Mail/*/INBOX.msf | \
-    #     jq -Rn '{accounts: [inputs] | map(select(. != "")) | map({path: .})}' | \
-    #     jq -s 'add' - "${baseconf}" > "$CONFIG_FILE"
-    # '';
   };
 in
 {
@@ -68,20 +55,6 @@ in
           WantedBy = [ "graphical-session.target" ];
         };
       };
-
-      # birdtray-autoconfig = {
-      #   Unit = {
-      #     Description = "Auto-configure Birdtray accounts from Thunderbird profiles";
-      #     After = [ "birdtray.service" ];
-      #   };
-      #   Service = {
-      #     Type = "oneshot";
-      #     ExecStart = "${lib.getExe genconf}";
-      #   };
-      #   Install = {
-      #     WantedBy = [ "graphical-session.target" ];
-      #   };
-      # };
     };
   };
 }
