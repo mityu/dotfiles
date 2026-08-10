@@ -87,12 +87,15 @@ in
 
   programs.thunderbird = {
     enable = true;
+    languagePacks = [ "ja" ];
     profiles.${username} = {
       isDefault = true;
       settings = {
         "general.smoothScroll" = true;
         "layout.css.devPixelsPerPx" = 1.25;
         "intl.date_time.pattern_override.date_short" = "yyyy/MM/dd";
+        "font.cjk_pref_fallback_order" = "ja,zh-cn,zh-hk,zh-tw,ko";
+        "intl.locale.requested" = "ja,en-US";
       };
     };
   };
