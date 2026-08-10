@@ -16,6 +16,7 @@ in
     ./linux/firefox.nix
     ./linux/xfce4.nix
     ./linux/libinput-gestures.nix
+    ./linux/slack.nix
     ./linux/module/gtrash.nix
     ./common.nix
     ./pkgs/adwaita-xfce4-icon-theme.nix
@@ -52,7 +53,6 @@ in
       ollama
       rofi
       seahorse
-      slack
       # swift
       tree
       udisks
