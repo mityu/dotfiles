@@ -164,8 +164,8 @@ in
         {
           name = "Application specific kill";
           application.only = [
-            "Slack"
-            "discord"
+            "slack.slack"
+            "discord.discord"
             "kdeconnect-app.kdeconnect-app"
             "org.remmina.Remmina.org.remmina.Remmina"
             "parole.Parole"
@@ -184,7 +184,7 @@ in
         }
         {
           name = "Slack specific keybindings";
-          application.only = [ "Slack" ];
+          application.only = [ "slack.slack" ];
           remap = {
             "Super-Enter" = "C-Enter";
             "Super-w" = "C-w";
