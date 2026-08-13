@@ -6,10 +6,39 @@ local isLinux = not (isWindows or isMac)
 
 local colors = require('colors')
 
+local function now(fn)
+  return fn()
+end
+
+local function inspect_font_size()
+  local screen = wezterm.gui.screens().active
+  local ratio = (screen.height / screen.effective_dpi)
+    * (screen.width / screen.effective_dpi)
+  local font_size = 12 + ratio / 135
+  return font_size
+end
+
 wezterm.on('gui-startup', function(cmd)
   local _, _, window = wezterm.mux.spawn_window(cmd or {})
   window:gui_window():maximize()
 end)
+
+wezterm.on(
+  'window-focus-changed',
+  now(function()
+    local initialized = {}
+    return function(window, _pane)
+      if initialized[window:window_id()] ~= nil then
+        return
+      end
+      initialized[window:window_id()] = true
+
+      local overrides = window:get_config_overrides() or {}
+      overrides.font_size = inspect_font_size()
+      window:set_config_overrides(overrides)
+    end
+  end)
+)
 
 wezterm.on('update-right-status', function(window, _)
   local bat = ''
@@ -171,7 +200,7 @@ local config = {
 }
 
 if isWindows then
-  config.font_size = 13
+  -- config.font_size = 13
   config.default_prog = {
     'C:/msys64/msys2_shell.cmd',
     '-mingw64',
