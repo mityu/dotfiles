@@ -428,6 +428,6 @@ if status is-interactive; and set -q SHLVL; and test $SHLVL -eq 1
   if set -q SSH_TTY
     zellij attach --create "ssh-$(hostname)"
   else
-    zellij
+    # zellij
   end
 end
