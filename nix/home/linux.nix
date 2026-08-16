@@ -43,7 +43,7 @@ in
       gparted
       hwloc
       imagemagick
-      (lib.mkIf isDesktop ladybird)
+      # (lib.mkIf isDesktop ladybird)
       gcc
       libgcc
       (lib.hiPrio clang-tools)

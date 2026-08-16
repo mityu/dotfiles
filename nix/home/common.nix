@@ -127,7 +127,7 @@ in
       map (v: lib.hiPrio v) uutils
     )
     ++ (with pkgs.haskellPackages; [
-      (if pkgs.stdenv.isDarwin then lib.hiPrio cabal-install else cabal-install)
+      (if pkgs.stdenv.hostPlatform.isDarwin then lib.hiPrio cabal-install else cabal-install)
       stack
     ]);
 
