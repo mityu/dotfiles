@@ -84,9 +84,15 @@ local function should_auto_formatting(bufnr, client)
     else
       return true
     end
-  elseif ft == 'cpp' then
+  elseif ft == 'c' or ft == 'cpp' then
     -- TODO: Check .clang-format
-    -- TODO: Check filename when in Vim repository
+    local fname = vim.fn.bufname(bufnr)
+    if fname ~= '' then
+      fname = vim.fn.fnamemodify(fname, ':p')
+    end
+    if fname:match([[vim[/\]src[/\][^/\]+%.[ch]$]]) ~= nil then
+      return false
+    end
   end
   return true
 end
