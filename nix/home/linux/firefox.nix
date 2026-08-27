@@ -95,6 +95,7 @@ in
               # Advanced permissions
               "browsingData"
               "bookmarks"
+              "browserSettings"
             ];
             settings = {
               tabPreviewTooltip = true;
