@@ -5,7 +5,6 @@
 {
   nixos-hardware,
   pkgs,
-  pkgs-stable,
   lib,
   username,
   config,
@@ -39,11 +38,21 @@ in
 
   networking.hostName = "rigel";
 
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = with pkgs; [
+      cups-filters
+      cups-browsed
+    ];
+  };
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
   # services.printing.drivers = [
   #   (pkgs.callPackage (import ../../app/fujixerox-driver.nix) { })
   # ];
-  services.avahi.enable = true;
 
   virtualisation.docker.rootless = {
     enable = true;
