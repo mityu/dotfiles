@@ -179,7 +179,7 @@ in
         if hardware == "laptop-hp-envy" then
           "${wallpapers}/mahoyo-hill-5.png"
         else
-          "${wallpapers}/mahoyo-misakicho.jpg";
+          "${wallpapers}/mahoyo-misakicho-1.jpg";
     };
 
   xfconf.settings = {
