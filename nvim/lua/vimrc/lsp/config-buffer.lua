@@ -102,10 +102,11 @@ end
 ---@return boolean
 local function should_use_as_formatter(ft, client)
   local formatter_preference = {
-    lua = 'stylua',
+    lua = { 'stylua' },
+    typescript = { 'deno', 'biome' },
   }
   local prf = formatter_preference[ft]
-  return prf == nil or prf == client.name
+  return prf == nil or vim.tbl_contains(prf, client.name)
 end
 
 helper.create_autocmd('LspAttach', {

@@ -116,7 +116,8 @@ helper.create_autocmd('FileType', {
 
     -- node
     if vim.fn.findfile('package.json', '.;') ~= '' then
-      start_server(ctx.buf, vim.lsp.config.ts_ls)
+      start_server(ctx.buf, vim.lsp.config.tsc)
+      start_server(ctx.buf, vim.lsp.config.biome)
       return
     end
 
