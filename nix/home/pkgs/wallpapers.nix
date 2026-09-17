@@ -7,7 +7,7 @@ pkgs.callPackage (
 
     src = fetchurl {
       url = "https://drive.usercontent.google.com/download?id=15nxGfudC9g3A1lWrKZgkSwHujge1fyXd&confirm=yes";
-      hash = "sha256-9RyRWbHcnvVHUiQAViTy3Usaktzo3vH3bGSxHBZaoRU=";
+      hash = "sha256-ZJ8IR1rNKkPzjH1M0h9vJre2MeTYzEnHRTgAXanl6oY=";
       name = "assets.tar.gz.gpg";
     };
 
