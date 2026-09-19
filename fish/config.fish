@@ -378,6 +378,15 @@ if functions -q top
   alias '\\top'='command top'
 end
 
+if command -q nix
+  function nix-llm-agents
+    nix $argv[1] --option allow-import-from-derivation false "github:numtide/llm-agents.nix#$argv[2]" -- $argv[3..]
+  end
+  alias ccode='nix-llm-agents run claude-code'
+  alias claude='ccode'
+  alias agy='nix-llm-agents run antigravity-cli'
+end
+
 if $in_ghostty
   # Ghostty uses 'xterm-ghostty' as $TERM value, and it can causes error with
   # some commands over SSH.  Set terminfo name to 'xterm-256color' on SSH
