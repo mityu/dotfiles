@@ -66,6 +66,21 @@ function gobin-path {
 	echo "$gobin"
 }
 
+function do-update-pip3 {
+	if should-update pip3; then
+		pip3 list --outdated --format json | python3 <(cat <<- EOF
+			import sys
+			import json
+			excludes = ['pip', 'wheel', 'idle', 'pydoc']  # Modules managed by Homebrew.
+			data = json.loads(sys.stdin.read())
+			pkgs = filter(lambda pkg: not pkg in excludes, map(lambda x: x['name'], data))
+			list(map(lambda x: print(x), pkgs))
+			EOF
+			) | xargs pip3 install -U
+	fi
+
+}
+
 function do-update {
 	local password
 
@@ -135,18 +150,6 @@ function do-update {
 
 	if should-update opam; then
 		opam update && opam upgrade --yes
-	fi
-
-	if should-update pip3; then
-		pip3 list --outdated --format json | python3 <(cat <<- EOF
-			import sys
-			import json
-			excludes = ['pip', 'wheel', 'idle', 'pydoc']  # Modules managed by Homebrew.
-			data = json.loads(sys.stdin.read())
-			pkgs = filter(lambda pkg: not pkg in excludes, map(lambda x: x['name'], data))
-			list(map(lambda x: print(x), pkgs))
-			EOF
-			) | xargs pip3 install -U
 	fi
 
 	should-update update-vim-plugins && update-vim-plugins
