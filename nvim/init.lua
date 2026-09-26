@@ -344,7 +344,7 @@ vim.api.nvim_create_user_command(
   { bar = true, nargs = '?' }
 )
 vim.api.nvim_create_user_command('Hlgroup', function()
-  helper.show_highlight_group()
+  require('vimrc').show_highlight_group()
 end, { bar = true })
 vim.api.nvim_create_user_command('Draft', function(_)
   vim.bo.buftype = 'nofile'
