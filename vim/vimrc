@@ -2967,7 +2967,7 @@ if has('gui_running')
     # for unix (use xfontset)
     set guifont=a14,r14,k14
   elseif IsLinux
-    set guifont=Cica\ 14,DejaVu\ Sans\ Mono\ 14
+    set guifont=UDEV\ Gothic\ NF\ 14,Cica\ 14,DejaVu\ Sans\ Mono\ 14
   endif
 
   if has('multi_byte_ime') || has('xim')
