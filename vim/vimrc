@@ -2471,16 +2471,16 @@ if Pacpack.Tap('vim-gin')
   def GinBufferOpened()
     setlocal nomodeline
 
-    if Pacpack.Tap('fall.vim')
-      # Postpone the mapping definition a bit later in order to make sure the
-      # mappings be defined after gin's built-in ftplugins are loaded.
-      autocmd vimrc-gin FileType <buffer> ++once timer_start(0, (_) => {
-        if &l:filetype =~# '^gin'
-          nnoremap <buffer> a <Cmd>Fall gin-action<CR>
-          nnoremap <buffer> A <Plug>(gin-action-choice)
-        endif
-      })
-    endif
+    # if Pacpack.Tap('fall.vim')
+    #   # Postpone the mapping definition a bit later in order to make sure the
+    #   # mappings be defined after gin's built-in ftplugins are loaded.
+    #   autocmd vimrc-gin FileType <buffer> ++once timer_start(0, (_) => {
+    #     if &l:filetype =~# '^gin'
+    #       nnoremap <buffer> a <Cmd>Fall gin-action<CR>
+    #       nnoremap <buffer> A <Plug>(gin-action-choice)
+    #     endif
+    #   })
+    # endif
 
     if stridx(bufname('%'), 'vimdoc-ja-working') != -1
       setlocal tabstop=8
