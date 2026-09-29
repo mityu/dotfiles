@@ -1,113 +1,23 @@
 " vim: shiftwidth=2
 vim9script noclear
 
-# Encoding
 if !v:vim_did_enter
   set encoding=utf-8
   $MYVIMRC = resolve(expand('<script>'))
+
+  &runtimepath = &runtimepath
+    \->split(',')
+    \->filter('isdirectory(v:val)')
+    \->add(escape($'{fnamemodify($MYVIMRC, ':h')}/runtime', ' \'))
+    \->join(',')
 endif
 
 scriptencoding utf-8
 
-final IsWindows = has('win32')
-final IsWinUnix = has('win32unix')
-final IsLinux = has('linux')
-final IsMac = has('mac')
-final IsUnix = IsLinux || IsMac
-final IsWSL = IsLinux && getftype('/proc/sys/fs/binfmt_misc/WSLInterop') !=# ''
+import 'vimrc.vim' as Vimrc
 
-export class Fs
-  static const slash = IsWindows ? '\\' : '/'
-  static const pathSeparator = IsWindows ? ':' : ';'
-  static const rcfilePrefix = IsWindows ? '_' : '.'
-
-  static def Rc(fname: string): string
-    return rcfilePrefix .. fname
-  enddef
-
-  static def JoinPath(...elems: list<any>): string
-    return join(elems, slash)
-  enddef
-endclass
-
-export class Stdpath
-  static const cache = (IsWindows ? '~\.cache\vim' : '~/.cache/vim')->expand()
-  static const dotvim = $MYVIMRC->fnamemodify(':h')
-  static const dotfiles = $MYVIMRC->fnamemodify(':h:h')
-  static const localpack = Fs.JoinPath(expand('~'), 'dev', 'vim')
-endclass
-
-def GetMsgString(msg: string): string
-  return '[vimrc] ' .. msg
-enddef
-
-def EchomsgWithColor(msg: string, hl_group: string)
-  execute 'echohl' hl_group
-  echomsg GetMsgString(msg)
-  echohl NONE
-enddef
-
-export def Echomsg(msg: string)
-  EchomsgWithColor(msg, 'NONE')
-enddef
-
-export def EchomsgError(msg: string)
-  EchomsgWithColor(msg, 'Error')
-enddef
-
-export def EchomsgWarning(msg: string)
-  EchomsgWithColor(msg, 'WarningMsg')
-enddef
-
-export def Echo(msg: string)
-  echo GetMsgString(msg)
-enddef
-
-export def EchoQuestion(question: string)
-  echon GetMsgString(question) .. ' '
-  echohl Question
-  echon '[Y/N]'
-  echohl NONE
-  echon "\n"
-enddef
-
-export def Ask(question: string): bool
-  EchoQuestion(question)
-  return getcharstr() =~? 'y'
-enddef
-
-export def Mkdir(dir: string, ...opt: list<any>): bool
-  if isdirectory(dir)
-    return true
-  endif
-  return !!call('mkdir', [dir] + opt)
-enddef
-
-export def Input(prompt: string, ...opt: list<any>): string
-  try
-    return call('input', [prompt] + opt)
-  catch /\C^Vim:Interrupt$/
-    return ''
-  endtry
-  return ''
-enddef
-
-export def ReplaceTermcodes(key: string): string
-  return key->substitute(
-    '<[^<>]\+>', (m: list<string>): string => eval($'"\{m[0]}"'), 'g')
-enddef
-
-# Global utility functions
-export def SetUndoFtplugin(config: string)
-  const restorer = 'execute ' .. string(config)
-  if exists('b:undo_ftplugin')
-    b:undo_ftplugin = restorer .. '|' .. b:undo_ftplugin
-  else
-    setbufvar('%', 'undo_ftplugin', restorer)
-  endif
-enddef
 command! -nargs=1 -complete=command SetUndoFtplugin
-      \ call SetUndoFtplugin(<q-args>)
+      \ call Vimrc.SetUndoFtplugin(<q-args>)
 
 def g:Tapi_drop(bufnr: number, arglist: list<any>)
   const cwd = arglist[0]
@@ -146,7 +56,7 @@ if !v:vim_did_enter
     &t_Ce = "\e[4:0m"
   endif
 
-  if $COLORTERM ==# 'truecolor' || IsWindows
+  if $COLORTERM ==# 'truecolor' || Vimrc.IsWindows
     set termguicolors  # Use true color if possible.
   endif
 
@@ -183,14 +93,15 @@ if !v:vim_did_enter
   g:skip_loading_mswin = 1
   g:loaded_logiPat = 1
 
-  &runtimepath = &runtimepath->split(',')->filter('isdirectory(v:val)')->join(',')
+  # &runtimepath = &runtimepath->split(',')->filter('isdirectory(v:val)')->join(',')
+  # &packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
+  # &runtimepath ..= ',' .. escape(Vimrc.Fs.JoinPath(Vimrc.Stdpath.dotvim, 'runtime'), ' \')
   &packpath = &packpath->split(',')->filter('isdirectory(v:val)')->join(',')
-  &runtimepath ..= ',' .. escape(Fs.JoinPath(Stdpath.dotvim, 'runtime'), ' \')
-  &packpath = Stdpath.cache .. ',' .. &packpath
+  &packpath = Vimrc.Stdpath.cache .. ',' .. &packpath
 
   # Set environmental variables on gVim.
   {
-    const envrc = Fs.JoinPath(expand('~'), Fs.Rc('envrc'))
+    const envrc = Vimrc.Fs.JoinPath(expand('~'), Vimrc.Fs.Rc('envrc'))
     if has('gui_running') && filereadable(envrc)
       const lines = readfile(envrc)
             ->map((_: number, val: string): string => substitute(val, '\v%(\_^|\s)#.*$', '', 'g'))
@@ -204,26 +115,26 @@ if !v:vim_did_enter
   }
 
   {  # Create directories for undo/swap/backup files.
-    Mkdir(Stdpath.cache, 'p')
+    Vimrc.Mkdir(Vimrc.Stdpath.cache, 'p')
 
-    final undodir = Fs.JoinPath(Stdpath.cache, 'undo')
-    if Mkdir(undodir, 'p')
+    const undodir = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'undo')
+    if Vimrc.Mkdir(undodir, 'p')
       set undofile
       &undodir = undodir
     else
       set noundofile
     endif
 
-    final swapdir = Fs.JoinPath(Stdpath.cache, 'swap')
-    if Mkdir(swapdir, 'p')
+    const swapdir = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'swap')
+    if Vimrc.Mkdir(swapdir, 'p')
       set swapfile
-      &directory = Fs.JoinPath(fnamemodify(swapdir, ':p'), '')
+      &directory = Vimrc.Fs.JoinPath(fnamemodify(swapdir, ':p'), '')
     else
       set noswapfile
     endif
 
-    final backupdir = Fs.JoinPath(Stdpath.cache, 'backup')
-    if Mkdir(backupdir, 'p')
+    const backupdir = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'backup')
+    if Vimrc.Mkdir(backupdir, 'p')
       set backup writebackup
       &backupdir = backupdir
     else
@@ -246,7 +157,7 @@ if v:vim_did_enter # Initialize augroups on reload
 endif
 
 # minpac
-export const PacPath = Fs.JoinPath(Stdpath.cache, 'pack', 'minpac', 'opt')
+export const PacPath = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'pack', 'minpac', 'opt')
 
 export def ListInstalledPlugins(): dict<bool>
   var d: dict<bool> = {}
@@ -288,7 +199,7 @@ class Plugin
       this.path = this.uri[_fileSchemaLen :]->expand()
       this.isExists = this.path->isdirectory()
     else
-      this.path = Fs.JoinPath(PacPath, name)
+      this.path = Vimrc.Fs.JoinPath(PacPath, name)
       this.isExists = _installedPlugins->has_key(name)
     endif
   enddef
@@ -345,7 +256,7 @@ export class Pacpack
       ->filter((_: number, p: Plugin): bool => !p.isLazy && p.isExists)
       ->mapnew((_: number, p: Plugin): string => p.path)
     const afterPluginPath = pluginPath
-      ->mapnew((_: number, v: string): string => Fs.JoinPath(v, 'after'))
+      ->mapnew((_: number, v: string): string => Vimrc.Fs.JoinPath(v, 'after'))
       ->filter((_: number, v: string): bool => isdirectory(v))
     execute 'set runtimepath+=' .. (pluginPath + afterPluginPath)->join(',')
 
@@ -390,9 +301,9 @@ export class Pacpack
     silent! MinpacInit()
     if !exists('*minpac#init()')
       # Download minpac...
-      const minpacPath = Fs.JoinPath(pacPath, 'minpac')
-      Mkdir(fnamemodify(minpacPath, ':h'), 'p')
-      Echomsg('Downloading minpac...')
+      const minpacPath = Vimrc.Fs.JoinPath(pacPath, 'minpac')
+      Vimrc.Mkdir(fnamemodify(minpacPath, ':h'), 'p')
+      Vimrc.Echomsg('Downloading minpac...')
       system('git clone https://github.com/k-takata/minpac ' .. minpacPath)
 
       silent! packadd minpac
@@ -431,7 +342,7 @@ export class Pacpack
     if exists('*minpac#status')
       minpac#status()
     else
-      EchomsgError('minpac isn''t loaded yet.')
+      Vimrc.EchomsgError('minpac isn''t loaded yet.')
     endif
   enddef
 endclass
@@ -545,8 +456,8 @@ try
 catch /^Vim\%((\a\+)\)\=:E197:/
   language C
 catch
-  EchomsgError(v:throwpoint)
-  EchomsgError(v:exception)
+  Vimrc.EchomsgError(v:throwpoint)
+  Vimrc.EchomsgError(v:exception)
   language C
 endtry
 
@@ -604,18 +515,18 @@ g:tex_conceal = ''  # Disable default conceals for TeX
 
 # IM control
 if !has('gui_running')
-  if IsWSL || IsWindows || IsWinUnix
-    const exepath = Fs.JoinPath(Stdpath.cache, 'disableim.exe')
+  if Vimrc.IsWSL || Vimrc.IsWindows || Vimrc.IsWinUnix
+    const exepath = Vimrc.Fs.JoinPath(Vimrc.Stdpath.cache, 'disableim.exe')
     if !executable(exepath)  # Build disableim.exe
       var csc = 'C:\Windows\Microsoft.Net\Framework64\v4.0.30319\csc.exe'
-      var srcpath = Fs.JoinPath(Stdpath.dotvim, 'misc', 'disableim.cs')
+      var srcpath = Vimrc.Fs.JoinPath(Vimrc.Stdpath.dotvim, 'misc', 'disableim.cs')
       var outpath = $'{shellescape(exepath)}'  # Check with Unix path, compile with Windows path.
       var cmdopts = ['/optimize+', '/debug-', '/nologo', '/target:winexe']
-      if IsWSL
+      if Vimrc.IsWSL
         csc = $'$(wslpath -u {shellescape(csc)})'
         srcpath = $'$(wslpath -w {shellescape(srcpath)})'
         cmdopts->add('/utf8output')
-      elseif IsWinUnix
+      elseif Vimrc.IsWinUnix
         csc = string(csc)
         srcpath = $'$(cygpath -w {shellescape(srcpath)})'
         outpath = $'$(cygpath -w {shellescape(exepath)})'
@@ -623,22 +534,22 @@ if !has('gui_running')
         srcpath = shellescape(srcpath)
       endif
       var cmd = join([csc] + cmdopts + [$'/out:{outpath}', srcpath])
-      if IsWinUnix
+      if Vimrc.IsWinUnix
         # Do not let MSYS2 to convert option argument (e.g. /nologo) into
         # Windows style path (e.g. C:\msys64\nologo)
         cmd = $'MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" {cmd}'
       endif
-      Echomsg('Building disableim.exe...')
-      Echomsg(cmd)
+      Vimrc.Echomsg('Building disableim.exe...')
+      Vimrc.Echomsg(cmd)
       var output = system(cmd)
       if v:shell_error != 0
-        EchomsgError('Compilation failed')
-        EchomsgError(output)
-      elseif IsWSL
+        Vimrc.EchomsgError('Compilation failed')
+        Vimrc.EchomsgError(output)
+      elseif Vimrc.IsWSL
         output = system($'chmod u+x {shellescape(exepath)}')
         if v:shell_error != 0
-          EchomsgError('chmod failed')
-          EchomsgError(output)
+          Vimrc.EchomsgError('chmod failed')
+          Vimrc.EchomsgError(output)
         endif
       endif
     endif
@@ -649,7 +560,7 @@ if !has('gui_running')
     endif
   endif
 endif
-if (IsLinux && !IsWSL) && executable('fcitx5-remote') == 1
+if (Vimrc.IsLinux && !Vimrc.IsWSL) && executable('fcitx5-remote') == 1
   augroup vimrc-auto-disableim
     autocmd InsertLeave * system('fcitx5-remote -c')
   augroup END
@@ -850,7 +761,7 @@ for c in 'tnsvq'
   execute $'tnoremap <C-w>{c} <C-w>.{c}'
 endfor
 
-if IsMac && has('gui_running')
+if Vimrc.IsMac && has('gui_running')
   noremap <D-[> <ESC>
   noremap! <D-[> <ESC>
 endif
@@ -972,7 +883,7 @@ augroup vimrc-cmdwin
   autocmd CmdWinEnter * call CmdwinEnter()
 augroup END
 
-if IsMac
+if Vimrc.IsMac
   g:mapleader = '_'
 endif
 
@@ -1069,18 +980,18 @@ endif
 if Pacpack.Tap('vim-ripgrep')
   def RipGrep(argsGiven: string)
     var cwd = FindGitroot() ?? getcwd(winnr())
-    cwd = Input('Grep here? ', cwd, 'dir')->expand()
+    cwd = Vimrc.Input('Grep here? ', cwd, 'dir')->expand()
     if !cwd->isdirectory()
-      EchomsgError($'Directory not exist: {cwd}')
+      Vimrc.EchomsgError($'Directory not exist: {cwd}')
       return
     endif
     var args = argsGiven
     if args ==# ''
-      args = Input('Search pattern: ')
+      args = Vimrc.Input('Search pattern: ')
     endif
     const command = $'rg --json -i {args}'
-    Echo($'Invoked command: {command}')
-    ripgrep#call(command, cwd, fnamemodify(cwd, ':p:.') .. Fs.slash)
+    Vimrc.Echo($'Invoked command: {command}')
+    ripgrep#call(command, cwd, fnamemodify(cwd, ':p:.') .. Vimrc.Fs.slash)
   enddef
 
   command! -nargs=? -complete=file RipGrep RipGrep(<q-args>)
@@ -1183,7 +1094,7 @@ if Pacpack.Tap('vim-fern')
     nnoremap <buffer> <expr> <silent> <C-g> fern#smart#scheme('<C-g>',
           \ {'file': '<Cmd>call fern#helper#call("<SID>FernShowRootPath")<CR>'})
     nnoremap <buffer> q <Cmd>call <SID>FernClose()<CR>
-    nnoremap <buffer> <Space>f <Cmd>call <SID>Echo('Fern is already open.')<CR>
+    nnoremap <buffer> <Space>f <Cmd>call <SID>Vimrc.Echo('Fern is already open.')<CR>
     nnoremap <buffer> / <Plug>(fern-action-include)
     nnoremap <buffer> <C-h> <Plug>(fern-action-include=)<C-e><C-u><CR>
 
@@ -1333,7 +1244,7 @@ if Pacpack.Tap('vim-cobachi')
 
   def CobachiMru()
     if !Pacpack.Tap('vim-mr')
-      EchomsgError('mr.vim is not installed.')
+      Vimrc.EchomsgError('mr.vim is not installed.')
       return
     endif
     const Fn = (): list<string> =>
@@ -1382,7 +1293,7 @@ endif
 if Pacpack.Tap('previm')
   g:previm_show_header = 0
   g:previm_enable_realtime = 1
-  if IsWSL
+  if Vimrc.IsWSL
     g:previm_open_cmd = '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe'
   endif
 endif
@@ -1505,9 +1416,9 @@ if Pacpack.Tap('vim-quickrun')
 
   {
     var opencmd: string
-    if IsWindows
+    if Vimrc.IsWindows
       opencmd = 'explorer'
-    elseif IsMac
+    elseif Vimrc.IsMac
       opencmd = 'open'
     else
       opencmd = 'xdg-open'
@@ -1527,7 +1438,7 @@ if Pacpack.Tap('vim-quickrun')
     }
   }
 
-  if IsWSL
+  if Vimrc.IsWSL
     g:quickrun_config.dosbatch = {
       command: 'cmd.exe',
       exec: '%c /Q /c \$(wslpath -w %s) %a'
@@ -1618,7 +1529,7 @@ if Pacpack.Tap('open-browser.vim') && !v:vim_did_enter
     if reg !=# ''
       uri = getreg(reg)
       if uri ==# ''
-        EchomsgError(printf('Register @%s is empty.', reg))
+        Vimrc.EchomsgError(printf('Register @%s is empty.', reg))
         return
       endif
     endif
@@ -2096,7 +2007,7 @@ if Pacpack.Tap('vim-lsp-settings')
       ->map('v:val.name')
       ->ToDict()
     if installedServers->empty()
-      Echomsg('No servers are installed.')
+      Vimrc.Echomsg('No servers are installed.')
       return
     endif
     for [ft, servers] in lsp_settings#settings()->items()
@@ -2118,7 +2029,7 @@ if Pacpack.Tap('vim-lsp-settings')
       endif
       # TODO: Check if enough spaces are left.
     endfor
-    Echomsg('Finished trigger updates.')
+    Vimrc.Echomsg('Finished trigger updates.')
   enddef
 
   command! -bar LspUpdateAllServers LspUpdateAllServers()
@@ -2162,7 +2073,7 @@ def MapTextModifierPlugin(
   for map in maps
     for key in ['rhs', 'lhs', 'modes']
       if !has_key(map, key)
-        EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
+        Vimrc.EchomsgError('MapTextModifierPlugin: This key is missing: ' .. key)
         return
       endif
     endfor
@@ -2184,7 +2095,7 @@ def LoadTextModifierPlugin(plugin: string, map: dict<string>): string
     execute $'{mode}map {map.lhs} {map.rhs}'
   endfor
 
-  return ReplaceTermcodes(map.rhs)
+  return Vimrc.ReplaceTermcodes(map.rhs)
 enddef
 
 if Pacpack.Tap('vim-operator-replace')
@@ -2356,7 +2267,7 @@ endif
 
 if Pacpack.Tap('denops.vim')
   $DENOPS_TEST_DENOPS_PATH = Pacpack.GetPlugin('denops.vim').path
-  if IsWindows
+  if Vimrc.IsWindows
     g:denops_server_addr = '127.0.0.1:32123'
   endif
   if Pacpack.Tap('vim-notification')
@@ -2369,7 +2280,7 @@ endif
 
 if Pacpack.Tap('ddc.vim')
   def DdcConfig()
-    ddc#custom#load_config(Fs.JoinPath(Stdpath.dotvim, 'ddc', 'config.ts'))
+    ddc#custom#load_config(Vimrc.Fs.JoinPath(Vimrc.Stdpath.dotvim, 'ddc', 'config.ts'))
 
     var engine = ''
     if Pacpack.Tap('lspoints')
@@ -2433,7 +2344,7 @@ if Pacpack.Tap('skkeleton')
     if Pacpack.Tap('dict')
       const dictrepo = Pacpack.GetPlugin('dict')
       config.globalDictionaries = ['SKK-JISYO.L.json']
-        ->map((_: number, v: string): string => Fs.JoinPath(dictrepo.path, 'json', v))
+        ->map((_: number, v: string): string => Vimrc.Fs.JoinPath(dictrepo.path, 'json', v))
     endif
 
     config.eggLikeNewline = true
@@ -2574,7 +2485,7 @@ if Pacpack.Tap('vim-gin')
   def GinLogDiff(compareTo: string)
     const hash = getline('.')->matchstr('^commit\s\+\zs\<\w\+\>')
     if hash ==# ''
-      Echo('Failed to find commit hash.')
+      Vimrc.Echo('Failed to find commit hash.')
       return
     endif
     execute $'GinDiff {hash}..{compareTo}'
@@ -2598,9 +2509,9 @@ if Pacpack.Tap('fall.vim')
 
   def g:FallGetStdpath(kind: string): string
     if kind ==# 'dotfiles'
-      return Stdpath.dotfiles
+      return Vimrc.Stdpath.dotfiles
     elseif kind ==# 'localpack'
-      return Stdpath.localpack
+      return Vimrc.Stdpath.localpack
     elseif kind ==# 'packpath'
       return PacPath
     endif
@@ -2611,9 +2522,9 @@ if Pacpack.Tap('fall.vim')
     var path = vimrc#FindProjectRoot(pathGiven)
     if path !=# ''
       if pathGiven ==# ''
-        path = Input('Grep here?: ', path, 'dir')->expand()
+        path = Vimrc.Input('Grep here?: ', path, 'dir')->expand()
         if !path->isdirectory()
-          EchomsgError($'Directory not found: {path}')
+          Vimrc.EchomsgError($'Directory not found: {path}')
           return
         endif
       endif
@@ -2627,7 +2538,7 @@ if Pacpack.Tap('fall.vim')
     autocmd ColorScheme * FallDefColors()
   augroup END
 
-  g:fall_custom_path = Fs.JoinPath(Stdpath.dotvim, 'fall', 'custom.ts')
+  g:fall_custom_path = Vimrc.Fs.JoinPath(Vimrc.Stdpath.dotvim, 'fall', 'custom.ts')
   g:fall_disable_default_mapping = true
 
   nnoremap <Space>k <Cmd>Fall mru<CR>
@@ -2655,7 +2566,7 @@ def ReadingVimrc()
 
     command! ReadingVimrc ReadingVimrcNext
   catch
-    EchomsgError(v:throwpoint .. v:exception)
+    Vimrc.EchomsgError(v:throwpoint .. v:exception)
   endtry
 enddef
 
@@ -2909,7 +2820,7 @@ augroup END
 
 # splash
 command! Splash call vimrc#splash#Show()
-if !v:vim_did_enter && !(IsMac && has('gui_running'))
+if !v:vim_did_enter && !(Vimrc.IsMac && has('gui_running'))
   augroup vimrc_splash
     autocmd VimEnter * ++once ++nested call vimrc#splash#Intro()
     autocmd StdinReadPre * ++once autocmd! vimrc_splash VimEnter
@@ -2919,17 +2830,17 @@ endif
 # gvimrc
 if has('gui_running')
   if !v:vim_did_enter
-    if IsWSL
+    if Vimrc.IsWSL
       # Avoid too large window.
       set lines=35 columns=100
-    elseif IsLinux
+    elseif Vimrc.IsLinux
       # It seems that too large window on i3 does not work properly.
       set lines=50 columns=200
     else
       set lines=999 columns=9999
     endif
 
-    if IsWindows
+    if Vimrc.IsWindows
       winpos 0 0
       autocmd GuiEnter * ++once simalt ~x
       cd $USERPROFILE
@@ -2957,16 +2868,16 @@ if has('gui_running')
   set nomousefocus
   set mousehide
 
-  if IsWindows
+  if Vimrc.IsWindows
     set guifont=Cica:h12,MS_Gothic:h10:cSHIFTJIS
     set linespace=1
-  elseif IsMac
+  elseif Vimrc.IsMac
     set guifont=Cica:h14,Osaka-Mono:h14
     nnoremap <D-n> <Cmd>macaction newWindow:<CR>
   elseif has('xfontset')
     # for unix (use xfontset)
     set guifont=a14,r14,k14
-  elseif IsLinux
+  elseif Vimrc.IsLinux
     set guifont=UDEV\ Gothic\ NF\ 14,Cica\ 14,DejaVu\ Sans\ Mono\ 14
   endif
 
@@ -2980,7 +2891,7 @@ endif
 
 # lvimrc
 {
-  const lvimrc = Fs.JoinPath('~', Fs.Rc('lvimrc'))
+  const lvimrc = Vimrc.Fs.JoinPath('~', Vimrc.Fs.Rc('lvimrc'))
   execute 'command! -bar -nargs=* LVimrc ' ..
           'execute <q-args> ?? "edit"' string(lvimrc)
   if filereadable(expand(lvimrc))

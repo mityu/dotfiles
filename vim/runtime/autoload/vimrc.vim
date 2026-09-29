@@ -1,6 +1,6 @@
 vim9script
 
-import $MYVIMRC as Vimrc
+import 'vimrc.vim' as Vimrc
 
 final SLASH = Vimrc.Fs.slash
 final NON_ESCAPED_SPACE = '\v%(%(\_^|[^\\])%(\\\\)*)@<=\s'
