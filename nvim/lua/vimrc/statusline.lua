@@ -47,8 +47,8 @@ local function generate_statusline()
     surround_by_bracket(git_branch()),
     [[%{vimrc#helper#statusline_filename_label('%')}]],
     '%<%=',
-    surround_by_bracket(vim.opt.fileformat:get()),
-    surround_by_bracket(or_if_empty(vim.opt.fileencoding:get(), vim.opt.encoding:get())),
+    surround_by_bracket(vim.o.fileformat),
+    surround_by_bracket(or_if_empty(vim.o.fileencoding, vim.o.encoding)),
     surround_by_bracket(vim.fn.pathshorten(vim.fn.getcwd(vim.fn.winnr()))),
   }, '')
 end
