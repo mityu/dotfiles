@@ -19,9 +19,9 @@ function __bashrc_should_invoke_fish {
 		return 1
 	fi
 
-	# Don't invoke fish when the parent process if fish.
+	# Invoke fish only when the parent process is fish.
 	if [[ $(uname) == "Darwin" ]]; then
-		[[ $(/bin/ps -p $PPID -o comm | tail -n +2) == "fish" ]]
+		[[ $(basename "$(/bin/ps -p $PPID -o comm | tail -n +2)") == "fish" ]]
 	else
 		[[ $(ps --no-header --pid=$PPID --format=comm) == "fish" ]]
 	fi
