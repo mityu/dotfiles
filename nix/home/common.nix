@@ -13,7 +13,7 @@ let
     actionlint
     bash-language-server
     cmake-language-server
-    coqPackages.coq-lsp
+    rocqPackages.coq-lsp
     efm-langserver
     fish-lsp
     gopls
@@ -46,6 +46,17 @@ in
   nixpkgs.overlays = [
     inputs.neovim-nightly-overlay.overlays.default
   ];
+
+  nixpkgs.config.permittedInsecurePackages =
+    lib.warn
+      ''
+        Firefox ESR 140 (the "firefox-esr-140-bin-unwrapped-140.17.0esr" package), which is deprecated at 2026/10/13,
+        is marked as "permittedInsecurePackages".
+        Remove this as soon as zotero updates its firefox.
+      ''
+      [
+        "firefox-esr-140-bin-unwrapped-140.17.0esr"
+      ];
 
   programs.home-manager.enable = true;
 

@@ -3,6 +3,7 @@
   lib,
   config,
   username,
+  apple-fonts,
   ...
 }:
 let
@@ -14,6 +15,8 @@ in
     ../app/sound-theme.nix
     ../app/fonts.nix
   ];
+
+  nixpkgs.overlays = [ apple-fonts.overlays.default ];
 
   # networking.hostName = "nixos"; # Define your hostname.
   # Pick only one of the below networking options.
@@ -31,29 +34,29 @@ in
   i18n.defaultLocale = "en_US.UTF-8";
 
   fonts = {
-    packages =
-      with pkgs;
-      [
-        noto-fonts-cjk-serif
-        noto-fonts-cjk-sans
-        noto-fonts-color-emoji
-        nerd-fonts.noto
-        hackgen-nf-font
-        ipaexfont
-        biz-ud-gothic
-        ibm-plex
-        texlivePackages.haranoaji
-        texlivePackages.haranoaji-extra
-        source-han-mono
-        source-han-serif
-        source-han-sans
-        nerd-fonts.arimo
-        udev-gothic-nf
+    packages = with pkgs; [
+      noto-fonts-cjk-serif
+      noto-fonts-cjk-sans
+      noto-fonts-color-emoji
+      nerd-fonts.noto
+      hackgen-nf-font
+      ipaexfont
+      biz-ud-gothic
+      ibm-plex
+      texlivePackages.haranoaji
+      texlivePackages.haranoaji-extra
+      source-han-mono
+      source-han-serif
+      source-han-sans
+      nerd-fonts.arimo
+      udev-gothic-nf
+      sf-mono
+      sf-pro
+      sf-compact
 
-        # The followings are by local package
-        cica-font
-      ]
-      ++ (builtins.attrValues apple-fonts);
+      # The followings are by local package
+      cica-font
+    ];
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {

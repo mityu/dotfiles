@@ -23,6 +23,8 @@ in
     ./pkgs/adwaita-xfce4-icon-theme.nix
   ];
 
+  nixpkgs.config.allowUnfree = true;
+
   home = {
     homeDirectory = "/home/${username}";
     stateVersion = "26.05";
