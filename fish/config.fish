@@ -1,6 +1,7 @@
 # Diagnostic error supression.  See this link for the details of error codes.
 # https://github.com/ndonfris/fish-lsp/wiki/Diagnostic-Error-Codes
-# @fish-lsp-disable 2002
+## Allow alias command
+## @fish-lsp-disable 2002
 
 function __fishrc_is_nixos
   test -f /etc/os-release
