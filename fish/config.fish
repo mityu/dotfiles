@@ -3,16 +3,23 @@
 ## Allow alias command
 ## @fish-lsp-disable 2002
 
-function __fishrc_is_nixos
+function fishrc_check_now
+  eval $argv;
+  and echo 'true'
+  or echo 'false'
+end
+
+function fishrc_is_nixos
   test -f /etc/os-release
   and grep -w VENDOR_NAME /etc/os-release | grep -q -i -w nixos
 end
 
-set -l is_msys test (uname -o) = "Msys"
-set -l in_vim_terminal string length -q -- $VIM_TERMINAL
-set -l in_neovim_terminal string length -q -- $NVIM
-set -l in_vscode_terminal test "$TERM_PROGRAM" = "vscode"
-set -l in_ghostty test "$TERM_PROGRAM" = "ghostty"
+set -l is_nixos (fishrc_check_now fishrc_is_nixos)
+set -l is_darwin (fishrc_check_now test (uname) = "Darwin")
+set -l in_vim_terminal (fishrc_check_now string length -q -- $VIM_TERMINAL)
+set -l in_neovim_terminal (fishrc_check_now string length -q -- $NVIM)
+set -l in_vscode_terminal (fishrc_check_now test "$TERM_PROGRAM" = "vscode")
+set -l in_ghostty (fishrc_check_now test "$TERM_PROGRAM" = "ghostty")
 
 set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_CACHE_HOME $HOME/.cache
@@ -75,7 +82,7 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
     end
   end
 
-  if test (uname) = "darwin"; and not command -q darwin-rebuild
+  if $is_darwin; and not command -q darwin-rebuild
     setup-brew-cc
   end
 
@@ -88,7 +95,7 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   command -q opam && eval (opam env)
   test -f ~/.cargo/env.fish && source ~/.cargo/env.fish
 
-  if not __fishrc_is_nixos
+  if not $is_nixos
     fishrc_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
   end
   fishrc_add_path --prepend ~/.nodebrew/current/bin
@@ -100,7 +107,7 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
     fishrc_add_path --prepend --move "$(aqua root-dir)/bin"
     set -gx AQUA_GLOBAL_CONFIG $dotfiles_path/aqua/aqua.yaml
   end
-  if test (uname) = "Darwin"
+  if $is_darwin
     fishrc_add_path --prepend --move /run/current-system/sw/bin
     fishrc_add_path --prepend --move ~/.nix-profile/bin
   end
