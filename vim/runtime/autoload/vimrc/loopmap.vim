@@ -14,9 +14,26 @@ import 'vimrc.vim' as Vimrc
 #   gh                       <SID>(loop:Tab)h
 #   <SID>(loop:Tab)          <Nop>
 #   <SID>(loop:Tab)<ESC>     <Nop>
-#   <SID>(loop:Tab)h         gh<C-g><SID>(loop:Tab)
+#   <SID>(loop:Tab)h         gt<C-g><SID>(loop:Tab)
 #   <SID>(loop:Tab)h         <Cmd>execute "normal! gt\<C-g>"<CR><SID>(loop:Tab)    (tmap)
 #   <C-w>gh                  <SID>(loop:Tab)h     (tmap)
+
+# FIXME: Vim does not decode key sequence written in any key protocol when
+# <ESC> comes at the end of mapping. As a workaround for this bug, at the
+# tail of mappings to cancel loop mappings, put the hardcoded key sequences
+# for keys that should work like <ESC>.
+const cancelers = [
+  '',
+  '<C-@>',
+  '<C-[>',
+  '<ESC>[27;5;63~',  # <ESC> in modifyOtherKeys
+  '<ESC>[27;5;91~',  # <C-[> in modifyOtherKeys
+  '<ESC>[27;5;64~',  # <C-@> in modifyOtherKeys
+  '<ESC>[27;1u',  # <ESC> in modifyOtherKeys
+  '<ESC>[91;5u',  # <C-[> in modifyOtherKeys
+  '<ESC>[64;5u',  # <C-@> in modifyOtherKeys
+]
+# const cancelers = ['', '<ESC>', '<C-@>']
 
 export def LoopDefine(config: dict<any>)
   const mode = config->get('mode', 'n')
@@ -31,8 +48,9 @@ export def LoopDefine(config: dict<any>)
   endif
 
   const prefix = $'<Plug><SID>(loop:{config.id})'
-  execute $'{mode}noremap {prefix} <Nop>'
-  execute $'{mode}noremap {prefix}<ESC> <Nop>'
+  for canceler in cancelers
+    execute $'{mode}noremap {prefix}{canceler} <Nop>'
+  endfor
 
   for body in config.body
     const lhs = body[0]->ReplaceSpecialkeys()
@@ -46,8 +64,9 @@ export def LoopDefine(config: dict<any>)
     const termwinkey = &termwinkey ?? '<C-w>'
     const termwinkeyPrefix = (enterer =~? $'^{termwinkey}') ? '' : termwinkey
 
-    execute $'tnoremap {prefix} <Nop>'
-    execute $'tnoremap {prefix}<ESC> <Nop>'
+    for canceler in cancelers
+      execute $'tnoremap {prefix}{canceler} <Nop>'
+    endfor
 
     for body in config.body
       const switcher = body[0]
