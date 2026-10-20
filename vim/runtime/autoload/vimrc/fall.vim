@@ -1,6 +1,6 @@
 vim9script
 
-import $MYVIMRC as Vimrc
+import 'vimrc.vim' as Vimrc
 
 class FallSubmode
   var _pluginMappings: list<dict<any>> = []
