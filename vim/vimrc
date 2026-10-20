@@ -588,7 +588,7 @@ augroup vimrc
   endif
 augroup END
 
-if executable('chmod')
+if Vimrc.IsUnix && executable('chmod')
   # This hack is from github.com/thinca/config/dotfiles/dot.vim/vimrc. Thanks!
   augroup vimrc_autoexecutable
     autocmd BufWritePost * AddPermissionX()
