@@ -29,7 +29,7 @@ set -gx XDG_STATE_HOME $HOME/.local/state
 function dotfiles-path
   # "realpath" is heavy so use some heuristic to detect dotfiles path faster.
   set -l path $HOME/dotfiles
-  if string match -rq 'github\.com[/:]mityu/dotfiles' (git -C $path remote get-url origin)
+  if command -q git; and string match -rq 'github\.com[/:]mityu/dotfiles' (git -C $path remote get-url origin)
     echo $path
     return
   end
