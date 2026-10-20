@@ -292,10 +292,20 @@ export class Pacpack
 
   # minpac integrations.
   static def InitMinpac(): bool
+    const MinpacInspectJobs = () => {
+      var nproc = 0
+      if Vimrc.IsUnix && executable('nproc')
+        nproc = str2nr(system(['nproc']))
+      elseif Vimrc.IsWindows && $NUMBER_OF_PROCESSORS !=# ''
+        nproc = str2nr($NUMBER_OF_PROCESSORS)
+      endif
+      return nproc ?? 8
+    }
     const MinpacInit = () => minpac#init({
       progress_open: "tab",
       status_open: "vertical",
-      status_auto: true
+      status_auto: true,
+      jobs: MinpacInspectJobs(),
     })
     silent! packadd minpac
     silent! MinpacInit()
