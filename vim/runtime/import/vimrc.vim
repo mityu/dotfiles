@@ -96,3 +96,12 @@ export def SetUndoFtplugin(config: string)
     setbufvar('%', 'undo_ftplugin', restorer)
   endif
 enddef
+
+export def FindGitRoot(targetGiven: string = null_string): string
+  const target: string = resolve(targetGiven ?? bufname('%')->fnamemodify(':p'))
+  const gitDir: string = finddir('.git', target .. ';')
+  if gitDir ==# ''
+    return ''
+  endif
+  return fnamemodify(gitDir, ':p:h:h')
+enddef
