@@ -40,7 +40,7 @@ local helper = require('vimrc.helper')
 helper.refresh_augroup_cache()
 require('vimrc.inherit-dotvim')
 
-local opt = vim_did_start and vim.opt or vim.opt_global
+local opt = vim_did_start and vim.o or vim.go
 local set_default = now(function()
   local default_set_opts = vim_did_start and {} or { scope = 'global' }
   ---@param optname string
