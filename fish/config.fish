@@ -1,6 +1,12 @@
 # Diagnostic error supression.  See this link for the details of error codes.
 # https://github.com/ndonfris/fish-lsp/wiki/Diagnostic-Error-Codes
 # @fish-lsp-disable 2002
+
+function __fishrc_is_nixos
+  test -f /etc/os-release
+  and grep -w VENDOR_NAME /etc/os-release | grep -q -i -w nixos
+end
+
 set -l is_msys test (uname -o) = "Msys"
 set -l in_vim_terminal string length -q -- $VIM_TERMINAL
 set -l in_neovim_terminal string length -q -- $NVIM
@@ -81,7 +87,9 @@ if status is-login; and not string length -q -- $IN_NIX_SHELL
   command -q opam && eval (opam env)
   test -f ~/.cargo/env.fish && source ~/.cargo/env.fish
 
-  fishrc_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
+  if not __fishrc_is_nixos
+    fishrc_add_path --prepend ~/.cache/vim/pack/minpac/opt/vim-themis/bin/
+  end
   fishrc_add_path --prepend ~/.nodebrew/current/bin
   fishrc_add_path --prepend ~/.roswell/bin
   fishrc_add_path --prepend /opt/homebrew/bin

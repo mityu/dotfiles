@@ -118,6 +118,7 @@ in
       typst
       vhs
       vim-startuptime
+      vimPlugins.vim-themis
       with-shell
       yazi
       yq-go
