@@ -92,7 +92,7 @@ setup_server({ 'tex', 'latex', 'plaintex', 'bib', 'otex' }, 'texlab', {
 })
 setup_server({ 'rust' }, 'rust_analyzer')
 setup_server({ 'fish' }, 'fish_lsp')
-setup_server({ 'bash' }, 'bashls')
+setup_server({ 'bash', 'sh' }, 'bashls')
 setup_server({ 'cmake' }, 'cmake')
 
 local efm_filetypes = { 'python' }
