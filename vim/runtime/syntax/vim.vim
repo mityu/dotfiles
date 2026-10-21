@@ -1,5 +1,5 @@
 " Highlight GitHub URL in plugin declarations.
-syntax match vimStringUrlGithub +['"]\zshttps://github.com/+ containedin=vimString
+syntax match vimStringUrlGithub +['"]\@<=https://github.com/+ containedin=vimString,vimContinueString
 highlight default link vimStringUrlGithub vimString
 
 " From thinca/config repository.  Thank you!
