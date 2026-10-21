@@ -4,7 +4,7 @@
 ## @fish-lsp-disable 2002
 
 function fishrc_check_now
-  eval $argv;
+  $argv;
   and echo 'true'
   or echo 'false'
 end
