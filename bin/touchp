@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+function makeone() (
+	# The body of this function should be run in subshell in order to enable
+	# the exit-on-failure feature only in this function.
+	set -euo pipefail
+
+	local target basedir
+	target="$1"
+	basedir="$(dirname "$target")"
+
+	if [[ ! -d "$basedir" ]]; then
+		command mkdir -p "$basedir"
+	fi
+	command touch "$target"
+)
+
+for f in "$@"; do
+	makeone "$f"
+done
