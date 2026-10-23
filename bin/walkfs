@@ -115,6 +115,7 @@ function main {
 				;;
 			-h|--help)
 				usage
+				exit 0
 				;;
 			-*)
 				echo "Invalid option: $1"
