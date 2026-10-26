@@ -54,6 +54,7 @@ in
       lssecret
       net-tools
       ollama
+      python3
       rofi
       seahorse
       # swift
