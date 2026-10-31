@@ -401,6 +401,8 @@ if command -q nix
   alias ccode='nix-llm-agents run claude-code'
   alias claude='ccode'
   alias agy='nix-llm-agents run antigravity-cli'
+
+  alias cclens='nix run github:lambdalisue/cclens --'
 end
 
 if $in_ghostty
