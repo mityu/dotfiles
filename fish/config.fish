@@ -240,6 +240,12 @@ if status is-interactive
         $execmd
     end
   end
+
+  if test (uname) = "Darwin"
+    function to-rtf --description "Convert command-line output to RTF format"
+      aha | textutil -stdin -format html -convert rtf -stdout
+    end
+  end
 end
 
 # Replace $HOME at the head of path into "~", and then escape white-spaces,
