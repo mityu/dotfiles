@@ -41,6 +41,7 @@ in
   imports = [
     ./pkgs/vim-overlay.nix
     ./pkgs/vim-wrapper.nix
+    ./pkgs/sping.nix
   ];
 
   nixpkgs.overlays = [
@@ -112,6 +113,7 @@ in
       serie
       skim
       stylua
+      sping
       tdf
       tlrc
       tokei
