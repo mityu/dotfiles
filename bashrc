@@ -40,6 +40,12 @@ if __bashrc_should_invoke_fish; then
 	return
 fi
 
+# c.f.: https://tellme.tokyo/post/2026/10/01/ai-agent-first-dotfiles/
+bashrc_is_human() {
+	[[ -t 0 && -t 1 ]] || return 1
+	[[ -z $CLAUDECODE$CODEX_SANDBOX$GEMINI_CLI$CURSOR_AGENT$AI_AGENT ]]
+}
+
 function dotfiles-path() {
 	dirname "$(realpath "${BASH_SOURCE[0]}")"
 }
@@ -143,6 +149,14 @@ if shopt -q login_shell && [[ -z "$IN_NIX_SHELL" ]]; then
 	fi
 fi
 
+if ! bashrc_is_human; then
+	# Nobody can answer an editor, pager or password prompt: fail fast
+	set -o pipefail
+	export EDITOR=true VISUAL=true GIT_EDITOR=true GIT_SEQUENCE_EDITOR=true
+	export PAGER=cat GIT_PAGER=cat MANPAGER=cat
+	export GIT_TERMINAL_PROMPT=0
+	return 0
+fi
 
 shopt -s nocaseglob
 set -o vi
