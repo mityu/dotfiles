@@ -74,8 +74,8 @@ in
     [
       # act
       # actionlint
-      # shellcheck
       # ffmpeg
+      ast-grep
       bat
       bottom
       btop
@@ -111,6 +111,7 @@ in
       satysfi
       satyrographos
       serie
+      shellcheck
       skim
       stylua
       sping
