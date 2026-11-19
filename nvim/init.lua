@@ -487,12 +487,12 @@ helper.create_autocmd('BufWritePre', {
   end,
 })
 
-helper.create_autocmd('QuickfixCmdPost', {
+helper.create_autocmd('QuickFixCmdPost', {
   group = 'vimrc',
   pattern = '[^l]*',
   command = 'cwindow',
 })
-helper.create_autocmd('QuickfixCmdPost', {
+helper.create_autocmd('QuickFixCmdPost', {
   group = 'vimrc',
   pattern = 'l*',
   command = 'lwindow',
