@@ -241,7 +241,7 @@ if status is-interactive
     end
   end
 
-  if test (uname) = "Darwin"
+  if $is_darwin
     function to-rtf --description "Convert command-line output to RTF format"
       aha | textutil -stdin -format html -convert rtf -stdout
     end
@@ -389,6 +389,12 @@ if command -q vim
   set -gx MANPAGER 'vim -M +MANPAGER -'
   set -gx EDITOR vim
   set -gx GIT_EDITOR vim
+end
+
+if command -q nvim
+  set -gx EDITOR nvim
+  set -gx GIT_EDITOR nvim
+  set -gx MANPAGER 'nvim +Man!'
 end
 
 if command -q btm
